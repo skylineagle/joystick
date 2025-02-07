@@ -5,6 +5,7 @@ import { Layout } from "./layout";
 // import { ParamsView } from "./pages/params-view";
 
 import "./App.css";
+import { ParamsPage } from "./pages/params/params-page";
 
 function App() {
   return (
@@ -20,7 +21,14 @@ function App() {
                 </Layout>
               }
             />
-            {/* <Route path="/params" element={<ParamsView />} /> */}
+            <Route
+              path="/params"
+              element={
+                <Layout>
+                  <ParamsPage />
+                </Layout>
+              }
+            />
           </Routes>
         </div>
       </BrowserRouter>

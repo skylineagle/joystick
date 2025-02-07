@@ -1,0 +1,149 @@
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useParamsStore } from "@/lib/params.store";
+import { cn } from "@/lib/utils";
+import { ParamValueEditor } from "@/pages/params/param-value-editor";
+import { ParamNode, ParamPath, ParamValue } from "@/types/params";
+import { Check, ChevronRight, PencilLine, RotateCw } from "lucide-react";
+
+interface ParamTreeProps {
+  schema: ParamNode | ParamValue;
+  path: ParamPath;
+  expanded: Set<string>;
+  onToggle: (path: ParamPath) => void;
+}
+
+export function ParamTree({
+  schema,
+  path,
+  expanded,
+  onToggle,
+}: ParamTreeProps) {
+  const pathStr = path.join(".");
+  const isExpanded = expanded.has(pathStr);
+  const { values } = useParamsStore();
+
+  if (schema.type === "object") {
+    return (
+      <div className="space-y-1">
+        <Button
+          variant="ghost"
+          size="sm"
+          className={cn(
+            "w-full justify-start gap-2 font-normal",
+            path.length === 0 && "font-medium"
+          )}
+          onClick={() => onToggle(path)}
+        >
+          <ChevronRight
+            className={cn(
+              "h-4 w-4 shrink-0 transition-transform",
+
+              isExpanded && "rotate-90"
+            )}
+          />
+          <Label>{schema.title}</Label>
+        </Button>
+
+        {isExpanded && (
+          <div className="ml-4 border-l pl-4">
+            {Object.entries(schema.properties).map(([key, value]) => (
+              <ParamTree
+                key={key}
+                schema={value}
+                path={[...path, key]}
+                expanded={expanded}
+                onToggle={onToggle}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const value = values[pathStr];
+  const isEdited = Boolean(value?.edited);
+  const isLoading = Boolean(value?.isLoading);
+  console.log(path, isEdited);
+
+  return (
+    <div className="flex items-center gap-2 py-1">
+      <ParamValueEditor schema={schema} path={path} />
+      <div className="flex items-center gap-1">
+        {isEdited ? (
+          <ValueIndicator
+            status="edited"
+            isActive={true}
+            isLoading={isLoading}
+          />
+        ) : (
+          <ValueIndicator
+            status="current"
+            isActive={Boolean(value?.current)}
+            isLoading={isLoading}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface ValueIndicatorProps {
+  status: "edited" | "pending" | "current";
+  isActive?: boolean;
+  isLoading?: boolean;
+}
+
+function ValueIndicator({
+  status,
+  isActive = false,
+  isLoading = false,
+}: ValueIndicatorProps) {
+  const tooltipContent = {
+    edited: "Value has been edited but not saved",
+    pending: "Value is pending update from device",
+    current: "Current value on device",
+  }[status];
+
+  const StatusIcon = {
+    edited: PencilLine,
+    pending: RotateCw,
+    current: Check,
+  }[status];
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger>
+          <div
+            className={cn(
+              "flex h-6 w-6 items-center justify-center rounded-md transition-colors duration-200",
+              !isLoading && !isActive && "bg-muted text-muted-foreground/50",
+              !isLoading &&
+                isActive &&
+                status === "edited" &&
+                "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20",
+              !isLoading &&
+                isActive &&
+                status === "current" &&
+                "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
+            )}
+          >
+            <StatusIcon className="h-3.5 w-3.5" />
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="bottom" className="flex items-center gap-1.5">
+          <StatusIcon className="h-3.5 w-3.5" />
+          <p>{tooltipContent}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
