@@ -3,7 +3,12 @@ import { RoiContainer, RoiList } from "react-roi";
 
 export const Roi = () => {
   return (
-    <RoiContainer className="size-full" target={<Frame mode="edit" />}>
+    <RoiContainer
+      className="size-full"
+      style={{ backgroundColor: "transparent" }}
+      target={<Frame mode="edit" />}
+      lockPan
+    >
       <RoiList
         allowRotate
         getOverlayOpacity={() => 0.8}

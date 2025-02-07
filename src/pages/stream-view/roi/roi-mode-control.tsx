@@ -18,18 +18,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useRoiMode } from "@/hooks/use-roi-mode";
 import { Edit3, Eye, EyeOff, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useActions, useCommittedRois, useRoiState } from "react-roi";
 
-type RoiMode = "off" | "view" | "edit";
+type RoiMode = "hide" | "view" | "edit";
 
 export function RoiModeControl() {
+  const { roiMode, setRoiMode } = useRoiMode();
   const { setMode, removeRoi, selectRoi } = useActions();
   const { selectedRoi } = useRoiState();
   const rois = useCommittedRois();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [roiMode, setRoiMode] = useState<RoiMode>("view");
   const selectedButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -50,7 +51,7 @@ export function RoiModeControl() {
       case "view":
         setMode("select");
         break;
-      case "off":
+      case "hide":
         setMode("select");
         selectRoi(null);
         break;
@@ -59,7 +60,7 @@ export function RoiModeControl() {
 
   const handleModeChange = (value: RoiMode) => {
     setRoiMode(value);
-    if (value === "off") {
+    if (value === "hide") {
       selectRoi(null);
       setMode("select");
     }
@@ -74,7 +75,7 @@ export function RoiModeControl() {
   };
 
   const handleRegionClick = (roiId: string) => {
-    if (roiMode !== "off") selectRoi(roiId);
+    if (roiMode !== "hide") selectRoi(roiId);
   };
 
   const handleDeleteRegion = (roiId: string, event: React.MouseEvent) => {
@@ -111,17 +112,17 @@ export function RoiModeControl() {
                 <Label>View</Label>
               </div>
             </SelectItem>
-            <SelectItem value="off">
+            <SelectItem value="hide">
               <div className="flex items-center gap-2">
                 <EyeOff className="h-4 w-4" />
-                <Label>Off</Label>
+                <Label>Hide</Label>
               </div>
             </SelectItem>
           </SelectContent>
         </Select>
       </div>
 
-      {rois.length > 0 && roiMode !== "off" && (
+      {rois.length > 0 && roiMode !== "hide" && (
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <div className="flex items-center gap-2 min-w-0 flex-1 max-w-[300px]">
             <div className="overflow-x-auto flex-1 min-w-0 no-scrollbar">

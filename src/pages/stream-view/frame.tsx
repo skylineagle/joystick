@@ -24,9 +24,22 @@ export const Frame = ({ mode }: FrameProps) => {
     };
   }, []);
 
-  return mode === "edit" ? (
-    <TargetImage id="frame" src={frameData} className="size-full rounded-xl" />
-  ) : (
-    <img className="size-full rounded-2xl" id="frame" src={frameData} />
+  return (
+    <div className="size-full">
+      {mode === "edit" ? (
+        <TargetImage
+          id="frame"
+          src={frameData}
+          className="size-full rounded-xl"
+        />
+      ) : (
+        <img
+          className="size-full rounded-2xl"
+          id="frame"
+          src={frameData}
+          draggable={false}
+        />
+      )}
+    </div>
   );
 };
