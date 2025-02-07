@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ThemeProvider } from "./components/theme-provider";
-import { StreamView } from "./pages/stream-view";
+import { StreamView } from "./pages/stream-view/stream-view";
 import { Layout } from "./layout";
 // import { ParamsView } from "./pages/params-view";
 
