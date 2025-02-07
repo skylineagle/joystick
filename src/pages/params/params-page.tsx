@@ -1,11 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useParamsStore } from "@/lib/params.store";
-import { cn } from "@/lib/utils";
 import { ParamTree } from "@/pages/params/param-tree";
 import { ParamNode, ParamPath } from "@/types/params";
-import { RotateCw } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 // Mock schema - replace with actual schema from device
 const mockSchema: ParamNode = {
@@ -63,26 +59,8 @@ const mockSchema: ParamNode = {
   },
 };
 
-function initializeValues(
-  node: ParamNode,
-  path: ParamPath = [],
-  values: Record<string, null> = {}
-) {
-  Object.entries(node.properties).forEach(([key, value]) => {
-    const currentPath = [...path, key];
-    if (value.type === "object") {
-      initializeValues(value, currentPath, values);
-    } else {
-      values[currentPath.join(".")] = null;
-    }
-  });
-  return values;
-}
-
 export function ParamsPage() {
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set([]));
-  const { readAllValues } = useParamsStore();
-  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleToggle = useCallback((path: ParamPath) => {
     setExpandedPaths((prev) => {
@@ -94,48 +72,9 @@ export function ParamsPage() {
     });
   }, []);
 
-  const handleRefreshAll = useCallback(async () => {
-    setIsRefreshing(true);
-    try {
-      await readAllValues();
-    } finally {
-      setIsRefreshing(false);
-    }
-  }, [readAllValues]);
-
-  useEffect(() => {
-    // Initialize store with empty values for all parameters
-    const initialValues = initializeValues(mockSchema);
-    Object.keys(initialValues).forEach((path) => {
-      useParamsStore.setState((state) => ({
-        values: {
-          ...state.values,
-          [path]: {
-            current: null,
-            edited: null,
-            pending: null,
-            isLoading: false,
-          },
-        },
-      }));
-    });
-
-    // Read initial values
-    handleRefreshAll();
-  }, [handleRefreshAll]);
-
   return (
-    <div className="flex flex-col gap-4">
-      <Button
-        className="self-end"
-        variant="outline"
-        size="icon"
-        onClick={handleRefreshAll}
-        disabled={isRefreshing}
-      >
-        <RotateCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
-      </Button>
-      <ScrollArea className="pr-4">
+    <div className="space-y-4">
+      <ScrollArea className="h-[calc(100vh-200px)]">
         <ParamTree
           schema={mockSchema}
           path={[]}

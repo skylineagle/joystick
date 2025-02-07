@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import {
   Tooltip,
   TooltipContent,
@@ -27,29 +26,75 @@ export function ParamTree({
 }: ParamTreeProps) {
   const pathStr = path.join(".");
   const isExpanded = expanded.has(pathStr);
-  const { values } = useParamsStore();
+  const { values, readValue } = useParamsStore();
+
+  const handleRereadSection = async () => {
+    if (schema.type === "object") {
+      // Get all child parameter paths
+      const childPaths: ParamPath[] = [];
+      const collectPaths = (
+        node: ParamNode | ParamValue,
+        currentPath: ParamPath
+      ) => {
+        if (node.type === "object") {
+          Object.entries(node.properties).forEach(([key, value]) => {
+            collectPaths(value, [...currentPath, key]);
+          });
+        } else {
+          childPaths.push(currentPath);
+        }
+      };
+      collectPaths(schema, path);
+
+      // Read all child parameters
+      await Promise.all(childPaths.map(readValue));
+    }
+  };
 
   if (schema.type === "object") {
     return (
       <div className="space-y-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          className={cn(
-            "w-full justify-start gap-2 font-normal",
-            path.length === 0 && "font-medium"
-          )}
-          onClick={() => onToggle(path)}
-        >
-          <ChevronRight
+        <div className="flex items-center">
+          <Button
+            variant="ghost"
+            size="sm"
             className={cn(
-              "h-4 w-4 shrink-0 transition-transform",
-
-              isExpanded && "rotate-90"
+              "w-full justify-start gap-2 font-normal text-sm",
+              path.length === 0 && "font-medium"
             )}
-          />
-          <Label>{schema.title}</Label>
-        </Button>
+            onClick={() => onToggle(path)}
+          >
+            <ChevronRight
+              className={cn(
+                "h-4 w-4 shrink-0 transition-transform",
+                isExpanded && "rotate-90"
+              )}
+            />
+            <span className="text-sm">{schema.title}</span>
+            {path.length === 1 && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-5 w-5 p-0 ml-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRereadSection();
+                      }}
+                    >
+                      <RotateCw className="h-3.5 w-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="text-sm">
+                    <p>Reread all values in this section</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+          </Button>
+        </div>
 
         {isExpanded && (
           <div className="ml-4 border-l pl-4">

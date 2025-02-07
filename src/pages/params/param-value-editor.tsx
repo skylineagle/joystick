@@ -130,7 +130,7 @@ export function ParamValueEditor({ schema, path }: ParamValueEditorProps) {
 
   return (
     <div className="grid grid-cols-[200px_1fr_auto] items-start gap-6">
-      <Label className="text-base font-medium py-2.5 text-left">
+      <Label className="text-sm font-medium py-2.5 text-left">
         {schema.title}
       </Label>
       <div className="min-w-[220px]">
@@ -146,9 +146,9 @@ export function ParamValueEditor({ schema, path }: ParamValueEditorProps) {
             variant="ghost"
             onClick={handleCommit}
             disabled={value.isLoading}
-            className="h-8 w-8"
+            className="h-6 w-6"
           >
-            <Send className="h-4 w-4" />
+            <Send className="h-3.5 w-3.5" />
           </Button>
         ) : (
           <Button
@@ -156,10 +156,10 @@ export function ParamValueEditor({ schema, path }: ParamValueEditorProps) {
             variant="ghost"
             onClick={handleRefresh}
             disabled={value.isLoading}
-            className="h-8 w-8"
+            className="h-6 w-6"
           >
             <RotateCw
-              className={cn("h-4 w-4", value.isLoading && "animate-spin")}
+              className={cn("h-3.5 w-3.5", value.isLoading && "animate-spin")}
             />
           </Button>
         )}
