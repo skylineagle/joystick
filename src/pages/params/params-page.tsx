@@ -74,13 +74,15 @@ export function ParamsPage() {
 
   return (
     <div className="space-y-4">
-      <ScrollArea className="h-[calc(100vh-200px)]">
-        <ParamTree
-          schema={mockSchema}
-          path={[]}
-          expanded={expandedPaths}
-          onToggle={handleToggle}
-        />
+      <ScrollArea className="h-[calc(100vh-120px)] px-2 sm:px-4">
+        <div className="pb-8">
+          <ParamTree
+            schema={mockSchema}
+            path={[]}
+            expanded={expandedPaths}
+            onToggle={handleToggle}
+          />
+        </div>
       </ScrollArea>
     </div>
   );

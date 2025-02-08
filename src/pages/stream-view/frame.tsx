@@ -10,12 +10,13 @@ export const Frame = ({ mode }: FrameProps) => {
   const [frameData, setFrameData] = useState<string>("");
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8080");
+    const ws = new WebSocket("/api/ws");
     wsRef.current = ws;
 
     ws.onmessage = (event) => {
       const message = JSON.parse(event.data);
       if (message.type !== "frame") return;
+
       setFrameData(`data:image/jpeg;base64,${message.payload.data}`);
     };
 
@@ -24,22 +25,14 @@ export const Frame = ({ mode }: FrameProps) => {
     };
   }, []);
 
-  return (
-    <div className="size-full">
-      {mode === "edit" ? (
-        <TargetImage
-          id="frame"
-          src={frameData}
-          className="size-full rounded-xl"
-        />
-      ) : (
-        <img
-          className="size-full rounded-2xl"
-          id="frame"
-          src={frameData}
-          draggable={false}
-        />
-      )}
-    </div>
+  return mode === "edit" ? (
+    <TargetImage id="frame" src={frameData} className="size-full rounded-3xl" />
+  ) : (
+    <img
+      className="size-full rounded-3xl"
+      id="frame"
+      src={frameData}
+      draggable={false}
+    />
   );
 };

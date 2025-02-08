@@ -4,7 +4,7 @@ import { RoiContainer, RoiList } from "react-roi";
 export const Roi = () => {
   return (
     <RoiContainer
-      className="size-full"
+      className="size-full overflow-hidden rounded-3xl"
       style={{ backgroundColor: "transparent" }}
       target={<Frame mode="edit" />}
       lockPan

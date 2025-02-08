@@ -59,18 +59,18 @@ export function ParamTree({
             variant="ghost"
             size="sm"
             className={cn(
-              "w-full justify-start gap-2 font-normal text-sm",
+              "w-full justify-start gap-1.5 sm:gap-2 font-normal text-xs sm:text-sm px-2 sm:px-3",
               path.length === 0 && "font-medium"
             )}
             onClick={() => onToggle(path)}
           >
             <ChevronRight
               className={cn(
-                "h-4 w-4 shrink-0 transition-transform",
+                "h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 transition-transform",
                 isExpanded && "rotate-90"
               )}
             />
-            <span className="text-sm">{schema.title}</span>
+            <span className="text-xs sm:text-sm truncate">{schema.title}</span>
             {path.length === 1 && (
               <TooltipProvider>
                 <Tooltip>
@@ -78,16 +78,16 @@ export function ParamTree({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-5 w-5 p-0 ml-2"
+                      className="h-4 w-4 sm:h-5 sm:w-5 p-0 ml-1 sm:ml-2"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleRereadSection();
                       }}
                     >
-                      <RotateCw className="h-3.5 w-3.5" />
+                      <RotateCw className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent className="text-sm">
+                  <TooltipContent className="text-xs sm:text-sm">
                     <p>Reread all values in this section</p>
                   </TooltipContent>
                 </Tooltip>
@@ -97,7 +97,7 @@ export function ParamTree({
         </div>
 
         {isExpanded && (
-          <div className="ml-4 border-l pl-4">
+          <div className="ml-2 sm:ml-4 border-l pl-2 sm:pl-4">
             {Object.entries(schema.properties).map(([key, value]) => (
               <ParamTree
                 key={key}
@@ -119,7 +119,7 @@ export function ParamTree({
   console.log(path, isEdited);
 
   return (
-    <div className="flex items-center gap-2 py-1">
+    <div className="flex items-center gap-1.5 sm:gap-2 py-1">
       <ParamValueEditor schema={schema} path={path} />
       <div className="flex items-center gap-1">
         {isEdited ? (

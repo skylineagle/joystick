@@ -129,24 +129,32 @@ export function ParamValueEditor({ schema, path }: ParamValueEditorProps) {
   };
 
   return (
-    <div className="grid grid-cols-[200px_1fr_auto] items-start gap-6">
-      <Label className="text-sm font-medium py-2.5 text-left">
+    <div className="grid grid-cols-[120px_1fr_auto] sm:grid-cols-[200px_1fr_auto] items-center gap-2 sm:gap-6">
+      <Label
+        className="text-xs sm:text-sm font-medium truncate"
+        title={schema.title}
+      >
         {schema.title}
       </Label>
-      <div className="min-w-[220px]">
+      <div className="min-w-0">
         {renderInput()}
         {value.error && (
-          <p className="mt-1.5 text-sm text-red-500">{value.error}</p>
+          <p
+            className="mt-1 sm:mt-1.5 text-xs sm:text-sm text-red-500 truncate"
+            title={value.error}
+          >
+            {value.error}
+          </p>
         )}
       </div>
-      <div className="flex items-center gap-2 py-1.5">
+      <div className="flex items-center gap-1 flex-shrink-0">
         {value.edited !== null ? (
           <Button
             size="icon"
             variant="ghost"
             onClick={handleCommit}
             disabled={value.isLoading}
-            className="h-6 w-6"
+            className="h-6 w-6 flex-shrink-0"
           >
             <Send className="h-3.5 w-3.5" />
           </Button>
@@ -156,7 +164,7 @@ export function ParamValueEditor({ schema, path }: ParamValueEditorProps) {
             variant="ghost"
             onClick={handleRefresh}
             disabled={value.isLoading}
-            className="h-6 w-6"
+            className="h-6 w-6 flex-shrink-0"
           >
             <RotateCw
               className={cn("h-3.5 w-3.5", value.isLoading && "animate-spin")}

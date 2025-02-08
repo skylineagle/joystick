@@ -1,16 +1,6 @@
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -18,20 +8,30 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { useRoiMode } from "@/hooks/use-roi-mode";
-import { Edit3, Eye, EyeOff, Trash2, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Edit3, Eye, EyeOff, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useActions, useCommittedRois, useRoiState } from "react-roi";
 
 type RoiMode = "hide" | "view" | "edit";
+
+interface RegionName {
+  id: string;
+  name: string;
+}
 
 export function RoiModeControl() {
   const { roiMode, setRoiMode } = useRoiMode();
   const { setMode, removeRoi, selectRoi } = useActions();
   const { selectedRoi } = useRoiState();
   const rois = useCommittedRois();
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [editingRegionId, setEditingRegionId] = useState<string | null>(null);
+  const [regionNames, setRegionNames] = useState<RegionName[]>([]);
   const selectedButtonRef = useRef<HTMLButtonElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { isMobileLandscape } = useMobileLandscape();
 
   useEffect(() => {
     if (selectedRoi && selectedButtonRef.current) {
@@ -58,20 +58,27 @@ export function RoiModeControl() {
     }
   }, [roiMode, setMode, selectRoi]);
 
+  useEffect(() => {
+    const newRegions = rois.filter(
+      (roi) => !regionNames.some((rn) => rn.id === roi.id)
+    );
+    if (newRegions.length > 0) {
+      setRegionNames((prev) => [
+        ...prev,
+        ...newRegions.map((roi) => ({
+          id: roi.id,
+          name: `Region ${rois.findIndex((r) => r.id === roi.id) + 1}`,
+        })),
+      ]);
+    }
+  }, [regionNames, rois]);
+
   const handleModeChange = (value: RoiMode) => {
     setRoiMode(value);
     if (value === "hide") {
       selectRoi(null);
       setMode("select");
     }
-  };
-
-  const handleClearRois = () => {
-    selectRoi(null);
-    rois.forEach((roi) => {
-      removeRoi(roi.id);
-    });
-    setIsConfirmOpen(false);
   };
 
   const handleRegionClick = (roiId: string) => {
@@ -81,108 +88,128 @@ export function RoiModeControl() {
   const handleDeleteRegion = (roiId: string, event: React.MouseEvent) => {
     event.stopPropagation();
     removeRoi(roiId);
+    setRegionNames((prev) => prev.filter((rn) => rn.id !== roiId));
     if (selectedRoi === roiId) {
       selectRoi(null);
     }
   };
 
+  const handleDoubleClick = (roiId: string) => {
+    if (roiMode === "edit") {
+      setEditingRegionId(roiId);
+      setTimeout(() => {
+        inputRef.current?.focus();
+        inputRef.current?.select();
+      }, 0);
+    }
+  };
+
+  const handleNameChange = (roiId: string, newName: string) => {
+    setRegionNames((prev) =>
+      prev.map((rn) => (rn.id === roiId ? { ...rn, name: newName } : rn))
+    );
+  };
+
+  const handleNameSubmit = () => {
+    setEditingRegionId(null);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleNameSubmit();
+    }
+  };
+
   return (
-    <div className="flex items-center gap-4">
-      <div className="flex items-center gap-2 flex-shrink-0">
-        <Label
-          htmlFor="roi-mode"
-          className="text-sm font-medium whitespace-nowrap"
-        >
-          ROI Mode
-        </Label>
-        <Select value={roiMode} onValueChange={handleModeChange}>
-          <SelectTrigger id="roi-mode" className="w-[140px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="edit">
-              <div className="flex items-center gap-2">
-                <Edit3 className="h-4 w-4" />
-                <Label>Edit</Label>
-              </div>
-            </SelectItem>
-            <SelectItem value="view">
-              <div className="flex items-center gap-2">
-                <Eye className="h-4 w-4" />
-                <Label>View</Label>
-              </div>
-            </SelectItem>
-            <SelectItem value="hide">
-              <div className="flex items-center gap-2">
-                <EyeOff className="h-4 w-4" />
-                <Label>Hide</Label>
-              </div>
-            </SelectItem>
-          </SelectContent>
-        </Select>
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-2">
+        <Label className="text-xs sm:text-sm">ROI Mode</Label>
       </div>
+      <Select value={roiMode} onValueChange={handleModeChange}>
+        <SelectTrigger className="w-full h-8 sm:h-10 text-xs sm:text-sm">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="edit">
+            <div className="flex items-center gap-2">
+              <Edit3 className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="text-xs sm:text-sm">Edit</span>
+            </div>
+          </SelectItem>
+          <SelectItem value="view">
+            <div className="flex items-center gap-2">
+              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="text-xs sm:text-sm">View</span>
+            </div>
+          </SelectItem>
+          <SelectItem value="hide">
+            <div className="flex items-center gap-2">
+              <EyeOff className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="text-xs sm:text-sm">Hide</span>
+            </div>
+          </SelectItem>
+        </SelectContent>
+      </Select>
 
       {rois.length > 0 && roiMode !== "hide" && (
-        <div className="flex items-center gap-3 min-w-0 flex-1">
-          <div className="flex items-center gap-2 min-w-0 flex-1 max-w-[300px]">
-            <div className="overflow-x-auto flex-1 min-w-0 no-scrollbar">
-              <div className="flex items-center gap-1 w-max">
-                {rois.map((roi, index) => (
+        <div className="mt-2 w-full">
+          <ScrollArea
+            className={cn("mt-1", isMobileLandscape ? "h-[80px]" : "h-[120px]")}
+          >
+            <div className="flex flex-col gap-1">
+              {rois.map((roi) => {
+                const regionName =
+                  regionNames.find((rn) => rn.id === roi.id)?.name ||
+                  `Region ${rois.findIndex((r) => r.id === roi.id) + 1}`;
+                const isEditing = editingRegionId === roi.id;
+
+                return (
                   <button
                     key={roi.id}
                     ref={roi.id === selectedRoi ? selectedButtonRef : undefined}
                     onClick={() => handleRegionClick(roi.id)}
-                    className={`text-sm p-1 rounded transition-colors whitespace-nowrap group relative ${
+                    onDoubleClick={() => handleDoubleClick(roi.id)}
+                    className={cn(
+                      "text-xs sm:text-sm rounded transition-colors w-full text-left group relative",
+                      isMobileLandscape ? "p-1" : "p-1.5",
                       roi.id === selectedRoi
                         ? "bg-primary text-primary-foreground pr-7"
                         : "text-foreground/80 hover:bg-accent"
-                    }`}
-                  >
-                    Region {index + 1}
-                    {roi.id === selectedRoi && roiMode === "edit" && (
-                      <button
-                        onClick={(e) => handleDeleteRegion(roi.id, e)}
-                        className="absolute right-1.5 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
                     )}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {roiMode === "edit" && (
-              <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 hover:bg-destructive/20 flex-shrink-0"
                   >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Clear all regions?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. All regions will be
-                      permanently deleted.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleClearRois}
-                      className="bg-destructive hover:bg-destructive/90"
-                    >
-                      Delete All
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
-          </div>
+                    {isEditing ? (
+                      <Input
+                        ref={inputRef}
+                        value={regionName}
+                        onChange={(e) =>
+                          handleNameChange(roi.id, e.target.value)
+                        }
+                        onBlur={handleNameSubmit}
+                        onKeyDown={handleKeyDown}
+                        className={cn(
+                          "w-full px-1 py-0 text-xs sm:text-sm",
+                          isMobileLandscape ? "h-5" : "h-6 sm:h-7"
+                        )}
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    ) : (
+                      regionName
+                    )}
+                    {roi.id === selectedRoi &&
+                      roiMode === "edit" &&
+                      !isEditing && (
+                        <button
+                          onClick={(e) => handleDeleteRegion(roi.id, e)}
+                          className="absolute right-1 sm:right-1.5 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100"
+                        >
+                          <X className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                        </button>
+                      )}
+                  </button>
+                );
+              })}
+            </div>
+          </ScrollArea>
         </div>
       )}
     </div>

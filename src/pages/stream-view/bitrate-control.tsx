@@ -11,9 +11,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 
 const BITRATE_PRESETS = [
   { value: "1000", label: "1000 kbps" },
@@ -33,6 +35,7 @@ export function BitrateControll({
 }: BitrateControllProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const { isMobileLandscape } = useMobileLandscape();
 
   const handleSelect = (value: string) => {
     const numValue = parseInt(value);
@@ -55,36 +58,51 @@ export function BitrateControll({
   }, [search]);
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-sm font-medium">Bitrate:</span>
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-2">
+        <Label className="text-xs sm:text-sm">Bitrate</Label>
+      </div>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-[140px] justify-between"
+            className={cn(
+              "w-full text-xs sm:text-sm justify-between",
+              isMobileLandscape ? "h-7" : "h-8 sm:h-10"
+            )}
           >
             {bitrate} kbps
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            <ChevronsUpDown className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[140px] p-0">
-          <Command shouldFilter={false}>
+        <PopoverContent
+          className={cn("w-full p-0", isMobileLandscape && "max-h-[120px]")}
+          align="start"
+        >
+          <Command shouldFilter={false} className="max-h-[300px]">
             <CommandInput
               placeholder="Enter bitrate..."
               value={search}
               onValueChange={setSearch}
+              className={cn(
+                "text-xs sm:text-sm",
+                isMobileLandscape ? "h-7" : "h-8 sm:h-10"
+              )}
             />
             <CommandList>
               {showCreateOption && (
                 <CommandItem
                   value={search}
                   onSelect={() => handleSelect(search)}
-                  className="text-sm"
+                  className={cn(
+                    "text-xs sm:text-sm px-2",
+                    isMobileLandscape ? "h-7" : "h-8 sm:h-10"
+                  )}
                 >
-                  <Plus className="mr-2 h-4 w-4" />
-                  {search} kbps
+                  <Plus className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span className="truncate">{search} kbps</span>
                 </CommandItem>
               )}
               <CommandGroup>
@@ -93,16 +111,20 @@ export function BitrateControll({
                     key={preset.value}
                     value={preset.value}
                     onSelect={() => handleSelect(preset.value)}
+                    className={cn(
+                      "text-xs sm:text-sm px-2",
+                      isMobileLandscape ? "h-7" : "h-8 sm:h-10"
+                    )}
                   >
                     <Check
                       className={cn(
-                        "mr-2 h-4 w-4",
+                        "mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0",
                         bitrate?.toString() === preset.value
                           ? "opacity-100"
                           : "opacity-0"
                       )}
                     />
-                    {preset.label}
+                    <span className="truncate">{preset.label}</span>
                   </CommandItem>
                 ))}
               </CommandGroup>

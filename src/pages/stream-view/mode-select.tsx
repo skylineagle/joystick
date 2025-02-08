@@ -1,69 +1,62 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Eye, Terminal, Video } from "lucide-react";
-import { motion } from "motion/react";
+import { Label } from "@/components/ui/label";
+import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
+import { cn } from "@/lib/utils";
 
 interface ModeSelectProps {
   mode: "live" | "vmd" | "cmd";
   setMode: (mode: "live" | "vmd" | "cmd") => void;
 }
 
-export const ModeSelect = ({ mode, setMode }: ModeSelectProps) => {
+export function ModeSelect({ mode, setMode }: ModeSelectProps) {
+  const { isMobileLandscape } = useMobileLandscape();
+
   return (
-    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-      <Card className="p-1.5 rounded-xl border border-white/20 bg-white/10 shadow-lg backdrop-blur-sm">
-        <div className="flex flex-col gap-1">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={mode === "live" ? "default" : "ghost"}
-                onClick={() => setMode("live")}
-                size="icon"
-              >
-                <Video className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right" align="center">
-              <p>Live Stream</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={mode === "vmd" ? "default" : "ghost"}
-                onClick={() => setMode("vmd")}
-                size="icon"
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right" align="center">
-              <p>Motion Detection</p>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant={mode === "cmd" ? "default" : "ghost"}
-                onClick={() => setMode("cmd")}
-                size="icon"
-              >
-                <Terminal className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="right" align="center">
-              <p>Command Mode</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      </Card>
-    </motion.div>
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-2">
+        <Label className="text-xs sm:text-sm">Mode</Label>
+      </div>
+      <Tabs
+        defaultValue="live"
+        orientation="vertical"
+        className="w-full"
+        value={mode}
+        onValueChange={(value) => setMode(value as "live" | "vmd" | "cmd")}
+      >
+        <TabsList className="flex flex-col w-full gap-1 bg-transparent">
+          <TabsTrigger
+            value="live"
+            className={cn(
+              "flex items-center gap-2 w-full justify-start data-[state=active]:bg-muted data-[state=active]:shadow-none",
+              isMobileLandscape ? "p-1" : "p-1.5"
+            )}
+          >
+            <Video className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="text-xs sm:text-sm">Live Stream</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="vmd"
+            className={cn(
+              "flex items-center gap-2 w-full justify-start data-[state=active]:bg-muted data-[state=active]:shadow-none",
+              isMobileLandscape ? "p-1" : "p-1.5"
+            )}
+          >
+            <Eye className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="text-xs sm:text-sm">Motion Detection</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="cmd"
+            className={cn(
+              "flex items-center gap-2 w-full justify-start data-[state=active]:bg-muted data-[state=active]:shadow-none",
+              isMobileLandscape ? "p-1" : "p-1.5"
+            )}
+          >
+            <Terminal className="h-3 w-3 md:h-4 md:w-4" />
+            <span className="text-xs sm:text-sm">Command Mode</span>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
+    </div>
   );
-};
+}
