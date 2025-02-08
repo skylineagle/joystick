@@ -1,3 +1,5 @@
+"use client";
+
 import { AnimatedThemeToggle } from "@/components/ui/animated-theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
