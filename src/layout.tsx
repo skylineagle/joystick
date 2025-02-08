@@ -29,7 +29,7 @@ export function Layout({ children }: AppLayoutProps) {
         <div
           className={cn(
             "h-[100dvh] flex flex-col p-4",
-            isMobileLandscape && "overflow-hidden"
+            isMobileLandscape && "overflow-hidden p-0 w-full"
           )}
         >
           <div
