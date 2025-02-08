@@ -1,27 +1,16 @@
 import { ThemeProvider } from "@/components/theme-provider";
-import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { cn } from "@/lib/utils";
-import { ArrowLeft } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { Label } from "./components/ui/label";
+import { Controls } from "./pages/stream-view/controls";
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 export function Layout({ children }: AppLayoutProps) {
-  const navigate = useNavigate();
-  const location = useLocation();
   const { isMobileLandscape } = useMobileLandscape();
-  const isParamsPage = location.pathname === "/params";
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -38,28 +27,33 @@ export function Layout({ children }: AppLayoutProps) {
               isMobileLandscape && "h-[100dvh]"
             )}
           >
-            {!isMobileLandscape && (
-              <div className="flex items-center justify-between">
-                <h1 className="text-xl sm:text-3xl font-bold">Joystick</h1>
-                {isParamsPage && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        className="gap-1 sm:gap-2 text-sm sm:text-base hover:bg-transparent active:bg-transparent"
-                        onClick={() => navigate("/")}
-                      >
-                        <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
-                        <Label className="hidden sm:inline">Back to Home</Label>
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Return to main view</TooltipContent>
-                  </Tooltip>
+            <div className="flex-1 overflow-auto">
+              <div
+                className={cn(
+                  "inset-0 h-full",
+                  isMobileLandscape && "h-[100dvh]"
                 )}
+              >
+                <div
+                  className={cn(
+                    "flex items-start justify-center h-full",
+                    isMobileLandscape ? "p-1" : "p-2 sm:p-4"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "flex gap-2",
+                      isMobileLandscape
+                        ? "flex-row"
+                        : "flex-col md:flex-row gap-4 md:gap-6 w-full max-w-[1200px]"
+                    )}
+                  >
+                    <div className="flex-1">{children}</div>
+                    <Controls />
+                  </div>
+                </div>
               </div>
-            )}
-
-            <div className="flex-1 overflow-auto">{children}</div>
+            </div>
           </div>
         </div>
         <Toaster position="top-center" closeButton />

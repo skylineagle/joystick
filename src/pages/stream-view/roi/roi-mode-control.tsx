@@ -121,7 +121,7 @@ export function RoiModeControl() {
   };
 
   return (
-    <div className="w-full">
+    <div className="size-full">
       <div className="flex items-center justify-between mb-2">
         <Label className="text-xs sm:text-sm">ROI Mode</Label>
       </div>
@@ -152,11 +152,11 @@ export function RoiModeControl() {
       </Select>
 
       {rois.length > 0 && roiMode !== "hide" && (
-        <div className="mt-2 w-full">
+        <div className="mt-2 size-full">
           <ScrollArea
-            className={cn("mt-1", isMobileLandscape ? "h-[80px]" : "h-[120px]")}
+            className={cn("mt-1", isMobileLandscape ? "h-[80px]" : "h-[320px]")}
           >
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 pr-2">
               {rois.map((roi) => {
                 const regionName =
                   regionNames.find((rn) => rn.id === roi.id)?.name ||
@@ -202,7 +202,7 @@ export function RoiModeControl() {
                           onClick={(e) => handleDeleteRegion(roi.id, e)}
                           className="absolute right-1 sm:right-1.5 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100"
                         >
-                          <X className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                          <X className="h-3 w-3 sm:h-4 sm:w-4" />
                         </button>
                       )}
                   </button>

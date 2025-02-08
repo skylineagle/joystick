@@ -73,7 +73,7 @@ export function ParamsPage() {
   }, []);
 
   return (
-    <div className="space-y-4">
+    <div className="size-full">
       <ScrollArea className="h-[calc(100vh-120px)] px-2 sm:px-4">
         <div className="pb-8">
           <ParamTree
