@@ -1,7 +1,3 @@
 FROM ghcr.io/muchobien/pocketbase:latest
 
-# Copy migrations and hooks
 COPY ./pocketbase/pb_migrations /pb_migrations
-COPY ./pocketbase/pb_hooks /pb_hooks
-
-# The base image already has the correct ENTRYPOINT and CMD 
