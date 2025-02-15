@@ -7,6 +7,7 @@ import { CommittedRoiProperties, RoiProvider } from "react-roi";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Layout } from "./layout";
 import { DeviceSelector } from "./pages/device-selector/device-selector";
+import { ActionsPage } from "./pages/actions/actions-page";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ function App() {
               <Route path="/:device" element={<Layout />}>
                 <Route index element={<StreamView />} />
                 <Route path="params" element={<ParamsPage />} />
+                <Route path="actions" element={<ActionsPage />} />
               </Route>
             </Routes>
           </BrowserRouter>

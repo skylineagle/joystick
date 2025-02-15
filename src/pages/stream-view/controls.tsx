@@ -30,8 +30,21 @@ export const Controls = () => {
   ]);
 
   const isParamsRoute = pathname.endsWith("/params");
-  const toggleView = () => {
-    navigate(isParamsRoute ? `/${device}` : `/${device}/params`);
+  const isActionsRoute = pathname.endsWith("/actions");
+  const isStreamRoute = !isParamsRoute && !isActionsRoute;
+
+  const navigateTo = (route: "stream" | "params" | "actions") => {
+    switch (route) {
+      case "stream":
+        navigate(`/${device}`);
+        break;
+      case "params":
+        navigate(`/${device}/params`);
+        break;
+      case "actions":
+        navigate(`/${device}/actions`);
+        break;
+    }
   };
 
   return (
@@ -56,26 +69,53 @@ export const Controls = () => {
           <div className="flex-1">{isRoiSupported && <RoiModeControl />}</div>
           <div className="flex-1" />
 
-          <div className="flex items-center justify-between mt-auto">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  className="hover:bg-transparent active:bg-transparent"
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleView}
-                >
-                  {isParamsRoute ? (
+          <div className="flex items-center justify-between mt-auto gap-2">
+            <div className="flex gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="hover:bg-transparent active:bg-transparent"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigateTo("stream")}
+                    disabled={isStreamRoute}
+                  >
                     <Icon icon="video" style={{ width: 24, height: 24 }} />
-                  ) : (
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Open stream view</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="hover:bg-transparent active:bg-transparent"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigateTo("params")}
+                    disabled={isParamsRoute}
+                  >
                     <Icon icon="settings" style={{ width: 24, height: 24 }} />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {isParamsRoute ? "Open stream view" : "Open params"}
-              </TooltipContent>
-            </Tooltip>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Open params</TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    className="hover:bg-transparent active:bg-transparent"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => navigateTo("actions")}
+                    disabled={isActionsRoute}
+                  >
+                    <Icon icon="send" style={{ width: 24, height: 24 }} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Open actions</TooltipContent>
+              </Tooltip>
+            </div>
             <AnimatedThemeToggle />
           </div>
         </div>
@@ -92,19 +132,55 @@ export const Controls = () => {
               <Separator className="my-4" />
               {isSetBitrateSupported && <BitrateControll deviceId={device!} />}
               <div className="flex items-center justify-between">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      className="hover:bg-transparent active:bg-transparent"
-                      variant="ghost"
-                      size="icon"
-                      onClick={toggleView}
-                    >
-                      <Icon icon="settings" style={{ width: 24, height: 24 }} />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>Open settings</TooltipContent>
-                </Tooltip>
+                <div className="flex gap-2">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        className="hover:bg-transparent active:bg-transparent"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigateTo("stream")}
+                        disabled={isStreamRoute}
+                      >
+                        <Icon icon="video" style={{ width: 24, height: 24 }} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Open stream view</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        className="hover:bg-transparent active:bg-transparent"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigateTo("params")}
+                        disabled={isParamsRoute}
+                      >
+                        <Icon
+                          icon="settings"
+                          style={{ width: 24, height: 24 }}
+                        />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Open params</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        className="hover:bg-transparent active:bg-transparent"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigateTo("actions")}
+                        disabled={isActionsRoute}
+                      >
+                        <Icon icon="send" style={{ width: 24, height: 24 }} />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Open actions</TooltipContent>
+                  </Tooltip>
+                </div>
                 <AnimatedThemeToggle />
               </div>
             </div>

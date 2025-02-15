@@ -1,18 +1,16 @@
 import {
   ActionsResponse,
-  DevicesResponse,
-  ModelsResponse,
-  TypedPocketBase,
   RunTargetOptions,
+  TypedPocketBase,
 } from "@/types/db.types";
 import { ParamNode } from "@/types/params";
+import { DeviceWithModel } from "@/types/types";
 import cors from "@elysiajs/cors";
 import { $ } from "bun";
 import { Elysia, t } from "elysia";
 import { validate } from "jsonschema";
 import PocketBase from "pocketbase";
 import { logger } from "./logger";
-import { DeviceConfiguration } from "@/types/types";
 
 const pb = new PocketBase(Bun.env.POCKETBASE_URL) as TypedPocketBase;
 
@@ -40,9 +38,7 @@ app
       // Get the device from PocketBase
       const result = await pb
         .collection("devices")
-        .getFullList<
-          DevicesResponse<DeviceConfiguration, { device: ModelsResponse }>
-        >(1, {
+        .getFullList<DeviceWithModel>(1, {
           filter: `id = "${params.device}"`,
           expand: "device",
         });

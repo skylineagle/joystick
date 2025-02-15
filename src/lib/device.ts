@@ -1,21 +1,15 @@
-import {
-  ActionsResponse,
-  DevicesResponse,
-  ModelsResponse,
-} from "@/types/db.types";
-import { pb } from "./pocketbase";
 import { DeviceResponse } from "@/services/device";
+import { ActionsResponse } from "@/types/db.types";
+import { DeviceWithModel } from "@/types/types";
+import { pb } from "./pocketbase";
 
 export async function fetchDevice(deviceId: string) {
   try {
     const device = await pb
       .collection("devices")
-      .getFirstListItem<DevicesResponse<{ device: ModelsResponse }>>(
-        `id = "${deviceId}"`,
-        {
-          expand: "device",
-        }
-      );
+      .getFirstListItem<DeviceWithModel>(`id = "${deviceId}"`, {
+        expand: "device",
+      });
 
     return device;
   } catch {
@@ -24,17 +18,13 @@ export async function fetchDevice(deviceId: string) {
 }
 
 export async function fetchDevices() {
-  const records = await pb
-    .collection("devices")
-    .getFullList<DevicesResponse<{ device: ModelsResponse }>>({
-      expand: "device",
-    });
+  const records = await pb.collection("devices").getFullList<DeviceWithModel>({
+    expand: "device",
+  });
   return records;
 }
 
-export async function fetchDeviceActions(
-  device?: DevicesResponse<{ device: ModelsResponse }>
-) {
+export async function fetchDeviceActions(device?: DeviceWithModel) {
   if (!device) return [];
 
   const actions = await pb
