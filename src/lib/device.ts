@@ -24,7 +24,11 @@ export async function fetchDevice(deviceId: string) {
 }
 
 export async function fetchDevices() {
-  const records = await pb.collection("devices").getFullList<DevicesResponse>();
+  const records = await pb
+    .collection("devices")
+    .getFullList<DevicesResponse<{ device: ModelsResponse }>>({
+      expand: "device",
+    });
   return records;
 }
 
