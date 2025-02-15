@@ -11,8 +11,9 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useParamsStore } from "@/lib/params.store";
 import { cn } from "@/lib/utils";
-import { RotateCw, Send } from "lucide-react";
+import { RotateCw } from "lucide-react";
 import { DeviceValue, ParamPath, ParamValue } from "@/types/params";
+import { Icon } from "@/icons/icon";
 
 interface ParamValueEditorProps {
   schema: ParamValue;
@@ -156,7 +157,7 @@ export function ParamValueEditor({ schema, path }: ParamValueEditorProps) {
             disabled={value.isLoading}
             className="h-6 w-6 flex-shrink-0"
           >
-            <Send className="h-3.5 w-3.5" />
+            <Icon icon="send" style={{ width: 24, height: 24 }} />
           </Button>
         ) : (
           <Button
