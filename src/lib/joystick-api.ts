@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { ParamPath } from "@/types/params";
+import { urls } from "@/lib/urls";
 
 type JoystickApiResponse<T = unknown> = {
   success: boolean;
@@ -30,19 +31,16 @@ export async function writeParams({
   value,
 }: WriteParamsRequest): Promise<JoystickApiResponse> {
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_JOYSTICK_URL}/api/run/${deviceId}/write`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          path: path.join("."),
-          value,
-        }),
-      }
-    );
+    const response = await fetch(`${urls.joystick}/api/run/${deviceId}/write`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        path: path.join("."),
+        value,
+      }),
+    });
 
     if (!response.ok) throw new Error("Failed to write parameter");
 
@@ -61,18 +59,15 @@ export async function readParams({
   path,
 }: ReadParamsRequest): Promise<JoystickApiResponse> {
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_JOYSTICK_URL}/api/run/${deviceId}/read`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          path: path.join("."),
-        }),
-      }
-    );
+    const response = await fetch(`${urls.joystick}/api/run/${deviceId}/read`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        path: path.join("."),
+      }),
+    });
 
     if (!response.ok) throw new Error("Failed to read parameter");
 
@@ -93,7 +88,7 @@ export async function runAction({
 }: RunActionRequest) {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_JOYSTICK_URL}/api/run/${deviceId}/${action}`,
+      `${urls.joystick}/api/run/${deviceId}/${action}`,
       {
         method: "POST",
         headers: {
