@@ -1,0 +1,29 @@
+/// <reference path="../pb_data/types.d.ts" />
+migrate((app) => {
+  const collection = app.findCollectionByNameOrId("pbc_1599127217")
+
+  // add field
+  collection.fields.addAt(4, new Field({
+    "hidden": false,
+    "id": "select1181691900",
+    "maxSelect": 1,
+    "name": "target",
+    "presentable": false,
+    "required": false,
+    "system": false,
+    "type": "select",
+    "values": [
+      "local",
+      "device"
+    ]
+  }))
+
+  return app.save(collection)
+}, (app) => {
+  const collection = app.findCollectionByNameOrId("pbc_1599127217")
+
+  // remove field
+  collection.fields.removeById("select1181691900")
+
+  return app.save(collection)
+})

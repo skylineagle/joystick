@@ -97,7 +97,8 @@ export type ActionsRecord<Tparams = unknown> = {
 	updated?: IsoDateString
 }
 
-export type DevicesRecord = {
+export type DevicesRecord<Tconfiguration = unknown> = {
+	configuration?: null | Tconfiguration
 	created?: IsoDateString
 	description?: HTMLString
 	device: RecordIdString
@@ -119,12 +120,17 @@ export type ModelsRecord<Tparams = unknown> = {
 	updated?: IsoDateString
 }
 
+export enum RunTargetOptions {
+	"local" = "local",
+	"device" = "device",
+}
 export type RunRecord = {
 	action: RecordIdString
 	command: string
 	created?: IsoDateString
 	device: RecordIdString
 	id: string
+	target: RunTargetOptions
 	updated?: IsoDateString
 }
 
@@ -148,7 +154,7 @@ export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemF
 export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
 export type ActionsResponse<Tparams = unknown, Texpand = unknown> = Required<ActionsRecord<Tparams>> & BaseSystemFields<Texpand>
-export type DevicesResponse<Texpand = unknown> = Required<DevicesRecord> & BaseSystemFields<Texpand>
+export type DevicesResponse<Tconfiguration = unknown, Texpand = unknown> = Required<DevicesRecord<Tconfiguration>> & BaseSystemFields<Texpand>
 export type ModelsResponse<Tparams = unknown, Texpand = unknown> = Required<ModelsRecord<Tparams>> & BaseSystemFields<Texpand>
 export type RunResponse<Texpand = unknown> = Required<RunRecord> & BaseSystemFields<Texpand>
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>

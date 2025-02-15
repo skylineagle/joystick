@@ -3,6 +3,7 @@ import {
   DevicesResponse,
   ModelsResponse,
   TypedPocketBase,
+  RunTargetOptions,
 } from "@/types/db.types";
 import { ParamNode } from "@/types/params";
 import cors from "@elysiajs/cors";
@@ -11,6 +12,7 @@ import { Elysia, t } from "elysia";
 import { validate } from "jsonschema";
 import PocketBase from "pocketbase";
 import { logger } from "./logger";
+import { DeviceConfiguration } from "@/types/types";
 
 const pb = new PocketBase(Bun.env.POCKETBASE_URL) as TypedPocketBase;
 
@@ -38,7 +40,9 @@ app
       // Get the device from PocketBase
       const result = await pb
         .collection("devices")
-        .getFullList<DevicesResponse<{ device: ModelsResponse }>>(1, {
+        .getFullList<
+          DevicesResponse<DeviceConfiguration, { device: ModelsResponse }>
+        >(1, {
           filter: `id = "${params.device}"`,
           expand: "device",
         });
@@ -60,7 +64,7 @@ app
 
       const action = actionResult[0];
       const actionParams = action.params as ParamNode | undefined;
-      logger.info(actionParams);
+
       // Validate parameters if action has a params schema
       if (actionParams) {
         if (!body) throw new Error("Parameters are required for this action");
@@ -87,15 +91,16 @@ app
         return acc;
       }, run.command);
 
-      logger.info(command);
-      const output = await $`${{ raw: command }}`.text();
-      logger.info(output);
+      const output =
+        run.target === RunTargetOptions.device
+          ? await $`sshpass -p ${device.configuration?.password} ssh -o StrictHostKeyChecking=no ${device.configuration?.user}@${device.configuration?.host} '${command}'`.text()
+          : await $`${{ raw: command }}`.text();
 
       const response = {
         success: true,
         output,
       };
-
+      logger.info(response);
       return response;
     },
     {
