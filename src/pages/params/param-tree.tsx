@@ -12,7 +12,7 @@ import { ParamNode, ParamPath, ParamValue } from "@/types/params";
 import { Check, ChevronRight, PencilLine, RotateCw } from "lucide-react";
 
 interface ParamTreeProps {
-  schema: ParamNode | ParamValue;
+  schema: any;
   path: ParamPath;
   expanded: Set<string>;
   onToggle: (path: ParamPath) => void;
@@ -55,12 +55,10 @@ export function ParamTree({
     return (
       <div className="space-y-1">
         <div className="flex items-center">
-          <Button
-            variant="ghost"
-            size="sm"
+          <div
             className={cn(
-              "w-full justify-start gap-1.5 sm:gap-2 font-normal text-xs sm:text-sm px-2 sm:px-3",
-              path.length === 0 && "font-medium"
+              "w-full flex items-center gap-1.5 sm:gap-2 font-normal text-xs sm:text-sm px-2 sm:px-3 py-1.5 rounded-md cursor-pointer hover:bg-accent hover:text-accent-foreground",
+              path.length === 0 && "text-base sm:text-lg"
             )}
             onClick={() => onToggle(path)}
           >
@@ -93,7 +91,7 @@ export function ParamTree({
                 </Tooltip>
               </TooltipProvider>
             )}
-          </Button>
+          </div>
         </div>
 
         {isExpanded && (
@@ -116,7 +114,6 @@ export function ParamTree({
   const value = values[pathStr];
   const isEdited = Boolean(value?.edited);
   const isLoading = Boolean(value?.isLoading);
-  console.log(path, isEdited);
 
   return (
     <div className="flex items-center gap-1.5 sm:gap-2 py-1">

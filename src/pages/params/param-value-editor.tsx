@@ -1,5 +1,6 @@
-import { ParamPath, ParamValue, DeviceValue } from "@/types/params";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -8,11 +9,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 import { useParamsStore } from "@/lib/params.store";
-import { Button } from "@/components/ui/button";
-import { Send, RotateCw } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { RotateCw, Send } from "lucide-react";
+import { DeviceValue, ParamPath, ParamValue } from "@/types/params";
 
 interface ParamValueEditorProps {
   schema: ParamValue;

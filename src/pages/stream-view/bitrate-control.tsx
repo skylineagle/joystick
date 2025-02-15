@@ -6,16 +6,17 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Label } from "@/components/ui/label";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
+import { useBitrate } from "@/hooks/use-bitrate";
+import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 
 const BITRATE_PRESETS = [
   { value: "1000", label: "1000 kbps" },
@@ -25,22 +26,19 @@ const BITRATE_PRESETS = [
 ];
 
 interface BitrateControllProps {
-  bitrate: number;
-  handleBitrateChange: (value: number) => void;
+  deviceId: string;
 }
 
-export function BitrateControll({
-  bitrate,
-  handleBitrateChange,
-}: BitrateControllProps) {
+export function BitrateControll({ deviceId }: BitrateControllProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const { isMobileLandscape } = useMobileLandscape();
+  const { bitrate, setBitrate } = useBitrate(deviceId);
 
   const handleSelect = (value: string) => {
     const numValue = parseInt(value);
     if (!isNaN(numValue)) {
-      handleBitrateChange(numValue);
+      setBitrate(numValue);
       setOpen(false);
       setSearch("");
     }
