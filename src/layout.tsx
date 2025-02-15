@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
+import home from "@/icons/home.json";
 import { cn } from "@/lib/utils";
-import { Controls } from "./pages/stream-view/controls";
 import { Outlet, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { Icon } from "./icons/icon";
+import { Controls } from "./pages/stream-view/controls";
 
 export function Layout() {
   const { isMobileLandscape } = useMobileLandscape();
@@ -23,12 +24,12 @@ export function Layout() {
         >
           <div className="flex items-center mb-4">
             <Button
-              variant="ghost"
+              variant="link"
               size="icon"
               onClick={() => navigate("/")}
               className="mr-2"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <Icon icon={home} style={{ width: 32, height: 32 }} />
             </Button>
           </div>
           <div

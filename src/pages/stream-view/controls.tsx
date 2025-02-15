@@ -7,15 +7,17 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useIsSupported } from "@/hooks/use-is-supported";
+import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
+import { Icon } from "@/icons/icon";
+import settings from "@/icons/settings.json";
+import video from "@/icons/video.json";
 import { cn } from "@/lib/utils";
 import { BitrateControll } from "@/pages/stream-view/bitrate-control";
 import { ModeSelect } from "@/pages/stream-view/mode-select";
 import { RoiModeControl } from "@/pages/stream-view/roi/roi-mode-control";
-import { Settings, Video } from "lucide-react";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useState } from "react";
-import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
-import { useIsSupported } from "@/hooks/use-is-supported";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 export const Controls = () => {
   const [mode, setMode] = useState<"live" | "vmd" | "cmd">("live");
@@ -66,9 +68,9 @@ export const Controls = () => {
                   onClick={toggleView}
                 >
                   {isParamsRoute ? (
-                    <Video className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <Icon icon={video} style={{ width: 24, height: 24 }} />
                   ) : (
-                    <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <Icon icon={settings} style={{ width: 24, height: 24 }} />
                   )}
                 </Button>
               </TooltipTrigger>
@@ -100,7 +102,7 @@ export const Controls = () => {
                       size="icon"
                       onClick={toggleView}
                     >
-                      <Settings className="h-4 w-4 sm:h-5 sm:w-5" />
+                      <Icon icon={settings} style={{ width: 24, height: 24 }} />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Open settings</TooltipContent>
