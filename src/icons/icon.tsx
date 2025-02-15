@@ -1,17 +1,31 @@
 import Lottie, { LottieRefCurrentProps } from "lottie-react";
+import { useTheme } from "next-themes";
 import { CSSProperties, useRef } from "react";
+import homeDark from "./home.dark.json";
+import homeLight from "./home.light.json";
+import settingsDark from "./settings.dark.json";
+import settingsLight from "./settings.light.json";
+import videoDark from "./video.dark.json";
+import videoLight from "./video.light.json";
+
+const icons = {
+  video: { dark: videoLight, light: videoDark },
+  settings: { dark: settingsLight, light: settingsDark },
+  home: { dark: homeLight, light: homeDark },
+};
 
 interface IconProps {
-  icon: unknown;
+  icon: keyof typeof icons;
   style?: CSSProperties;
 }
 
 export function Icon({ icon, style }: IconProps) {
+  const { theme } = useTheme();
   const ref = useRef<LottieRefCurrentProps>(null);
 
   return (
     <Lottie
-      animationData={icon}
+      animationData={icons[icon][(theme as "dark" | "light") ?? "dark"]}
       style={style}
       lottieRef={ref}
       autoplay={false}

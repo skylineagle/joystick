@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
-import home from "@/icons/home.json";
 import { cn } from "@/lib/utils";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Icon } from "./icons/icon";
@@ -29,7 +28,7 @@ export function Layout() {
               onClick={() => navigate("/")}
               className="mr-2"
             >
-              <Icon icon={home} style={{ width: 32, height: 32 }} />
+              <Icon icon="home" style={{ width: 32, height: 32 }} />
             </Button>
           </div>
           <div

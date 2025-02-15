@@ -10,8 +10,6 @@ import {
 import { useIsSupported } from "@/hooks/use-is-supported";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { Icon } from "@/icons/icon";
-import settings from "@/icons/settings.json";
-import video from "@/icons/video.json";
 import { cn } from "@/lib/utils";
 import { BitrateControll } from "@/pages/stream-view/bitrate-control";
 import { ModeSelect } from "@/pages/stream-view/mode-select";
@@ -68,9 +66,9 @@ export const Controls = () => {
                   onClick={toggleView}
                 >
                   {isParamsRoute ? (
-                    <Icon icon={video} style={{ width: 24, height: 24 }} />
+                    <Icon icon="video" style={{ width: 24, height: 24 }} />
                   ) : (
-                    <Icon icon={settings} style={{ width: 24, height: 24 }} />
+                    <Icon icon="settings" style={{ width: 24, height: 24 }} />
                   )}
                 </Button>
               </TooltipTrigger>
@@ -102,7 +100,7 @@ export const Controls = () => {
                       size="icon"
                       onClick={toggleView}
                     >
-                      <Icon icon={settings} style={{ width: 24, height: 24 }} />
+                      <Icon icon="settings" style={{ width: 24, height: 24 }} />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Open settings</TooltipContent>
