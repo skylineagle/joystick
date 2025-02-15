@@ -1,5 +1,4 @@
 import Lottie, { LottieRefCurrentProps } from "lottie-react";
-import { useTheme } from "next-themes";
 import { CSSProperties, useRef } from "react";
 import homeDark from "./home.dark.json";
 import homeLight from "./home.light.json";
@@ -7,6 +6,7 @@ import settingsDark from "./settings.dark.json";
 import settingsLight from "./settings.light.json";
 import videoDark from "./video.dark.json";
 import videoLight from "./video.light.json";
+import { useTheme } from "@/components/theme-provider";
 
 const icons = {
   video: { dark: videoLight, light: videoDark },
