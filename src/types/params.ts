@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 export interface ParamValue {
   type: "string" | "number" | "boolean" | "integer";
   title: string;
@@ -23,23 +21,5 @@ export interface DeviceValue<T = unknown> {
   isLoading: boolean; // Whether the value is being read or written
   error?: string; // Error message if any operation failed
 }
-
-export const paramValueSchema = z.object({
-  type: z.enum(["string", "number", "boolean", "integer"]),
-  title: z.string(),
-  description: z.string().optional(),
-  minimum: z.number().optional(),
-  maximum: z.number().optional(),
-  enum: z.array(z.union([z.string(), z.number()])).optional(),
-});
-
-export const paramNodeSchema: z.ZodType<ParamNode> = z.object({
-  type: z.literal("object"),
-  title: z.string(),
-  description: z.string().optional(),
-  properties: z.record(
-    z.lazy(() => z.union([paramNodeSchema, paramValueSchema]))
-  ),
-});
 
 export type ParamPath = string[]; // Path to a parameter in the tree

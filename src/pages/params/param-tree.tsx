@@ -12,10 +12,12 @@ import { ParamNode, ParamPath, ParamValue } from "@/types/params";
 import { Check, ChevronRight, PencilLine, RotateCw } from "lucide-react";
 
 interface ParamTreeProps {
-  schema: ParamNode | ParamValue;
+  schema: any;
   path: ParamPath;
   expanded: Set<string>;
   onToggle: (path: ParamPath) => void;
+  onWrite: (path: ParamPath, value: ParamValue) => void;
+  onRead: (path: ParamPath) => void;
 }
 
 export function ParamTree({
@@ -23,6 +25,8 @@ export function ParamTree({
   path,
   expanded,
   onToggle,
+  onWrite,
+  onRead,
 }: ParamTreeProps) {
   const pathStr = path.join(".");
   const isExpanded = expanded.has(pathStr);

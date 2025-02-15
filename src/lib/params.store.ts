@@ -1,8 +1,11 @@
 import { create } from "zustand";
 import { DeviceValue, ParamPath } from "@/types/params";
+import { readParams, writeParams } from "@/lib/joystick-api";
 
 interface ParamsState {
   values: Record<string, DeviceValue>;
+  deviceId: string | null;
+  setDeviceId: (deviceId: string) => void;
   setEditedValue: (path: ParamPath, value: unknown) => void;
   commitValue: (path: ParamPath) => Promise<void>;
   readValue: (path: ParamPath) => Promise<void>;
@@ -11,6 +14,11 @@ interface ParamsState {
 
 export const useParamsStore = create<ParamsState>((set, get) => ({
   values: {},
+  deviceId: null,
+
+  setDeviceId: (deviceId: string) => {
+    set({ deviceId });
+  },
 
   setEditedValue: (path: ParamPath, value: unknown) => {
     const pathStr = path.join(".");
@@ -34,9 +42,10 @@ export const useParamsStore = create<ParamsState>((set, get) => ({
   commitValue: async (path: ParamPath) => {
     const pathStr = path.join(".");
     const value = get().values[pathStr];
+    const deviceId = get().deviceId;
 
     // Only commit if there's an edited value that's different from current
-    if (!value || value.edited === null) return;
+    if (!value || value.edited === null || !deviceId) return;
 
     set((state) => ({
       values: {
@@ -51,8 +60,15 @@ export const useParamsStore = create<ParamsState>((set, get) => ({
     }));
 
     try {
-      // Mock device communication - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await writeParams({
+        deviceId,
+        path,
+        value: value.edited,
+      });
+
+      if (!response.success) {
+        throw new Error(response.error || "Failed to write value");
+      }
 
       set((state) => ({
         values: {
@@ -86,6 +102,9 @@ export const useParamsStore = create<ParamsState>((set, get) => ({
   readValue: async (path: ParamPath) => {
     const pathStr = path.join(".");
     const value = get().values[pathStr];
+    const deviceId = get().deviceId;
+
+    if (!deviceId) return;
 
     set((state) => ({
       values: {
@@ -99,15 +118,17 @@ export const useParamsStore = create<ParamsState>((set, get) => ({
     }));
 
     try {
-      // Mock device communication - replace with actual implementation
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      const newValue = Math.random() > 0.5; // For testing boolean values
+      const response = await readParams({ deviceId, path });
+
+      if (!response.success) {
+        throw new Error(response.error || "Failed to read value");
+      }
 
       set((state) => ({
         values: {
           ...state.values,
           [pathStr]: {
-            current: newValue,
+            current: response.data,
             pending: null,
             edited: null,
             isLoading: false,
@@ -131,7 +152,9 @@ export const useParamsStore = create<ParamsState>((set, get) => ({
   },
 
   readAllValues: async () => {
-    // Mock implementation - replace with actual device communication
+    const deviceId = get().deviceId;
+    if (!deviceId) return;
+
     const paths = Object.keys(get().values).map((path) => path.split("."));
     await Promise.all(paths.map((path) => get().readValue(path)));
   },

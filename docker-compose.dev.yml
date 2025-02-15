@@ -1,0 +1,51 @@
+services:
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    environment:
+      - MEDIAMTX_API=http://mediamtx:9997
+    volumes:
+      - ./pocketbase/pb_data:/pb_data
+      - ./pocketbase/pb_public:/pb_public
+      - ./pocketbase/pb_hooks:/pb_hooks
+      - ./pocketbase/pb_migrations:/pb_migrations
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8090/api/health || exit 1
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  mediamtx:
+    image: bluenviron/mediamtx:1.11.2
+    restart: unless-stopped
+    ports:
+      - "9997:9997" # API
+      - "8554:8554" # RTSP
+      - "8888:8888" # API and metrics
+      - "8889:8889" # HLS
+      - "1935:1935" # RTMP
+    volumes:
+      - ./mediamtx/mediamtx.yml:/mediamtx.yml
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  pb_data:

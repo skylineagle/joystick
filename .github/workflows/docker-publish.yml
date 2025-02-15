@@ -1,0 +1,84 @@
+name: Docker Build and Publish
+
+on:
+  push:
+    branches: ["main", "staging", "dev"]
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: ["main"]
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  app:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    # Set environment based on branch/event
+    environment: ${{ startsWith(github.ref, 'refs/tags/') && 'prod' || github.ref == 'refs/heads/main' && 'stage' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/app
+
+      - name: Build and push App Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VITE_STREAM_URL=${{ secrets.VITE_STREAM_URL }}
+            VITE_POCKETBASE_URL=${{ secrets.VITE_POCKETBASE_URL }}
+
+  joystick:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    # Set environment based on branch/event
+    environment: ${{ startsWith(github.ref, 'refs/tags/') && 'prod' || github.ref == 'refs/heads/main' && 'stage' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/joystick
+
+      - name: Build and push Joystick Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile.joystick
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

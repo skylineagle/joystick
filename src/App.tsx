@@ -6,6 +6,7 @@ import { useState } from "react";
 import { CommittedRoiProperties, RoiProvider } from "react-roi";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Layout } from "./layout";
+import { DeviceSelector } from "./pages/device-selector/device-selector";
 
 const queryClient = new QueryClient();
 
@@ -42,22 +43,11 @@ function App() {
         >
           <BrowserRouter>
             <Routes>
-              <Route
-                path="/"
-                element={
-                  <Layout>
-                    <StreamView />
-                  </Layout>
-                }
-              />
-              <Route
-                path="/params"
-                element={
-                  <Layout>
-                    <ParamsPage />
-                  </Layout>
-                }
-              />
+              <Route path="/" element={<DeviceSelector />} />
+              <Route path="/:device" element={<Layout />}>
+                <Route index element={<StreamView />} />
+                <Route path="params" element={<ParamsPage />} />
+              </Route>
             </Routes>
           </BrowserRouter>
         </RoiProvider>

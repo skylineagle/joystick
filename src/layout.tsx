@@ -1,16 +1,16 @@
 import { ThemeProvider } from "@/components/theme-provider";
+import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { cn } from "@/lib/utils";
 import { Controls } from "./pages/stream-view/controls";
+import { Outlet, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
-interface AppLayoutProps {
-  children: React.ReactNode;
-}
-
-export function Layout({ children }: AppLayoutProps) {
+export function Layout() {
   const { isMobileLandscape } = useMobileLandscape();
+  const navigate = useNavigate();
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
@@ -21,6 +21,16 @@ export function Layout({ children }: AppLayoutProps) {
             isMobileLandscape && "overflow-hidden p-0 w-full"
           )}
         >
+          <div className="flex items-center mb-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate("/")}
+              className="mr-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </div>
           <div
             className={cn(
               "flex-1 flex flex-col overflow-hidden",
@@ -48,7 +58,9 @@ export function Layout({ children }: AppLayoutProps) {
                         : "flex-col md:flex-row gap-4 md:gap-6 w-full max-w-[1200px]"
                     )}
                   >
-                    <div className="flex-1">{children}</div>
+                    <div className="flex-1">
+                      <Outlet />
+                    </div>
                     <Controls />
                   </div>
                 </div>
