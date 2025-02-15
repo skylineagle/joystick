@@ -37,11 +37,9 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}/app
           tags: |
-            type=ref,event=branch
-            type=sha,format=long
-            type=raw,value={{branch}}-{{sha}},enable=${{ github.ref_type == 'branch' && github.ref != 'refs/heads/main' }}
+            type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=raw,value={{branch}}-latest,enable=${{ github.ref_type == 'branch' && github.ref != 'refs/heads/main' }}
+            type=sha,format=long,enable=${{ github.ref != 'refs/heads/main' }}
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
 
@@ -82,11 +80,9 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}/joystick
           tags: |
-            type=ref,event=branch
-            type=sha,format=long
-            type=raw,value={{branch}}-{{sha}},enable=${{ github.ref_type == 'branch' && github.ref != 'refs/heads/main' }}
+            type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
-            type=raw,value={{branch}}-latest,enable=${{ github.ref_type == 'branch' && github.ref != 'refs/heads/main' }}
+            type=sha,format=long,enable=${{ github.ref != 'refs/heads/main' }}
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
 
