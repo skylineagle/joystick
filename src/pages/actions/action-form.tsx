@@ -1,8 +1,12 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useQuery } from "@tanstack/react-query";
-import { pb } from "@/lib/pocketbase";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -13,8 +17,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -22,14 +24,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
+import { pb } from "@/lib/pocketbase";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 interface ActionFormProps {
   action: string;
@@ -111,7 +112,12 @@ export function ActionForm({
                         {name.replace(/-/g, " ")}
                       </FormLabel>
                       {renderField(schema, field)}
-                      <FormDescription>{schema.description}</FormDescription>
+                      <FormDescription>
+                        {
+                          (schema as unknown as { description?: string })
+                            ?.description
+                        }
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
