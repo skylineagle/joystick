@@ -60,7 +60,7 @@ app
 
       const action = actionResult[0];
       const actionParams = action.params as ParamNode | undefined;
-
+      logger.info(actionParams);
       // Validate parameters if action has a params schema
       if (actionParams) {
         if (!body) throw new Error("Parameters are required for this action");
@@ -99,7 +99,7 @@ app
       return response;
     },
     {
-      body: t.Any(),
+      body: t.Optional(t.Any()),
     }
   );
 

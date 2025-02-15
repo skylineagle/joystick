@@ -36,10 +36,20 @@ export async function fetchDeviceActions(
   const actions = await pb
     .collection("run")
     .getFullList<
-      ActionsResponse<{ device: DeviceResponse; action: ActionsResponse }>
+      ActionsResponse<
+        unknown,
+        { device: DeviceResponse; action: ActionsResponse }
+      >
     >(1, {
       filter: `device = "${device.expand?.device.id}"`,
       expand: "action,device",
     });
-  return actions.map((action) => action.expand?.action.name);
+  return actions.map((action) => action?.expand?.action.name);
+}
+
+export async function fetchBitrate(deviceId: string) {
+  const device = await fetchDevice(deviceId);
+  const actions = await fetchDeviceActions(device);
+  const bitrateAction = actions.find((action) => action === "set-bitrate");
+  return bitrateAction;
 }

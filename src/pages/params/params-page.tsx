@@ -31,23 +31,6 @@ export function ParamsPage() {
     });
   }, []);
 
-  const handleWrite = useCallback(
-    (path: ParamPath, value: unknown) => {
-      if (!deviceId) return;
-      useParamsStore.getState().setEditedValue(path, value);
-      useParamsStore.getState().commitValue(path);
-    },
-    [deviceId]
-  );
-
-  const handleRead = useCallback(
-    (path: ParamPath) => {
-      if (!deviceId) return;
-      useParamsStore.getState().readValue(path);
-    },
-    [deviceId]
-  );
-
   if (!isParamsSupported) {
     return <div className="p-4">Params are not supported</div>;
   }
@@ -67,8 +50,6 @@ export function ParamsPage() {
             path={[]}
             expanded={expandedPaths}
             onToggle={handleToggle}
-            onWrite={handleWrite}
-            onRead={handleRead}
           />
         </div>
       </ScrollArea>

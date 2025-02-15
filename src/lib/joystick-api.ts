@@ -1,22 +1,28 @@
 import { toast } from "sonner";
 import { ParamPath } from "@/types/params";
 
-interface JoystickApiResponse<T = unknown> {
+type JoystickApiResponse<T = unknown> = {
   success: boolean;
   data?: T;
   error?: string;
-}
+};
 
-export interface WriteParamsRequest {
+export type WriteParamsRequest = {
   deviceId: string;
   path: ParamPath;
   value: unknown;
-}
+};
 
-export interface ReadParamsRequest {
+export type ReadParamsRequest = {
   deviceId: string;
   path: ParamPath;
-}
+};
+
+export type RunActionRequest = {
+  deviceId: string;
+  action: string;
+  params?: Record<string, unknown>;
+};
 
 export async function writeParams({
   deviceId,
@@ -77,5 +83,34 @@ export async function readParams({
       error instanceof Error ? error.message : "Failed to read parameter";
     toast.error(message);
     return { success: false, error: message };
+  }
+}
+
+export async function runAction({
+  deviceId,
+  action,
+  params,
+}: RunActionRequest) {
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_JOYSTICK_URL}/api/run/${deviceId}/${action}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        ...(params ? { body: JSON.stringify(params) } : {}),
+      }
+    );
+
+    if (!response.ok) throw new Error("Failed to run action");
+
+    const data = await response.json();
+    return data.output;
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to run action";
+    toast.error(message);
+    throw new Error(message);
   }
 }
