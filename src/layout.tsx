@@ -55,7 +55,7 @@ export function Layout() {
                       "flex gap-2",
                       isMobileLandscape
                         ? "flex-row"
-                        : "flex-col md:flex-row gap-4 md:gap-6 w-full max-w-[1200px]"
+                        : "flex-col md:flex-row gap-4 md:gap-6 size-full max-w-[1200px]"
                     )}
                   >
                     <div className="flex-1">
