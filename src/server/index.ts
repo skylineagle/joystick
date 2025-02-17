@@ -93,7 +93,9 @@ app
 
         const output =
           run.target === RunTargetOptions.device
-            ? await $`sshpass -p ${device.configuration?.password} ssh -o StrictHostKeyChecking=no ${device.configuration?.user}@${device.configuration?.host} '${command}'`.text()
+            ? device.configuration?.password
+              ? await $`sshpass -p ${device.configuration?.password} ssh -o StrictHostKeyChecking=no ${device.configuration?.user}@${device.configuration?.host} '${command}'`.text()
+              : await $`ssh -o StrictHostKeyChecking=no ${device.configuration?.user}@${device.configuration?.host} '${command}'`.text()
             : await $`${{ raw: command }}`.text();
 
         const response = {
