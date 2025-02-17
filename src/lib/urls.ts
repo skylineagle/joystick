@@ -2,6 +2,7 @@ const PORTS = {
   joystick: 8000,
   stream: 8889,
   pocketbase: 8090,
+  panel: 8080,
 } as const;
 
 function getServiceUrl(service: keyof typeof PORTS): string {
@@ -15,6 +16,9 @@ function getServiceUrl(service: keyof typeof PORTS): string {
 export const urls = {
   get joystick() {
     return getServiceUrl("joystick");
+  },
+  get panel() {
+    return getServiceUrl("panel");
   },
   get stream() {
     return getServiceUrl("stream");

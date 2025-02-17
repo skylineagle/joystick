@@ -26,9 +26,7 @@ const app = new Elysia()
       { method: request.method, path: request.url },
       "Incoming request"
     );
-  });
-
-app
+  })
   .get("/", () => "Command Runner API")
   .post(
     "/api/run/:device/:action",
@@ -114,7 +112,4 @@ app
   );
 
 app.use(cors()).listen(Bun.env.PORT || 3000);
-
-console.log(
-  `🦊 Server is running at ${app.server?.hostname}:${app.server?.port}`
-);
+console.log(`🦊 Server is running at ${Bun.env.HOST}:${Bun.env.PORT}`);

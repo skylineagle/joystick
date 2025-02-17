@@ -8,6 +8,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Layout } from "./layout";
 import { DeviceSelector } from "./pages/device-selector/device-selector";
 import { ActionsPage } from "./pages/actions/actions-page";
+import { TerminalPage } from "./pages/terminal/terminal-page";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ function App() {
                 <Route index element={<StreamView />} />
                 <Route path="params" element={<ParamsPage />} />
                 <Route path="actions" element={<ActionsPage />} />
+                <Route path="terminal" element={<TerminalPage />} />
               </Route>
             </Routes>
           </BrowserRouter>

@@ -1,74 +1,100 @@
+import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useDevice } from "@/hooks/use-device";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { cn } from "@/lib/utils";
-import { Outlet, useNavigate } from "react-router-dom";
-import { Icon } from "./icons/icon";
-import { Controls } from "./pages/stream-view/controls";
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
+
+const navItems = [
+  {
+    label: "Stream",
+    path: "",
+  },
+  {
+    label: "Parameters",
+    path: "params",
+  },
+  {
+    label: "Actions",
+    path: "actions",
+  },
+  {
+    label: "Terminal",
+    path: "terminal",
+  },
+];
 
 export function Layout() {
   const { isMobileLandscape } = useMobileLandscape();
+  const { device: deviceId } = useParams();
+  const { data: currentDevice } = useDevice(deviceId ?? "");
+  const { pathname } = useLocation();
   const navigate = useNavigate();
+
+  // Get the current page name from the pathname
+  const getPageName = () => {
+    if (!deviceId) return "";
+
+    // Remove the device ID from the path
+    const path = pathname.split("/").filter(Boolean)[1] || "";
+
+    // Find matching nav item or default to Stream for root path
+    const navItem = navItems.find((item) => item.path === path);
+    return navItem?.label || "Stream";
+  };
 
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <TooltipProvider>
-        <div
-          className={cn(
-            "h-[100dvh] flex flex-col p-4",
-            isMobileLandscape && "overflow-hidden p-0 w-full"
-          )}
-        >
-          <div className="flex items-center mb-4">
-            <Button
-              variant="link"
-              size="icon"
-              onClick={() => navigate("/")}
-              className="mr-2"
-            >
-              <Icon icon="home" style={{ width: 32, height: 32 }} />
-            </Button>
-          </div>
-          <div
-            className={cn(
-              "flex-1 flex flex-col overflow-hidden",
-              isMobileLandscape && "h-[100dvh]"
-            )}
-          >
-            <div className="flex-1 overflow-auto">
-              <div
-                className={cn(
-                  "inset-0 h-full",
-                  isMobileLandscape && "h-[100dvh]"
-                )}
-              >
-                <div
-                  className={cn(
-                    "flex items-start justify-center h-full",
-                    isMobileLandscape ? "p-1" : "p-2 sm:p-4"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "flex gap-2",
-                      isMobileLandscape
-                        ? "flex-row"
-                        : "flex-col md:flex-row gap-4 md:gap-6 size-full max-w-[1200px]"
+        <SidebarProvider>
+          <AppSidebar />
+          <SidebarInset>
+            <header className="flex h-16 shrink-0 items-center gap-2">
+              <div className="flex items-center gap-2 px-4">
+                <SidebarTrigger className="-ml-1" />
+                <Separator orientation="vertical" className="mr-2 h-4" />
+                <Breadcrumb>
+                  <BreadcrumbList>
+                    <BreadcrumbItem>
+                      <BreadcrumbLink
+                        onClick={() => navigate("/")}
+                        className="cursor-pointer"
+                      >
+                        {currentDevice?.name || "Select Device"}
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    {deviceId && (
+                      <>
+                        <BreadcrumbSeparator />
+                        <BreadcrumbItem>
+                          <BreadcrumbPage>{getPageName()}</BreadcrumbPage>
+                        </BreadcrumbItem>
+                      </>
                     )}
-                  >
-                    <div className="flex-1">
-                      <Outlet />
-                    </div>
-                    <Controls />
-                  </div>
-                </div>
+                  </BreadcrumbList>
+                </Breadcrumb>
               </div>
-            </div>
-          </div>
-        </div>
-        <Toaster position="top-center" closeButton />
+            </header>
+            <main className={cn("flex-1 p-4", isMobileLandscape && "p-2")}>
+              <Outlet />
+            </main>
+          </SidebarInset>
+        </SidebarProvider>
       </TooltipProvider>
     </ThemeProvider>
   );

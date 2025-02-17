@@ -7,14 +7,20 @@ import sendDark from "./send.dark.json";
 import sendLight from "./send.light.json";
 import settingsDark from "./settings.dark.json";
 import settingsLight from "./settings.light.json";
+import terminalDark from "./terminal.dark.json";
+import terminalLight from "./terminal.light.json";
 import videoDark from "./video.dark.json";
 import videoLight from "./video.light.json";
+import menuDark from "./menu.dark.json";
+import menuLight from "./menu.light.json";
 
 const icons = {
   video: { dark: videoLight, light: videoDark },
   settings: { dark: settingsLight, light: settingsDark },
   home: { dark: homeLight, light: homeDark },
   send: { dark: sendLight, light: sendDark },
+  terminal: { dark: terminalLight, light: terminalDark },
+  menu: { dark: menuLight, light: menuDark },
 };
 
 interface IconProps {

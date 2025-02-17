@@ -81,6 +81,30 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  panel:
+    image: ghcr.io/skylineagle/joystick/panel:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.panel
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - POCKETBASE_URL=http://pocketbase:8090
+      - PORT=8080
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+      mediamtx:
+        condition: service_started
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 networks:
   app-network:
     driver: bridge
