@@ -22,6 +22,8 @@ interface ParamValueEditorProps {
 
 export function ParamValueEditor({ schema, path }: ParamValueEditorProps) {
   const pathStr = path.join(".");
+  const displayTitle = schema.title || path[path.length - 1];
+
   const value =
     useParamsStore((state) => state.values[pathStr]) ??
     ({
@@ -132,10 +134,10 @@ export function ParamValueEditor({ schema, path }: ParamValueEditorProps) {
   return (
     <div className="grid grid-cols-[120px_1fr_auto] sm:grid-cols-[200px_1fr_auto] items-center gap-2 sm:gap-6">
       <Label
-        className="text-xs sm:text-sm font-medium truncate"
-        title={schema.title}
+        className="text-xs sm:text-sm font-medium truncate capitalize"
+        title={schema.description || displayTitle}
       >
-        {schema.title}
+        {displayTitle}
       </Label>
       <div className="min-w-0">
         {renderInput()}

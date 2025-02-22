@@ -28,6 +28,10 @@ export function ParamTree({
   const isExpanded = expanded.has(pathStr);
   const { values, readValue } = useParamsStore();
 
+  // Get display title - use schema title, last path segment, or "Root" for empty path
+  const displayTitle =
+    schema.title || (path.length > 0 ? path[path.length - 1] : "Parameters");
+
   const handleRereadSection = async () => {
     if (schema.type === "object") {
       // Get all child parameter paths
@@ -57,18 +61,35 @@ export function ParamTree({
         <div className="flex items-center">
           <div
             className={cn(
-              "w-full flex items-center gap-1.5 sm:gap-2 font-normal text-xs sm:text-sm px-2 sm:px-3 py-1.5 rounded-md cursor-pointer hover:bg-accent hover:text-accent-foreground",
-              path.length === 0 && "text-base sm:text-lg"
+              "w-full flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 rounded-md cursor-pointer",
+              "hover:bg-accent hover:text-accent-foreground transition-colors duration-200",
+              "group/param-header",
+              path.length === 0 &&
+                "text-base sm:text-lg font-medium bg-muted/30",
+              path.length === 1 && "text-sm font-medium bg-muted/20",
+              path.length > 1 && "text-sm bg-muted/10"
             )}
             onClick={() => onToggle(path)}
           >
             <ChevronRight
               className={cn(
-                "h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 transition-transform",
+                "h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 transition-transform duration-200",
+                "text-muted-foreground/70 group-hover/param-header:text-accent-foreground",
                 isExpanded && "rotate-90"
               )}
             />
-            <span className="text-xs sm:text-sm truncate">{schema.title}</span>
+            <span
+              className={cn(
+                "truncate capitalize",
+                !schema.title && "text-muted-foreground/90",
+                path.length === 0 && "font-medium",
+                path.length === 1 && "font-medium text-foreground/90",
+                path.length > 1 && "text-foreground/80"
+              )}
+              title={schema.description || displayTitle}
+            >
+              {displayTitle}
+            </span>
             {path.length === 1 && (
               <TooltipProvider>
                 <Tooltip>
@@ -95,7 +116,17 @@ export function ParamTree({
         </div>
 
         {isExpanded && (
-          <div className="ml-2 sm:ml-4 border-l pl-2 sm:pl-4">
+          <div
+            className={cn(
+              "relative pl-3 sm:pl-4 mt-1 space-y-1",
+              path.length === 0 && "pl-1 sm:pl-2",
+              path.length > 0 && [
+                "before:absolute before:left-0 before:top-2 before:bottom-2 before:w-px",
+                "before:bg-border/50 hover:before:bg-border/80",
+                "before:rounded-sm",
+              ]
+            )}
+          >
             {Object.entries(schema.properties).map(([key, value]) => (
               <ParamTree
                 key={key}
@@ -116,7 +147,13 @@ export function ParamTree({
   const isLoading = Boolean(value?.isLoading);
 
   return (
-    <div className="flex items-center gap-1.5 sm:gap-2 py-1">
+    <div
+      className={cn(
+        "flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 rounded-md",
+        "hover:bg-accent/5 transition-colors duration-200",
+        "relative"
+      )}
+    >
       <ParamValueEditor schema={schema} path={path} />
       <div className="flex items-center gap-1">
         {isEdited ? (
