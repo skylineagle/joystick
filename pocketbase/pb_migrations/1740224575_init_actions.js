@@ -86,4 +86,39 @@ migrate((app) => {
     additionalProperties: false,
   });
   app.save(getModeAction);
+
+  // Set ROI action
+  let setRoiAction = new Record(actions);
+  setRoiAction.set("name", "set-roi");
+  setRoiAction.set("params", {
+    type: "object",
+    properties: {
+      rois: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            x1: { type: "number" },
+            y1: { type: "number" },
+            x2: { type: "number" },
+            y2: { type: "number" },
+          },
+          required: ["x1", "y1", "x2", "y2"],
+          additionalProperties: false,
+        },
+      },
+    },
+    additionalProperties: false,
+  });
+  app.save(setRoiAction);
+
+  // Get ROI action
+  let getRoiAction = new Record(actions);
+  getRoiAction.set("name", "get-roi");
+  getRoiAction.set("params", {
+    type: "object",
+    properties: {},
+    additionalProperties: false,
+  });
+  app.save(getRoiAction);
 });

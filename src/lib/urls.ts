@@ -1,6 +1,6 @@
 const PORTS = {
   joystick: 8000,
-  stream: 8889,
+  stream: 8888,
   pocketbase: 8090,
   panel: 8080,
 } as const;

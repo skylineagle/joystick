@@ -91,7 +91,6 @@ Bun.serve({
           const sshProcess = connections.get(message.device);
           if (sshProcess) {
             // TODO: Implement terminal resize using SIGWINCH if needed
-            ws.send("Resize handled");
           } else {
             ws.send("No active connection");
           }

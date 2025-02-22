@@ -1,12 +1,20 @@
-import { Frame } from "@/pages/stream-view/frame";
+import { JSX } from "react";
 import { RoiContainer, RoiList } from "react-roi";
 
-export const Roi = () => {
+interface RoiProps {
+  children: JSX.Element;
+}
+
+export const Roi = ({ children }: RoiProps) => {
   return (
     <RoiContainer
-      className="size-full overflow-hidden rounded-3xl"
-      style={{ backgroundColor: "transparent" }}
-      target={<Frame mode="edit" />}
+      className="size-full overflow-hidden"
+      style={{
+        backgroundColor: "transparent",
+        position: "absolute",
+        inset: 0,
+      }}
+      target={children}
       lockPan
     >
       <RoiList
@@ -19,6 +27,9 @@ export const Roi = () => {
             fill: "rgba(0,0,0,0.2)",
             stroke: "white",
             strokeWidth: 2,
+          },
+          containerStyle: {
+            pointerEvents: "auto",
           },
         })}
       />

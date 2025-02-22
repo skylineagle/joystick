@@ -11,7 +11,7 @@ import { useParams } from "react-router-dom";
 export const Controls = () => {
   const { isMobileLandscape } = useMobileLandscape();
   const { device } = useParams<{ device: string }>();
-  const isRoiSupported = useIsSupported(device!, "set-roi");
+  const isRoiSupported = useIsSupported(device!, ["set-roi", "get-roi"]);
   const isSetBitrateSupported = useIsSupported(device!, [
     "set-bitrate",
     "get-bitrate",

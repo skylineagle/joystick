@@ -2,7 +2,7 @@ import { WebSocketServer } from "ws";
 import { randomBytes } from "crypto";
 import sharp from "sharp";
 
-const PORT = 8080;
+const PORT = 8081;
 
 interface Frame {
   id: string;

@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useActions } from "@/hooks/use-actions";
 import { useParams } from "react-router-dom";
 import { ActionForm } from "./action-form";
+import { Label } from "@/components/ui/label";
 
 export function ActionsPage() {
   const { device: deviceId } = useParams();
@@ -52,6 +53,7 @@ export function ActionsPage() {
         className="flex w-full gap-4"
       >
         <TabsList className="flex-col w-64 space-y-1 bg-transparent rounded-md">
+          <Label className="font-bold text-md self-start">Actions</Label>
           <ScrollArea className="h-[calc(100dvh-100px)]">
             {filteredActions.map((action) => (
               <TabsTrigger
