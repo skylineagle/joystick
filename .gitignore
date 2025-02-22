@@ -26,6 +26,6 @@ dist-ssr
 .env
 .env.local
 
-./pocketbase/pb_data/*.db
-./pocketbase/pb_data/*.db-shm
-./pocketbase/pb_data/*.db-wal
+pocketbase/pb_data/*.db
+pocketbase/pb_data/*.db-shm
+pocketbase/pb_data/*.db-wal
