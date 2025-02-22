@@ -111,5 +111,5 @@ const app = new Elysia()
     }
   );
 
-app.use(cors()).listen(Bun.env.PORT || 3000);
+app.use(cors()).listen(Bun.env.PORT || 8000);
 console.log(`🦊 Server is running at ${Bun.env.HOST}:${Bun.env.PORT}`);

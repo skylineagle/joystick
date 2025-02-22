@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "joystick:server": "bun run ./src/server/index.ts --watch",
-    "joystick:panel": "bun run ./src/server/panel.ts --watch",
+    "joystick:panel": "PORT=8080 bun run ./src/server/panel.ts --watch",
     "db:generate": "pocketbase-typegen -d ./pocketbase/pb_data/data.db -o ./src/types/db.types.ts",
     "ws:server": "bun run src/lib/frame-test-server.ts",
     "ws:client": "bun run src/lib/frame-test-client.ts"
