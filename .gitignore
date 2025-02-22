@@ -29,3 +29,4 @@ dist-ssr
 pocketbase/pb_data/*.db
 pocketbase/pb_data/*.db-shm
 pocketbase/pb_data/*.db-wal
+pocketbase/pb_data/backups/
