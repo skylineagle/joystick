@@ -6,11 +6,9 @@ import { cn } from "@/lib/utils";
 import { BitrateControll } from "@/pages/stream-view/bitrate-control";
 import { ModeSelect } from "@/pages/stream-view/mode-select";
 import { RoiModeControl } from "@/pages/stream-view/roi/roi-mode-control";
-import { useState } from "react";
 import { useParams } from "react-router-dom";
 
 export const Controls = () => {
-  const [mode, setMode] = useState<"live" | "vmd" | "cmd">("live");
   const { isMobileLandscape } = useMobileLandscape();
   const { device } = useParams<{ device: string }>();
   const isRoiSupported = useIsSupported(device!, "set-roi");
@@ -18,6 +16,7 @@ export const Controls = () => {
     "set-bitrate",
     "get-bitrate",
   ]);
+  const isSetModeSupported = useIsSupported(device!, ["set-mode", "get-mode"]);
 
   return (
     <Card
@@ -34,7 +33,7 @@ export const Controls = () => {
           isMobileLandscape ? "gap-2" : "space-y-4"
         )}
       >
-        <ModeSelect mode={mode} setMode={setMode} />
+        {isSetModeSupported && <ModeSelect deviceId={device!} />}
 
         {isSetBitrateSupported && (
           <>

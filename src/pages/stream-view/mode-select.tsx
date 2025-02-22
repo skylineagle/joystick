@@ -1,16 +1,17 @@
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Eye, Terminal, Video } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
+import { useMode } from "@/hooks/use-mode";
 import { cn } from "@/lib/utils";
+import { Eye, Terminal, Video } from "lucide-react";
 
 interface ModeSelectProps {
-  mode: "live" | "vmd" | "cmd";
-  setMode: (mode: "live" | "vmd" | "cmd") => void;
+  deviceId: string;
 }
 
-export function ModeSelect({ mode, setMode }: ModeSelectProps) {
+export function ModeSelect({ deviceId }: ModeSelectProps) {
   const { isMobileLandscape } = useMobileLandscape();
+  const { mode, setMode } = useMode(deviceId);
 
   return (
     <div className="w-full">

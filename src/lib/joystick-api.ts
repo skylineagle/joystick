@@ -94,14 +94,14 @@ export async function runAction({
         headers: {
           "Content-Type": "application/json",
         },
-        ...(params ? { body: JSON.stringify(params) } : {}),
+        body: JSON.stringify(params ?? {}),
       }
     );
 
     if (!response.ok) throw new Error("Failed to run action");
 
     const data = await response.json();
-    return data.output;
+    return data.output?.replace(/\n$/, "");
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to run action";
