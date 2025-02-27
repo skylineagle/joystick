@@ -59,7 +59,7 @@ export function ActionForm({
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="border-none">
         <CardHeader>
           <Skeleton className="h-4 w-[200px]" />
           <Skeleton className="h-4 w-[300px]" />
@@ -73,7 +73,7 @@ export function ActionForm({
 
   if (!actionSchema) {
     return (
-      <Card>
+      <Card className="border-none">
         <CardHeader>
           <CardTitle>No Parameters Required</CardTitle>
           <CardDescription>
