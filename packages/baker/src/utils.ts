@@ -1,11 +1,11 @@
-import { MEDIAMTX_API, SWITCHER_API_URL } from "@/config";
+import { MEDIAMTX_API, JOYSTICK_API_URL } from "@/config";
 import { logger } from "./logger";
 
 export const API_URL = `${MEDIAMTX_API}/v3`;
 
 export async function toggleMode(name: string, mode: string) {
   logger.info(`Toggling mode for camera ${name} to ${mode}`);
-  const response = await fetch(`${SWITCHER_API_URL}/api/run/${name}/${mode}`, {
+  const response = await fetch(`${JOYSTICK_API_URL}/api/run/${name}/${mode}`, {
     method: "POST",
   });
 

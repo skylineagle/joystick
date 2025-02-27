@@ -6,4 +6,4 @@ RUN apt-get update && apt-get install -y sshpass
 COPY package.json bun.lockb ./
 RUN bun install --frozen-lockfile
 COPY . .
-CMD ["bun", "run", "src/server/panel.ts"] 
+CMD ["bun", "run", "src/index.ts"] 
