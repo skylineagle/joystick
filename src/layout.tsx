@@ -6,29 +6,9 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useDevice } from "@/hooks/use-device";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { cn } from "@/lib/utils";
-import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
-
-const navItems = [
-  {
-    label: "Stream",
-    path: "",
-  },
-  {
-    label: "Parameters",
-    path: "params",
-  },
-  {
-    label: "Actions",
-    path: "actions",
-  },
-  {
-    label: "Terminal",
-    path: "terminal",
-  },
-];
+import { Outlet } from "react-router-dom";
 
 export function Layout() {
   const { isMobileLandscape } = useMobileLandscape();
