@@ -1,6 +1,6 @@
 import { runAction } from "@/lib/joystick-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { toast } from "@/utils/toast";
 
 export function useBitrate(deviceId: string) {
   const queryClient = useQueryClient();
@@ -16,10 +16,15 @@ export function useBitrate(deviceId: string) {
     mutationFn: (bitrate: number) =>
       runAction({ deviceId, action: "set-bitrate", params: { bitrate } }),
     onError: (error) => {
-      toast.error(error.message);
+      console.log(error);
+      toast.error({
+        message: error.message,
+      });
     },
     onSuccess: () => {
-      toast.success("Bitrate set successfully");
+      toast.success({
+        message: "Bitrate set successfully",
+      });
       queryClient.invalidateQueries({ queryKey: ["bitrate", deviceId] });
     },
   });

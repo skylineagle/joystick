@@ -13,6 +13,8 @@ import videoDark from "./video.dark.json";
 import videoLight from "./video.light.json";
 import menuDark from "./menu.dark.json";
 import menuLight from "./menu.light.json";
+import statusDark from "./status.dark.json";
+import statusLight from "./status.light.json";
 
 const icons = {
   video: { dark: videoLight, light: videoDark },
@@ -21,6 +23,7 @@ const icons = {
   send: { dark: sendLight, light: sendDark },
   terminal: { dark: terminalLight, light: terminalDark },
   menu: { dark: menuLight, light: menuDark },
+  status: { dark: statusLight, light: statusDark },
 };
 
 interface IconProps {

@@ -2,11 +2,13 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchDeviceActions } from "@/lib/device";
 import { runAction } from "@/lib/joystick-api";
 import { useDevice } from "./use-device";
-import { toast } from "sonner";
-import { useState } from "react";
+import { toast as baseToast } from "sonner";
+import { toast } from "@/utils/toast";
+import { useRef, useState } from "react";
 
 export function useActions(deviceId: string) {
   const { data: device } = useDevice(deviceId);
+  const toastRef = useRef<string | number>(null);
   const [actionResult, setActionResult] = useState<string | null>(null);
   const [currentAction, setCurrentAction] = useState<string | null>(null);
 
@@ -17,25 +19,36 @@ export function useActions(deviceId: string) {
   });
 
   const runActionMutation = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       action,
       params,
     }: {
       action: string;
       params?: Record<string, unknown>;
     }) => {
+      toastRef.current = toast.loading({
+        message: "Executing action...",
+      });
+
       setCurrentAction(action);
       setActionResult(null);
       return runAction({ deviceId, action, params });
     },
+    onMutate: () => {},
     onSuccess: (data) => {
-      toast.success("Action executed successfully");
+      if (toastRef.current) baseToast.dismiss(toastRef.current);
+
+      toast.success({ message: "Action executed successfully" });
       setActionResult(data);
     },
     onError: (error) => {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to execute action"
-      );
+      if (toastRef.current) baseToast.dismiss(toastRef.current);
+      console.log(error);
+
+      toast.error({
+        message:
+          error instanceof Error ? error.message : "Failed to execute action",
+      });
       setActionResult(null);
     },
   });

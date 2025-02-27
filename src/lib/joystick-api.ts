@@ -1,6 +1,6 @@
-import { toast } from "sonner";
-import { ParamPath } from "@/types/params";
 import { urls } from "@/lib/urls";
+import { ParamPath } from "@/types/params";
+import { toast } from "@/utils/toast";
 
 type JoystickApiResponse<T = unknown> = {
   success: boolean;
@@ -49,7 +49,11 @@ export async function writeParams({
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to write parameter";
-    toast.error(message);
+    toast.error({
+      message,
+    });
+    console.log(error);
+
     return { success: false, error: message };
   }
 }
@@ -76,7 +80,9 @@ export async function readParams({
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to read parameter";
-    toast.error(message);
+    toast.error({
+      message,
+    });
     return { success: false, error: message };
   }
 }
@@ -105,7 +111,9 @@ export async function runAction({
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to run action";
-    toast.error(message);
+    toast.error({
+      message,
+    });
     throw new Error(message);
   }
 }

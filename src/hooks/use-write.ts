@@ -1,18 +1,21 @@
 import { useMutation } from "@tanstack/react-query";
 import { writeParams, readParams } from "@/lib/joystick-api";
-import { toast } from "sonner";
+import { toast } from "@/utils/toast";
 import { ParamPath } from "@/types/params";
 
 export function useParamsActions(deviceId: string) {
   const readMutation = useMutation({
     mutationFn: (path: ParamPath) => readParams({ deviceId, path }),
     onSuccess: () => {
-      toast.success("Parameter read successfully");
+      toast.success({ message: "Parameter read successfully" });
     },
     onError: (error) => {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to read parameter"
-      );
+      console.log(error);
+
+      toast.error({
+        message:
+          error instanceof Error ? error.message : "Failed to read parameter",
+      });
     },
   });
 
@@ -20,14 +23,17 @@ export function useParamsActions(deviceId: string) {
     mutationFn: ({ path, value }: { path: ParamPath; value: unknown }) =>
       writeParams({ deviceId, path, value }),
     onSuccess: (_, variables) => {
-      toast.success("Parameter written successfully");
+      toast.success({ message: "Parameter written successfully" });
       // Auto-read after successful write
       readMutation.mutate(variables.path);
     },
     onError: (error) => {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to write parameter"
-      );
+      console.log(error);
+
+      toast.error({
+        message:
+          error instanceof Error ? error.message : "Failed to write parameter",
+      });
     },
   });
 

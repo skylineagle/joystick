@@ -9,6 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { cn } from "@/lib/utils";
 import { Outlet } from "react-router-dom";
+import { Toaster } from "sonner";
 
 export function Layout() {
   const { isMobileLandscape } = useMobileLandscape();
@@ -30,6 +31,7 @@ export function Layout() {
           </SidebarInset>
         </SidebarProvider>
       </TooltipProvider>
+      <Toaster position="top-center" richColors />
     </ThemeProvider>
   );
 }

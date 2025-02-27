@@ -9,6 +9,7 @@ import { Layout } from "./layout";
 import { DeviceSelector } from "./pages/device-selector/device-selector";
 import { ActionsPage } from "./pages/actions/actions-page";
 import { TerminalPage } from "./pages/terminal/terminal-page";
+import { StatusPage } from "./pages/status/status-page";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ function App() {
                 <Route path="params" element={<ParamsPage />} />
                 <Route path="actions" element={<ActionsPage />} />
                 <Route path="terminal" element={<TerminalPage />} />
+                <Route path="status" element={<StatusPage />} />
               </Route>
             </Routes>
           </BrowserRouter>
