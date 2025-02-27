@@ -1,0 +1,15 @@
+{
+  "name": "panel",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch ./src/index.ts",
+    "db:generate": "pocketbase-typegen -d ../../pocketbase/pb_data/data.db -o ./src/types/db.types.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

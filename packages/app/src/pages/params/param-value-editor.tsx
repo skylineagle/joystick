@@ -1,0 +1,180 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { useParamsStore } from "@/lib/params.store";
+import { cn } from "@/lib/utils";
+import { RotateCw } from "lucide-react";
+import { DeviceValue, ParamPath, ParamValue } from "@/types/params";
+import { Icon } from "@/icons/icon";
+
+interface ParamValueEditorProps {
+  schema: ParamValue;
+  path: ParamPath;
+}
+
+export function ParamValueEditor({ schema, path }: ParamValueEditorProps) {
+  const pathStr = path.join(".");
+  const displayTitle = schema.title || path[path.length - 1];
+
+  const value =
+    useParamsStore((state) => state.values[pathStr]) ??
+    ({
+      current: null,
+      edited: null,
+      pending: null,
+      isLoading: false,
+    } as DeviceValue<string | number | boolean>);
+  const { setEditedValue, commitValue, readValue } = useParamsStore();
+
+  const handleChange = (newValue: unknown) => {
+    if (schema.type === "boolean") {
+      setEditedValue(path, newValue as boolean);
+    } else {
+      setEditedValue(path, newValue);
+    }
+  };
+
+  const handleCommit = async () => {
+    await commitValue(path);
+  };
+
+  const handleRefresh = async () => {
+    await readValue(path);
+  };
+
+  const renderInput = () => {
+    const commonProps = {
+      disabled: value.isLoading,
+      className: cn(
+        "w-full",
+        value.edited !== null && "border-blue-500",
+        value.pending !== null && "border-yellow-500",
+        value.error && "border-red-500"
+      ),
+    };
+
+    switch (schema.type) {
+      case "boolean": {
+        const currentValue =
+          value.edited !== null ? value.edited : value.current;
+        return (
+          <div
+            className={cn(
+              "flex h-9 items-center rounded-md px-3",
+              value.edited !== null && "bg-blue-500/10",
+              value.pending !== null && "bg-yellow-500/10",
+              value.error && "bg-red-500/10"
+            )}
+          >
+            <Switch
+              checked={Boolean(currentValue)}
+              onCheckedChange={handleChange}
+              disabled={value.isLoading}
+            />
+          </div>
+        );
+      }
+
+      case "string":
+        if (schema.enum) {
+          return (
+            <Select
+              value={(value.edited ?? value.current)?.toString() ?? ""}
+              onValueChange={handleChange}
+              disabled={value.isLoading}
+            >
+              <SelectTrigger className={cn("w-full", commonProps.className)}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {schema.enum.map((option) => (
+                  <SelectItem key={option} value={option.toString()}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          );
+        }
+        return (
+          <Input
+            value={(value.edited ?? value.current)?.toString() ?? ""}
+            onChange={(e) => handleChange(e.target.value)}
+            {...commonProps}
+          />
+        );
+
+      case "number":
+      case "integer":
+        return (
+          <Input
+            type="number"
+            value={(value.edited ?? value.current)?.toString() ?? ""}
+            onChange={(e) => handleChange(Number(e.target.value))}
+            min={schema.minimum}
+            max={schema.maximum}
+            step={schema.type === "integer" ? 1 : "any"}
+            {...commonProps}
+          />
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="grid grid-cols-[120px_1fr_auto] sm:grid-cols-[200px_1fr_auto] items-center gap-2 sm:gap-6">
+      <Label
+        className="text-xs sm:text-sm font-medium truncate capitalize"
+        title={schema.description || displayTitle}
+      >
+        {displayTitle}
+      </Label>
+      <div className="min-w-0">
+        {renderInput()}
+        {value.error && (
+          <p
+            className="mt-1 sm:mt-1.5 text-xs sm:text-sm text-red-500 truncate"
+            title={value.error}
+          >
+            {value.error}
+          </p>
+        )}
+      </div>
+      <div className="flex items-center gap-1 flex-shrink-0">
+        {value.edited !== null ? (
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={handleCommit}
+            disabled={value.isLoading}
+            className="h-6 w-6 flex-shrink-0"
+          >
+            <Icon icon="send" style={{ width: 24, height: 24 }} />
+          </Button>
+        ) : (
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={handleRefresh}
+            disabled={value.isLoading}
+            className="h-6 w-6 flex-shrink-0"
+          >
+            <RotateCw
+              className={cn("h-3.5 w-3.5", value.isLoading && "animate-spin")}
+            />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}

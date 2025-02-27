@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  :root {
+    --background: 167 0% 95%;
+    --foreground: 167 0% 5%;
+    --card: 167 0% 90%;
+    --card-foreground: 167 0% 10%;
+    --popover: 167 0% 95%;
+    --popover-foreground: 167 95% 5%;
+    --primary: 167 33.3% 84.1%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 167 10% 70%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 129 10% 85%;
+    --muted-foreground: 167 0% 35%;
+    --accent: 129 10% 80%;
+    --accent-foreground: 167 0% 10%;
+    --destructive: 0 50% 30%;
+    --destructive-foreground: 167 0% 90%;
+    --border: 167 20% 50%;
+    --input: 167 20% 18%;
+    --ring: 167 33.3% 84.1%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+  .dark {
+    --background: 167 10% 5%;
+    --foreground: 167 0% 90%;
+    --card: 167 0% 5%;
+    --card-foreground: 167 0% 90%;
+    --popover: 167 10% 5%;
+    --popover-foreground: 167 0% 90%;
+    --primary: 167 33.3% 84.1%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 167 10% 10%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 129 10% 15%;
+    --muted-foreground: 167 0% 60%;
+    --accent: 129 10% 15%;
+    --accent-foreground: 167 0% 90%;
+    --destructive: 0 50% 30%;
+    --destructive-foreground: 167 0% 90%;
+    --border: 167 20% 18%;
+    --input: 167 20% 18%;
+    --ring: 167 33.3% 84.1%;
+    --radius: 0.5rem;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
