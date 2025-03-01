@@ -153,6 +153,29 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  whisper:
+    image: ghcr.io/skylineagle/joystick/whisper:latest
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - MEDIAMTX_API=http://mediamtx:9997
+      - POCKETBASE_URL=http://pocketbase:8090
+      - JOYSTICK_API_URL=http://joystick:8000
+      - PORT=8081
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+      mediamtx:
+        condition: service_started
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 networks:
   app-network:
     driver: bridge
