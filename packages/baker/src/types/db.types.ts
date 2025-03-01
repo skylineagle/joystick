@@ -16,6 +16,7 @@ export enum Collections {
 	Models = "models",
 	Rules = "rules",
 	Run = "run",
+	Templates = "templates",
 	Users = "users",
 }
 
@@ -155,6 +156,15 @@ export type RunRecord<Tparameters = unknown> = {
 	updated?: IsoDateString
 }
 
+export type TemplatesRecord = {
+	created?: IsoDateString
+	id: string
+	model: RecordIdString
+	name: string
+	updated?: IsoDateString
+	value?: string
+}
+
 export type UsersRecord = {
 	avatar?: string
 	created?: IsoDateString
@@ -179,6 +189,7 @@ export type DevicesResponse<Tautomation = unknown, Tconfiguration = unknown, Tin
 export type ModelsResponse<Tparams = unknown, Texpand = unknown> = Required<ModelsRecord<Tparams>> & BaseSystemFields<Texpand>
 export type RulesResponse<Texpand = unknown> = Required<RulesRecord> & BaseSystemFields<Texpand>
 export type RunResponse<Tparameters = unknown, Texpand = unknown> = Required<RunRecord<Tparameters>> & BaseSystemFields<Texpand>
+export type TemplatesResponse<Texpand = unknown> = Required<TemplatesRecord> & BaseSystemFields<Texpand>
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>
 
 // Types containing all Records and Responses, useful for creating typing helper functions
@@ -194,6 +205,7 @@ export type CollectionRecords = {
 	models: ModelsRecord
 	rules: RulesRecord
 	run: RunRecord
+	templates: TemplatesRecord
 	users: UsersRecord
 }
 
@@ -208,6 +220,7 @@ export type CollectionResponses = {
 	models: ModelsResponse
 	rules: RulesResponse
 	run: RunResponse
+	templates: TemplatesResponse
 	users: UsersResponse
 }
 
@@ -225,5 +238,6 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: 'models'): RecordService<ModelsResponse>
 	collection(idOrName: 'rules'): RecordService<RulesResponse>
 	collection(idOrName: 'run'): RecordService<RunResponse>
+	collection(idOrName: 'templates'): RecordService<TemplatesResponse>
 	collection(idOrName: 'users'): RecordService<UsersResponse>
 }

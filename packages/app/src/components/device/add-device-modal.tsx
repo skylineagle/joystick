@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { pb } from "@/lib/pocketbase";
 import { cn } from "@/lib/utils";
 import { DeviceResponse } from "@/types/types";
+import { ModelsResponse } from "@/types/db.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -19,12 +20,25 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
+  deviceType: z.string().min(1, "Device type is required"),
   configuration: z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     ipAddress: z.string().ip("Must be a valid IP address"),
+  }),
+  information: z.object({
+    host: z.string().min(1, "Host is required"),
+    user: z.string().min(1, "User is required"),
+    password: z.string().min(1, "Password is required"),
   }),
 });
 
@@ -38,33 +52,70 @@ export function AddDeviceModal() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      deviceType: "",
       configuration: {
         name: "",
         ipAddress: "",
       },
+      information: {
+        host: "",
+        user: "",
+        password: "",
+      },
     },
   });
 
-  const { data: sourceTemplate } = useQuery({
-    queryKey: ["source"],
-    queryFn: async () => {
-      const template = await pb
-        .collection("configurations")
-        .getFirstListItem<{ value: { template: string } }>("name = 'source'");
+  // const { data: sourceTemplate } = useQuery({
+  //   queryKey: ["source-template", form.getValues("deviceType")],
+  //   queryFn: async () => {
+  //     console.log(form.getValues("deviceType"));
+  //     const template = await pb
+  //       .collection("templates")
+  //       .getFirstListItem<{ value: { template: string } }>(
+  //         `name = "source" && model = "${form.getValues("deviceType")}"`
+  //       );
 
-      return template.value.template;
+  //     return template.value.template;
+  //   },
+  //   enabled: !!form.getValues("deviceType"),
+  // });
+
+  // console.log(sourceTemplate);
+
+  const { data: deviceModels } = useQuery({
+    queryKey: ["device-models"],
+    queryFn: async () => {
+      const models = await pb
+        .collection("models")
+        .getFullList<ModelsResponse>();
+      return models;
     },
   });
 
   const { mutate: addCamera, isPending } = useMutation({
-    mutationFn: async ({ configuration, ...data }: FormValues) => {
+    mutationFn: async ({
+      configuration,
+      information,
+      deviceType,
+      ...data
+    }: FormValues) => {
+      console.log(deviceType);
+
+      const sourceTemplate = await pb
+        .collection("templates")
+        .getFirstListItem(`name = "source" && model = "${deviceType}"`);
+
       if (!sourceTemplate) {
         throw new Error("Source template must be set in the db.");
       }
+      console.log(sourceTemplate.value);
 
-      const sourceUrl = sourceTemplate
+      const sourceUrl = sourceTemplate.value
         .replace("<ip>", configuration.ipAddress)
         .replace("<id>", configuration.name);
+
+      console.log(sourceUrl);
+
       const configWithSource = {
         name: configuration.name,
         source: sourceUrl,
@@ -72,7 +123,10 @@ export function AddDeviceModal() {
 
       return pb.collection("devices").create<DeviceResponse>({
         ...data,
+        device: deviceType,
         configuration: configWithSource,
+        information,
+        mode: "off",
         automation: null,
       });
     },
@@ -122,9 +176,39 @@ export function AddDeviceModal() {
                 )}
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="name">Device ID</Label>
+                <Label htmlFor="deviceType">Device Type</Label>
+                <Select
+                  onValueChange={(value) => form.setValue("deviceType", value)}
+                  defaultValue={form.getValues("deviceType")}
+                >
+                  <SelectTrigger
+                    className={cn(
+                      form.formState.errors.deviceType && "border-destructive"
+                    )}
+                  >
+                    <SelectValue placeholder="Select device type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {deviceModels?.map((model) => (
+                      <SelectItem key={model.id} value={model.id}>
+                        {model.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {form.formState.errors.deviceType && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.deviceType.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid gap-4 grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="deviceId">Device ID</Label>
                 <Input
-                  id="name"
+                  id="deviceId"
                   placeholder="Enter the device 4 digit ID"
                   {...form.register("configuration.name")}
                   className={cn(
@@ -138,9 +222,6 @@ export function AddDeviceModal() {
                   </p>
                 )}
               </div>
-            </div>
-
-            <div className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="ipAddress">IP Address</Label>
                 <Input
@@ -154,6 +235,61 @@ export function AddDeviceModal() {
                 {form.formState.errors.configuration?.ipAddress && (
                   <p className="text-sm text-destructive">
                     {form.formState.errors.configuration.ipAddress.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-sm font-medium">Device Information</h3>
+              <div className="grid gap-4 grid-cols-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="host">Host</Label>
+                  <Input
+                    id="host"
+                    {...form.register("information.host")}
+                    className={cn(
+                      form.formState.errors.information?.host &&
+                        "border-destructive"
+                    )}
+                  />
+                  {form.formState.errors.information?.host && (
+                    <p className="text-sm text-destructive">
+                      {form.formState.errors.information.host.message}
+                    </p>
+                  )}
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="user">User</Label>
+                  <Input
+                    id="user"
+                    {...form.register("information.user")}
+                    className={cn(
+                      form.formState.errors.information?.user &&
+                        "border-destructive"
+                    )}
+                  />
+                  {form.formState.errors.information?.user && (
+                    <p className="text-sm text-destructive">
+                      {form.formState.errors.information.user.message}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  {...form.register("information.password")}
+                  className={cn(
+                    form.formState.errors.information?.password &&
+                      "border-destructive"
+                  )}
+                />
+                {form.formState.errors.information?.password && (
+                  <p className="text-sm text-destructive">
+                    {form.formState.errors.information.password.message}
                   </p>
                 )}
               </div>
