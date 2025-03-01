@@ -33,8 +33,8 @@ app.post("/jobs/:device", async ({ params, body }) => {
     const automation = parsedBody as DeviceAutomation;
     if (
       !automation ||
-      automation.minutesOff === 0 ||
-      automation.minutesOn === 0
+      automation?.off?.minutes === 0 ||
+      automation?.on?.minutes === 0
     ) {
       logger.info(`Automation values are invalid for device ${device}`);
       return { success: false, error: "Invalid automation values" };

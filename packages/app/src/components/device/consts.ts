@@ -1,4 +1,4 @@
-import { Ban, Clock, CornerDownRight, Video } from "lucide-react";
+import { Ban, Clock, CornerDownRight, Moon, Sun, Video } from "lucide-react";
 
 export const modeConfig = {
   live: {
@@ -16,6 +16,22 @@ export const modeConfig = {
     color: "text-slate-500",
     bgColor: "bg-slate-500/10",
     hoverColor: "hover:bg-slate-500/10",
+  },
+  "live-day": {
+    label: "Live Day",
+    icon: Sun,
+    description: "Using the day preset",
+    color: "text-yellow-500",
+    bgColor: "bg-yellow-500/10",
+    hoverColor: "hover:bg-yellow-500/10",
+  },
+  "live-night": {
+    label: "Live Night",
+    icon: Moon,
+    description: "Using the night preset",
+    color: "text-indigo-500",
+    bgColor: "bg-indigo-500/10",
+    hoverColor: "hover:bg-indigo-500/10",
   },
   auto: {
     label: "Automated",

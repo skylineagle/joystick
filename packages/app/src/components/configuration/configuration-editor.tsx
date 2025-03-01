@@ -13,9 +13,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SelectMode } from "@/components/ui/select-mode";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAction } from "@/hooks/use-action";
 import { updateDevice } from "@/lib/device";
-import { cn } from "@/lib/utils";
+import { cn, getModeOptionsFromSchema } from "@/lib/utils";
 import { DevicesStatusOptions } from "@/types/db.types";
 import { DeviceAutomation, DeviceResponse, UpdateDevice } from "@/types/types";
 import Editor, { type OnMount } from "@monaco-editor/react";
@@ -32,6 +34,11 @@ export interface ConfigurationEditorProps {
 export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
   const queryClient = useQueryClient();
   const { theme } = useTheme();
+  const { action, isLoading: isActionLoading } = useAction(
+    device.id,
+    "set-mode"
+  );
+  const availableModes = getModeOptionsFromSchema(action?.parameters ?? {});
   const [editingConfig, setEditingConfig] = useState<{
     id: string;
     config: string;
@@ -86,8 +93,8 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
 
   const isAutomationValid = useCallback(() => {
     if (!editingConfig?.automation) return false;
-    const { minutesOn, minutesOff } = editingConfig.automation;
-    return minutesOn > 0 && minutesOff > 0;
+    const { on, off } = editingConfig.automation;
+    return on?.minutes > 0 && off?.minutes > 0;
   }, [editingConfig]);
 
   const isSaveDisabled = useCallback(() => {
@@ -195,18 +202,14 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
             />
           </TabsContent>
           <TabsContent value="general" className="py-4">
-            <div className="grid gap-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="name"
-                  className="text-right text-sm font-medium"
-                >
+            <div className="grid gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium">
                   Name
                 </Label>
                 <Input
                   id="name"
                   type="text"
-                  className="col-span-3"
                   value={editingConfig?.name ?? ""}
                   onChange={(e) =>
                     setEditingConfig((prev) =>
@@ -215,53 +218,141 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
                   }
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="minutesOn"
-                  className="text-right text-sm font-medium"
-                >
-                  Minutes On
-                </Label>
-                <Input
-                  id="minutesOn"
-                  type="number"
-                  className="col-span-3"
-                  value={editingConfig?.automation?.minutesOn ?? 0}
-                  min={1}
-                  onChange={(e) =>
-                    setEditingConfig((prev) => ({
-                      ...prev!,
-                      automation: {
-                        minutesOn: parseInt(e.target.value),
-                        minutesOff: prev?.automation?.minutesOff ?? 0,
-                      },
-                    }))
-                  }
-                />
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">On Settings</h3>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right text-sm font-medium">Mode</Label>
+                  <div className="col-span-3">
+                    <SelectMode
+                      mode={editingConfig?.automation?.on?.mode ?? ""}
+                      handleModeChange={(value) =>
+                        setEditingConfig((prev) => {
+                          if (!prev) return null;
+                          return {
+                            ...prev,
+                            automation: {
+                              ...prev.automation,
+                              on: {
+                                ...(prev.automation?.on || { minutes: 0 }),
+                                mode: value,
+                              },
+                              off: prev.automation?.off || {
+                                minutes: prev.automation?.off?.minutes ?? 0,
+                                mode:
+                                  prev.automation?.off?.mode ??
+                                  availableModes[0],
+                              },
+                            },
+                          };
+                        })
+                      }
+                      isLoading={isActionLoading}
+                      availableModes={availableModes}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label
+                    htmlFor="minutesOn"
+                    className="text-right text-sm font-medium"
+                  >
+                    Minutes On
+                  </Label>
+                  <div className="col-span-3">
+                    <Input
+                      id="minutesOn"
+                      type="number"
+                      value={editingConfig?.automation?.on?.minutes ?? 0}
+                      min={1}
+                      onChange={(e) =>
+                        setEditingConfig((prev) => ({
+                          ...prev!,
+                          automation: {
+                            on: {
+                              minutes: parseInt(e.target.value),
+                              mode: prev?.automation?.on?.mode ?? "auto",
+                            },
+                            off: {
+                              minutes: prev?.automation?.off?.minutes ?? 0,
+                              mode: prev?.automation?.off?.mode ?? "auto",
+                            },
+                          },
+                        }))
+                      }
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label
-                  htmlFor="minutesOff"
-                  className="text-right text-sm font-medium"
-                >
-                  Minutes Off
-                </Label>
-                <Input
-                  id="minutesOff"
-                  type="number"
-                  className="col-span-3"
-                  value={editingConfig?.automation?.minutesOff ?? 0}
-                  min={1}
-                  onChange={(e) =>
-                    setEditingConfig((prev) => ({
-                      ...prev!,
-                      automation: {
-                        minutesOn: prev?.automation?.minutesOn ?? 0,
-                        minutesOff: parseInt(e.target.value),
-                      },
-                    }))
-                  }
-                />
+
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Off Settings</h3>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right text-sm font-medium">Mode</Label>
+                  <div className="col-span-3">
+                    <SelectMode
+                      mode={editingConfig?.automation?.off?.mode ?? ""}
+                      handleModeChange={(value) =>
+                        setEditingConfig((prev) => {
+                          if (!prev) return null;
+                          return {
+                            ...prev,
+                            automation: {
+                              ...prev.automation,
+                              on: prev.automation?.on || {
+                                minutes: prev.automation?.on?.minutes ?? 0,
+                                mode:
+                                  prev.automation?.on?.mode ??
+                                  availableModes[0],
+                              },
+                              off: {
+                                ...(prev.automation?.off || { minutes: 0 }),
+                                mode: value,
+                              },
+                            },
+                          };
+                        })
+                      }
+                      isLoading={isActionLoading}
+                      availableModes={availableModes}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label
+                    htmlFor="minutesOff"
+                    className="text-right text-sm font-medium"
+                  >
+                    Minutes Off
+                  </Label>
+                  <div className="col-span-3">
+                    <Input
+                      id="minutesOff"
+                      type="number"
+                      value={editingConfig?.automation?.off?.minutes ?? 0}
+                      min={1}
+                      onChange={(e) =>
+                        setEditingConfig((prev) => {
+                          if (!prev) return null;
+                          return {
+                            ...prev,
+                            automation: {
+                              ...prev.automation,
+                              off: {
+                                ...(prev.automation?.off || { mode: "auto" }),
+                                minutes: parseInt(e.target.value),
+                              },
+                              on: prev.automation?.on || {
+                                minutes: 0,
+                                mode: "auto",
+                              },
+                            },
+                          };
+                        })
+                      }
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </TabsContent>

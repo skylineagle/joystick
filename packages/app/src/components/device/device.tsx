@@ -1,4 +1,5 @@
 import { ConfigurationEditor } from "@/components/configuration/configuration-editor";
+import { AutomateToggle } from "@/components/device/automate-toggle";
 import { AutomationIndicator } from "@/components/device/automation-indicator";
 import { DeleteDevice } from "@/components/device/delete-device";
 import { DeviceName } from "@/components/device/device-name";
@@ -7,7 +8,6 @@ import { StatusIndicator } from "@/components/device/status-indicator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useDevice } from "@/hooks/use-device";
-import { useAuthStore } from "@/lib/auth";
 import { memo } from "react";
 
 interface DeviceProps {
@@ -18,9 +18,8 @@ interface DeviceProps {
 
 export const DeviceRow = memo(
   ({ deviceId, isSelected, onSelect }: DeviceProps) => {
-    const { user } = useAuthStore();
     const { data: device } = useDevice(deviceId);
-    
+
     if (!device) return null;
 
     return (
@@ -30,7 +29,7 @@ export const DeviceRow = memo(
             <Checkbox
               checked={isSelected}
               onCheckedChange={(checked) =>
-                onSelect?.(device.id, checked as boolean)
+                onSelect?.(deviceId, checked as boolean)
               }
               aria-label={`Select ${device.name || device.configuration?.name}`}
             />
@@ -42,23 +41,26 @@ export const DeviceRow = memo(
             configurationName={device.configuration?.name || ""}
           />
         </TableCell>
-        <TableCell className="w-[15%]">
-          <ModeSelector
-            automation={Boolean(device.automation)}
-            deviceId={device.id}
-          />
+        <TableCell className="w-[20%]">
+          <ModeSelector deviceId={deviceId} />
         </TableCell>
-        <TableCell className="w-[15%]">
+        <TableCell className="w-[10%]">
+          {device.automation && (
+            <AutomateToggle deviceId={deviceId} isAutomated={device.auto} />
+          )}
+        </TableCell>
+        <TableCell className="w-[10%]">
           <StatusIndicator status={device.status} />
         </TableCell>
         <TableCell className="w-[20%]">
-          <AutomationIndicator device={device} />
+          {device.auto && device.automation && (
+            <AutomationIndicator device={device} />
+          )}
         </TableCell>
         <TableCell className="w-[15%]">
           <div className="flex gap-2">
             <ConfigurationEditor device={device} />
-            {user?.level === "manager" ||
-              (user?.level === "super" && <DeleteDevice device={device} />)}
+            <DeleteDevice device={device} />
           </div>
         </TableCell>
       </TableRow>

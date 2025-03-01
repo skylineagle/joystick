@@ -70,6 +70,15 @@ export async function getDevices({
   return records.items;
 }
 
+export async function getDeviceMode(deviceId: string) {
+  const device = await pb
+    .collection("devices")
+    .getOne<DeviceResponse>(deviceId, {
+      fields: "mode",
+    });
+  return device?.mode;
+}
+
 export async function updateDevice({ id, ...data }: UpdateDevice) {
   const record = await pb.collection("devices").update(id, data);
   return record;
@@ -79,17 +88,20 @@ export async function deleteDevice(id: string) {
   await pb.collection("devices").delete(id);
 }
 
-export async function fetchDeviceActions(device?: DeviceResponse) {
-  if (!device) return [];
+export async function fetchModelActions(modelId?: string) {
+  if (!modelId) return [];
+
+  console.log("start", modelId);
 
   const actions = await pb
     .collection("run")
     .getFullList<
       ActionsResponse<{ device: DeviceResponse; action: ActionsResponse }>
     >(1, {
-      filter: `device = "${device.expand?.device.id}"`,
+      filter: `device="${modelId}"`,
       expand: "action,device",
     });
+  console.log("end");
   return actions.map((action) => action?.expand?.action.name);
 }
 
@@ -109,13 +121,6 @@ export async function gethDeviceAction(deviceId: string, actionName: string) {
   });
 
   return runAction;
-}
-
-export async function fetchBitrate(deviceId: string) {
-  const device = await fetchDevice(deviceId);
-  const actions = await fetchDeviceActions(device);
-  const bitrateAction = actions.find((action) => action === "set-bitrate");
-  return bitrateAction;
 }
 
 export interface BatchUpdateDeviceMode {

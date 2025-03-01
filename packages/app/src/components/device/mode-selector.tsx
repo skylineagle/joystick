@@ -6,61 +6,51 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useAction } from "@/hooks/use-action";
-import { useIsPermitted } from "@/hooks/use-is-permitted";
-import { useIsSupported } from "@/hooks/use-is-supported";
 import { useMode } from "@/hooks/use-mode";
 import { cn, getModeOptionsFromSchema } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 import { motion } from "motion/react";
-import { memo, useMemo } from "react";
+import { memo, useCallback } from "react";
 
 export interface ModeSelectorProps {
-  automation: boolean;
   deviceId: string;
 }
 
-export const ModeSelector = memo(
-  ({ automation, deviceId }: ModeSelectorProps) => {
-    const { mode, setMode, isLoading } = useMode(deviceId);
-    const { action, isLoading: isActionLoading } = useAction(
-      deviceId,
-      "set-mode"
-    );
-    const isSupported = useIsSupported(deviceId, ["set-mode", "get-mode"]);
-    const isPermitted = useIsPermitted("set-mode");
+export const ModeSelector = memo(({ deviceId }: ModeSelectorProps) => {
+  const { action, mode, setMode, isAutomated, isLoading } = useMode(deviceId);
+  const availableModes = getModeOptionsFromSchema(action?.parameters ?? {});
+  const currentMode = Object.keys(modeConfig).includes(mode ?? "")
+    ? modeConfig[mode as keyof typeof modeConfig]
+    : getDefaultModeConfig(mode ?? "");
 
-    const availableModes = useMemo(() => {
-      return getModeOptionsFromSchema(action?.parameters ?? {});
-    }, [action]);
+  const handleModeChange = useCallback(
+    (value: string) => {
+      setMode(value);
+    },
+    [setMode]
+  );
 
-    const currentMode = Object.keys(modeConfig).includes(mode ?? "")
-      ? modeConfig[mode as keyof typeof modeConfig]
-      : getDefaultModeConfig(mode ?? "");
-
-    if (isLoading || isActionLoading || !isSupported) {
-      return (
-        <Select disabled value={mode}>
-          <SelectTrigger className="w-40 opacity-70">
-            <Skeleton className="h-4 w-4" />
-          </SelectTrigger>
-        </Select>
-      );
-    }
-
+  if (isLoading)
     return (
-      availableModes.length !== 0 && (
+      <div className="flex items-center justify-center">
+        <Loader2 className="w-4 h-4 animate-spin" />
+      </div>
+    );
+
+  return (
+    <div className="flex flex-col gap-2">
+      {availableModes.length !== 0 && (
         <Select
           value={mode}
-          onValueChange={(value) => setMode(value)}
-          disabled={isLoading || !isPermitted}
+          onValueChange={handleModeChange}
+          disabled={isLoading || isAutomated}
         >
           <SelectTrigger
             className={cn(
               "w-40 transition-all duration-300 ease-in-out border-1",
               currentMode.bgColor,
               "border-transparent",
-              isLoading && "opacity-50 cursor-not-allowed"
+              (isLoading || isAutomated) && "opacity-50 cursor-not-allowed"
             )}
             aria-label="Select camera mode"
           >
@@ -97,19 +87,17 @@ export const ModeSelector = memo(
                 getDefaultModeConfig(actionName);
 
               const { label, color, bgColor, hoverColor, icon: Icon } = config;
-              const isDisabled = actionName === "auto" && !automation;
+
               const isSelected = mode === actionName;
 
               return (
                 <SelectItem
                   key={actionName}
                   value={actionName}
-                  disabled={isDisabled}
                   className={cn(
                     "transition-all duration-200 rounded-md",
                     isSelected && bgColor,
-                    !isSelected && hoverColor,
-                    isDisabled && "opacity-40 cursor-not-allowed"
+                    !isSelected && hoverColor
                   )}
                 >
                   <div className="flex flex-row items-center cursor-pointer my-0.5 px-2 py-1.5">
@@ -152,9 +140,9 @@ export const ModeSelector = memo(
             })}
           </SelectContent>
         </Select>
-      )
-    );
-  }
-);
+      )}
+    </div>
+  );
+});
 
 ModeSelector.displayName = "ModeSelector";

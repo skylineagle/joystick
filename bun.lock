@@ -131,6 +131,22 @@
         "typescript": "^5.0.0",
       },
     },
+    "packages/switcher": {
+      "name": "@joystick/switcher",
+      "dependencies": {
+        "@elysiajs/cors": "^1.2.0",
+        "elysia": "^1.2.10",
+        "pino": "^9.6.0",
+        "pino-pretty": "^13.0.0",
+        "pocketbase": "^0.25.1",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+      "peerDependencies": {
+        "typescript": "^5.0.0",
+      },
+    },
   },
   "packages": {
     "@alloc/quick-lru": ["@alloc/quick-lru@5.2.0", "", {}, "sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw=="],
@@ -344,6 +360,8 @@
     "@joystick/baker": ["@joystick/baker@workspace:packages/baker"],
 
     "@joystick/joystick": ["@joystick/joystick@workspace:packages/joystick"],
+
+    "@joystick/switcher": ["@joystick/switcher@workspace:packages/switcher"],
 
     "@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.8", "", { "dependencies": { "@jridgewell/set-array": "^1.2.1", "@jridgewell/sourcemap-codec": "^1.4.10", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-imAbBGkb+ebQyxKgzv5Hu2nmROxoDOXHh80evxdoXNOrvAnVx7zimzc1Oo5h9RlfV4vPXaE2iM5pOFbvOCClWA=="],
 

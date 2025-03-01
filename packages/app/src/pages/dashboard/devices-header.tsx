@@ -2,8 +2,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { useDeviceStore } from "@/store/device-store";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Info } from "lucide-react";
 import { memo } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface DeviceTableHeaderProps {
   onSelectAll: (checked: boolean) => void;
@@ -49,7 +54,7 @@ export const DeviceTableHeader = memo(
             </div>
           </TableHead>
           <TableHead
-            className="w-[15%] cursor-pointer hover:bg-accent transition-colors"
+            className="w-[20%] cursor-pointer hover:bg-accent transition-colors"
             onClick={() => setSortState("mode")}
           >
             <div className="flex items-center gap-2">
@@ -70,8 +75,22 @@ export const DeviceTableHeader = memo(
               )}
             </div>
           </TableHead>
+          <TableHead className="w-[10%] cursor-pointer hover:bg-accent transition-colors">
+            <div className="flex items-center gap-2">
+              Auto
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-xs">
+                  When enabled, the device will automatically switch between
+                  modes based on the automation settings.
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </TableHead>
           <TableHead
-            className="w-[15%] cursor-pointer hover:bg-accent transition-colors"
+            className="w-[10%] cursor-pointer hover:bg-accent transition-colors"
             onClick={() => setSortState("status")}
           >
             <div className="flex items-center gap-2">

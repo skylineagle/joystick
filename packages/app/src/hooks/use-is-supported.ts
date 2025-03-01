@@ -1,16 +1,17 @@
-import { useQuery } from "@tanstack/react-query";
-import { useDevice } from "./use-device";
-import { fetchDeviceActions } from "@/lib/device";
+import { useDevice } from "@/hooks/use-device";
+import { useDeviceActions } from "@/hooks/use-device-actions";
 
 export function useIsSupported(deviceId: string, actions: string | string[]) {
   const { data: device } = useDevice(deviceId);
-  const { data: deviceActions } = useQuery({
-    queryKey: ["device-actions", deviceId],
-    queryFn: () => fetchDeviceActions(device),
-    enabled: !!device,
-  });
+  const { data: deviceActions, isLoading } = useDeviceActions(
+    device?.expand?.device.id
+  );
 
-  return typeof actions === "string"
-    ? deviceActions?.includes(actions)
-    : actions.every((action) => deviceActions?.includes(action));
+  return {
+    isSupported:
+      typeof actions === "string"
+        ? deviceActions?.includes(actions)
+        : actions.every((action) => deviceActions?.includes(action)),
+    isLoading,
+  };
 }

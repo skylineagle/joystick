@@ -13,7 +13,6 @@ export enum Collections {
 	Superusers = "_superusers",
 	Actions = "actions",
 	Devices = "devices",
-	Levels = "levels",
 	Models = "models",
 	Rules = "rules",
 	Run = "run",
@@ -104,7 +103,8 @@ export enum DevicesStatusOptions {
 	"waiting" = "waiting",
 }
 export type DevicesRecord<Tautomation = unknown, Tconfiguration = unknown, Tinformation = unknown> = {
-	allowed: RecordIdString[]
+	allow?: RecordIdString[]
+	auto?: boolean
 	automation?: null | Tautomation
 	configuration?: null | Tconfiguration
 	created?: IsoDateString
@@ -116,13 +116,6 @@ export type DevicesRecord<Tautomation = unknown, Tconfiguration = unknown, Tinfo
 	mode: string
 	name?: string
 	status?: DevicesStatusOptions
-	updated?: IsoDateString
-}
-
-export type LevelsRecord = {
-	created?: IsoDateString
-	id: string
-	name: string
 	updated?: IsoDateString
 }
 
@@ -141,7 +134,7 @@ export type ModelsRecord<Tparams = unknown> = {
 
 export type RulesRecord = {
 	action?: RecordIdString[]
-	allow: RecordIdString
+	allow?: RecordIdString[]
 	created?: IsoDateString
 	id: string
 	updated?: IsoDateString
@@ -168,7 +161,6 @@ export type UsersRecord = {
 	email: string
 	emailVisibility?: boolean
 	id: string
-	level: RecordIdString
 	name?: string
 	password: string
 	tokenKey: string
@@ -184,7 +176,6 @@ export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemF
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
 export type ActionsResponse<Texpand = unknown> = Required<ActionsRecord> & BaseSystemFields<Texpand>
 export type DevicesResponse<Tautomation = unknown, Tconfiguration = unknown, Tinformation = unknown, Texpand = unknown> = Required<DevicesRecord<Tautomation, Tconfiguration, Tinformation>> & BaseSystemFields<Texpand>
-export type LevelsResponse<Texpand = unknown> = Required<LevelsRecord> & BaseSystemFields<Texpand>
 export type ModelsResponse<Tparams = unknown, Texpand = unknown> = Required<ModelsRecord<Tparams>> & BaseSystemFields<Texpand>
 export type RulesResponse<Texpand = unknown> = Required<RulesRecord> & BaseSystemFields<Texpand>
 export type RunResponse<Tparameters = unknown, Texpand = unknown> = Required<RunRecord<Tparameters>> & BaseSystemFields<Texpand>
@@ -200,7 +191,6 @@ export type CollectionRecords = {
 	_superusers: SuperusersRecord
 	actions: ActionsRecord
 	devices: DevicesRecord
-	levels: LevelsRecord
 	models: ModelsRecord
 	rules: RulesRecord
 	run: RunRecord
@@ -215,7 +205,6 @@ export type CollectionResponses = {
 	_superusers: SuperusersResponse
 	actions: ActionsResponse
 	devices: DevicesResponse
-	levels: LevelsResponse
 	models: ModelsResponse
 	rules: RulesResponse
 	run: RunResponse
@@ -233,7 +222,6 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: '_superusers'): RecordService<SuperusersResponse>
 	collection(idOrName: 'actions'): RecordService<ActionsResponse>
 	collection(idOrName: 'devices'): RecordService<DevicesResponse>
-	collection(idOrName: 'levels'): RecordService<LevelsResponse>
 	collection(idOrName: 'models'): RecordService<ModelsResponse>
 	collection(idOrName: 'rules'): RecordService<RulesResponse>
 	collection(idOrName: 'run'): RecordService<RunResponse>

@@ -5,6 +5,7 @@ services:
     ports:
       - "8090:8090"
     environment:
+      - BAKER_URL=http://baker:3000
       - MEDIAMTX_API=http://mediamtx:9997
     volumes:
       - pb_data:/pb_data

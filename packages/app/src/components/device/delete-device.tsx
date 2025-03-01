@@ -13,7 +13,7 @@ import { deleteDevice } from "@/lib/device";
 import { DeviceResponse } from "@/types/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/utils/toast";
 
 export function DeleteDevice({ device }: { device: DeviceResponse }) {
   const queryClient = useQueryClient();
@@ -23,10 +23,10 @@ export function DeleteDevice({ device }: { device: DeviceResponse }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["devices"] });
-      toast.success("Device deleted successfully");
+      toast.success({ message: "Device deleted successfully" });
     },
     onError: (error) => {
-      toast.error("Failed to delete device: " + error.message);
+      toast.error({ message: "Failed to delete device: " + error.message });
     },
   });
 

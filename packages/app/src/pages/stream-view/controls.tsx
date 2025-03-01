@@ -1,22 +1,23 @@
+import { ModeSelector } from "@/components/device/mode-selector";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useIsSupported } from "@/hooks/use-is-supported";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { cn } from "@/lib/utils";
 import { BitrateControll } from "@/pages/stream-view/bitrate-control";
-import { ModeSelect } from "@/pages/stream-view/mode-select";
+
 import { RoiModeControl } from "@/pages/stream-view/roi/roi-mode-control";
 import { useParams } from "react-router-dom";
 
 export const Controls = () => {
   const { isMobileLandscape } = useMobileLandscape();
   const { device } = useParams<{ device: string }>();
-  const isRoiSupported = useIsSupported(device!, ["set-roi", "get-roi"]);
-  const isSetBitrateSupported = useIsSupported(device!, [
-    "set-bitrate",
-    "get-bitrate",
-  ]);
-  const isSetModeSupported = useIsSupported(device!, ["set-mode", "get-mode"]);
+  const { isSupported: isRoiSupported, isLoading: isRoiLoading } =
+    useIsSupported(device!, ["set-roi", "get-roi"]);
+  const { isSupported: isSetBitrateSupported, isLoading: isSetBitrateLoading } =
+    useIsSupported(device!, ["set-bitrate", "get-bitrate"]);
+  const { isSupported: isSetModeSupported, isLoading: isSetModeLoading } =
+    useIsSupported(device!, ["set-mode", "get-mode"]);
 
   return (
     <Card
@@ -33,16 +34,18 @@ export const Controls = () => {
           isMobileLandscape ? "gap-2" : "space-y-4"
         )}
       >
-        {isSetModeSupported && <ModeSelect deviceId={device!} />}
+        {isSetModeSupported && !isSetModeLoading && (
+          <ModeSelector deviceId={device!} />
+        )}
 
-        {isSetBitrateSupported && (
+        {isSetBitrateSupported && !isSetBitrateLoading && (
           <>
             <Separator className="my-2" />
             <BitrateControll deviceId={device!} />
           </>
         )}
 
-        {isRoiSupported && (
+        {isRoiSupported && !isRoiLoading && (
           <>
             <Separator className="my-2" />
             <RoiModeControl />

@@ -1,11 +1,10 @@
 import {
-  RunResponse as BaseRunResponse,
-  UsersResponse as BaseUsersResponse,
   ActionsResponse,
+  RunResponse as BaseRunResponse,
   DevicesResponse,
   ModelsResponse,
-  LevelsResponse,
   RulesResponse,
+  UsersResponse,
 } from "@/types/db.types";
 
 export type CPSIResult = {
@@ -24,22 +23,22 @@ export type CPSIResult = {
   timingAdvance?: number;
 };
 
-export type UserResponse = BaseUsersResponse & {
-  expand: {
-    level: LevelsResponse;
-  };
-};
-
 export type RuleResponse = RulesResponse & {
   expand: {
-    allow: LevelsResponse;
+    allow: UsersResponse;
     action: ActionsResponse[];
   };
 };
 
 export type DeviceAutomation = {
-  minutesOn: number;
-  minutesOff: number;
+  on: {
+    minutes: number;
+    mode: string;
+  };
+  off: {
+    minutes: number;
+    mode: string;
+  };
 };
 
 export type DeviceConfiguration = {

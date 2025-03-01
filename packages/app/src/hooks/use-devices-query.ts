@@ -1,11 +1,12 @@
 import { GetDevicesOptions, getDevices } from "@/lib/device";
+import { pb } from "@/lib/pocketbase";
 import { useDeviceStore } from "@/store/device-store";
-import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo } from "react";
 
 export function useDevicesQuery(options?: GetDevicesOptions) {
   const { searchQuery, sortState, isReversed } = useDeviceStore();
-
+  const queryClient = useQueryClient();
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["devices", options?.modes, options?.search],
     queryFn: async () => {
@@ -13,6 +14,20 @@ export function useDevicesQuery(options?: GetDevicesOptions) {
       return devices;
     },
   });
+
+  useEffect(() => {
+    pb.collection("devices").subscribe("*", (e) => {
+      if (e.action === "create" || e.action === "delete") {
+        queryClient.invalidateQueries({ queryKey: ["devices"] });
+      } else if (e.action === "update") {
+        queryClient.invalidateQueries({ queryKey: ["device", e.record.id] });
+      }
+    });
+
+    return () => {
+      pb.collection("devices").unsubscribe("*");
+    };
+  }, [queryClient]);
 
   const sortedAndFilteredDevices = useMemo(() => {
     let result = data;

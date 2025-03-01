@@ -4,7 +4,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useMode } from "@/hooks/use-mode";
 import { urls } from "@/lib/urls";
 import { DeviceResponse } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
@@ -22,7 +21,6 @@ interface AutomationIndicatorProps {
 }
 
 export function AutomationIndicator({ device }: AutomationIndicatorProps) {
-  const { mode } = useMode(device.id);
   const { data } = useQuery<CountdownData>({
     queryKey: ["next-job", device.id],
     queryFn: async () => {
@@ -31,8 +29,8 @@ export function AutomationIndicator({ device }: AutomationIndicatorProps) {
 
       if (
         !response.ok ||
-        !device?.automation?.minutesOn ||
-        !device?.automation?.minutesOff
+        !device?.automation?.on?.minutes ||
+        !device?.automation?.off?.minutes
       ) {
         throw new Error("Failed to fetch next execution");
       }
@@ -41,7 +39,7 @@ export function AutomationIndicator({ device }: AutomationIndicatorProps) {
         (new Date(data?.nextExecution).getTime() - new Date().getTime()) / 1000
       );
 
-      if (secondsUntilNextExecution < device.automation.minutesOff * 60) {
+      if (secondsUntilNextExecution < device.automation.off.minutes * 60) {
         return {
           countdownTime: new Date(data?.nextExecution).getTime(),
           until: "on",
@@ -55,17 +53,16 @@ export function AutomationIndicator({ device }: AutomationIndicatorProps) {
         return {
           countdownTime:
             new Date().getTime() +
-            (secondsUntilNextExecution - device.automation.minutesOff * 60) *
+            (secondsUntilNextExecution - device.automation.off.minutes * 60) *
               1000,
           until: "off",
         };
       }
     },
-    enabled: mode === "auto",
     refetchInterval: 1000,
   });
 
-  if (mode !== "auto" || !device.automation) {
+  if (!device.automation) {
     return null;
   }
 
@@ -93,10 +90,10 @@ export function AutomationIndicator({ device }: AutomationIndicatorProps) {
               sideOffset={10}
             >
               <Label className="text-xs">
-                On: {device.automation.minutesOn} minutes
+                On: {device.automation.on.minutes} minutes
               </Label>
               <Label className="text-xs">
-                Off: {device.automation.minutesOff} minutes
+                Off: {device.automation.off.minutes} minutes
               </Label>
             </TooltipContent>
           </Tooltip>
@@ -106,7 +103,9 @@ export function AutomationIndicator({ device }: AutomationIndicatorProps) {
               data.until === "on" ? "text-emerald-500" : "text-destructive"
             }`}
           >
-            {data.until === "on" ? "Live" : "Offline"}
+            {data.until === "on"
+              ? device.automation.on.mode
+              : device.automation.off.mode}
           </div>
           <ArrowRight className="h-3 w-3" />
           <Countdown

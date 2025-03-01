@@ -1,8 +1,14 @@
 import type { DevicesResponse, ModelsResponse } from "@/types/db.types";
 
 export type DeviceAutomation = {
-  minutesOn: number;
-  minutesOff: number;
+  on: {
+    minutes: number;
+    mode: string;
+  };
+  off: {
+    minutes: number;
+    mode: string;
+  };
 };
 
 export type DeviceConfiguration = {

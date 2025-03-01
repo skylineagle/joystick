@@ -7,7 +7,6 @@ migrate((app) => {
   userRecord.set("password", "Aa123456");
   userRecord.set("verified", true);
   userRecord.set("name", "User");
-  userRecord.set("level", "user");
 
   app.save(userRecord);
 
@@ -17,7 +16,6 @@ migrate((app) => {
   managerUserRecord.set("password", "Password1!");
   managerUserRecord.set("verified", true);
   managerUserRecord.set("name", "Manager");
-  managerUserRecord.set("level", "manager");
 
   app.save(managerUserRecord);
 
@@ -27,7 +25,6 @@ migrate((app) => {
   adminUserRecord.set("password", "Password2@");
   adminUserRecord.set("verified", true);
   adminUserRecord.set("name", "Admin");
-  adminUserRecord.set("level", "super");
 
   app.save(adminUserRecord);
 });

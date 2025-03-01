@@ -1,37 +1,34 @@
 import { pb } from "@/lib/pocketbase";
-import { RuleResponse, UserResponse } from "@/types/types";
+import { RuleResponse } from "@/types/types";
 
 export async function getIsPermitted(action: string, userId: string) {
-  const user = await pb.collection("users").getOne<UserResponse>(userId, {
-    expand: "level",
-  });
-  const level = user.expand.level.name;
+  console.log(userId, action);
 
   const actionsData = await pb.collection("actions").getFullList({
     filter: `name="${action}"`,
   });
+  console.log(action, actionsData);
 
   if (!actionsData) {
+    console.log("no actions data");
     return false;
   }
 
   const actionId = actionsData[0].id;
-
-  const data = await pb.collection("levels").getFullList({
-    filter: `name="${level}"`,
-  });
-
-  if (!data || data.length !== 1) {
-    return false;
-  }
-
-  const levelId = data[0].id;
+  console.log("1");
 
   const allowedActions = await pb
     .collection("rules")
-    .getFirstListItem<RuleResponse>(`allow="${levelId}"`, {
-      expand: "action",
+    .getFullList<RuleResponse>({
+      filter: `allow="${userId}"`,
     });
 
-  return allowedActions.action.includes(actionId);
+  if (!allowedActions || allowedActions.length !== 1) {
+    return false;
+  }
+
+  console.log("2");
+
+  console.log(allowedActions);
+  return allowedActions[0].action.includes(actionId);
 }

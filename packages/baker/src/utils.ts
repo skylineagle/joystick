@@ -5,8 +5,12 @@ export const API_URL = `${MEDIAMTX_API}/v3`;
 
 export async function toggleMode(name: string, mode: string) {
   logger.info(`Toggling mode for camera ${name} to ${mode}`);
-  const response = await fetch(`${JOYSTICK_API_URL}/api/run/${name}/${mode}`, {
+  const response = await fetch(`${JOYSTICK_API_URL}/api/run/${name}/set-mode`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ mode }),
   });
 
   if (!response.ok) {

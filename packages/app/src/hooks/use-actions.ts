@@ -1,22 +1,20 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { fetchDeviceActions } from "@/lib/device";
+import { useDevice } from "@/hooks/use-device";
+import { useDeviceActions } from "@/hooks/use-device-actions";
 import { runAction } from "@/lib/joystick-api";
-import { useDevice } from "./use-device";
-import { toast as baseToast } from "sonner";
 import { toast } from "@/utils/toast";
+import { useMutation } from "@tanstack/react-query";
 import { useRef, useState } from "react";
+import { toast as baseToast } from "sonner";
 
 export function useActions(deviceId: string) {
-  const { data: device } = useDevice(deviceId);
   const toastRef = useRef<string | number>(null);
   const [actionResult, setActionResult] = useState<string | null>(null);
   const [currentAction, setCurrentAction] = useState<string | null>(null);
 
-  const { data: actions, isLoading } = useQuery({
-    queryKey: ["device-actions", deviceId],
-    queryFn: () => fetchDeviceActions(device),
-    enabled: !!device,
-  });
+  const { data: device } = useDevice(deviceId);
+  const { data: actions, isLoading } = useDeviceActions(
+    device?.expand?.device.id
+  );
 
   const runActionMutation = useMutation({
     mutationFn: async ({

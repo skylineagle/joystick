@@ -6,7 +6,11 @@ export function useIsPermitted(action: string) {
   const { user } = useAuthStore();
   const { data: isPermitted } = useQuery({
     queryKey: ["is-permitted", user?.id, action],
-    queryFn: () => getIsPermitted(action, user?.id ?? ""),
+    queryFn: async () => {
+      if (!user) return false;
+      const result = await getIsPermitted(action, user.id);
+      return result;
+    },
     enabled: !!user,
   });
 

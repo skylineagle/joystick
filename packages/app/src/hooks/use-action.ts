@@ -2,14 +2,12 @@ import { gethDeviceAction } from "@/lib/device";
 import { runAction } from "@/lib/joystick-api";
 import { toast } from "@/utils/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { useDevice } from "./use-device";
 
 export function useAction(deviceId: string, action: string) {
-  const { data: device } = useDevice(deviceId);
   const { data: run, isLoading } = useQuery({
     queryKey: ["device-action", deviceId, action],
     queryFn: () => gethDeviceAction(deviceId, action),
-    enabled: !!device,
+    enabled: !!deviceId && !!action,
   });
 
   const runActionMutation = useMutation({

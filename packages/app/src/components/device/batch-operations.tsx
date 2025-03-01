@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, Clock, Power, PowerOff, Trash } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/utils/toast";
 
 interface BatchOperationsProps {
   selectedDevices: string[];
@@ -58,11 +58,13 @@ export function BatchOperations({
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["cameras"] });
-      toast.success(
-        `Successfully deleted ${result.succeeded} out of ${result.total} cameras`
-      );
+      toast.success({
+        message: `Successfully deleted ${result.succeeded} out of ${result.total} cameras`,
+      });
       if (result.failed > 0) {
-        toast.error(`Failed to delete ${result.failed} cameras`);
+        toast.error({
+          message: `Failed to delete ${result.failed} cameras`,
+        });
       }
       onClearSelection();
       setProgress(0);
@@ -82,11 +84,13 @@ export function BatchOperations({
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["cameras"] });
-      toast.success(
-        `Successfully updated ${result.succeeded} out of ${result.total} cameras`
-      );
+      toast.success({
+        message: `Successfully updated ${result.succeeded} out of ${result.total} cameras`,
+      });
       if (result.failed > 0) {
-        toast.error(`Failed to update ${result.failed} cameras`);
+        toast.error({
+          message: `Failed to update ${result.failed} cameras`,
+        });
       }
       onClearSelection();
       setProgress(0);

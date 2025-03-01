@@ -24,6 +24,7 @@ async function initializeJobs() {
 
     logger.info("All device jobs initialized successfully");
   } catch (error) {
+    logger.error(error);
     logger.error("Failed to initialize device jobs", error);
     throw error;
   }
@@ -39,7 +40,9 @@ export async function createJob(
     logger.info(`Creating job for device ${device}`);
     baker.add({
       name: device,
-      cron: `@every_${automation.minutesOn + automation.minutesOff}_minutes`,
+      cron: `@every_${
+        automation?.on?.minutes + automation?.off?.minutes
+      }_minutes`,
       start: false,
       callback: async () => {
         // Turn camera on
@@ -51,19 +54,19 @@ export async function createJob(
           throw new Error("Device configuration is null");
         }
 
-        await toggleMode(data.id, "live");
+        await toggleMode(data.id, automation?.on?.mode);
         updateStatus();
         logger.info(`Device ${device} turned on`);
 
         setTimeout(async () => {
           if (baker.isRunning(device) && data.configuration?.name) {
-            await toggleMode(data.id, "offline");
+            await toggleMode(data.id, automation?.off?.mode);
             updateStatus();
             logger.info(`Device ${device} turned off`);
           } else {
             logger.info(`Job for device ${device} is not running, skipping`);
           }
-        }, automation.minutesOn * 60 * 1000);
+        }, automation?.on?.minutes * 60 * 1000);
       },
     });
   } catch (error) {
@@ -76,8 +79,6 @@ export async function startJob(device: string): Promise<void> {
   try {
     baker.bake(device);
     logger.info(`Job for device ${device} started`);
-    logger.debug(baker.getStatus(device));
-    logger.debug(baker.isRunning(device));
   } catch (error) {
     console.error(error);
     throw error;

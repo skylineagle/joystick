@@ -4,7 +4,7 @@ import { useIsParamsSupported } from "@/hooks/use-support-params";
 import { useParamsStore } from "@/lib/params.store";
 import { ParamTree } from "@/pages/params/param-tree";
 import { ParamPath } from "@/types/params";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useParams } from "react-router-dom";
 
 export function ParamsPage() {
@@ -15,11 +15,9 @@ export function ParamsPage() {
 
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set([]));
 
-  useEffect(() => {
-    if (deviceId) {
-      setDeviceId(deviceId);
-    }
-  }, [deviceId, setDeviceId]);
+  if (deviceId) {
+    setDeviceId(deviceId);
+  }
 
   const handleToggle = useCallback((path: ParamPath) => {
     setExpandedPaths((prev) => {

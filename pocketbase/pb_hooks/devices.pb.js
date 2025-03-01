@@ -130,6 +130,31 @@ onRecordUpdateRequest((e) => {
   e.next();
 }, "devices");
 
+// Handle mode change
+onRecordUpdateRequest((e) => {
+  const { startDeviceJob, stopDeviceJob } = require(`${__hooks}/baker.utils`);
+  const current = $app.findRecordById("devices", e.record.id);
+  const auto = e.record.get("auto");
+
+  if (auto && auto !== current.get("auto")) {
+    $app.logger().info("Mode changed, syncing camera state");
+
+    try {
+      // If mode changed to auto, create and start job
+      if (auto) {
+        startDeviceJob(e.record.id);
+      } else {
+        $app.logger().debug("Stopping job");
+        stopDeviceJob(e.record.id);
+      }
+    } catch (error) {
+      $app.logger().error(error);
+    }
+  }
+
+  e.next();
+}, "devices");
+
 // Handle after successful deletion
 onRecordAfterDeleteSuccess((e) => {
   const { stopDeviceJob, deleteDeviceJob } = require(`${__hooks}/baker.utils`);

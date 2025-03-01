@@ -106,7 +106,7 @@ export async function updateStatus(deviceId: string) {
       `Updating status for device ${device.configuration?.name} to ${updatedStatus}`
     );
     await pb.collection("devices").update(device.id, {
-      status: updateStatus,
+      status: updatedStatus,
     });
   } catch (error) {
     logger.error(error);

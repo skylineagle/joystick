@@ -7,7 +7,7 @@ import { Elysia, t } from "elysia";
 import { validate } from "jsonschema";
 import { logger } from "./logger";
 import { generateRandomCPSIResult, updateStatus } from "./utils";
-import { STREAM_API_URL } from "@/config";
+import { STREAM_API_URL, SWITCHER_API_URL } from "@/config";
 
 const app = new Elysia()
   .onError(({ code, error, request }) => {
@@ -47,7 +47,7 @@ app.post(
       const actionResult = await pb
         .collection("actions")
         .getFullList<ActionsResponse>(1, {
-          filter: `name = "${params.action}"`,
+          filter: `name="${params.action}"`,
         });
 
       if (actionResult.length !== 1)
@@ -78,7 +78,7 @@ app.post(
       const defaultParamters = {
         device: params.device,
         mediamtx: STREAM_API_URL,
-        joystick: "http://localhost:8000",
+        switcher: SWITCHER_API_URL,
       };
 
       const command = Object.entries({ ...body, ...defaultParamters }).reduce(
@@ -103,6 +103,10 @@ app.post(
         output,
       };
 
+      await pb.collection("devices").update(params.device, {
+        mode: body?.mode,
+      });
+
       await updateStatus(params.device);
 
       return response;
@@ -124,71 +128,6 @@ app.get("/api/healtcheck", async () => {
     status: "connected",
     lastConnected: new Date().toISOString(),
   };
-});
-
-app.post("/api/mode/:device/:mode", async ({ params, body }) => {
-  const { device: deviceId, mode } = params;
-
-  const deviceResult = await pb
-    .collection("devices")
-    .getFullList<DeviceResponse>(1, {
-      filter: `id = "${deviceId}"`,
-    });
-
-  if (deviceResult.length !== 1) {
-    throw new Error(`Device ${deviceId} not found`);
-  }
-
-  const device = deviceResult[0];
-
-  switch (mode) {
-    case "live":
-      const addResponse = await fetch(
-        `${STREAM_API_URL}/v3/config/paths/add/${device.configuration?.name}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(device.configuration),
-        }
-      );
-
-      if (!addResponse.ok) {
-        throw new Error("Failed to add path");
-      }
-      break;
-    case "off":
-      const deleteResponse = await fetch(
-        `${STREAM_API_URL}/v3/config/paths/delete/${device.configuration?.name}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!deleteResponse.ok) {
-        throw new Error("Failed to delete path");
-      }
-      break;
-    case "auto":
-      const response = await fetch(
-        `${STREAM_API_URL}/v3/config/paths/delete/${device.configuration?.name}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to delete path");
-      }
-      break;
-    default:
-      throw new Error("Invalid mode");
-  }
-
-  await pb.collection("devices").update(deviceId, {
-    mode,
-  });
 });
 
 app.use(cors()).listen(Bun.env.PORT || 8000);
