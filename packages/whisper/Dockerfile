@@ -1,7 +1,7 @@
 FROM oven/bun:1.2.2
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y sshpass
+RUN apt-get update && apt-get install -y sshpass curl
 
 COPY package.json ./
 RUN bun install --frozen-lockfile

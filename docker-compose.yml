@@ -71,7 +71,8 @@ services:
       - POCKETBASE_URL=http://pocketbase:8090
       - SWITCHER_API_URL=http://switcher:8080
       - PORT=8000
-      - PASSWORD=Password2@
+      - HOST=0.0.0.0
+      # - PASSWORD=Password2@
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -96,7 +97,7 @@ services:
     environment:
       - POCKETBASE_URL=http://pocketbase:8090
       - PORT=4000
-      - PASSWORD=Password2@
+      # - PASSWORD=Password2@
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -117,7 +118,7 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
-      - PASSWORD=Password2@
+      # - PASSWORD=Password2@
       - MEDIAMTX_API=http://mediamtx:9997
       - POCKETBASE_URL=http://pocketbase:8090
       - JOYSTICK_API_URL=http://joystick:8000
@@ -144,7 +145,7 @@ services:
       - POCKETBASE_URL=http://pocketbase:8090
       - JOYSTICK_API_URL=http://joystick:8000
       - PORT=8080
-      - PASSWORD=Password2@
+      # - PASSWORD=Password2@
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -168,7 +169,7 @@ services:
       - POCKETBASE_URL=http://pocketbase:8090
       - JOYSTICK_API_URL=http://joystick:8000
       - PORT=8081
-      - PASSWORD=Password2@
+      # - PASSWORD=Password2@
     depends_on:
       pocketbase:
         condition: service_healthy
