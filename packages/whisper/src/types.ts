@@ -40,4 +40,6 @@ export interface PendingSmsMessage {
   resolve: (value: SmsResponse) => void;
   reject: (reason: any) => void;
   timeout: Timer;
+  responses: SmsResponse[];
+  finalResolve: (value: SmsResponse[]) => void;
 }

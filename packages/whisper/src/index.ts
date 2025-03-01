@@ -1,5 +1,6 @@
 import { cors } from "@elysiajs/cors";
 import Client from "android-sms-gateway";
+import { randomUUIDv7 } from "bun";
 import { Elysia } from "elysia";
 import { logger } from "./logger";
 import type {
@@ -72,28 +73,52 @@ app.post("/api/send-sms", async ({ body, set }) => {
 
   try {
     // Send the SMS
-    const result = await apiClient.send({ phoneNumbers, message });
+    // const result = await apiClient.send({ phoneNumbers, message });
+    const result = { id: randomUUIDv7() };
     logger.info(`result ${JSON.stringify(result)}`);
     const messageId = result.id;
     logger.info(`messageId ${messageId}`);
 
     const phoneKey = phoneNumbers[0];
 
-    const responsePromise = new Promise<SmsResponse>((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        pendingSmsMessages.delete(phoneKey);
-        reject(new Error("SMS response timeout"));
-      }, 80000);
+    const responsePromise = new Promise<SmsResponse[]>((resolve, reject) => {
+      // Create a function to reset the timeout
+      const createTimeout = (isInitial = false) => {
+        return setTimeout(
+          () => {
+            const pendingMessage = pendingSmsMessages.get(phoneKey);
+            if (pendingMessage) {
+              pendingSmsMessages.delete(phoneKey);
+              if (pendingMessage.responses.length > 0) {
+                // If we've received at least one response, resolve with what we have
+                pendingMessage.finalResolve(pendingMessage.responses);
+              } else {
+                reject(new Error("SMS response timeout"));
+              }
+            }
+          },
+          isInitial ? 80000 : 5000
+        ); // 80 seconds for initial timeout, 5 seconds for subsequent timeouts
+      };
 
       pendingSmsMessages.set(phoneKey, {
-        resolve,
+        resolve: (value: SmsResponse) => {
+          const pendingMessage = pendingSmsMessages.get(phoneKey);
+          if (pendingMessage) {
+            clearTimeout(pendingMessage.timeout);
+            pendingMessage.responses.push(value);
+            pendingMessage.timeout = createTimeout(false);
+          }
+        },
         reject,
-        timeout,
+        timeout: createTimeout(true), // Initial timeout
+        responses: [],
+        finalResolve: resolve,
       });
     });
 
-    const response = await responsePromise;
-    return response;
+    const responses = await responsePromise;
+    return responses?.map((response) => response.message).join("\n");
   } catch (error: unknown) {
     set.status = 500;
     return {
@@ -111,11 +136,6 @@ app.post("/api/receive-sms", ({ body, set }) => {
     const pendingMessage = pendingSmsMessages.get(payload.phoneNumber);
 
     if (pendingMessage) {
-      const { resolve, timeout } = pendingMessage;
-
-      clearTimeout(timeout);
-      pendingSmsMessages.delete(payload.phoneNumber);
-
       const response: SmsResponse = {
         id: id || "unknown",
         status,
@@ -123,7 +143,9 @@ app.post("/api/receive-sms", ({ body, set }) => {
         timestamp: Date.now(),
       };
 
-      resolve(response);
+      // Call the resolve function which will handle adding the response and resetting the timeout
+      pendingMessage.resolve(response);
+
       set.status = 200;
       return { success: true };
     }
