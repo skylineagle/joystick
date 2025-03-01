@@ -1,0 +1,21 @@
+{
+  "name": "whisper",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@elysiajs/cors": "^1.2.0",
+    "android-sms-gateway": "^2.0.0",
+    "elysia": "^1.2.23",
+    "pino": "^9.6.0",
+    "pino-pretty": "^13.0.0"
+  }
+}
