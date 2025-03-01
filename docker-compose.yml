@@ -5,6 +5,7 @@ services:
     ports:
       - "8090:8090"
     environment:
+      - BAKER_URL=http://baker:3000
       - MEDIAMTX_API=http://mediamtx:9997
     volumes:
       - pb_data:/pb_data
@@ -67,6 +68,7 @@ services:
       - "8000:8000"
     environment:
       - POCKETBASE_URL=http://pocketbase:8090
+      - SWITCHER_API_URL=http://switcher:8080
       - PORT=8000
     depends_on:
       pocketbase:
@@ -88,9 +90,55 @@ services:
       dockerfile: Dockerfile.panel
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "4000:4000"
     environment:
       - POCKETBASE_URL=http://pocketbase:8090
+      - PORT=4000
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+      mediamtx:
+        condition: service_started
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  baker:
+    image: ghcr.io/skylineagle/switcher/baker:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - MEDIAMTX_API=http://mediamtx:9997
+      - POCKETBASE_URL=http://pocketbase:8090
+      - JOYSTICK_API_URL=http://joystick:8000
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+      mediamtx:
+        condition: service_started
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  switcher:
+    image: ghcr.io/skylineagle/switcher/switcher:latest
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - MEDIAMTX_API=http://mediamtx:9997
+      - POCKETBASE_URL=http://pocketbase:8090
+      - JOYSTICK_API_URL=http://joystick:8000
       - PORT=8080
     depends_on:
       pocketbase:
