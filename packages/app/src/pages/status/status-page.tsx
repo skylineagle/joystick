@@ -10,9 +10,12 @@ import { ServicesTable } from "./services-table";
 export function StatusPage() {
   const { device: deviceId } = useParams();
   const { data: device, isLoading: isDeviceLoading } = useDevice(deviceId!);
-  const hasGetCpsi = useIsSupported(deviceId!, "get-cpsi");
-  const hasServicesStatus = useIsSupported(deviceId!, "get-services-status");
-  const hasHealthcheck = useIsSupported(deviceId!, "healthcheck");
+  const { isSupported: hasGetCpsi, isLoading: isGetCpsiLoading } =
+    useIsSupported(deviceId!, "get-cpsi");
+  const { isSupported: hasServicesStatus, isLoading: isServicesStatusLoading } =
+    useIsSupported(deviceId!, "get-services-status");
+  const { isSupported: hasHealthcheck, isLoading: isHealthcheckLoading } =
+    useIsSupported(deviceId!, "healthcheck");
 
   if (isDeviceLoading) {
     return (
@@ -27,13 +30,13 @@ export function StatusPage() {
   const isMediaMtx = device?.expand?.device.stream === "mediamtx";
 
   return (
-    <div className="size-full">
+    <div className="flex flex-col size-full">
       <div className="flex justify-between items-center p-4 pb-0">
         <h1 className="text-2xl font-bold">Device Status</h1>
       </div>
 
-      <div className="p-4 size-full overflow-auto flex flex-col gap-4">
-        <div className="size-full p-2">
+      <div className="size-full flex flex-col gap-4">
+        <div className="flex-1 p-2">
           {device && (
             <Frame
               deviceName={device.name}
@@ -42,10 +45,16 @@ export function StatusPage() {
             />
           )}
         </div>
-        <div className={"grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"}>
-          {hasGetCpsi && <CellularStatus deviceId={deviceId!} />}
-          {hasServicesStatus && <ServicesTable deviceId={deviceId!} />}
-          {hasHealthcheck && <Healthcheck deviceId={deviceId!} />}
+        <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {hasGetCpsi && !isGetCpsiLoading && (
+            <CellularStatus deviceId={deviceId!} />
+          )}
+          {hasServicesStatus && !isServicesStatusLoading && (
+            <ServicesTable deviceId={deviceId!} />
+          )}
+          {hasHealthcheck && !isHealthcheckLoading && (
+            <Healthcheck deviceId={deviceId!} />
+          )}
         </div>
       </div>
     </div>

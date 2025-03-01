@@ -112,6 +112,10 @@ app.post(
       return response;
     } catch (error) {
       logger.error(error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
     }
   },
   {

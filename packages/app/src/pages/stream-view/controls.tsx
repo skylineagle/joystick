@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { useIsSupported } from "@/hooks/use-is-supported";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { cn } from "@/lib/utils";
+import { CellularStatus } from "@/pages/status/cellular-status";
 import { BitrateControll } from "@/pages/stream-view/bitrate-control";
 
 import { RoiModeControl } from "@/pages/stream-view/roi/roi-mode-control";
@@ -18,6 +19,8 @@ export const Controls = () => {
     useIsSupported(device!, ["set-bitrate", "get-bitrate"]);
   const { isSupported: isSetModeSupported, isLoading: isSetModeLoading } =
     useIsSupported(device!, ["set-mode", "get-mode"]);
+  const { isSupported: isGetCpsiSupported, isLoading: isGetCpsiLoading } =
+    useIsSupported(device!, "get-cpsi");
 
   return (
     <Card
@@ -50,6 +53,10 @@ export const Controls = () => {
             <Separator className="my-2" />
             <RoiModeControl />
           </>
+        )}
+
+        {isGetCpsiSupported && !isGetCpsiLoading && (
+          <CellularStatus deviceId={device!} className="border-none m-0 p-0" />
         )}
 
         <div className="flex-1" />

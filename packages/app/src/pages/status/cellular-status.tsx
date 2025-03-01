@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { runAction } from "@/lib/joystick-api";
-import { parseCPSIResult } from "@/lib/utils";
+import { cn, parseCPSIResult } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import {
   RefreshCw,
@@ -16,9 +16,10 @@ import {
 
 interface CellularStatusProps {
   deviceId: string;
+  className?: string;
 }
 
-export function CellularStatus({ deviceId }: CellularStatusProps) {
+export function CellularStatus({ deviceId, className }: CellularStatusProps) {
   const {
     data,
     isLoading: isCpsiLoading,
@@ -130,7 +131,7 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
   };
 
   return (
-    <Card key="cellular" className="shadow-md h-full">
+    <Card key="cellular" className={cn("shadow-md h-full m-4", className)}>
       <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
         <CardTitle className="text-lg">Cellular Status</CardTitle>
         <Button
@@ -153,7 +154,7 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 {getSignalIcon()}
                 <span className="font-medium">

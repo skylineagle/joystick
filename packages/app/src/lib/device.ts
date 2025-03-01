@@ -91,8 +91,6 @@ export async function deleteDevice(id: string) {
 export async function fetchModelActions(modelId?: string) {
   if (!modelId) return [];
 
-  console.log("start", modelId);
-
   const actions = await pb
     .collection("run")
     .getFullList<
@@ -101,7 +99,7 @@ export async function fetchModelActions(modelId?: string) {
       filter: `device="${modelId}"`,
       expand: "action,device",
     });
-  console.log("end");
+
   return actions.map((action) => action?.expand?.action.name);
 }
 

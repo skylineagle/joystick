@@ -26,7 +26,7 @@ export function Layout({ children }: LayoutProps) {
               <SidebarTrigger className="-ml-1" />
             </div>
           </header>
-          <main className={cn("flex-1 p-4", isMobileLandscape && "p-2")}>
+          <main className={cn("flex-1 p-2", isMobileLandscape && "p-2")}>
             {children || <Outlet />}
           </main>
         </SidebarInset>

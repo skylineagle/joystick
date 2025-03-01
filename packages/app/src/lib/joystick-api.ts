@@ -83,6 +83,7 @@ export async function readParams({
     toast.error({
       message,
     });
+
     return { success: false, error: message };
   }
 }
@@ -107,6 +108,8 @@ export async function runAction({
     if (!response.ok) throw new Error("Failed to run action");
 
     const data = await response.json();
+    if (!data.success) throw new Error(data.error);
+
     return data.output?.replace(/\n$/, "");
   } catch (error) {
     const message =
@@ -114,6 +117,7 @@ export async function runAction({
     toast.error({
       message,
     });
+
     throw new Error(message);
   }
 }
