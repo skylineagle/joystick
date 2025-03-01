@@ -2,7 +2,7 @@ import { LoginForm } from "@/components/auth/login-form";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { ThemeProvider } from "@/components/theme-provider";
 import { pb } from "@/lib/pocketbase";
-import { DashboardPage } from "@/pages/dashboard/dashboard";
+import { DashboardPage } from "@/pages/dashboard/dashboard-page";
 import { ParamsPage } from "@/pages/params/params-page";
 import { StreamView } from "@/pages/stream-view/stream-view";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -13,7 +13,6 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import { Layout } from "./layout";
 import { ActionsPage } from "./pages/actions/actions-page";
-import { DeviceSelector } from "./pages/device-selector/device-selector";
 import { StatusPage } from "./pages/status/status-page";
 import { TerminalPage } from "./pages/terminal/terminal-page";
 
@@ -64,9 +63,8 @@ function App() {
           <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<DeviceSelector />} />
                 <Route
-                  path="/dashboard"
+                  path="/"
                   element={
                     <ProtectedRoute>
                       <DashboardPage />

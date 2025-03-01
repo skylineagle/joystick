@@ -1,5 +1,6 @@
 import { DeviceSwitcher } from "@/components/device-switcher";
 import { AnimatedThemeToggle } from "@/components/ui/animated-theme-toggle";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Sidebar,
@@ -11,9 +12,16 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { UserProfile } from "@/components/user-profile";
-import { Home, SatelliteDish, Send, Settings, Terminal } from "lucide-react";
+import {
+  Home,
+  LayoutDashboard,
+  SatelliteDish,
+  Send,
+  Settings,
+  Terminal,
+} from "lucide-react";
 import * as React from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 const navItems = [
   {
@@ -78,6 +86,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
+        <Button variant="ghost" size="sm" className="w-full mt-2" asChild>
+          <Link to="/">
+            <LayoutDashboard className="mr-2 h-4 w-4" />
+            Back to Dashboard
+          </Link>
+        </Button>
         <div className="flex flex-col gap-2 p-4">
           <div className="flex items-center justify-between">
             <UserProfile />

@@ -5,10 +5,13 @@ import { DeleteDevice } from "@/components/device/delete-device";
 import { DeviceName } from "@/components/device/device-name";
 import { ModeSelector } from "@/components/device/mode-selector";
 import { StatusIndicator } from "@/components/device/status-indicator";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useDevice } from "@/hooks/use-device";
+import { ExternalLink } from "lucide-react";
 import { memo } from "react";
+import { Link } from "react-router-dom";
 
 interface DeviceProps {
   deviceId: string;
@@ -60,6 +63,12 @@ export const DeviceRow = memo(
         <TableCell className="w-[15%]">
           <div className="flex gap-2">
             <ConfigurationEditor device={device} />
+            <Link target="_blank" to={`/${deviceId}`} className="self-center">
+              <Button variant="ghost" size="icon">
+                <ExternalLink className="h-4 w-4" />
+                <span className="sr-only">View device</span>
+              </Button>
+            </Link>
             <DeleteDevice device={device} />
           </div>
         </TableCell>
