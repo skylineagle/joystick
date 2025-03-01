@@ -108,7 +108,7 @@ services:
         max-file: "3"
 
   baker:
-    image: ghcr.io/skylineagle/switcher/baker:latest
+    image: ghcr.io/skylineagle/joystick/baker:latest
     restart: unless-stopped
     ports:
       - "3000:3000"
@@ -131,7 +131,7 @@ services:
         max-file: "3"
 
   switcher:
-    image: ghcr.io/skylineagle/switcher/switcher:latest
+    image: ghcr.io/skylineagle/joystick/switcher:latest
     restart: unless-stopped
     ports:
       - "8080:8080"
