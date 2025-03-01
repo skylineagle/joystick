@@ -26,38 +26,31 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
-import { pb } from "@/lib/pocketbase";
+import { useAction } from "@/hooks/use-action";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 interface ActionFormProps {
+  deviceId?: string;
   action: string;
   onSubmit: (params: Record<string, unknown>) => void;
   isSubmitting: boolean;
 }
 
 export function ActionForm({
+  deviceId,
   action,
   onSubmit,
   isSubmitting,
 }: ActionFormProps) {
-  const { data: actionSchema, isLoading } = useQuery({
-    queryKey: ["action-schema", action],
-    queryFn: async () => {
-      const result = await pb
-        .collection("actions")
-        .getFirstListItem(`name = "${action}"`);
-      return result.params as Record<string, any> | undefined;
-    },
-  });
-  const zodSchema = buildZodSchema(actionSchema ?? {});
+  const { action: actionData, isLoading } = useAction(deviceId ?? "", action);
+  const zodSchema = buildZodSchema(actionData?.parameters ?? {});
   const form = useForm<z.infer<typeof zodSchema>>({
     resolver: zodResolver(zodSchema),
   });
 
-  if (isLoading) {
+  if (!deviceId || isLoading) {
     return (
       <Card className="border-none">
         <CardHeader>
@@ -71,7 +64,7 @@ export function ActionForm({
     );
   }
 
-  if (!actionSchema) {
+  if (!actionData?.parameters) {
     return (
       <Card className="border-none">
         <CardHeader>
@@ -100,7 +93,7 @@ export function ActionForm({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {Object.entries(actionSchema.properties || {}).map(
+            {Object.entries(actionData?.parameters.properties || {}).map(
               ([name, schema]) => (
                 <FormField
                   key={name}

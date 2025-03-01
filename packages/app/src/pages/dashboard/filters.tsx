@@ -68,7 +68,7 @@ export const Filters = memo(() => {
           </div>
         </div>
 
-        {/* <AddDeviceModal /> */}
+        <AddDeviceModal />
       </div>
       {(selectedModes.length > 0 || searchQuery) && (
         <div className="flex items-center gap-2">

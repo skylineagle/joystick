@@ -88,6 +88,7 @@ export function ActionsPage() {
               className="mt-0 border-0 space-y-4"
             >
               <ActionForm
+                deviceId={deviceId}
                 action={action}
                 onSubmit={(params) => runAction({ action, params })}
                 isSubmitting={isRunning && currentAction === action}

@@ -21,7 +21,7 @@ import { toast } from "sonner";
 import * as z from "zod";
 
 const formSchema = z.object({
-  nickname: z.string().min(2, "Nickname must be at least 2 characters"),
+  name: z.string().min(2, "Name must be at least 2 characters"),
   configuration: z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     ipAddress: z.string().ip("Must be a valid IP address"),
@@ -37,7 +37,7 @@ export function AddDeviceModal() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nickname: "",
+      name: "",
       configuration: {
         name: "",
         ipAddress: "",
@@ -107,17 +107,17 @@ export function AddDeviceModal() {
           <div className="space-y-6">
             <div className="grid gap-4 grid-cols-2">
               <div className="grid gap-2">
-                <Label htmlFor="nickname">Nickname</Label>
+                <Label htmlFor="name">Name</Label>
                 <Input
-                  id="nickname"
-                  {...form.register("nickname")}
+                  id="name"
+                  {...form.register("name")}
                   className={cn(
-                    form.formState.errors.nickname && "border-destructive"
+                    form.formState.errors.name && "border-destructive"
                   )}
                 />
-                {form.formState.errors.nickname && (
+                {form.formState.errors.name && (
                   <p className="text-sm text-destructive">
-                    {form.formState.errors.nickname.message}
+                    {form.formState.errors.name.message}
                   </p>
                 )}
               </div>

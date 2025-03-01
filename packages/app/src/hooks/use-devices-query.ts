@@ -51,23 +51,19 @@ export function useDevicesQuery(options?: GetDevicesOptions) {
 
         switch (sortState.column) {
           case "name":
-            aValue = a.name || a.configuration?.name;
-            bValue = b.name || b.configuration?.name;
+            aValue = a.name || a.configuration?.name || a.mode;
+            bValue = b.name || b.configuration?.name || b.mode;
             break;
-          // case "mode":
-          //   aValue = a.mode;
-          //   bValue = b.mode;
-          //   break;
           case "status":
             aValue = a.status;
             bValue = b.status;
             break;
           case "automation":
             aValue = a.automation
-              ? `${a.automation.minutesOn}/${a.automation.minutesOff}`
+              ? `${a.automation.off.minutes}:${a.automation.off.minutes}`
               : "";
             bValue = b.automation
-              ? `${b.automation.minutesOn}/${b.automation.minutesOff}`
+              ? `${b.automation.off.minutes}:${b.automation.off.minutes}`
               : "";
             break;
         }
