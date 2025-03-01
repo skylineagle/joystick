@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { UserProfile } from "@/components/user-profile";
 import { login } from "@/lib/auth";
 import { useState } from "react";
-import { toast, Toaster } from "sonner";
+import { toast } from "@/utils/toast";
 
 export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,12 +19,12 @@ export function LoginForm() {
     try {
       const result = await login(email, password);
       if (!result.success) {
-        toast.error(result.error || "Failed to login");
+        toast.error({ message: result.error || "Failed to login" });
         return;
       }
-      toast.success("Logged in successfully");
+      toast.success({ message: "Logged in successfully" });
     } catch {
-      toast.error("An unexpected error occurred");
+      toast.error({ message: "An unexpected error occurred" });
     } finally {
       setIsLoading(false);
     }
@@ -78,7 +78,6 @@ export function LoginForm() {
           </form>
         </div>
       </div>
-      <Toaster position="top-center" richColors />
     </div>
   );
 }
