@@ -7,20 +7,23 @@ import { cn } from "@/lib/utils";
 import { CellularStatus } from "@/pages/status/cellular-status";
 import { BitrateControll } from "@/pages/stream-view/bitrate-control";
 
+import { StatusIndicator } from "@/components/device/status-indicator";
+import { useDevice } from "@/hooks/use-device";
 import { RoiModeControl } from "@/pages/stream-view/roi/roi-mode-control";
 import { useParams } from "react-router-dom";
 
 export const Controls = () => {
   const { isMobileLandscape } = useMobileLandscape();
-  const { device } = useParams<{ device: string }>();
+  const { device: deviceId } = useParams<{ device: string }>();
+  const { data: device, isLoading: isDeviceLoading } = useDevice(deviceId!);
   const { isSupported: isRoiSupported, isLoading: isRoiLoading } =
-    useIsSupported(device!, ["set-roi", "get-roi"]);
+    useIsSupported(deviceId!, ["set-roi", "get-roi"]);
   const { isSupported: isSetBitrateSupported, isLoading: isSetBitrateLoading } =
-    useIsSupported(device!, ["set-bitrate", "get-bitrate"]);
+    useIsSupported(deviceId!, ["set-bitrate", "get-bitrate"]);
   const { isSupported: isSetModeSupported, isLoading: isSetModeLoading } =
-    useIsSupported(device!, ["set-mode", "get-mode"]);
+    useIsSupported(deviceId!, ["set-mode", "get-mode"]);
   const { isSupported: isGetCpsiSupported, isLoading: isGetCpsiLoading } =
-    useIsSupported(device!, "get-cpsi");
+    useIsSupported(deviceId!, "get-cpsi");
 
   return (
     <Card
@@ -37,14 +40,19 @@ export const Controls = () => {
           isMobileLandscape ? "gap-2" : "space-y-4"
         )}
       >
-        {isSetModeSupported && !isSetModeLoading && (
-          <ModeSelector deviceId={device!} />
+        {isSetModeSupported && !isSetModeLoading && !isDeviceLoading && (
+          <div className="flex items-center gap-2">
+            <ModeSelector deviceId={deviceId!} />
+            <div className="self-center">
+              <StatusIndicator status={device?.status ?? "unknown"} />{" "}
+            </div>
+          </div>
         )}
 
         {isSetBitrateSupported && !isSetBitrateLoading && (
           <>
             <Separator className="my-2" />
-            <BitrateControll deviceId={device!} />
+            <BitrateControll deviceId={deviceId!} />
           </>
         )}
 
@@ -56,7 +64,10 @@ export const Controls = () => {
         )}
 
         {isGetCpsiSupported && !isGetCpsiLoading && (
-          <CellularStatus deviceId={device!} className="border-none m-0 p-0" />
+          <CellularStatus
+            deviceId={deviceId!}
+            className="border-none m-0 p-0"
+          />
         )}
 
         <div className="flex-1" />

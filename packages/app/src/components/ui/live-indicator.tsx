@@ -2,6 +2,7 @@ import { Label } from "@radix-ui/react-label";
 import type React from "react";
 import { Badge } from "./badge";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/components/theme-provider";
 
 const sizeClasses = {
   small: "w-1.5 h-1.5",
@@ -18,6 +19,7 @@ export const LiveIndicator: React.FC<LiveIndicatorProps> = ({
   size = "medium",
   status,
 }) => {
+  const { theme } = useTheme();
   return (
     <Badge
       variant="default"
@@ -35,7 +37,8 @@ export const LiveIndicator: React.FC<LiveIndicatorProps> = ({
             <div key={i} className={cn("relative", sizeClasses[size])}>
               <div
                 className={cn(
-                  `absolute inset-0 bg-current rounded-full animate-ping`,
+                  `absolute inset-0 rounded-full animate-ping`,
+                  theme === "light" ? "bg-current" : "bg-slate-800",
                   i === 0 && "animation-delay-0",
                   i === 1 && "animation-delay-300",
                   i === 2 && "animation-delay-600"
@@ -45,23 +48,39 @@ export const LiveIndicator: React.FC<LiveIndicatorProps> = ({
                 }}
               ></div>
               <div
-                className={`relative ${sizeClasses[size]} bg-current rounded-full`}
+                className={cn(
+                  `relative ${sizeClasses[size]} rounded-full`,
+                  theme === "light" ? "bg-current" : "bg-slate-800"
+                )}
               ></div>
             </div>
           ))
         ) : (
           <div className={`relative ${sizeClasses[size]}`}>
             <div
-              className={`absolute inset-0 bg-current rounded-full animate-ping`}
+              className={cn(
+                `absolute inset-0 bg-current rounded-full animate-ping`,
+                theme === "light" ? "bg-current" : "bg-slate-800"
+              )}
             ></div>
             <div
-              className={`relative ${sizeClasses[size]} bg-current rounded-full`}
+              className={cn(
+                `relative ${sizeClasses[size]} rounded-full`,
+                theme === "light" ? "bg-current" : "bg-slate-800"
+              )}
             ></div>
           </div>
         )}
       </div>
 
-      <Label className="text-sm">{status === "on" ? "Live" : "Waiting"}</Label>
+      <Label
+        className={cn(
+          "text-sm",
+          theme === "light" ? "text-current" : "text-slate-800"
+        )}
+      >
+        {status === "on" ? "Live" : "Waiting"}
+      </Label>
     </Badge>
   );
 };
