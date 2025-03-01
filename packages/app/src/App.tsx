@@ -13,7 +13,6 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import { Layout } from "./layout";
 import { ActionsPage } from "./pages/actions/actions-page";
-import { StatusPage } from "./pages/status/status-page";
 import { TerminalPage } from "./pages/terminal/terminal-page";
 
 const queryClient = new QueryClient();
@@ -93,7 +92,6 @@ function App() {
                   <Route path="params" element={<ParamsPage />} />
                   <Route path="actions" element={<ActionsPage />} />
                   <Route path="terminal" element={<TerminalPage />} />
-                  <Route path="status" element={<StatusPage />} />
                 </Route>
               </Routes>
             </BrowserRouter>

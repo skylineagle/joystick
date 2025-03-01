@@ -12,14 +12,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { UserProfile } from "@/components/user-profile";
-import {
-  Home,
-  LayoutDashboard,
-  SatelliteDish,
-  Send,
-  Settings,
-  Terminal,
-} from "lucide-react";
+import { Home, LayoutDashboard, Send, Settings, Terminal } from "lucide-react";
 import * as React from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -47,12 +40,6 @@ const navItems = [
     icon: Terminal,
     path: "terminal",
     description: "Device terminal access",
-  },
-  {
-    label: "Status",
-    icon: SatelliteDish,
-    path: "status",
-    description: "Device status and information",
   },
 ];
 
