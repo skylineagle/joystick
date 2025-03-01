@@ -4,6 +4,7 @@ const PORTS = {
   pocketbase: 8090,
   panel: 4000,
   baker: 3000,
+  switcher: 8080,
 } as const;
 
 function getServiceUrl(service: keyof typeof PORTS): string {

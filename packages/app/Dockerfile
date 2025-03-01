@@ -3,7 +3,7 @@ FROM oven/bun:1.1.43 as builder
 WORKDIR /app
 
 # Copy package files
-COPY package.json bun.lockb ./
+COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 
 # Copy source code and env files
