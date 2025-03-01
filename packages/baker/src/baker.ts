@@ -17,8 +17,6 @@ async function initializeJobs() {
       if (device.automation) {
         await createJob(device.id, device.automation);
         logger.info(`Initialized job for device ${device.id}`);
-
-        await toggleMode(device.id, device.mode ?? "offline");
       }
     }
 
