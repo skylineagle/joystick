@@ -10,7 +10,7 @@ import { useParams } from "react-router-dom";
 import { Frame as WsFrame } from "./ws-frame";
 
 // Memoize the frame to prevent rerenders when ROI mode changes
-const Frame = memo(
+export const Frame = memo(
   ({
     deviceName,
     isMediaMtx,

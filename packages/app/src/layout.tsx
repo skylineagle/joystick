@@ -11,7 +11,11 @@ import { cn } from "@/lib/utils";
 import { Outlet } from "react-router-dom";
 import { Toaster } from "sonner";
 
-export function Layout() {
+interface LayoutProps {
+  children?: React.ReactNode;
+}
+
+export function Layout({ children }: LayoutProps) {
   const { isMobileLandscape } = useMobileLandscape();
 
   return (
@@ -26,7 +30,7 @@ export function Layout() {
               </div>
             </header>
             <main className={cn("flex-1 p-4", isMobileLandscape && "p-2")}>
-              <Outlet />
+              {children || <Outlet />}
             </main>
           </SidebarInset>
         </SidebarProvider>

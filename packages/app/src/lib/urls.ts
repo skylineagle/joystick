@@ -3,6 +3,7 @@ const PORTS = {
   stream: 8888,
   pocketbase: 8090,
   panel: 4000,
+  baker: 3000,
 } as const;
 
 function getServiceUrl(service: keyof typeof PORTS): string {
@@ -22,6 +23,9 @@ export const urls = {
   },
   get stream() {
     return getServiceUrl("stream");
+  },
+  get baker() {
+    return getServiceUrl("baker");
   },
   get pocketbase() {
     return getServiceUrl("pocketbase");

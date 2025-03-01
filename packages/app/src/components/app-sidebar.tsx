@@ -1,6 +1,5 @@
 import { DeviceSwitcher } from "@/components/device-switcher";
 import { AnimatedThemeToggle } from "@/components/ui/animated-theme-toggle";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
   Sidebar,
@@ -11,14 +10,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import {
-  Home,
-  SatelliteDish,
-  Send,
-  Settings,
-  Terminal,
-  User,
-} from "lucide-react";
+import { UserProfile } from "@/components/user-profile";
+import { Home, SatelliteDish, Send, Settings, Terminal } from "lucide-react";
 import * as React from "react";
 import { useParams } from "react-router-dom";
 
@@ -87,10 +80,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <div className="flex flex-col gap-2 p-4">
           <div className="flex items-center justify-between">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <User className="size-4" />
-              <span className="text-sm font-medium">Profile</span>
-            </Button>
+            <UserProfile />
             <AnimatedThemeToggle />
           </div>
         </div>

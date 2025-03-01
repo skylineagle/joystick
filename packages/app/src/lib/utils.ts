@@ -63,3 +63,39 @@ export function parseCPSIResult(input: string): CPSIResult | null {
 
   return result;
 }
+
+/**
+ * Extracts mode enum options from a JSON schema
+ * @param schema - JSON schema containing a mode field with enum values
+ * @returns Array of mode options or empty array if not found
+ */
+export function getModeOptionsFromSchema(
+  schema?: Record<string, unknown>
+): string[] {
+  if (!schema || typeof schema !== "object") return [];
+
+  // Check if mode field exists directly in the schema
+  if (
+    schema.properties &&
+    typeof schema.properties === "object" &&
+    "mode" in schema.properties &&
+    typeof schema.properties.mode === "object" &&
+    schema.properties.mode !== null &&
+    "enum" in schema.properties.mode &&
+    Array.isArray(schema.properties.mode.enum)
+  ) {
+    return schema.properties.mode.enum as string[];
+  }
+  // Check if mode is directly in the schema
+  if (
+    schema.mode &&
+    typeof schema.mode === "object" &&
+    schema.mode !== null &&
+    "enum" in schema.mode &&
+    Array.isArray((schema.mode as Record<string, unknown>).enum)
+  ) {
+    return (schema.mode as Record<string, unknown>).enum as string[];
+  }
+
+  return [];
+}

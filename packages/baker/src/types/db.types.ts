@@ -12,11 +12,10 @@ export enum Collections {
 	Otps = "_otps",
 	Superusers = "_superusers",
 	Actions = "actions",
-	Cameras = "cameras",
-	Configurations = "configurations",
+	Devices = "devices",
 	Levels = "levels",
 	Models = "models",
-	Permissions = "permissions",
+	Rules = "rules",
 	Run = "run",
 	Users = "users",
 }
@@ -99,44 +98,25 @@ export type ActionsRecord = {
 	updated?: IsoDateString
 }
 
-export enum CamerasModeOptions {
-	"live" = "live",
-	"auto" = "auto",
-	"offline" = "offline",
-}
-
-export enum CamerasStatusOptions {
+export enum DevicesStatusOptions {
 	"off" = "off",
 	"on" = "on",
 	"waiting" = "waiting",
 }
-
-export enum CamerasAllowedOptions {
-	"super" = "super",
-	"manager" = "manager",
-	"user" = "user",
-}
-export type CamerasRecord<Tautomation = unknown, Tconfiguration = unknown, Tinfo = unknown> = {
-	allowed?: CamerasAllowedOptions[]
+export type DevicesRecord<Tautomation = unknown, Tconfiguration = unknown, Tinformation = unknown> = {
+	allowed: RecordIdString[]
 	automation?: null | Tautomation
-	configuration: null | Tconfiguration
+	configuration?: null | Tconfiguration
 	created?: IsoDateString
+	description?: HTMLString
+	device: RecordIdString
 	hide?: boolean
 	id: string
-	info?: null | Tinfo
-	mode: CamerasModeOptions
-	model?: RecordIdString
-	nickname?: string
-	status?: CamerasStatusOptions
-	updated?: IsoDateString
-}
-
-export type ConfigurationsRecord<Tvalue = unknown> = {
-	created?: IsoDateString
-	id: string
+	information: null | Tinformation
+	mode: string
 	name?: string
+	status?: DevicesStatusOptions
 	updated?: IsoDateString
-	value?: null | Tvalue
 }
 
 export type LevelsRecord = {
@@ -146,52 +126,50 @@ export type LevelsRecord = {
 	updated?: IsoDateString
 }
 
-export type ModelsRecord = {
+export enum ModelsStreamOptions {
+	"mediamtx" = "mediamtx",
+	"ws" = "ws",
+}
+export type ModelsRecord<Tparams = unknown> = {
 	created?: IsoDateString
 	id: string
 	name: string
+	params: null | Tparams
+	stream?: ModelsStreamOptions
 	updated?: IsoDateString
 }
 
-export enum PermissionsAllowedOptions {
-	"super" = "super",
-	"manager" = "manager",
-	"user" = "user",
-}
-export type PermissionsRecord = {
-	allowed?: PermissionsAllowedOptions[]
+export type RulesRecord = {
+	action?: RecordIdString[]
+	allow: RecordIdString
 	created?: IsoDateString
 	id: string
-	name: string
 	updated?: IsoDateString
 }
 
 export enum RunTargetOptions {
 	"local" = "local",
-	"remote" = "remote",
+	"device" = "device",
 }
-export type RunRecord = {
+export type RunRecord<Tparameters = unknown> = {
 	action: RecordIdString
-	command?: string
+	command: string
 	created?: IsoDateString
+	device: RecordIdString
 	id: string
-	model: RecordIdString
+	parameters?: null | Tparameters
 	target: RunTargetOptions
 	updated?: IsoDateString
 }
 
-export enum UsersLevelOptions {
-	"super" = "super",
-	"manager" = "manager",
-	"user" = "user",
-}
 export type UsersRecord = {
 	avatar?: string
 	created?: IsoDateString
 	email: string
 	emailVisibility?: boolean
 	id: string
-	level?: UsersLevelOptions
+	level: RecordIdString
+	name?: string
 	password: string
 	tokenKey: string
 	updated?: IsoDateString
@@ -205,12 +183,11 @@ export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemF
 export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
 export type ActionsResponse<Texpand = unknown> = Required<ActionsRecord> & BaseSystemFields<Texpand>
-export type CamerasResponse<Tautomation = unknown, Tconfiguration = unknown, Tinfo = unknown, Texpand = unknown> = Required<CamerasRecord<Tautomation, Tconfiguration, Tinfo>> & BaseSystemFields<Texpand>
-export type ConfigurationsResponse<Tvalue = unknown, Texpand = unknown> = Required<ConfigurationsRecord<Tvalue>> & BaseSystemFields<Texpand>
+export type DevicesResponse<Tautomation = unknown, Tconfiguration = unknown, Tinformation = unknown, Texpand = unknown> = Required<DevicesRecord<Tautomation, Tconfiguration, Tinformation>> & BaseSystemFields<Texpand>
 export type LevelsResponse<Texpand = unknown> = Required<LevelsRecord> & BaseSystemFields<Texpand>
-export type ModelsResponse<Texpand = unknown> = Required<ModelsRecord> & BaseSystemFields<Texpand>
-export type PermissionsResponse<Texpand = unknown> = Required<PermissionsRecord> & BaseSystemFields<Texpand>
-export type RunResponse<Texpand = unknown> = Required<RunRecord> & BaseSystemFields<Texpand>
+export type ModelsResponse<Tparams = unknown, Texpand = unknown> = Required<ModelsRecord<Tparams>> & BaseSystemFields<Texpand>
+export type RulesResponse<Texpand = unknown> = Required<RulesRecord> & BaseSystemFields<Texpand>
+export type RunResponse<Tparameters = unknown, Texpand = unknown> = Required<RunRecord<Tparameters>> & BaseSystemFields<Texpand>
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>
 
 // Types containing all Records and Responses, useful for creating typing helper functions
@@ -222,11 +199,10 @@ export type CollectionRecords = {
 	_otps: OtpsRecord
 	_superusers: SuperusersRecord
 	actions: ActionsRecord
-	cameras: CamerasRecord
-	configurations: ConfigurationsRecord
+	devices: DevicesRecord
 	levels: LevelsRecord
 	models: ModelsRecord
-	permissions: PermissionsRecord
+	rules: RulesRecord
 	run: RunRecord
 	users: UsersRecord
 }
@@ -238,11 +214,10 @@ export type CollectionResponses = {
 	_otps: OtpsResponse
 	_superusers: SuperusersResponse
 	actions: ActionsResponse
-	cameras: CamerasResponse
-	configurations: ConfigurationsResponse
+	devices: DevicesResponse
 	levels: LevelsResponse
 	models: ModelsResponse
-	permissions: PermissionsResponse
+	rules: RulesResponse
 	run: RunResponse
 	users: UsersResponse
 }
@@ -257,11 +232,10 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: '_otps'): RecordService<OtpsResponse>
 	collection(idOrName: '_superusers'): RecordService<SuperusersResponse>
 	collection(idOrName: 'actions'): RecordService<ActionsResponse>
-	collection(idOrName: 'cameras'): RecordService<CamerasResponse>
-	collection(idOrName: 'configurations'): RecordService<ConfigurationsResponse>
+	collection(idOrName: 'devices'): RecordService<DevicesResponse>
 	collection(idOrName: 'levels'): RecordService<LevelsResponse>
 	collection(idOrName: 'models'): RecordService<ModelsResponse>
-	collection(idOrName: 'permissions'): RecordService<PermissionsResponse>
+	collection(idOrName: 'rules'): RecordService<RulesResponse>
 	collection(idOrName: 'run'): RecordService<RunResponse>
 	collection(idOrName: 'users'): RecordService<UsersResponse>
 }

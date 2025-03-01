@@ -1,3 +1,8 @@
+import { STREAM_API_URL } from "@/config";
+import { logger } from "@/logger";
+import { pb } from "@/pocketbase";
+import type { DeviceResponse } from "@/types/types";
+
 export function generateRandomCPSIResult(): string {
   // Randomly choose a technology type
   const techTypes = ["LTE", "GSM", "WCDMA"];
@@ -63,4 +68,47 @@ export function generateRandomCPSIResult(): string {
   }
 
   return result;
+}
+
+export async function getMediaMTXPaths() {
+  const response = await fetch(`${STREAM_API_URL}/v3/paths/list`);
+
+  if (!response.ok) {
+    throw new Error(`Failed to get MediaMTX paths: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function updateStatus(deviceId: string) {
+  try {
+    const device = await pb
+      .collection("devices")
+      .getOne<DeviceResponse>(deviceId);
+    const pathList = await getMediaMTXPaths();
+    const paths = pathList.items;
+
+    const status = paths.find(
+      (path: { name: string; ready: boolean }) =>
+        path.name === device.configuration?.name
+    );
+
+    const updatedStatus = status
+      ? paths.find(
+          (path: { name: string; ready: boolean }) =>
+            path.name === device.configuration?.name
+        ).ready
+        ? "on"
+        : "waiting"
+      : "off";
+
+    logger.info(
+      `Updating status for device ${device.configuration?.name} to ${updatedStatus}`
+    );
+    await pb.collection("devices").update(device.id, {
+      status: updateStatus,
+    });
+  } catch (error) {
+    logger.error(error);
+  }
 }

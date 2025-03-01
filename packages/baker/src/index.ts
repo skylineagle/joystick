@@ -6,8 +6,9 @@ import {
   startJob,
   stopJob,
 } from "@/baker";
+import { MEDIAMTX_API, POCKETBASE_URL } from "@/config";
 import { logger } from "@/logger";
-import type { CameraAutomation } from "@/types/types";
+import type { DeviceAutomation } from "@/types/types";
 import cors from "@elysiajs/cors";
 import { Elysia } from "elysia";
 
@@ -25,87 +26,87 @@ const app = new Elysia()
     );
   });
 
-app.post("/jobs/:camera", async ({ params, body }) => {
+app.post("/jobs/:device", async ({ params, body }) => {
   try {
-    const { camera } = params;
+    const { device } = params;
     const parsedBody = typeof body === "string" ? JSON.parse(body) : body;
-    const automation = parsedBody as CameraAutomation;
+    const automation = parsedBody as DeviceAutomation;
     if (
       !automation ||
       automation.minutesOff === 0 ||
       automation.minutesOn === 0
     ) {
-      logger.info(`Automation values are invalid for camera ${camera}`);
+      logger.info(`Automation values are invalid for device ${device}`);
       return { success: false, error: "Invalid automation values" };
     }
     logger.info("Creating new job");
-    await createJob(camera, automation);
+    await createJob(device, automation);
 
     return { success: true };
   } catch (error: unknown) {
     logger.error(error);
-    logger.error("Failed to create job", { camera: params.camera, error });
+    logger.error("Failed to create job", { device: params.device, error });
     if (error instanceof Error) return { success: false, error: error.message };
     return { success: false, error: "An unknown error occurred" };
   }
 });
 
-app.post("/jobs/:camera/start", async ({ params }) => {
+app.post("/jobs/:device/start", async ({ params }) => {
   try {
-    const { camera } = params;
-    logger.info({ camera }, "Starting job");
-    await startJob(camera);
+    const { device } = params;
+    logger.info({ device }, "Starting job");
+    await startJob(device);
     return { success: true };
   } catch (error: unknown) {
-    logger.error("Failed to start job", { camera: params.camera, error });
+    logger.error("Failed to start job", { device: params.device, error });
     if (error instanceof Error) return { success: false, error: error.message };
     return { success: false, error: "An unknown error occurred" };
   }
 });
 
-app.post("/jobs/:camera/stop", async ({ params }) => {
+app.post("/jobs/:device/stop", async ({ params }) => {
   try {
-    const { camera } = params;
-    logger.info({ camera }, "Stopping job");
-    await stopJob(camera);
+    const { device } = params;
+    logger.info({ device }, "Stopping job");
+    await stopJob(device);
     return { success: true };
   } catch (error: unknown) {
-    logger.error("Failed to stop job", { camera: params.camera, error });
+    logger.error("Failed to stop job", { device: params.device, error });
     if (error instanceof Error) return { success: false, error: error.message };
     return { success: false, error: "An unknown error occurred" };
   }
 });
 
-app.get("/jobs/:camera", ({ params }) => {
+app.get("/jobs/:device", ({ params }) => {
   try {
-    const { camera } = params;
-    const status = getJobStatus(camera);
-    logger.info("Retrieved job status", { camera, status });
+    const { device } = params;
+    const status = getJobStatus(device);
+    logger.info("Retrieved job status", { device, status });
     return { success: true, status };
   } catch (error: unknown) {
-    logger.error("Failed to get job status", { camera: params.camera, error });
+    logger.error("Failed to get job status", { device: params.device, error });
     if (error instanceof Error) return { success: false, error: error.message };
     return { success: false, error: "An unknown error occurred" };
   }
 });
 
-app.delete("/jobs/:camera", async ({ params }) => {
+app.delete("/jobs/:device", async ({ params }) => {
   try {
-    const { camera } = params;
-    logger.info({ camera }, "Deleting job");
-    await deleteJob(camera);
+    const { device } = params;
+    logger.info({ device }, "Deleting job");
+    await deleteJob(device);
     return { success: true };
   } catch (error: unknown) {
-    logger.error("Failed to delete job", { camera: params.camera, error });
+    logger.error("Failed to delete job", { device: params.device, error });
     if (error instanceof Error) return { success: false, error: error.message };
     return { success: false, error: "An unknown error occurred" };
   }
 });
 
-app.get("/jobs/:camera/next", async ({ params }) => {
-  const { camera } = params;
-  const nextExecution = await getNextExecution(camera);
-  const status = getJobStatus(camera);
+app.get("/jobs/:device/next", async ({ params }) => {
+  const { device } = params;
+  const nextExecution = await getNextExecution(device);
+  const status = getJobStatus(device);
   return {
     success: true,
     nextExecution: nextExecution.toString(),
@@ -115,5 +116,5 @@ app.get("/jobs/:camera/next", async ({ params }) => {
 
 app.use(cors()).listen(3000);
 logger.info("🦊 Baker API server running at http://localhost:3000");
-logger.debug(`Pocketbase URL: ${process.env.POCKETBASE_URL}`);
-logger.debug(`Stream URL: ${process.env.MEDIAMTX_API}`);
+logger.debug(`Pocketbase URL: ${POCKETBASE_URL}`);
+logger.debug(`Stream URL: ${MEDIAMTX_API}`);

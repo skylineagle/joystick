@@ -1,6 +1,6 @@
 import { logger } from "@/logger";
 import { pb } from "@/pocketbase";
-import type { CameraAutomation, CamerasResponse } from "@/types/types";
+import type { DeviceAutomation, DeviceResponse } from "@/types/types";
 import { Baker, type Status } from "cronbake";
 import { getMediaMTXPaths, toggleMode } from "./utils";
 
@@ -8,23 +8,23 @@ const baker = Baker.create();
 
 async function initializeJobs() {
   try {
-    const cameras = await pb
-      .collection("cameras")
-      .getFullList<CamerasResponse>();
+    const devices = await pb
+      .collection("devices")
+      .getFullList<DeviceResponse>();
 
-    logger.info(`Found ${cameras.length} cameras`);
-    for (const camera of cameras) {
-      if (camera.automation) {
-        await createJob(camera.id, camera.automation);
-        logger.info(`Initialized job for camera ${camera.id}`);
+    logger.info(`Found ${devices.length} devices`);
+    for (const device of devices) {
+      if (device.automation) {
+        await createJob(device.id, device.automation);
+        logger.info(`Initialized job for device ${device.id}`);
 
-        await toggleMode(camera.id, camera.mode ?? "offline");
+        await toggleMode(device.id, device.mode ?? "offline");
       }
     }
 
-    logger.info("All camera jobs initialized successfully");
+    logger.info("All device jobs initialized successfully");
   } catch (error) {
-    logger.error("Failed to initialize camera jobs", error);
+    logger.error("Failed to initialize device jobs", error);
     throw error;
   }
 }
@@ -32,36 +32,36 @@ async function initializeJobs() {
 initializeJobs();
 
 export async function createJob(
-  camera: string,
-  automation: CameraAutomation
+  device: string,
+  automation: DeviceAutomation
 ): Promise<void> {
   try {
-    logger.info(`Creating job for camera ${camera}`);
+    logger.info(`Creating job for device ${device}`);
     baker.add({
-      name: camera,
+      name: device,
       cron: `@every_${automation.minutesOn + automation.minutesOff}_minutes`,
       start: false,
       callback: async () => {
         // Turn camera on
-        logger.info(`Starting automation routine for camera ${camera}`);
+        logger.info(`Starting automation routine for device ${device}`);
         const data = await pb
-          .collection("cameras")
-          .getOne<CamerasResponse>(camera);
+          .collection("devices")
+          .getOne<DeviceResponse>(device);
         if (!data.configuration) {
-          throw new Error("Camera configuration is null");
+          throw new Error("Device configuration is null");
         }
 
         await toggleMode(data.id, "live");
         updateStatus();
-        logger.info(`Camera ${camera} turned on`);
+        logger.info(`Device ${device} turned on`);
 
         setTimeout(async () => {
-          if (baker.isRunning(camera) && data.configuration?.name) {
+          if (baker.isRunning(device) && data.configuration?.name) {
             await toggleMode(data.id, "offline");
             updateStatus();
-            logger.info(`Camera ${camera} turned off`);
+            logger.info(`Device ${device} turned off`);
           } else {
-            logger.info(`Job for camera ${camera} is not running, skipping`);
+            logger.info(`Job for device ${device} is not running, skipping`);
           }
         }, automation.minutesOn * 60 * 1000);
       },
@@ -72,49 +72,49 @@ export async function createJob(
   }
 }
 
-export async function startJob(camera: string): Promise<void> {
+export async function startJob(device: string): Promise<void> {
   try {
-    baker.bake(camera);
-    logger.info(`Job for camera ${camera} started`);
-    logger.debug(baker.getStatus(camera));
-    logger.debug(baker.isRunning(camera));
+    baker.bake(device);
+    logger.info(`Job for device ${device} started`);
+    logger.debug(baker.getStatus(device));
+    logger.debug(baker.isRunning(device));
   } catch (error) {
     console.error(error);
     throw error;
   }
 }
 
-export async function stopJob(camera: string): Promise<void> {
+export async function stopJob(device: string): Promise<void> {
   try {
-    baker.stop(camera);
+    baker.stop(device);
   } catch (error) {
     console.error(error);
     throw error;
   }
 }
 
-export function getJobStatus(camera: string): Status | undefined {
+export function getJobStatus(device: string): Status | undefined {
   try {
-    return baker.getStatus(camera);
+    return baker.getStatus(device);
   } catch (error) {
     console.error(error);
     throw error;
   }
 }
 
-export async function deleteJob(camera: string): Promise<void> {
+export async function deleteJob(device: string): Promise<void> {
   try {
-    baker.stop(camera);
-    baker.remove(camera);
+    baker.stop(device);
+    baker.remove(device);
   } catch (error) {
     console.error(error);
     throw error;
   }
 }
 
-export async function getNextExecution(camera: string): Promise<Date> {
+export async function getNextExecution(device: string): Promise<Date> {
   try {
-    return baker.nextExecution(camera);
+    return baker.nextExecution(device);
   } catch (error) {
     console.error(error);
     throw error;
@@ -123,20 +123,23 @@ export async function getNextExecution(camera: string): Promise<Date> {
 
 async function updateStatus() {
   try {
-    const cameras = await pb
-      .collection("cameras")
-      .getFullList<CamerasResponse>();
+    const devices = await pb
+      .collection("devices")
+      .getFullList<DeviceResponse>();
     const pathList = await getMediaMTXPaths();
     const paths = pathList.items;
 
-    for (const camera of cameras) {
-      const status = paths.includes(camera.configuration?.name);
+    for (const device of devices) {
+      const status = paths.find(
+        (path: { name: string; ready: boolean }) =>
+          path.name === device.configuration?.name
+      );
 
-      await pb.collection("cameras").update(camera.id, {
+      await pb.collection("devices").update(device.id, {
         status: status
           ? paths.find(
               (path: { name: string; ready: boolean }) =>
-                path.name === camera.configuration?.name
+                path.name === device.configuration?.name
             ).ready
             ? "on"
             : "waiting"

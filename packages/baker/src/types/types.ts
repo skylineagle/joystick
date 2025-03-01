@@ -1,24 +1,26 @@
-import type { CamerasResponse as BaseCameraResponse } from "./db.types";
+import type { DevicesResponse, ModelsResponse } from "@/types/db.types";
 
-export interface CameraAutomation {
+export type DeviceAutomation = {
   minutesOn: number;
   minutesOff: number;
-}
+};
 
-export interface CameraConfiguration {
+export type DeviceConfiguration = {
   name: string;
   source: string;
-}
+} & { [key: string]: unknown };
 
-export interface CameraInfo {
-  host: string;
+export type DeviceInformation = {
   user: string;
   password: string;
-}
+  host: string;
+};
 
-export type CamerasResponse = Omit<
-  BaseCameraResponse<CameraAutomation, CameraConfiguration, CameraInfo>,
-  "created" | "updated"
+export type DeviceResponse = DevicesResponse<
+  DeviceAutomation,
+  DeviceConfiguration,
+  DeviceInformation,
+  { device: ModelsResponse }
 >;
 
 export interface ParamValue {

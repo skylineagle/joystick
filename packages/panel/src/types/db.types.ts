@@ -13,7 +13,9 @@ export enum Collections {
 	Superusers = "_superusers",
 	Actions = "actions",
 	Devices = "devices",
+	Levels = "levels",
 	Models = "models",
+	Rules = "rules",
 	Run = "run",
 	Users = "users",
 }
@@ -89,23 +91,38 @@ export type SuperusersRecord = {
 	verified?: boolean
 }
 
-export type ActionsRecord<Tparams = unknown> = {
+export type ActionsRecord = {
 	created?: IsoDateString
 	id: string
 	name: string
-	params?: null | Tparams
 	updated?: IsoDateString
 }
 
+export enum DevicesStatusOptions {
+	"off" = "off",
+	"on" = "on",
+	"waiting" = "waiting",
+}
 export type DevicesRecord<Tautomation = unknown, Tconfiguration = unknown, Tinformation = unknown> = {
+	allowed: RecordIdString[]
 	automation?: null | Tautomation
 	configuration?: null | Tconfiguration
 	created?: IsoDateString
 	description?: HTMLString
 	device: RecordIdString
+	hide?: boolean
 	id: string
 	information: null | Tinformation
+	mode: string
 	name?: string
+	status?: DevicesStatusOptions
+	updated?: IsoDateString
+}
+
+export type LevelsRecord = {
+	created?: IsoDateString
+	id: string
+	name: string
 	updated?: IsoDateString
 }
 
@@ -122,16 +139,25 @@ export type ModelsRecord<Tparams = unknown> = {
 	updated?: IsoDateString
 }
 
+export type RulesRecord = {
+	action?: RecordIdString[]
+	allow: RecordIdString
+	created?: IsoDateString
+	id: string
+	updated?: IsoDateString
+}
+
 export enum RunTargetOptions {
 	"local" = "local",
 	"device" = "device",
 }
-export type RunRecord = {
+export type RunRecord<Tparameters = unknown> = {
 	action: RecordIdString
 	command: string
 	created?: IsoDateString
 	device: RecordIdString
 	id: string
+	parameters?: null | Tparameters
 	target: RunTargetOptions
 	updated?: IsoDateString
 }
@@ -142,6 +168,7 @@ export type UsersRecord = {
 	email: string
 	emailVisibility?: boolean
 	id: string
+	level: RecordIdString
 	name?: string
 	password: string
 	tokenKey: string
@@ -155,10 +182,12 @@ export type ExternalauthsResponse<Texpand = unknown> = Required<ExternalauthsRec
 export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemFields<Texpand>
 export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
-export type ActionsResponse<Tparams = unknown, Texpand = unknown> = Required<ActionsRecord<Tparams>> & BaseSystemFields<Texpand>
+export type ActionsResponse<Texpand = unknown> = Required<ActionsRecord> & BaseSystemFields<Texpand>
 export type DevicesResponse<Tautomation = unknown, Tconfiguration = unknown, Tinformation = unknown, Texpand = unknown> = Required<DevicesRecord<Tautomation, Tconfiguration, Tinformation>> & BaseSystemFields<Texpand>
+export type LevelsResponse<Texpand = unknown> = Required<LevelsRecord> & BaseSystemFields<Texpand>
 export type ModelsResponse<Tparams = unknown, Texpand = unknown> = Required<ModelsRecord<Tparams>> & BaseSystemFields<Texpand>
-export type RunResponse<Texpand = unknown> = Required<RunRecord> & BaseSystemFields<Texpand>
+export type RulesResponse<Texpand = unknown> = Required<RulesRecord> & BaseSystemFields<Texpand>
+export type RunResponse<Tparameters = unknown, Texpand = unknown> = Required<RunRecord<Tparameters>> & BaseSystemFields<Texpand>
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>
 
 // Types containing all Records and Responses, useful for creating typing helper functions
@@ -171,7 +200,9 @@ export type CollectionRecords = {
 	_superusers: SuperusersRecord
 	actions: ActionsRecord
 	devices: DevicesRecord
+	levels: LevelsRecord
 	models: ModelsRecord
+	rules: RulesRecord
 	run: RunRecord
 	users: UsersRecord
 }
@@ -184,7 +215,9 @@ export type CollectionResponses = {
 	_superusers: SuperusersResponse
 	actions: ActionsResponse
 	devices: DevicesResponse
+	levels: LevelsResponse
 	models: ModelsResponse
+	rules: RulesResponse
 	run: RunResponse
 	users: UsersResponse
 }
@@ -200,7 +233,9 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: '_superusers'): RecordService<SuperusersResponse>
 	collection(idOrName: 'actions'): RecordService<ActionsResponse>
 	collection(idOrName: 'devices'): RecordService<DevicesResponse>
+	collection(idOrName: 'levels'): RecordService<LevelsResponse>
 	collection(idOrName: 'models'): RecordService<ModelsResponse>
+	collection(idOrName: 'rules'): RecordService<RulesResponse>
 	collection(idOrName: 'run'): RecordService<RunResponse>
 	collection(idOrName: 'users'): RecordService<UsersResponse>
 }

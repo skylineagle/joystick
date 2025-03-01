@@ -1,4 +1,8 @@
 import type { DevicesResponse, ModelsResponse } from "@/types/db.types";
+import type {
+  ActionsResponse,
+  RunResponse as BaseRunResponse,
+} from "@/types/db.types";
 
 export type CPSIResult = {
   technology: string;
@@ -16,18 +20,26 @@ export type CPSIResult = {
   timingAdvance?: number;
 };
 
+export type DeviceAutomation = {
+  minutesOn: number;
+  minutesOff: number;
+};
+
 export type DeviceConfiguration = {
+  name: string;
+  source: string;
+} & { [key: string]: unknown };
+
+export type DeviceInformation = {
   user: string;
   password: string;
   host: string;
 };
 
-export type DeviceWithModel = DevicesResponse<
+export type DeviceResponse = DevicesResponse<
+  DeviceAutomation,
   DeviceConfiguration,
-  { device: ModelsResponse }
->;
-export type FullDevice = DevicesResponse<
-  DeviceConfiguration,
+  DeviceInformation,
   { device: ModelsResponse }
 >;
 
@@ -58,3 +70,11 @@ export interface ParamNode {
   description?: string;
   properties: Record<string, ParamNode | ParamValue>;
 }
+
+export type RunResponse = BaseRunResponse<
+  Record<string, unknown>,
+  {
+    device: ModelsResponse;
+    action: ActionsResponse;
+  }
+>;

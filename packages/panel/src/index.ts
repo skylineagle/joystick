@@ -10,8 +10,6 @@ type WebSocketMessage = {
   data?: string;
 };
 
-logger.info(Bun.env.POCKETBASE_URL);
-
 const pb = new PocketBase(Bun.env.POCKETBASE_URL) as TypedPocketBase;
 const connections = new Map<string, ChildProcess>();
 
