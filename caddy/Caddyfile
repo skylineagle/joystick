@@ -1,0 +1,69 @@
+{
+email admin@joystick.io
+}
+
+# Main domain with all services
+
+localhost { # Main application (root path)
+handle / {
+reverse_proxy app:80
+}
+
+    # PocketBase admin and API - updated configuration
+    handle_path /pocketbase/* {
+        reverse_proxy pocketbase:8090
+    }
+
+    # Joystick API
+    handle /joystick* {
+        uri strip_prefix /joystick
+        reverse_proxy joystick:8000
+    }
+
+    # Panel
+    handle /panel* {
+        uri strip_prefix /panel
+        reverse_proxy panel:4000
+    }
+
+    # Baker
+    handle /baker* {
+        uri strip_prefix /baker
+        reverse_proxy baker:3000
+    }
+
+    # Switcher
+    handle /switcher* {
+        uri strip_prefix /switcher
+        reverse_proxy switcher:8080
+    }
+
+    # Whisper
+    handle /whisper* {
+        uri strip_prefix /whisper
+        reverse_proxy whisper:8081
+    }
+
+    # MediaMTX HLS
+    handle /stream/* {
+        reverse_proxy mediamtx:8888
+    }
+
+    # MediaMTX WebRTC
+    handle /stream_web/* {
+        reverse_proxy mediamtx:8889
+    }
+
+    # MediaMTX API and metrics
+    handle /mediamtx/api* {
+        uri strip_prefix /mediamtx/api
+        reverse_proxy mediamtx:9997
+    }
+
+    # Log requests
+    log {
+        output file /var/log/caddy/access.log
+        format console
+    }
+
+}

@@ -2,8 +2,8 @@ services:
   pocketbase:
     image: ghcr.io/skylineagle/joystick/pb:latest
     restart: unless-stopped
-    ports:
-      - "8090:8090"
+    expose:
+      - "8090"
     environment:
       - BAKER_URL=http://baker:3000
       - MEDIAMTX_API=http://mediamtx:9997
@@ -26,12 +26,12 @@ services:
   mediamtx:
     image: bluenviron/mediamtx:1.11.2
     restart: unless-stopped
-    ports:
-      - "9997:9997" # API
-      - "8554:8554" # RTSP
-      - "8888:8888" # API and metrics
-      - "8889:8889" # HLS
-      - "1935:1935" # RTMP
+    expose:
+      - "9997" # API
+      - "8554" # RTSP
+      - "8888" # API and metrics
+      - "8889" # HLS
+      - "1935" # RTMP
     volumes:
       - ./mediamtx/mediamtx.yml:/mediamtx.yml
     networks:
@@ -44,8 +44,8 @@ services:
   app:
     image: ghcr.io/skylineagle/joystick/app:latest
     restart: unless-stopped
-    ports:
-      - "80:80"
+    expose:
+      - "80"
     depends_on:
       - pocketbase
     networks:
@@ -59,14 +59,14 @@ services:
   joystick:
     image: ghcr.io/skylineagle/joystick/joystick:latest
     restart: unless-stopped
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
     environment:
       - POCKETBASE_URL=http://pocketbase:8090
       - SWITCHER_API_URL=http://switcher:8080
       - PORT=8000
       - HOST=0.0.0.0
-      - PASSWORD=Password2@
+      #- PASSWORD=Password2@
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -83,12 +83,12 @@ services:
   panel:
     image: ghcr.io/skylineagle/joystick/panel:latest
     restart: unless-stopped
-    ports:
-      - "4000:4000"
+    expose:
+      - "4000"
     environment:
       - POCKETBASE_URL=http://pocketbase:8090
       - PORT=4000
-      - PASSWORD=Password2@
+      #- PASSWORD=Password2@
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -105,11 +105,11 @@ services:
   baker:
     image: ghcr.io/skylineagle/joystick/baker:latest
     restart: unless-stopped
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       - PORT=3000
-      - PASSWORD=Password2@
+      #- PASSWORD=Password2@
       - MEDIAMTX_API=http://mediamtx:9997
       - POCKETBASE_URL=http://pocketbase:8090
       - JOYSTICK_API_URL=http://joystick:8000
@@ -129,14 +129,14 @@ services:
   switcher:
     image: ghcr.io/skylineagle/joystick/switcher:latest
     restart: unless-stopped
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     environment:
       - MEDIAMTX_API=http://mediamtx:9997
       - POCKETBASE_URL=http://pocketbase:8090
       - JOYSTICK_API_URL=http://joystick:8000
       - PORT=8080
-      - PASSWORD=Password2@
+      #- PASSWORD=Password2@
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -153,19 +153,47 @@ services:
   whisper:
     image: ghcr.io/skylineagle/joystick/whisper:latest
     restart: unless-stopped
-    ports:
-      - "8081:8081"
+    expose:
+      - "8081"
     environment:
       - MEDIAMTX_API=http://mediamtx:9997
       - POCKETBASE_URL=http://pocketbase:8090
       - JOYSTICK_API_URL=http://joystick:8000
       - PORT=8081
-      - PASSWORD=Password2@
+      #- PASSWORD=Password2@
     depends_on:
       pocketbase:
         condition: service_healthy
       mediamtx:
         condition: service_started
+    networks:
+      - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  caddy:
+    image: caddy:2.7.4-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./caddy/logs:/var/log/caddy
+    depends_on:
+      - app
+      - pocketbase
+      - joystick
+      - panel
+      - baker
+      - switcher
+      - whisper
+      - mediamtx
     networks:
       - app-network
     logging:
@@ -180,3 +208,5 @@ networks:
 
 volumes:
   pb_data:
+  caddy_data:
+  caddy_config:
