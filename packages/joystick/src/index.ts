@@ -5,30 +5,31 @@ import cors from "@elysiajs/cors";
 import { $ } from "bun";
 import { Elysia, t } from "elysia";
 import { validate } from "jsonschema";
-import { logger } from "./logger";
+import { enhancedLogger, setupLoggingMiddleware } from "./enhanced-logger";
 import { generateRandomCPSIResult, updateStatus } from "./utils";
 import { STREAM_API_URL, SWITCHER_API_URL } from "@/config";
 
-const app = new Elysia()
-  .onError(({ code, error, request }) => {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
-    logger.error({ code, error, path: request.url }, "Request error occurred");
-    return { success: false, error: errorMessage };
-  })
-  .onRequest(({ request }) => {
-    logger.info(
-      { method: request.method, path: request.url },
-      "Incoming request"
-    );
-  })
-  .get("/", () => "Command Runner API");
+const app = new Elysia();
+
+// Apply the logging middleware
+setupLoggingMiddleware(app);
+
+app.get("/", () => "Command Runner API");
 
 app.post(
   "/api/run/:device/:action",
-  async ({ params, body }) => {
+  async ({ params, body, headers, request }) => {
     try {
-      logger.info("Running command");
+      // Start timing the action
+      enhancedLogger.startActionTimer();
+      enhancedLogger.info(
+        {
+          device: params.device,
+          action: params.action,
+          parameters: body || {},
+        },
+        "Running command"
+      );
 
       // Get the device from PocketBase
       const result = await pb
@@ -82,7 +83,7 @@ app.post(
         ...device.information,
       };
 
-      logger.info(
+      enhancedLogger.debug(
         `using those default parameters: ${JSON.stringify(defaultParamters)}`
       );
 
@@ -114,9 +115,62 @@ app.post(
 
       await updateStatus(params.device);
 
+      // Get the current user for the action logging
+      const authStore = pb.authStore.model;
+      const userId = authStore ? authStore.id : "system";
+
+      // Log the action completion using helper function
+      await enhancedLogger.logCommandAction({
+        userId,
+        deviceId: params.device,
+        actionId: action.id,
+        parameters: body || {},
+        result: response,
+        success: true,
+      });
+
+      enhancedLogger.info(
+        {
+          device: params.device,
+          action: params.action,
+          executionTime: enhancedLogger.getExecutionTime(),
+        },
+        "Command executed successfully"
+      );
+
       return response;
     } catch (error) {
-      logger.error(error);
+      enhancedLogger.error(
+        { error: error instanceof Error ? error.message : String(error) },
+        "Error executing command"
+      );
+
+      // Get the current user for the action logging
+      const authStore = pb.authStore.model;
+      const userId = authStore ? authStore.id : "system";
+
+      // If we have action info, log the failed action
+      if (params?.device && params?.action) {
+        const actionResult = await pb
+          .collection("actions")
+          .getFullList<ActionsResponse>(1, {
+            filter: `name="${params.action}"`,
+          });
+
+        if (actionResult.length === 1) {
+          await enhancedLogger.logCommandAction({
+            userId,
+            deviceId: params.device,
+            actionId: actionResult[0].id,
+            parameters: body || {},
+            result: {
+              error: error instanceof Error ? error.message : String(error),
+            },
+            success: false,
+          });
+        }
+      }
+
       return {
         success: false,
         error: error instanceof Error ? error.message : "Unknown error",
@@ -133,6 +187,15 @@ app.get("/api/cpsi", async () => {
 });
 
 app.get("/api/healtcheck", async () => {
+  // Log a system heartbeat action
+  await enhancedLogger.logSystemAction({
+    actionName: "heartbeat",
+    details: {
+      timestamp: new Date().toISOString(),
+      service: "joystick",
+    },
+  });
+
   return {
     status: "connected",
     lastConnected: new Date().toISOString(),

@@ -11,6 +11,7 @@ export enum Collections {
 	Mfas = "_mfas",
 	Otps = "_otps",
 	Superusers = "_superusers",
+	ActionLogs = "action_logs",
 	Actions = "actions",
 	Devices = "devices",
 	Models = "models",
@@ -90,6 +91,19 @@ export type SuperusersRecord = {
 	tokenKey: string
 	updated?: IsoDateString
 	verified?: boolean
+}
+
+export type ActionLogsRecord<Tparameters = unknown> = {
+	action?: RecordIdString
+	created?: IsoDateString
+	device?: RecordIdString
+	execution_time?: IsoDateString
+	id: string
+	ip_address?: string
+	parameters?: null | Tparameters
+	updated?: IsoDateString
+	user?: RecordIdString
+	user_agent?: string
 }
 
 export type ActionsRecord = {
@@ -193,6 +207,7 @@ export type ExternalauthsResponse<Texpand = unknown> = Required<ExternalauthsRec
 export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemFields<Texpand>
 export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
+export type ActionLogsResponse<Tparameters = unknown, Texpand = unknown> = Required<ActionLogsRecord<Tparameters>> & BaseSystemFields<Texpand>
 export type ActionsResponse<Texpand = unknown> = Required<ActionsRecord> & BaseSystemFields<Texpand>
 export type DevicesResponse<Tautomation = unknown, Tconfiguration = unknown, Tinformation = unknown, Texpand = unknown> = Required<DevicesRecord<Tautomation, Tconfiguration, Tinformation>> & BaseSystemFields<Texpand>
 export type ModelsResponse<Tparams = unknown, Texpand = unknown> = Required<ModelsRecord<Tparams>> & BaseSystemFields<Texpand>
@@ -210,6 +225,7 @@ export type CollectionRecords = {
 	_mfas: MfasRecord
 	_otps: OtpsRecord
 	_superusers: SuperusersRecord
+	action_logs: ActionLogsRecord
 	actions: ActionsRecord
 	devices: DevicesRecord
 	models: ModelsRecord
@@ -226,6 +242,7 @@ export type CollectionResponses = {
 	_mfas: MfasResponse
 	_otps: OtpsResponse
 	_superusers: SuperusersResponse
+	action_logs: ActionLogsResponse
 	actions: ActionsResponse
 	devices: DevicesResponse
 	models: ModelsResponse
@@ -245,6 +262,7 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: '_mfas'): RecordService<MfasResponse>
 	collection(idOrName: '_otps'): RecordService<OtpsResponse>
 	collection(idOrName: '_superusers'): RecordService<SuperusersResponse>
+	collection(idOrName: 'action_logs'): RecordService<ActionLogsResponse>
 	collection(idOrName: 'actions'): RecordService<ActionsResponse>
 	collection(idOrName: 'devices'): RecordService<DevicesResponse>
 	collection(idOrName: 'models'): RecordService<ModelsResponse>
