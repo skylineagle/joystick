@@ -1,13 +1,32 @@
 {
 email admin@joystick.io
+
+    # Define proper MIME types for modern web applications
+    mime {
+        # Add extension mappings here to ensure proper content types
+        .js application/javascript
+        .mjs application/javascript
+        .json application/json
+        .css text/css
+        .wasm application/wasm
+    }
+
 }
 
 # Main domain with all services
 
 localhost { # Main application (root path)
-handle / {
-reverse_proxy app:80
+handle / { # Add standard headers for better security and functionality
+header { # Enable CORS
+Access-Control-Allow-Origin \* # Improve security
+X-Frame-Options "SAMEORIGIN"
+X-Content-Type-Options "nosniff" # Cache static assets
+Cache-Control "public, max-age=3600" # Remove Server header
+-Server
 }
+
+        reverse_proxy app:80
+    }
 
     # PocketBase admin and API - updated configuration
     handle_path /pocketbase/* {

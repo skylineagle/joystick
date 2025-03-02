@@ -26,12 +26,12 @@ services:
   mediamtx:
     image: bluenviron/mediamtx:1.11.2
     restart: unless-stopped
+    ports:
+      - "8554:8554"
     expose:
-      - "9997" # API
-      - "8554" # RTSP
-      - "8888" # API and metrics
-      - "8889" # HLS
-      - "1935" # RTMP
+      - "8888:8888"
+      - "9997:9997"
+      - "8889:8889"
     volumes:
       - ./mediamtx/mediamtx.yml:/mediamtx.yml
     networks:
