@@ -8,6 +8,7 @@ export function useIsPermitted(action: string) {
     queryKey: ["is-permitted", user?.id, action],
     queryFn: async () => {
       if (!user) return false;
+
       const result = await getIsPermitted(action, user.id);
       return result;
     },

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useDevice } from "@/hooks/use-device";
+import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { ExternalLink } from "lucide-react";
 import { memo } from "react";
 import { Link } from "react-router-dom";
@@ -22,6 +23,9 @@ interface DeviceProps {
 export const DeviceRow = memo(
   ({ deviceId, isSelected, onSelect }: DeviceProps) => {
     const { data: device } = useDevice(deviceId);
+    const isAllowedToControlDevice = useIsPermitted("control-device");
+    const isAllowedToDeleteDevice = useIsPermitted("delete-device");
+    const isAllowedToEditDevice = useIsPermitted("edit-device");
 
     if (!device) return null;
 
@@ -62,14 +66,16 @@ export const DeviceRow = memo(
         </TableCell>
         <TableCell className="w-[15%]">
           <div className="flex gap-2">
-            <ConfigurationEditor device={device} />
-            <Link target="_blank" to={`/${deviceId}`} className="self-center">
-              <Button variant="ghost" size="icon">
-                <ExternalLink className="h-4 w-4" />
-                <span className="sr-only">View device</span>
-              </Button>
-            </Link>
-            <DeleteDevice device={device} />
+            {isAllowedToEditDevice && <ConfigurationEditor device={device} />}
+            {isAllowedToControlDevice && (
+              <Link target="_blank" to={`/${deviceId}`} className="self-center">
+                <Button variant="ghost" size="icon">
+                  <ExternalLink className="h-4 w-4" />
+                  <span className="sr-only">View device</span>
+                </Button>
+              </Link>
+            )}
+            {isAllowedToDeleteDevice && <DeleteDevice device={device} />}
           </div>
         </TableCell>
       </TableRow>

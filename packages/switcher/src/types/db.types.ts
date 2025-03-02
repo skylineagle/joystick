@@ -14,6 +14,7 @@ export enum Collections {
 	Actions = "actions",
 	Devices = "devices",
 	Models = "models",
+	Permissions = "permissions",
 	Rules = "rules",
 	Run = "run",
 	Templates = "templates",
@@ -133,6 +134,14 @@ export type ModelsRecord<Tparams = unknown> = {
 	updated?: IsoDateString
 }
 
+export type PermissionsRecord = {
+	created?: IsoDateString
+	id: string
+	name: string
+	updated?: IsoDateString
+	users: RecordIdString[]
+}
+
 export type RulesRecord = {
 	action?: RecordIdString[]
 	allow?: RecordIdString[]
@@ -187,6 +196,7 @@ export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> &
 export type ActionsResponse<Texpand = unknown> = Required<ActionsRecord> & BaseSystemFields<Texpand>
 export type DevicesResponse<Tautomation = unknown, Tconfiguration = unknown, Tinformation = unknown, Texpand = unknown> = Required<DevicesRecord<Tautomation, Tconfiguration, Tinformation>> & BaseSystemFields<Texpand>
 export type ModelsResponse<Tparams = unknown, Texpand = unknown> = Required<ModelsRecord<Tparams>> & BaseSystemFields<Texpand>
+export type PermissionsResponse<Texpand = unknown> = Required<PermissionsRecord> & BaseSystemFields<Texpand>
 export type RulesResponse<Texpand = unknown> = Required<RulesRecord> & BaseSystemFields<Texpand>
 export type RunResponse<Tparameters = unknown, Texpand = unknown> = Required<RunRecord<Tparameters>> & BaseSystemFields<Texpand>
 export type TemplatesResponse<Texpand = unknown> = Required<TemplatesRecord> & BaseSystemFields<Texpand>
@@ -203,6 +213,7 @@ export type CollectionRecords = {
 	actions: ActionsRecord
 	devices: DevicesRecord
 	models: ModelsRecord
+	permissions: PermissionsRecord
 	rules: RulesRecord
 	run: RunRecord
 	templates: TemplatesRecord
@@ -218,6 +229,7 @@ export type CollectionResponses = {
 	actions: ActionsResponse
 	devices: DevicesResponse
 	models: ModelsResponse
+	permissions: PermissionsResponse
 	rules: RulesResponse
 	run: RunResponse
 	templates: TemplatesResponse
@@ -236,6 +248,7 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: 'actions'): RecordService<ActionsResponse>
 	collection(idOrName: 'devices'): RecordService<DevicesResponse>
 	collection(idOrName: 'models'): RecordService<ModelsResponse>
+	collection(idOrName: 'permissions'): RecordService<PermissionsResponse>
 	collection(idOrName: 'rules'): RecordService<RulesResponse>
 	collection(idOrName: 'run'): RecordService<RunResponse>
 	collection(idOrName: 'templates'): RecordService<TemplatesResponse>

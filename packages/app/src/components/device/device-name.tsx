@@ -5,6 +5,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { Label } from "@radix-ui/react-label";
 import { memo } from "react";
 
@@ -15,6 +16,8 @@ export interface DeviceNameProps {
 
 export const DeviceName = memo(
   ({ configurationName, name }: DeviceNameProps) => {
+    const isAllowedToViewStream = useIsPermitted("view-stream");
+
     return (
       <div className="flex items-center gap-2">
         {name ? (
@@ -34,7 +37,7 @@ export const DeviceName = memo(
           </Badge>
         )}
 
-        <StreamLink name={configurationName} />
+        {isAllowedToViewStream && <StreamLink name={configurationName} />}
       </div>
     );
   }

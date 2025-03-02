@@ -16,16 +16,17 @@ import { Label } from "@/components/ui/label";
 import { SelectMode } from "@/components/ui/select-mode";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAction } from "@/hooks/use-action";
+import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { updateDevice } from "@/lib/device";
 import { cn, getModeOptionsFromSchema } from "@/lib/utils";
 import { DevicesStatusOptions } from "@/types/db.types";
 import { DeviceAutomation, DeviceResponse, UpdateDevice } from "@/types/types";
+import { toast } from "@/utils/toast";
 import Editor, { type OnMount } from "@monaco-editor/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import type * as Monaco from "monaco-editor";
 import { useCallback, useRef, useState } from "react";
-import { toast } from "sonner";
 
 export interface ConfigurationEditorProps {
   device: DeviceResponse;
@@ -34,6 +35,7 @@ export interface ConfigurationEditorProps {
 export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
   const queryClient = useQueryClient();
   const { theme } = useTheme();
+  const isAllowedToEditConfig = useIsPermitted("edit-config");
   const { action, isLoading: isActionLoading } = useAction(
     device.id,
     "set-mode"
@@ -62,11 +64,15 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["devices"] });
-      toast.success("Device updated successfully");
+      toast.success({
+        message: "Device updated successfully",
+      });
       setEditingConfig(null);
     },
     onError: (error) => {
-      toast.error("Failed to update device: " + error.message);
+      toast.error({
+        message: "Failed to update device - " + error.message,
+      });
     },
   });
 
@@ -115,11 +121,15 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
           name: editingConfig.name,
         });
       } catch {
-        toast.error("Invalid JSON configuration");
+        toast.error({
+          message: "Invalid JSON configuration",
+        });
       }
     } else {
       if (!isAutomationValid()) {
-        toast.error("Minutes On and Minutes Off must be greater than 0");
+        toast.error({
+          message: "On and Off minutes must be greater than 0",
+        });
         return;
       }
       updateDeviceMutation({
@@ -167,13 +177,21 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
             setCurrentTab(value as "general" | "config")
           }
         >
-          <TabsList className={cn("w-full", "grid grid-cols-2")}>
+          <TabsList
+            className={cn(
+              "w-full",
+              "grid",
+              isAllowedToEditConfig ? "grid-cols-2" : "grid-cols-1"
+            )}
+          >
             <TabsTrigger className="w-full" value="general">
               <Label className="text-foreground">General</Label>
             </TabsTrigger>
-            <TabsTrigger className="w-full" value="config">
-              <Label className="text-foreground">Configuration</Label>
-            </TabsTrigger>
+            {isAllowedToEditConfig && (
+              <TabsTrigger className="w-full" value="config">
+                <Label className="text-foreground">Configuration</Label>
+              </TabsTrigger>
+            )}
           </TabsList>
           <TabsContent value="config" className="py-4">
             <Editor

@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { cn } from "@/lib/utils";
 import { modeConfig } from "@/pages/dashboard/config";
 import { useDeviceStore } from "@/store/device-store";
@@ -34,6 +35,8 @@ export const Filters = memo(() => {
     isReversed,
     toggleReversed,
   } = useDeviceStore();
+  const isAllowedToCreateDevice = useIsPermitted("create-device");
+
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearchQuery(e.target.value);
@@ -68,7 +71,7 @@ export const Filters = memo(() => {
           </div>
         </div>
 
-        <AddDeviceModal />
+        {isAllowedToCreateDevice && <AddDeviceModal />}
       </div>
       {(selectedModes.length > 0 || searchQuery) && (
         <div className="flex items-center gap-2">
