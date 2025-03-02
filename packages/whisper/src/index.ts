@@ -43,9 +43,10 @@ const httpFetchClient: FetchClient = {
 };
 
 const apiClient = new Client(
-  Bun.env.user || "2QI3ID",
-  Bun.env.key || "9ajhrt8g4_a-q3",
-  httpFetchClient
+  Bun.env.SMS_USER || "sms",
+  Bun.env.SMS_KEY || "test",
+  httpFetchClient,
+  Bun.env.SMS_SERVER_URL || "https://api.sms-gate.app"
 );
 
 // Create a Bun server using Elysia
@@ -73,16 +74,14 @@ app.post("/api/send-sms", async ({ body, set }) => {
 
   try {
     // Send the SMS
-    // const result = await apiClient.send({ phoneNumbers, message });
-    const result = { id: randomUUIDv7() };
-    logger.info(`result ${JSON.stringify(result)}`);
-    const messageId = result.id;
-    logger.info(`messageId ${messageId}`);
+    const result = await apiClient.send({ phoneNumbers, message });
+    if (result.state === "Failed") {
+      throw new Error("Failed to send SMS");
+    }
 
     const phoneKey = phoneNumbers[0];
 
     const responsePromise = new Promise<SmsResponse[]>((resolve, reject) => {
-      // Create a function to reset the timeout
       const createTimeout = (isInitial = false) => {
         return setTimeout(
           () => {
@@ -90,7 +89,6 @@ app.post("/api/send-sms", async ({ body, set }) => {
             if (pendingMessage) {
               pendingSmsMessages.delete(phoneKey);
               if (pendingMessage.responses.length > 0) {
-                // If we've received at least one response, resolve with what we have
                 pendingMessage.finalResolve(pendingMessage.responses);
               } else {
                 reject(new Error("SMS response timeout"));
@@ -159,7 +157,7 @@ app.get("/health", () => ({ status: "ok" }));
 
 app
   .use(cors())
-  .listen(Bun.env.PORT || 1234, () =>
+  .listen(Bun.env.PORT || 8081, () =>
     console.log(
       `🚀 SMS Server is running at ${app.server?.hostname}:${app.server?.port}`
     )
