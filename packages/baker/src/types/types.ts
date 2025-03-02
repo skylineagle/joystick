@@ -20,6 +20,7 @@ export type DeviceInformation = {
   user: string;
   password: string;
   host: string;
+  phone?: string;
 };
 
 export type DeviceResponse = DevicesResponse<

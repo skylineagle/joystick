@@ -79,7 +79,12 @@ app.post(
         device: params.device,
         mediamtx: STREAM_API_URL,
         switcher: SWITCHER_API_URL,
+        ...device.information,
       };
+
+      logger.info(
+        `using those default parameters: ${JSON.stringify(defaultParamters)}`
+      );
 
       const command = Object.entries({ ...body, ...defaultParamters }).reduce(
         (acc, [key, value]) => {

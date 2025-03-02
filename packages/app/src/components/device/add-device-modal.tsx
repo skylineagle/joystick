@@ -1,3 +1,8 @@
+import {
+  CountrySelect,
+  FlagComponent,
+  PhoneInput,
+} from "@/components/phone-input";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,17 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { pb } from "@/lib/pocketbase";
-import { cn } from "@/lib/utils";
-import { DeviceResponse } from "@/types/types";
-import { ModelsResponse } from "@/types/db.types";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import * as z from "zod";
 import {
   Select,
   SelectContent,
@@ -27,6 +21,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { pb } from "@/lib/pocketbase";
+import { cn } from "@/lib/utils";
+import { ModelsResponse } from "@/types/db.types";
+import { DeviceResponse } from "@/types/types";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import * as RPNInput from "react-phone-number-input";
+import { Country } from "react-phone-number-input";
+import { toast } from "sonner";
+import * as z from "zod";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -36,9 +43,9 @@ const formSchema = z.object({
     ipAddress: z.string().ip("Must be a valid IP address"),
   }),
   information: z.object({
-    host: z.string().min(1, "Host is required"),
     user: z.string().min(1, "User is required"),
     password: z.string().min(1, "Password is required"),
+    phone: z.string().optional(),
   }),
 });
 
@@ -47,7 +54,6 @@ type FormValues = z.infer<typeof formSchema>;
 export function AddDeviceModal() {
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -58,29 +64,22 @@ export function AddDeviceModal() {
         ipAddress: "",
       },
       information: {
-        host: "",
         user: "",
         password: "",
+        phone: "",
       },
     },
   });
+  const { data: defaultCountry } = useQuery({
+    queryKey: ["default-country", form.getValues("deviceType")],
+    queryFn: async () => {
+      const country = await pb
+        .collection("templates")
+        .getFirstListItem(`name = "country"`);
 
-  // const { data: sourceTemplate } = useQuery({
-  //   queryKey: ["source-template", form.getValues("deviceType")],
-  //   queryFn: async () => {
-  //     console.log(form.getValues("deviceType"));
-  //     const template = await pb
-  //       .collection("templates")
-  //       .getFirstListItem<{ value: { template: string } }>(
-  //         `name = "source" && model = "${form.getValues("deviceType")}"`
-  //       );
-
-  //     return template.value.template;
-  //   },
-  //   enabled: !!form.getValues("deviceType"),
-  // });
-
-  // console.log(sourceTemplate);
+      return country;
+    },
+  });
 
   const { data: deviceModels } = useQuery({
     queryKey: ["device-models"],
@@ -99,22 +98,18 @@ export function AddDeviceModal() {
       deviceType,
       ...data
     }: FormValues) => {
-      console.log(deviceType);
+      const sourceResult = await pb.collection("templates").getFullList({
+        filter: `name = "source" && model ?~ "${deviceType}"`,
+      });
 
-      const sourceTemplate = await pb
-        .collection("templates")
-        .getFirstListItem(`name = "source" && model = "${deviceType}"`);
-
-      if (!sourceTemplate) {
+      if (!sourceResult || sourceResult.length !== 1) {
         throw new Error("Source template must be set in the db.");
       }
-      console.log(sourceTemplate.value);
 
+      const sourceTemplate = sourceResult[0];
       const sourceUrl = sourceTemplate.value
         .replace("<ip>", configuration.ipAddress)
         .replace("<id>", configuration.name);
-
-      console.log(sourceUrl);
 
       const configWithSource = {
         name: configuration.name,
@@ -125,7 +120,12 @@ export function AddDeviceModal() {
         ...data,
         device: deviceType,
         configuration: configWithSource,
-        information,
+        information: {
+          ...information,
+          phone:
+            information?.phone?.length === 13 ? information.phone : undefined,
+          host: configuration.ipAddress,
+        },
         mode: "off",
         automation: null,
       });
@@ -244,22 +244,6 @@ export function AddDeviceModal() {
               <h3 className="text-sm font-medium">Device Information</h3>
               <div className="grid gap-4 grid-cols-2">
                 <div className="grid gap-2">
-                  <Label htmlFor="host">Host</Label>
-                  <Input
-                    id="host"
-                    {...form.register("information.host")}
-                    className={cn(
-                      form.formState.errors.information?.host &&
-                        "border-destructive"
-                    )}
-                  />
-                  {form.formState.errors.information?.host && (
-                    <p className="text-sm text-destructive">
-                      {form.formState.errors.information.host.message}
-                    </p>
-                  )}
-                </div>
-                <div className="grid gap-2">
                   <Label htmlFor="user">User</Label>
                   <Input
                     id="user"
@@ -275,21 +259,46 @@ export function AddDeviceModal() {
                     </p>
                   )}
                 </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    {...form.register("information.password")}
+                    className={cn(
+                      form.formState.errors.information?.password &&
+                        "border-destructive"
+                    )}
+                  />
+                  {form.formState.errors.information?.password && (
+                    <p className="text-sm text-destructive">
+                      {form.formState.errors.information.password.message}
+                    </p>
+                  )}
+                </div>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  {...form.register("information.password")}
-                  className={cn(
-                    form.formState.errors.information?.password &&
-                      "border-destructive"
-                  )}
+                <Label htmlFor="phone">Phone number</Label>
+                <RPNInput.default
+                  className="flex rounded-md shadow-xs"
+                  international
+                  flagComponent={FlagComponent}
+                  defaultCountry={defaultCountry?.value as Country}
+                  countrySelectComponent={CountrySelect}
+                  inputComponent={PhoneInput}
+                  numberInputProps={{
+                    ...form.register("information.phone"),
+                  }}
+                  id="phone"
+                  placeholder="Enter phone number"
+                  value={form.getValues("information.phone")}
+                  onChange={(value) =>
+                    form.setValue("information.phone", value ?? "")
+                  }
                 />
-                {form.formState.errors.information?.password && (
+                {form.formState.errors.information?.phone && (
                   <p className="text-sm text-destructive">
-                    {form.formState.errors.information.password.message}
+                    {form.formState.errors.information.phone.message}
                   </p>
                 )}
               </div>

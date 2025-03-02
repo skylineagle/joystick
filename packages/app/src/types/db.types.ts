@@ -159,7 +159,7 @@ export type RunRecord<Tparameters = unknown> = {
 export type TemplatesRecord = {
 	created?: IsoDateString
 	id: string
-	model: RecordIdString
+	model?: RecordIdString[]
 	name: string
 	updated?: IsoDateString
 	value?: string
