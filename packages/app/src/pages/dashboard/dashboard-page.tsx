@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody } from "@/components/ui/table";
 import { UserProfile } from "@/components/user-profile";
 import { useDevicesQuery } from "@/hooks/use-devices-query";
+import { useAuthStore } from "@/lib/auth";
 import { DeviceTableHeader } from "@/pages/dashboard/devices-header";
 import { Filters } from "@/pages/dashboard/filters";
 import { useDeviceStore } from "@/store/device-store";
@@ -12,6 +13,7 @@ import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { Toaster } from "sonner";
 
 export function DashboardPage() {
+  const { user } = useAuthStore();
   const { devices, isLoading } = useDevicesQuery();
   const { selectedDevices, selectDevice, selectAllDevices, clearSelection } =
     useDeviceStore();
@@ -25,7 +27,9 @@ export function DashboardPage() {
           <div className="flex items-center justify-between px-12 py-4">
             <div className="flex items-center gap-2">
               <img src="/logo.png" alt="Switcher Logo" className="h-16 w-16" />
-              <h1 className="text-3xl font-bold">HaTomer</h1>
+              <h1 className="text-3xl font-bold">
+                {user?.email.includes("user") ? "HaTomer" : "Joystick"}
+              </h1>
             </div>
 
             <div className="flex items-center gap-5">
