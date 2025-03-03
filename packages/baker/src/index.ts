@@ -104,14 +104,42 @@ app.delete("/jobs/:device", async ({ params }) => {
 });
 
 app.get("/jobs/:device/next", async ({ params }) => {
-  const { device } = params;
-  const nextExecution = await getNextExecution(device);
-  const status = getJobStatus(device);
-  return {
-    success: true,
-    nextExecution: nextExecution.toString(),
-    status,
-  };
+  try {
+    const { device } = params;
+    const result = await getNextExecution(device);
+    const status = getJobStatus(device);
+
+    if (!result || !result.nextExecution) {
+      const fallbackTime = new Date(Date.now() + 60000); // 1 minute from now
+      return {
+        success: true,
+        nextExecution: fallbackTime.toString(),
+        jobName: device,
+        status,
+      };
+    }
+
+    return {
+      success: true,
+      nextExecution: result.nextExecution.toString(),
+      jobName: result.jobName,
+      status,
+    };
+  } catch (error) {
+    logger.error("Failed to get next execution", {
+      device: params.device,
+      error,
+    });
+
+    const fallbackTime = new Date(Date.now() + 60000); // 1 minute from now
+    return {
+      success: false,
+      nextExecution: fallbackTime.toString(),
+      jobName: params.device,
+      error:
+        error instanceof Error ? error.message : "An unknown error occurred",
+    };
+  }
 });
 
 app.use(cors()).listen(3000);

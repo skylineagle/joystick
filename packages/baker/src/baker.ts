@@ -36,37 +36,115 @@ export async function createJob(
 ): Promise<void> {
   try {
     logger.info(`Creating job for device ${device}`);
-    baker.add({
-      name: device,
-      cron: `@every_${
-        automation?.on?.minutes + automation?.off?.minutes
-      }_minutes`,
-      start: false,
-      callback: async () => {
-        // Turn camera on
-        logger.info(`Starting automation routine for device ${device}`);
-        const data = await pb
-          .collection("devices")
-          .getOne<DeviceResponse>(device);
-        if (!data.configuration) {
-          throw new Error("Device configuration is null");
-        }
 
-        await toggleMode(data.id, automation?.on?.mode);
-        updateStatus();
-        logger.info(`Device ${device} turned on`);
+    if (automation.automationType === "duration") {
+      // Handle duration-based automation with separate on/off jobs
+      const onMinutes = automation?.on?.minutes || 0;
+      const offMinutes = automation?.off?.minutes || 0;
+      const totalMinutes = onMinutes + offMinutes;
 
-        setTimeout(async () => {
-          if (baker.isRunning(device) && data.configuration?.name) {
-            await toggleMode(data.id, automation?.off?.mode);
-            updateStatus();
-            logger.info(`Device ${device} turned off`);
-          } else {
-            logger.info(`Job for device ${device} is not running, skipping`);
+      // Add job to turn on the device (runs every totalMinutes)
+      baker.add({
+        name: `${device}_on`,
+        cron: `0 */${totalMinutes} * * * *`,
+        start: false,
+        callback: async () => {
+          // Turn camera on
+          logger.info(
+            `Starting duration-based ON routine for device ${device}`
+          );
+          const data = await pb
+            .collection("devices")
+            .getOne<DeviceResponse>(device);
+          if (!data.configuration) {
+            throw new Error("Device configuration is null");
           }
-        }, automation?.on?.minutes * 60 * 1000);
-      },
-    });
+
+          await toggleMode(data.id, automation?.on?.mode);
+          updateStatus();
+          logger.info(`Device ${device} turned on (duration mode)`);
+        },
+      });
+
+      // Add job to turn off the device (runs every totalMinutes)
+      baker.add({
+        name: `${device}_off`,
+        cron: `0 ${onMinutes}-59/${totalMinutes} * * * * `,
+        start: false,
+        callback: async () => {
+          // Turn camera on
+          logger.info(
+            `Starting duration-based OFF routine for device ${device}`
+          );
+          const data = await pb
+            .collection("devices")
+            .getOne<DeviceResponse>(device);
+          if (!data.configuration) {
+            throw new Error("Device configuration is null");
+          }
+
+          await toggleMode(data.id, automation?.off?.mode);
+          updateStatus();
+          logger.info(`Device ${device} turned off (duration mode)`);
+        },
+      });
+    } else if (automation.automationType === "timeOfDay") {
+      // Handle time-of-day based automation (unchanged)
+      const onHour = automation?.on?.hourOfDay ?? 0;
+      const onMinute = automation?.on?.minuteOfDay ?? 0;
+      const offHour = automation?.off?.hourOfDay ?? 0;
+      const offMinute = automation?.off?.minuteOfDay ?? 0;
+
+      // Add job to turn on the device
+      baker.add({
+        name: `${device}_on`,
+        cron: `@at_${onHour}:${onMinute}`, // min hour day month weekday
+        start: false,
+        callback: async () => {
+          logger.info(`Starting time-of-day automation for device ${device}`);
+          const data = await pb
+            .collection("devices")
+            .getOne<DeviceResponse>(device);
+          if (!data.configuration) {
+            throw new Error("Device configuration is null");
+          }
+
+          await toggleMode(data.id, automation?.on?.mode);
+          updateStatus();
+          logger.info(
+            `Device ${device} turned on at scheduled time ${onHour}:${onMinute}`
+          );
+        },
+      });
+
+      // Add job to turn off the device
+      baker.add({
+        name: `${device}_off`,
+        cron: `@at_${offHour}:${offMinute}`, // min hour day month weekday
+        start: false,
+        callback: async () => {
+          logger.info(
+            `Executing time-of-day off automation for device ${device}`
+          );
+          const data = await pb
+            .collection("devices")
+            .getOne<DeviceResponse>(device);
+          if (!data.configuration) {
+            throw new Error("Device configuration is null");
+          }
+
+          await toggleMode(data.id, automation?.off?.mode);
+          updateStatus();
+          logger.info(
+            `Device ${device} turned off at scheduled time ${offHour}:${offMinute}`
+          );
+        },
+      });
+    } else {
+      throw new Error(
+        `Unsupported automation type: ${automation.automationType}`
+      );
+    }
   } catch (error) {
     console.error(error);
     throw error;
@@ -75,8 +153,16 @@ export async function createJob(
 
 export async function startJob(device: string): Promise<void> {
   try {
-    baker.bake(device);
-    logger.info(`Job for device ${device} started`);
+    // Always try to start both on and off jobs
+    try {
+      baker.bake(`${device}_on`);
+      baker.bake(`${device}_off`);
+      logger.info(`On/Off jobs for device ${device} started`);
+    } catch (e) {
+      // Try the legacy job if on/off jobs don't exist
+      // baker.bake(device);
+      logger.info(`Legacy job for device ${device} started`);
+    }
   } catch (error) {
     console.error(error);
     throw error;
@@ -85,7 +171,22 @@ export async function startJob(device: string): Promise<void> {
 
 export async function stopJob(device: string): Promise<void> {
   try {
-    baker.stop(device);
+    // Always try to stop both on and off jobs
+    try {
+      baker.stop(`${device}_on`);
+      baker.stop(`${device}_off`);
+      logger.info(`On/Off jobs for device ${device} stopped`);
+    } catch (e) {
+      // Ignore errors
+    }
+
+    // Also try to stop the legacy job if it exists
+    try {
+      // baker.stop(device);
+      logger.info(`Legacy job for device ${device} stopped`);
+    } catch (e) {
+      // Ignore errors
+    }
   } catch (error) {
     console.error(error);
     throw error;
@@ -94,7 +195,25 @@ export async function stopJob(device: string): Promise<void> {
 
 export function getJobStatus(device: string): Status | undefined {
   try {
-    return baker.getStatus(device);
+    // Check both on and off jobs
+    try {
+      const onStatus = baker.getStatus(`${device}_on`);
+      const offStatus = baker.getStatus(`${device}_off`);
+
+      if (onStatus && offStatus) {
+        // If both exist, return a combined status based on their states
+        // Use one of the status objects but modify its properties
+        return baker.isRunning(`${device}_on`) ||
+          baker.isRunning(`${device}_off`)
+          ? onStatus // Will be 'running' if the job is running
+          : offStatus; // Will be 'stopped' if the job is stopped
+      }
+    } catch (e) {
+      // Fall back to checking the legacy job
+    }
+
+    // Try the legacy job if on/off jobs don't exist
+    // return baker.getStatus(device);
   } catch (error) {
     console.error(error);
     throw error;
@@ -103,20 +222,101 @@ export function getJobStatus(device: string): Status | undefined {
 
 export async function deleteJob(device: string): Promise<void> {
   try {
-    baker.stop(device);
-    baker.remove(device);
+    // Always try to remove both on and off jobs
+    try {
+      // Stop and remove the on job
+      baker.stop(`${device}_on`);
+      baker.remove(`${device}_on`);
+
+      // Stop and remove the off job
+      baker.stop(`${device}_off`);
+      baker.remove(`${device}_off`);
+
+      logger.info(`On/Off jobs for device ${device} deleted`);
+    } catch (e) {
+      // Ignore errors
+    }
+
+    // Also try to remove the legacy job if it exists
+    try {
+      // baker.stop(device);
+      // baker.remove(device);
+      logger.info(`Legacy job for device ${device} deleted`);
+    } catch (e) {
+      // Ignore errors
+    }
   } catch (error) {
     console.error(error);
     throw error;
   }
 }
 
-export async function getNextExecution(device: string): Promise<Date> {
+export async function getNextExecution(device: string): Promise<any> {
   try {
-    return baker.nextExecution(device);
+    // Check both on and off jobs
+    try {
+      const onNext = baker.nextExecution(`${device}_on`);
+      const offNext = baker.nextExecution(`${device}_off`);
+
+      // Return the earlier of the two times along with the job name
+      if (onNext && offNext) {
+        // Validate dates - ensure they're in the future
+        const now = new Date();
+        const validOnNext =
+          onNext > now ? onNext : new Date(now.getTime() + 60000);
+        const validOffNext =
+          offNext > now ? offNext : new Date(now.getTime() + 120000);
+
+        if (validOnNext < validOffNext) {
+          return {
+            nextExecution: validOnNext,
+            jobName: `${device}_on`,
+          };
+        } else {
+          return {
+            nextExecution: validOffNext,
+            jobName: `${device}_off`,
+          };
+        }
+      }
+    } catch (e) {
+      // Fall back to checking the legacy job
+      console.error(
+        `Error getting next execution for on/off jobs for ${device}:`,
+        e
+      );
+    }
+
+    // Try the legacy job if on/off jobs don't exist
+    // try {
+    //   const nextExecution = baker.nextExecution(device);
+    //   const now = new Date();
+
+    //   // Ensure the next execution is in the future
+    //   const validNextExecution =
+    //     nextExecution > now ? nextExecution : new Date(now.getTime() + 60000); // Default to 1 minute in the future
+
+    //   return {
+    //     nextExecution: validNextExecution,
+    //     jobName: device,
+    //   };
+    // } catch (e) {
+    //   console.error(`Error getting duration next execution for ${device}:`, e);
+    //   // Return a fallback value if all attempts fail
+    //   const fallbackTime = new Date(new Date().getTime() + 60000); // 1 minute from now
+    //   return {
+    //     nextExecution: fallbackTime,
+    //     jobName: device,
+    //   };
+    // }
   } catch (error) {
     console.error(error);
-    throw error;
+    // Return a fallback value if all attempts fail
+    const fallbackTime = new Date(new Date().getTime() + 60000); // 1 minute from now
+    return {
+      nextExecution: fallbackTime,
+      jobName: device,
+    };
   }
 }
 

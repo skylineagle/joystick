@@ -14,6 +14,7 @@ import { DeviceResponse } from "@/types/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
 import { toast } from "@/utils/toast";
+import { Button } from "@/components/ui/button";
 
 export function DeleteDevice({ device }: { device: DeviceResponse }) {
   const queryClient = useQueryClient();
@@ -33,7 +34,9 @@ export function DeleteDevice({ device }: { device: DeviceResponse }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger>
-        <Trash2 className="h-4 w-4 text-destructive" />
+        <Button variant="ghost" size="icon">
+          <Trash2 className="h-4 w-4 text-destructive" />
+        </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

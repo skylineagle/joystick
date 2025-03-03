@@ -34,7 +34,7 @@ export const Controls = () => {
   return (
     <Card
       className={cn(
-        "flex flex-col border-none bg-muted/30",
+        "flex flex-col border-none shadow-2xl bg-muted/30",
         isMobileLandscape
           ? "p-2 w-[180px] h-full"
           : "p-4 hidden md:flex min-w-[200px] gap-4"
@@ -69,7 +69,7 @@ export const Controls = () => {
           </>
         )}
 
-        <Card className="p-3 border-t mt-3">
+        <Card className="p-3 border-none shadow-xl mt-3">
           <Tabs
             defaultValue="stream"
             value={activeTab}

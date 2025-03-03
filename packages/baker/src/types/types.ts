@@ -1,13 +1,18 @@
 import type { DevicesResponse, ModelsResponse } from "@/types/db.types";
 
 export type DeviceAutomation = {
+  automationType: "duration" | "timeOfDay";
   on: {
-    minutes: number;
+    minutes?: number;
     mode: string;
+    hourOfDay?: number;
+    minuteOfDay?: number;
   };
   off: {
-    minutes: number;
+    minutes?: number;
     mode: string;
+    hourOfDay?: number;
+    minuteOfDay?: number;
   };
 };
 
