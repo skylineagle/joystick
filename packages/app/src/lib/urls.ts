@@ -12,11 +12,7 @@ function getServiceUrl(service: keyof typeof PORTS): string {
   const hostname = window.location.hostname;
   const port = PORTS[service];
 
-  if (true || import.meta.env.NODE_ENV === "development") {
-    return `${protocol}//${hostname}:${port}`;
-  }
-
-  // return `${protocol}//${hostname}/${port}`;
+  return `${protocol}//${hostname}:${port}`;
 }
 
 export const urls = {
