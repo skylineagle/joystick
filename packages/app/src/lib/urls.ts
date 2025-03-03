@@ -1,6 +1,7 @@
 const PORTS = {
   joystick: 8000,
   stream: 8888,
+  stream_api: 9997,
   pocketbase: 8090,
   panel: 4000,
   baker: 3000,
@@ -24,6 +25,9 @@ export const urls = {
   },
   get stream() {
     return getServiceUrl("stream");
+  },
+  get stream_api() {
+    return getServiceUrl("stream_api");
   },
   get baker() {
     return getServiceUrl("baker");

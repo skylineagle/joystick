@@ -51,6 +51,7 @@ export function StreamView() {
     >
       <div className="flex-1 min-h-0 relative">
         <Frame deviceName={device.name} isMediaMtx={isMediaMtx} mode={mode} />
+
         {roiMode !== "hide" && (
           <div className="absolute inset-0">
             <Roi>

@@ -44,7 +44,7 @@ export function DashboardPage() {
                 />
               </CardHeader>
               <CardContent>
-                <div className="bg-background">
+                <div>
                   <Table>
                     <DeviceTableHeader
                       onSelectAll={() =>

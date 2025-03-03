@@ -1,9 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { runAction } from "@/lib/joystick-api";
-import { cn, parseCPSIResult } from "@/lib/utils";
+import { parseCPSIResult } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import {
   RefreshCw,
@@ -16,10 +15,9 @@ import {
 
 interface CellularStatusProps {
   deviceId: string;
-  className?: string;
 }
 
-export function CellularStatus({ deviceId, className }: CellularStatusProps) {
+export function CellularStatus({ deviceId }: CellularStatusProps) {
   const {
     data,
     isLoading: isCpsiLoading,
@@ -131,106 +129,99 @@ export function CellularStatus({ deviceId, className }: CellularStatusProps) {
   };
 
   return (
-    <Card key="cellular" className={cn("shadow-md h-full m-4", className)}>
-      <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
-        <CardTitle className="text-lg">Cellular Status</CardTitle>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => refetchCpsi()}
-          disabled={isCpsiLoading}
-          className="h-8 w-8"
-        >
-          <RefreshCw className="h-4 w-4" />
-          <span className="sr-only">Refresh cellular status</span>
-        </Button>
-      </CardHeader>
-      <CardContent className="p-4 pt-0">
-        {isCpsiLoading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-6 w-3/4" />
-            <Skeleton className="h-6 w-1/2" />
+    <div className="p-4 pt-0">
+      {isCpsiLoading ? (
+        <div className="space-y-2">
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-3/4" />
+          <Skeleton className="h-6 w-1/2" />
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              {getSignalIcon()}
+              <span className="font-medium">
+                {data.operator || "Unknown Operator"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              {getNetworkTypeBadge(data.technology)}
+              {getStatusBadge(data.status)}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => refetchCpsi()}
+              disabled={isCpsiLoading}
+              className="h-8 w-8"
+            >
+              <RefreshCw className="h-4 w-4" />
+              <span className="sr-only">Refresh cellular status</span>
+            </Button>
           </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                {getSignalIcon()}
-                <span className="font-medium">
-                  {data.operator || "Unknown Operator"}
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                {getNetworkTypeBadge(data.technology)}
-                {getStatusBadge(data.status)}
-              </div>
+
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 pt-2">
+            <div className="flex flex-col">
+              <span className="text-sm text-muted-foreground">MCC-MNC</span>
+              <span>{data.mccMnc || "N/A"}</span>
             </div>
 
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2 pt-2">
-              <div className="flex flex-col">
-                <span className="text-sm text-muted-foreground">MCC-MNC</span>
-                <span>{data.mccMnc || "N/A"}</span>
-              </div>
+            <div className="flex flex-col">
+              <span className="text-sm text-muted-foreground">Band</span>
+              <span>{data.band || "N/A"}</span>
+            </div>
 
-              <div className="flex flex-col">
-                <span className="text-sm text-muted-foreground">Band</span>
-                <span>{data.band || "N/A"}</span>
-              </div>
+            <div className="flex flex-col">
+              <span className="text-sm text-muted-foreground">ARFCN</span>
+              <span>{data.arfcn !== undefined ? data.arfcn : "N/A"}</span>
+            </div>
 
-              <div className="flex flex-col">
-                <span className="text-sm text-muted-foreground">ARFCN</span>
-                <span>{data.arfcn !== undefined ? data.arfcn : "N/A"}</span>
-              </div>
+            {data.technology === "LTE" ? (
+              <>
+                <div className="flex flex-col">
+                  <span className="text-sm text-muted-foreground">RSRP</span>
+                  <span>{formatSignalMetric(data.rsrp, "dBm")}</span>
+                </div>
 
-              {data.technology === "LTE" ? (
-                <>
+                <div className="flex flex-col">
+                  <span className="text-sm text-muted-foreground">SINR</span>
+                  <span>{formatSignalMetric(data.sinr, "dB")}</span>
+                </div>
+
+                <div className="flex flex-col">
+                  <span className="text-sm text-muted-foreground">RSRQ</span>
+                  <span>{formatSignalMetric(data.rsrq, "dB")}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex flex-col">
+                  <span className="text-sm text-muted-foreground">RSSI</span>
+                  <span>{formatSignalMetric(data.rssi, "dBm")}</span>
+                </div>
+
+                {data.technology === "GSM" && (
                   <div className="flex flex-col">
-                    <span className="text-sm text-muted-foreground">RSRP</span>
-                    <span>{formatSignalMetric(data.rsrp, "dBm")}</span>
+                    <span className="text-sm text-muted-foreground">BSIC</span>
+                    <span>{data.bsic !== undefined ? data.bsic : "N/A"}</span>
                   </div>
+                )}
 
-                  <div className="flex flex-col">
-                    <span className="text-sm text-muted-foreground">SINR</span>
-                    <span>{formatSignalMetric(data.sinr, "dB")}</span>
-                  </div>
-
-                  <div className="flex flex-col">
-                    <span className="text-sm text-muted-foreground">RSRQ</span>
-                    <span>{formatSignalMetric(data.rsrq, "dB")}</span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex flex-col">
-                    <span className="text-sm text-muted-foreground">RSSI</span>
-                    <span>{formatSignalMetric(data.rssi, "dBm")}</span>
-                  </div>
-
-                  {data.technology === "GSM" && (
+                {data.technology === "GSM" &&
+                  data.timingAdvance !== undefined && (
                     <div className="flex flex-col">
                       <span className="text-sm text-muted-foreground">
-                        BSIC
+                        Timing Advance
                       </span>
-                      <span>{data.bsic !== undefined ? data.bsic : "N/A"}</span>
+                      <span>{data.timingAdvance}</span>
                     </div>
                   )}
-
-                  {data.technology === "GSM" &&
-                    data.timingAdvance !== undefined && (
-                      <div className="flex flex-col">
-                        <span className="text-sm text-muted-foreground">
-                          Timing Advance
-                        </span>
-                        <span>{data.timingAdvance}</span>
-                      </div>
-                    )}
-                </>
-              )}
-            </div>
+              </>
+            )}
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </div>
   );
 }
