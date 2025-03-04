@@ -25,7 +25,7 @@ export const ModeSelector = ({ deviceId }: ModeSelectorProps) => {
   );
   const { data: modes, isLoading: isModesLoading } = useModeConfig(deviceId);
   console.log(modes);
-  const currentMode = modes?.[mode as keyof typeof modes];
+  const currentMode = modes[mode as keyof typeof modes];
 
   const handleModeChange = useCallback(
     (value: string) => {
@@ -43,9 +43,7 @@ export const ModeSelector = ({ deviceId }: ModeSelectorProps) => {
           bgColor,
           hoverColor,
           icon: Icon,
-        } = modes?.[actionName as keyof typeof modes] ?? {};
-        console.log(actionName, modes?.[actionName as keyof typeof modes]);
-
+        } = modes[actionName as keyof typeof modes] ?? {};
         const isSelected = mode === actionName;
 
         return (

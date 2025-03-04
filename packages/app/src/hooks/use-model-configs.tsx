@@ -36,5 +36,5 @@ export function useModeConfig(deviceId: string) {
     enabled: !!deviceId,
   });
 
-  return { data, isLoading };
+  return { data: data ?? modeConfig, isLoading };
 }

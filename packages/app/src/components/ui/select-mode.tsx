@@ -26,7 +26,7 @@ export const SelectMode = ({
   availableModes,
 }: SelectModeProps) => {
   const { data: configs } = useModeConfig(deviceId);
-  const config = configs?.[mode as keyof typeof configs] ?? {};
+  const config = configs[mode as keyof typeof configs] ?? {};
 
   return (
     <Select value={mode} onValueChange={handleModeChange} disabled={isLoading}>
@@ -74,7 +74,7 @@ export const SelectMode = ({
             bgColor,
             hoverColor,
             icon: Icon,
-          } = configs?.[actionName as keyof typeof configs] ?? {};
+          } = configs[actionName as keyof typeof configs] ?? {};
 
           const isSelected = mode === actionName;
 
