@@ -7,7 +7,7 @@ export const modeConfig = {
     description: "Camera is actively streaming",
     color: "text-green-500",
     bgColor: "bg-green-500/10",
-    hoverColor: "hover:bg-green-500/10",
+    hoverColor: "hover:bg-green-500/10 focus:bg-green-500/10",
   },
   off: {
     label: "Offline",
@@ -15,7 +15,7 @@ export const modeConfig = {
     description: "Camera is turned off",
     color: "text-slate-500",
     bgColor: "bg-slate-500/10",
-    hoverColor: "hover:bg-slate-500/10",
+    hoverColor: "hover:bg-slate-500/10 focus:bg-slate-500/10",
   },
   "live-day": {
     label: "Live Day",
@@ -23,7 +23,7 @@ export const modeConfig = {
     description: "Using the day preset",
     color: "text-yellow-500",
     bgColor: "bg-yellow-500/10",
-    hoverColor: "hover:bg-yellow-500/10",
+    hoverColor: "hover:bg-yellow-500/10 focus:bg-yellow-500/10",
   },
   "live-night": {
     label: "Live Night",
@@ -31,7 +31,7 @@ export const modeConfig = {
     description: "Using the night preset",
     color: "text-indigo-500",
     bgColor: "bg-indigo-500/10",
-    hoverColor: "hover:bg-indigo-500/10",
+    hoverColor: "hover:bg-indigo-500/10 focus:bg-indigo-500/10",
   },
   auto: {
     label: "Automated",
@@ -39,7 +39,7 @@ export const modeConfig = {
     description: "Camera follows automated schedule",
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
-    hoverColor: "hover:bg-blue-500/10",
+    hoverColor: "hover:bg-blue-500/10 focus:bg-blue-500/10",
   },
 } as const;
 

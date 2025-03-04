@@ -1,30 +1,34 @@
 import { useDevice } from "@/hooks/use-device";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { useRoiMode } from "@/hooks/use-roi-mode";
-import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 import { Controls } from "@/pages/stream-view/controls";
 import { Roi } from "@/pages/stream-view/roi/roi";
-import { memo } from "react";
+import { memo, useState } from "react";
+import { CommittedRoiProperties, RoiProvider } from "react-roi";
 import { useParams } from "react-router-dom";
-import { Frame as WsFrame } from "./ws-frame";
+import { MediaFrame, RoiMediaFrame } from "./media-frame";
+import { WsFrame } from "./ws-frame";
 
 // Memoize the frame to prevent rerenders when ROI mode changes
 export const Frame = memo(
   ({
+    deviceId,
     deviceName,
     isMediaMtx,
     mode,
   }: {
+    deviceId: string;
     deviceName: string;
     isMediaMtx: boolean;
     mode: "edit" | "view";
   }) => {
     return isMediaMtx ? (
-      <iframe
-        src={`${urls.stream}/${deviceName}?controls=false&autoPlay=true`}
-        className="size-full"
-      />
+      mode === "edit" ? (
+        <RoiMediaFrame deviceId={deviceId} deviceName={deviceName} />
+      ) : (
+        <MediaFrame deviceId={deviceId} deviceName={deviceName} />
+      )
     ) : (
       <WsFrame mode={mode} />
     );
@@ -32,6 +36,7 @@ export const Frame = memo(
 );
 
 export function StreamView() {
+  const [roiData, setRoiData] = useState<CommittedRoiProperties<unknown>[]>([]);
   const { isMobileLandscape } = useMobileLandscape();
   const { device: deviceId } = useParams();
   const { data: device } = useDevice(deviceId ?? "");
@@ -43,24 +48,63 @@ export function StreamView() {
   const mode = roiMode === "hide" ? "view" : "edit";
 
   return (
-    <div
-      className={cn(
-        "flex gap-4 md:gap-6 h-full",
-        isMobileLandscape ? "flex-row" : "flex-col md:flex-row"
-      )}
-    >
-      <div className="flex-1 min-h-0 relative">
-        <Frame deviceName={device.name} isMediaMtx={isMediaMtx} mode={mode} />
+    <RoiProvider
+      initialConfig={{
+        commitRoiBoxStrategy: "exact",
+        resizeStrategy: "none",
+        rois: roiData,
+      }}
+      onAfterDraw={(roi) => {
+        console.log("onAfterDraw", roi);
 
-        {roiMode !== "hide" && (
-          <div className="absolute inset-0">
-            <Roi>
-              <div className="absolute inset-0" />
-            </Roi>
-          </div>
+        setRoiData((prev) => [...prev, roi]);
+      }}
+      onAfterMove={(selectedRoiId, roi) => {
+        console.log("onAfterMove", selectedRoiId, roi);
+
+        setRoiData((prev) =>
+          prev.map((r) => (r.id === selectedRoiId ? { ...r, ...roi } : r))
+        );
+      }}
+      onAfterResize={(selectedRoiId, roi) => {
+        console.log("onAfterResize", selectedRoiId, roi);
+
+        setRoiData((prev) =>
+          prev.map((r) => (r.id === selectedRoiId ? { ...r, ...roi } : r))
+        );
+      }}
+      onAfterRotate={(selectedRoiId, roi) => {
+        console.log("onAfterRotate", selectedRoiId, roi);
+
+        setRoiData((prev) =>
+          prev.map((r) => (r.id === selectedRoiId ? { ...r, ...roi } : r))
+        );
+      }}
+    >
+      <div
+        className={cn(
+          "flex gap-4 md:gap-6 h-full",
+          isMobileLandscape ? "flex-row" : "flex-col md:flex-row"
         )}
+      >
+        <div className="flex-1 min-h-0 relative">
+          <Frame
+            deviceId={device.id}
+            deviceName={device.name}
+            isMediaMtx={isMediaMtx}
+            mode={mode}
+          />
+
+          {roiMode !== "hide" && (
+            <div className="absolute inset-0">
+              <Roi>
+                <div className="absolute inset-0" />
+              </Roi>
+            </div>
+          )}
+        </div>
+        <Controls />
       </div>
-      <Controls />
-    </div>
+    </RoiProvider>
   );
 }

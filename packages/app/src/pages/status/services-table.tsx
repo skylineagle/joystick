@@ -25,7 +25,7 @@ interface ServicesTableProps {
   deviceId: string;
 }
 
-export function ServicesTable({ deviceId }: ServicesTableProps) {
+export function ServicesStatus({ deviceId }: ServicesTableProps) {
   const {
     data,
     isLoading: isServicesLoading,

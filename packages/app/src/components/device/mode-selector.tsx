@@ -82,13 +82,18 @@ export const ModeSelector = memo(({ deviceId }: ModeSelectorProps) => {
 
           <SelectContent className="w-44 border-none bg-popover/95 backdrop-blur-sm shadow-xl">
             {availableModes.map((actionName) => {
-              const config =
-                modeConfig[actionName as keyof typeof modeConfig] ||
-                getDefaultModeConfig(actionName);
-
-              const { label, color, bgColor, hoverColor, icon: Icon } = config;
+              const {
+                label,
+                color,
+                bgColor,
+                hoverColor,
+                icon: Icon,
+              } = modeConfig[actionName as keyof typeof modeConfig] ||
+              getDefaultModeConfig(actionName);
 
               const isSelected = mode === actionName;
+              console.log(actionName);
+              console.log(modeConfig[actionName as keyof typeof modeConfig]);
 
               return (
                 <SelectItem
@@ -100,36 +105,21 @@ export const ModeSelector = memo(({ deviceId }: ModeSelectorProps) => {
                     !isSelected && hoverColor
                   )}
                 >
-                  <div className="flex flex-row items-center cursor-pointer my-0.5 px-2 py-1.5">
+                  <div
+                    className={
+                      "flex flex-row items-center cursor-pointer my-0.5 px-2 py-1.5"
+                    }
+                  >
                     <Icon
                       className={cn(
                         "h-4 w-4 mr-2",
-                        isSelected ? color : "text-muted-foreground",
-                        !isSelected &&
-                          actionName === "offline" &&
-                          "group-hover:text-slate-500",
-                        !isSelected &&
-                          actionName === "auto" &&
-                          "group-hover:text-blue-500",
-                        !isSelected &&
-                          actionName === "live" &&
-                          "group-hover:text-green-500",
-                        !isSelected &&
-                          actionName !== "offline" &&
-                          actionName !== "auto" &&
-                          actionName !== "live" &&
-                          "group-hover:text-purple-500"
+                        isSelected ? color : "text-muted-foreground"
                       )}
                     />
                     <Label
                       className={cn(
                         "font-medium transition-colors",
-                        isSelected && color,
-                        !isSelected && "group-hover:text-purple-500",
-                        actionName === "offline" &&
-                          "group-hover:text-slate-500",
-                        actionName === "auto" && "group-hover:text-blue-500",
-                        actionName === "live" && "group-hover:text-green-500"
+                        isSelected && color
                       )}
                     >
                       {label}

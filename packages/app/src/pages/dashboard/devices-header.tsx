@@ -82,7 +82,7 @@ export const DeviceTableHeader = memo(
                 <TooltipTrigger asChild>
                   <Info className="h-4 w-4 text-muted-foreground cursor-help" />
                 </TooltipTrigger>
-                <TooltipContent side="top" className="max-w-xs">
+                <TooltipContent side="top" className="max-w-x text-md">
                   When enabled, the device will automatically switch between
                   modes based on the automation settings.
                 </TooltipContent>
@@ -112,7 +112,7 @@ export const DeviceTableHeader = memo(
             </div>
           </TableHead>
           <TableHead
-            className="w-[20%] cursor-pointer hover:bg-accent transition-colors"
+            className="w-[25%] cursor-pointer hover:bg-accent transition-colors"
             onClick={() => setSortState("automation")}
           >
             <div className="flex items-center gap-2">
@@ -133,7 +133,7 @@ export const DeviceTableHeader = memo(
               )}
             </div>
           </TableHead>
-          <TableHead className="w-[15%]">Actions</TableHead>
+          <TableHead className="w-[10%]">Actions</TableHead>
         </TableRow>
       </TableHeader>
     );

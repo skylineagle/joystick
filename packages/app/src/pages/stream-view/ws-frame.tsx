@@ -5,7 +5,7 @@ export interface FrameProps {
   mode: "edit" | "view";
 }
 
-export const Frame = ({ mode }: FrameProps) => {
+export const WsFrame = ({ mode }: FrameProps) => {
   const wsRef = useRef<WebSocket | null>(null);
   const [frameData, setFrameData] = useState<string>("");
 

@@ -129,7 +129,7 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
   };
 
   return (
-    <div className="p-4 pt-0">
+    <div className="h-[200px] p-4 pt-0 max-w-full overflow-hidden">
       {isCpsiLoading ? (
         <div className="space-y-2">
           <Skeleton className="h-6 w-full" />
@@ -137,84 +137,96 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
           <Skeleton className="h-6 w-1/2" />
         </div>
       ) : (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
+        <div className="space-y-4 w-full">
+          <div className="flex items-center justify-between gap-1 flex-wrap w-full">
+            <div className="flex items-center gap-1 min-w-0 truncate">
               {getSignalIcon()}
-              <span className="font-medium">
+              <span className="font-medium text-sm truncate">
                 {data.operator || "Unknown Operator"}
               </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => refetchCpsi()}
+                disabled={isCpsiLoading}
+                className="h-7 w-7 flex-shrink-0"
+              >
+                <RefreshCw className="h-3 w-3" />
+                <span className="sr-only">Refresh cellular status</span>
+              </Button>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 flex-shrink-0">
               {getNetworkTypeBadge(data.technology)}
               {getStatusBadge(data.status)}
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => refetchCpsi()}
-              disabled={isCpsiLoading}
-              className="h-8 w-8"
-            >
-              <RefreshCw className="h-4 w-4" />
-              <span className="sr-only">Refresh cellular status</span>
-            </Button>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2 pt-2">
+          <div className="grid grid-cols-2 gap-x-2 gap-y-2 pt-1 text-xs w-full">
             <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">MCC-MNC</span>
-              <span>{data.mccMnc || "N/A"}</span>
+              <span className="text-xs text-muted-foreground">MCC-MNC</span>
+              <span className="truncate">{data.mccMnc || "N/A"}</span>
             </div>
 
             <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">Band</span>
-              <span>{data.band || "N/A"}</span>
+              <span className="text-xs text-muted-foreground">Band</span>
+              <span className="truncate">{data.band || "N/A"}</span>
             </div>
 
             <div className="flex flex-col">
-              <span className="text-sm text-muted-foreground">ARFCN</span>
-              <span>{data.arfcn !== undefined ? data.arfcn : "N/A"}</span>
+              <span className="text-xs text-muted-foreground">ARFCN</span>
+              <span className="truncate">
+                {data.arfcn !== undefined ? data.arfcn : "N/A"}
+              </span>
             </div>
 
             {data.technology === "LTE" ? (
               <>
                 <div className="flex flex-col">
-                  <span className="text-sm text-muted-foreground">RSRP</span>
-                  <span>{formatSignalMetric(data.rsrp, "dBm")}</span>
+                  <span className="text-xs text-muted-foreground">RSRP</span>
+                  <span className="truncate">
+                    {formatSignalMetric(data.rsrp, "dBm")}
+                  </span>
                 </div>
 
                 <div className="flex flex-col">
-                  <span className="text-sm text-muted-foreground">SINR</span>
-                  <span>{formatSignalMetric(data.sinr, "dB")}</span>
+                  <span className="text-xs text-muted-foreground">SINR</span>
+                  <span className="truncate">
+                    {formatSignalMetric(data.sinr, "dB")}
+                  </span>
                 </div>
 
                 <div className="flex flex-col">
-                  <span className="text-sm text-muted-foreground">RSRQ</span>
-                  <span>{formatSignalMetric(data.rsrq, "dB")}</span>
+                  <span className="text-xs text-muted-foreground">RSRQ</span>
+                  <span className="truncate">
+                    {formatSignalMetric(data.rsrq, "dB")}
+                  </span>
                 </div>
               </>
             ) : (
               <>
                 <div className="flex flex-col">
-                  <span className="text-sm text-muted-foreground">RSSI</span>
-                  <span>{formatSignalMetric(data.rssi, "dBm")}</span>
+                  <span className="text-xs text-muted-foreground">RSSI</span>
+                  <span className="truncate">
+                    {formatSignalMetric(data.rssi, "dBm")}
+                  </span>
                 </div>
 
                 {data.technology === "GSM" && (
                   <div className="flex flex-col">
-                    <span className="text-sm text-muted-foreground">BSIC</span>
-                    <span>{data.bsic !== undefined ? data.bsic : "N/A"}</span>
+                    <span className="text-xs text-muted-foreground">BSIC</span>
+                    <span className="truncate">
+                      {data.bsic !== undefined ? data.bsic : "N/A"}
+                    </span>
                   </div>
                 )}
 
                 {data.technology === "GSM" &&
                   data.timingAdvance !== undefined && (
                     <div className="flex flex-col">
-                      <span className="text-sm text-muted-foreground">
-                        Timing Advance
+                      <span className="text-xs text-muted-foreground">
+                        Timing Adv
                       </span>
-                      <span>{data.timingAdvance}</span>
+                      <span className="truncate">{data.timingAdvance}</span>
                     </div>
                   )}
               </>

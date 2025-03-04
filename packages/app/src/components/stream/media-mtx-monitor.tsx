@@ -30,13 +30,10 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>("initializing");
   const [qualityScore, setQualityScore] = useState<ConnectionQuality>("good");
-  const [bytesReceived, setBytesReceived] = useState<number>(0);
-  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [lastBytesReceived, setLastBytesReceived] = useState<number>(0);
   const [throughput, setThroughput] = useState<number>(0);
   const [lastFetchTime, setLastFetchTime] = useState<number>(Date.now());
 
-  // Fetch MediaMTX path status
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
@@ -78,7 +75,6 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
 
         // Calculate throughput based on actual time difference
         const currentBytesReceived = path.bytesReceived;
-        setBytesReceived(currentBytesReceived);
 
         if (lastBytesReceived > 0) {
           const byteDiff = currentBytesReceived - lastBytesReceived;
@@ -111,7 +107,6 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
 
         setLastBytesReceived(currentBytesReceived);
         setLastFetchTime(currentTime);
-        setLastUpdate(new Date());
       } catch (error) {
         console.error("Error fetching MediaMTX status:", error);
         setConnectionStatus("disconnected");
@@ -129,7 +124,6 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
 
           if (path) {
             setConnectionStatus(path.ready ? "connected" : "disconnected");
-            setBytesReceived(path.bytesReceived);
             setLastBytesReceived(path.bytesReceived);
           }
         }
@@ -171,17 +165,6 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
     poor: { label: "Poor", color: "bg-red-500", width: "w-1/4" },
   };
 
-  // Format bytes to human-readable format
-  const formatBytes = (bytes: number): string => {
-    if (bytes === 0) return "0 B";
-
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
-  };
-
   // Format throughput
   const formatThroughput = (bps: number): string => {
     const kbps = bps / 1024;
@@ -189,20 +172,6 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
       return `${kbps.toFixed(1)} KB/s`;
     } else {
       return `${(kbps / 1024).toFixed(2)} MB/s`;
-    }
-  };
-
-  // Calculate update time ago
-  const getUpdateTimeAgo = (): string => {
-    const now = new Date();
-    const diffMs = now.getTime() - lastUpdate.getTime();
-
-    if (diffMs < 5000) {
-      return "just now";
-    } else if (diffMs < 60000) {
-      return `${Math.floor(diffMs / 1000)}s ago`;
-    } else {
-      return lastUpdate.toLocaleTimeString();
     }
   };
 
@@ -232,7 +201,7 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
             <span>Stream quality</span>
             <span className="text-xs">{qualityLabel}</span>
           </div>
-          <div className="h-1.5 bg-gray-700 rounded-full w-full overflow-hidden">
+          <div className="h-1.5 bg-gray-700 rounded-full w-full overflow-hidden mb-4">
             <div
               className={cn(
                 "h-full rounded-full transition-all duration-500",
@@ -240,15 +209,6 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
                 width
               )}
             />
-          </div>
-          <div className="text-[10px] text-muted-foreground">
-            <div className="flex justify-between">
-              <span>Received:</span>
-              <span>{formatBytes(bytesReceived)}</span>
-            </div>
-            <div className="text-right mt-0.5">
-              Updated {getUpdateTimeAgo()}
-            </div>
           </div>
         </div>
       )}

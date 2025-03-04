@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Clock } from "lucide-react";
 import { motion } from "motion/react";
 import Countdown from "react-countdown";
+import { NextModeIndication } from "@/components/device/next-mode-indication";
 
 type CountdownData = {
   countdownTime: number;
@@ -64,22 +65,9 @@ export function AutomationIndicator({ device }: AutomationIndicatorProps) {
         (nextExecutionTime - currentTime) / 1000
       );
 
-      console.log("Countdown calculation", {
-        nextExecutionTime,
-        currentTime,
-        diff: nextExecutionTime - currentTime,
-        secondsUntilNextExecution,
-        automationType,
-        device: device.id,
-        jobName: data.jobName,
-      });
-
-      // For both duration and timeOfDay modes, we can determine the next action
-      // by checking if the jobName ends with "_on" or "_off"
       const isNextExecutionOn = data?.jobName?.endsWith("on");
       const isNextExecutionOff = data?.jobName?.endsWith("off");
 
-      // If we have a specific on/off job coming up next
       if (isNextExecutionOn || isNextExecutionOff) {
         return {
           countdownTime: nextExecutionTime,
@@ -200,9 +188,13 @@ export function AutomationIndicator({ device }: AutomationIndicatorProps) {
               data.until === "on" ? "text-emerald-500" : "text-destructive"
             }`}
           >
-            {data.until === "on"
-              ? device.automation.on.mode
-              : device.automation.off.mode}
+            <NextModeIndication
+              next={
+                data.until === "on"
+                  ? device.automation.on
+                  : device.automation.off
+              }
+            />
           </div>
           <ArrowRight className="h-3 w-3" />
           {device.automation.automationType === "timeOfDay" ? (

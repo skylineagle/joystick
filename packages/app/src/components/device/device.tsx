@@ -59,12 +59,12 @@ export const DeviceRow = memo(
         <TableCell className="w-[10%]">
           <StatusIndicator status={device.status} />
         </TableCell>
-        <TableCell className="w-[20%]">
+        <TableCell className="w-[25%]">
           {device.auto && device.automation && (
             <AutomationIndicator device={device} />
           )}
         </TableCell>
-        <TableCell className="w-[15%]">
+        <TableCell className="w-[10%]">
           <div className="flex gap-2">
             {isAllowedToEditDevice && <ConfigurationEditor device={device} />}
             {isAllowedToControlDevice && (
