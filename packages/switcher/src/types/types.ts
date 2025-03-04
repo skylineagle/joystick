@@ -21,13 +21,18 @@ export type CPSIResult = {
 };
 
 export type DeviceAutomation = {
+  automationType: "duration" | "timeOfDay";
   on: {
-    minutes: number;
+    minutes?: number;
     mode: string;
+    hourOfDay?: number;
+    minuteOfDay?: number;
   };
   off: {
-    minutes: number;
+    minutes?: number;
     mode: string;
+    hourOfDay?: number;
+    minuteOfDay?: number;
   };
 };
 

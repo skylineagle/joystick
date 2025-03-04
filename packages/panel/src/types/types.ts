@@ -1,22 +1,40 @@
-import type { DevicesResponse as BaseDevicesResponse, ModelsResponse } from "./db.types";
+import type {
+  DevicesResponse as BaseDevicesResponse,
+  ModelsResponse,
+} from "./db.types";
+import type { DevicesResponse } from "@/types/db.types";
 
-export interface CameraAutomation {
-  minutesOn: number;
-  minutesOff: number;
-}
+export type DeviceAutomation = {
+  automationType: "duration" | "timeOfDay";
+  on: {
+    minutes?: number;
+    mode: string;
+    hourOfDay?: number;
+    minuteOfDay?: number;
+  };
+  off: {
+    minutes?: number;
+    mode: string;
+    hourOfDay?: number;
+    minuteOfDay?: number;
+  };
+};
 
-export interface DeviceConfiguration {
+export type DeviceConfiguration = {
   name: string;
   source: string;
-}
+} & { [key: string]: unknown };
 
-export interface DeviceInfo {
-  host: string;
+export type DeviceInformation = {
   user: string;
   password: string;
-}
+  host: string;
+  phone?: string;
+};
 
-export type DevicesResponse = Omit<
-  BaseDevicesResponse<DeviceConfiguration, DeviceInfo, { device: ModelsResponse }>,
-  "created" | "updated"
+export type DeviceResponse = DevicesResponse<
+  DeviceAutomation,
+  DeviceConfiguration,
+  DeviceInformation,
+  { device: ModelsResponse }
 >;

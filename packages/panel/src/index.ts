@@ -2,7 +2,7 @@ import { ChildProcess, spawn } from "node:child_process";
 import PocketBase from "pocketbase";
 import { logger } from "./logger";
 import type { TypedPocketBase } from "./types/db.types";
-import type { DevicesResponse } from "./types/types";
+import type { DeviceResponse } from "./types/types";
 
 type WebSocketMessage = {
   type: string;
@@ -32,7 +32,7 @@ Bun.serve({
         if (message.type === "connect" && message.device) {
           const result = await pb
             .collection("devices")
-            .getFullList<DevicesResponse>(1, {
+            .getFullList<DeviceResponse>(1, {
               filter: `id = "${message.device}"`,
               expand: "device",
             });
@@ -43,12 +43,12 @@ Bun.serve({
           }
 
           const device = result[0];
-          if (!device.configuration) {
-            ws.send("Device configuration not found");
+          if (!device.information) {
+            ws.send("Device information not found");
             return;
           }
 
-          const { host, user, password } = device.configuration;
+          const { host, user, password } = device.information;
 
           const sshArgs = [
             "-o",

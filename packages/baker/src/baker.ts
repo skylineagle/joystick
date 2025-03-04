@@ -172,48 +172,26 @@ export async function startJob(device: string): Promise<void> {
 export async function stopJob(device: string): Promise<void> {
   try {
     // Always try to stop both on and off jobs
-    try {
-      baker.stop(`${device}_on`);
-      baker.stop(`${device}_off`);
-      logger.info(`On/Off jobs for device ${device} stopped`);
-    } catch (e) {
-      // Ignore errors
-    }
-
-    // Also try to stop the legacy job if it exists
-    try {
-      // baker.stop(device);
-      logger.info(`Legacy job for device ${device} stopped`);
-    } catch (e) {
-      // Ignore errors
-    }
+    baker.stop(`${device}_on`);
+    baker.stop(`${device}_off`);
+    logger.info(`On/Off jobs for device ${device} stopped`);
   } catch (error) {
-    console.error(error);
     throw error;
   }
 }
 
 export function getJobStatus(device: string): Status | undefined {
   try {
-    // Check both on and off jobs
-    try {
-      const onStatus = baker.getStatus(`${device}_on`);
-      const offStatus = baker.getStatus(`${device}_off`);
+    const onStatus = baker.getStatus(`${device}_on`);
+    const offStatus = baker.getStatus(`${device}_off`);
 
-      if (onStatus && offStatus) {
-        // If both exist, return a combined status based on their states
-        // Use one of the status objects but modify its properties
-        return baker.isRunning(`${device}_on`) ||
-          baker.isRunning(`${device}_off`)
-          ? onStatus // Will be 'running' if the job is running
-          : offStatus; // Will be 'stopped' if the job is stopped
-      }
-    } catch (e) {
-      // Fall back to checking the legacy job
+    if (onStatus && offStatus) {
+      // If both exist, return a combined status based on their states
+      // Use one of the status objects but modify its properties
+      return baker.isRunning(`${device}_on`) || baker.isRunning(`${device}_off`)
+        ? onStatus // Will be 'running' if the job is running
+        : offStatus; // Will be 'stopped' if the job is stopped
     }
-
-    // Try the legacy job if on/off jobs don't exist
-    // return baker.getStatus(device);
   } catch (error) {
     console.error(error);
     throw error;
@@ -222,29 +200,15 @@ export function getJobStatus(device: string): Status | undefined {
 
 export async function deleteJob(device: string): Promise<void> {
   try {
-    // Always try to remove both on and off jobs
-    try {
-      // Stop and remove the on job
-      baker.stop(`${device}_on`);
-      baker.remove(`${device}_on`);
+    // Stop and remove the on job
+    baker.stop(`${device}_on`);
+    baker.remove(`${device}_on`);
 
-      // Stop and remove the off job
-      baker.stop(`${device}_off`);
-      baker.remove(`${device}_off`);
+    // Stop and remove the off job
+    baker.stop(`${device}_off`);
+    baker.remove(`${device}_off`);
 
-      logger.info(`On/Off jobs for device ${device} deleted`);
-    } catch (e) {
-      // Ignore errors
-    }
-
-    // Also try to remove the legacy job if it exists
-    try {
-      // baker.stop(device);
-      // baker.remove(device);
-      logger.info(`Legacy job for device ${device} deleted`);
-    } catch (e) {
-      // Ignore errors
-    }
+    logger.info(`On/Off jobs for device ${device} deleted`);
   } catch (error) {
     console.error(error);
     throw error;
@@ -253,65 +217,31 @@ export async function deleteJob(device: string): Promise<void> {
 
 export async function getNextExecution(device: string): Promise<any> {
   try {
-    // Check both on and off jobs
-    try {
-      const onNext = baker.nextExecution(`${device}_on`);
-      const offNext = baker.nextExecution(`${device}_off`);
+    const onNext = baker.nextExecution(`${device}_on`);
+    const offNext = baker.nextExecution(`${device}_off`);
 
-      // Return the earlier of the two times along with the job name
-      if (onNext && offNext) {
-        // Validate dates - ensure they're in the future
-        const now = new Date();
-        const validOnNext =
-          onNext > now ? onNext : new Date(now.getTime() + 60000);
-        const validOffNext =
-          offNext > now ? offNext : new Date(now.getTime() + 120000);
+    // Return the earlier of the two times along with the job name
+    if (onNext && offNext) {
+      // Validate dates - ensure they're in the future
+      const now = new Date();
+      const validOnNext =
+        onNext > now ? onNext : new Date(now.getTime() + 60000);
+      const validOffNext =
+        offNext > now ? offNext : new Date(now.getTime() + 120000);
 
-        if (validOnNext < validOffNext) {
-          return {
-            nextExecution: validOnNext,
-            jobName: `${device}_on`,
-          };
-        } else {
-          return {
-            nextExecution: validOffNext,
-            jobName: `${device}_off`,
-          };
-        }
+      if (validOnNext < validOffNext) {
+        return {
+          nextExecution: validOnNext,
+          jobName: `${device}_on`,
+        };
+      } else {
+        return {
+          nextExecution: validOffNext,
+          jobName: `${device}_off`,
+        };
       }
-    } catch (e) {
-      // Fall back to checking the legacy job
-      console.error(
-        `Error getting next execution for on/off jobs for ${device}:`,
-        e
-      );
     }
-
-    // Try the legacy job if on/off jobs don't exist
-    // try {
-    //   const nextExecution = baker.nextExecution(device);
-    //   const now = new Date();
-
-    //   // Ensure the next execution is in the future
-    //   const validNextExecution =
-    //     nextExecution > now ? nextExecution : new Date(now.getTime() + 60000); // Default to 1 minute in the future
-
-    //   return {
-    //     nextExecution: validNextExecution,
-    //     jobName: device,
-    //   };
-    // } catch (e) {
-    //   console.error(`Error getting duration next execution for ${device}:`, e);
-    //   // Return a fallback value if all attempts fail
-    //   const fallbackTime = new Date(new Date().getTime() + 60000); // 1 minute from now
-    //   return {
-    //     nextExecution: fallbackTime,
-    //     jobName: device,
-    //   };
-    // }
   } catch (error) {
-    console.error(error);
-    // Return a fallback value if all attempts fail
     const fallbackTime = new Date(new Date().getTime() + 60000); // 1 minute from now
     return {
       nextExecution: fallbackTime,
