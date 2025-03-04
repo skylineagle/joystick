@@ -92,8 +92,6 @@ export const ModeSelector = memo(({ deviceId }: ModeSelectorProps) => {
               getDefaultModeConfig(actionName);
 
               const isSelected = mode === actionName;
-              console.log(actionName);
-              console.log(modeConfig[actionName as keyof typeof modeConfig]);
 
               return (
                 <SelectItem

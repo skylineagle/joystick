@@ -11,6 +11,7 @@ import { Filters } from "@/pages/dashboard/filters";
 import { useDeviceStore } from "@/store/device-store";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { Toaster } from "sonner";
+import { ConfettiEasterEgg } from "@/components/confetti-easter-egg";
 
 export function DashboardPage() {
   const { user } = useAuthStore();
@@ -26,7 +27,13 @@ export function DashboardPage() {
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between px-12 py-4">
             <div className="flex items-center gap-2">
-              <img src="/logo.png" alt="Switcher Logo" className="h-16 w-16" />
+              <ConfettiEasterEgg>
+                <img
+                  src="/logo.png"
+                  alt="Joystick Logo"
+                  className="h-16 w-16 cursor-pointer"
+                />
+              </ConfettiEasterEgg>
               <h1 className="text-3xl font-bold">
                 {user?.email.includes("user") ? "HaTomer" : "Joystick"}
               </h1>

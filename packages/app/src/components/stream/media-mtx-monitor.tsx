@@ -1,7 +1,7 @@
 import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 import { toast } from "@/utils/toast";
-import { Activity, CheckCircle, WifiOff } from "lucide-react";
+import { Activity, CheckCircle, MegaphoneOff } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface MediaMtxMonitorProps {
@@ -153,7 +153,7 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
       label: "Degraded",
     },
     disconnected: {
-      icon: <WifiOff className="h-4 w-4 text-red-500" />,
+      icon: <MegaphoneOff className="h-4 w-4 text-red-500" />,
       label: "Disconnected",
     },
   };
@@ -184,7 +184,7 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
   } = qualityConfig[qualityScore];
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 mb-4 p-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           {icon}
