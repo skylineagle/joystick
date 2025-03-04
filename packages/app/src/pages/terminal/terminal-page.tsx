@@ -1,7 +1,10 @@
 import { useTheme } from "@/components/theme-provider";
+import { Button } from "@/components/ui/button";
 import { useDevice } from "@/hooks/use-device";
+import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { urls } from "@/lib/urls";
 import { toast } from "@/utils/toast";
+import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Terminal } from "xterm";
@@ -9,19 +12,36 @@ import { FitAddon } from "xterm-addon-fit";
 import { WebLinksAddon } from "xterm-addon-web-links";
 import { customDarkTheme, customLightTheme } from "./terminal-theme";
 
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
-import { useIsPermitted } from "@/hooks/use-is-permitted";
 import "xterm/css/xterm.css";
 
-// ASCII art for the easter egg as individual lines for better terminal display
 const joystickAsciiLines = [
-  "     _                 _   _      _    ",
-  "    | | ___  _   _ ___| |_(_) ___| | __",
-  " _  | |/ _ \\| | | / __| __| |/ __| |/ /",
-  "| |_| | (_) | |_| \\__ \\ |_| | (__|   < ",
-  " \\___/ \\___/ \\__, |___/\\__|_|\\___|_|\\_\\",
-  "             |___/                     ",
+  "                                       ....                                     ",
+  "                                 ......:;;:.....                                ",
+  "                              $x..X&&&&&&&&&&&&x..$X                            ",
+  "                           $&&$.X&&X..........&&&:.&&&x                         ",
+  "                         $&&$.......$&&&&&&&&X.......&&&X                       ",
+  "                       $&&X........X&X......&&;........&&&X                     ",
+  "                      &&$..............&&&&..............&&$                    ",
+  "                    x&&+....X$$XXXX$&$.$&&$.&&&$$XX$$X....$&&                   ",
+  "                    &&+...$+...:..................+...X$...$&&                  ",
+  "                   &&x...$..&$::x&x..............$&&...;&...&&&                 ",
+  "                  &&&...X&.X$X:.&X&...x.;..x..$&&...&&&.&x...&&                 ",
+  "                  &&:...&&.;&X$$$&&............x..+..+..&&...$&$                ",
+  "                 x&&...;&&&..&&&&+.&;.&:..+$.X$..$&&...&&&...x&&                ",
+  "                 &&&...X&;$&x......&&$&;..x&$&$......$&Xx&:..+&&                ",
+  "                 X&&...$$+++&&&x..................$&&$+xx&x..x&&                ",
+  "                  &&:..&$xxxxxX$&&&&&&&&&&&&&&&&&&$xxXXXX&&..$&$                ",
+  "                  &&$..&&xXXXXXX&&&:..........;&&&XXXXXX$&$..&&.                ",
+  "                   &&+.X&&$X$$&&&+..............x&&&$$$$&&:.&&&                 ",
+  "                   ;&&..+&&&&&&+..................X&&&&&&:.X&&                  ",
+  "                    X&&+..................................$&&                   ",
+  "                     $&&&...............................;&&&                    ",
+  "                       $&&$:..........................;&&&X                     ",
+  "                         $&&&;......................x&&&X                       ",
+  "                           X&&&&$:..............;&&&&$x                         ",
+  "                               $&&&&&&&&&&&&&&&&&&X                             ",
+  "                                    x$&&&&&&$;                                  ",
+  "                                                                                ",
 ];
 
 // Matrix characters for the matrix easter egg
@@ -380,7 +400,7 @@ export function TerminalPage() {
         const command = commandBufferRef.current.trim();
 
         if (isEasterEggsPermitted) {
-          if (command === "joystick-ascii") {
+          if (command === "joystick") {
             // Display the ASCII art line by line
             terminal.write("\r\n\n"); // Add some space
 
