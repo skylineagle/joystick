@@ -7,6 +7,13 @@ import {
   UsersResponse,
 } from "@/types/db.types";
 
+export type ModelStreamQulity = {
+  excellent: number;
+  good: number;
+  fair: number;
+  poor: number;
+};
+
 export type ModelModeConfigs = {
   [key: string]: {
     label: string;
@@ -18,7 +25,11 @@ export type ModelModeConfigs = {
   };
 };
 
-export type ModelResponse = ModelsResponse<ModelModeConfigs, unknown>;
+export type ModelResponse = ModelsResponse<
+  ModelModeConfigs,
+  unknown,
+  ModelStreamQulity
+>;
 
 export type CPSIResult = {
   technology: string;

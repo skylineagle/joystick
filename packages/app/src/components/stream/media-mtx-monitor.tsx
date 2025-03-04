@@ -1,3 +1,4 @@
+import { useDevice } from "@/hooks/use-device";
 import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 import { toast } from "@/utils/toast";
@@ -29,6 +30,7 @@ type ConnectionQuality = "excellent" | "good" | "fair" | "poor";
 export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>("initializing");
+  const { data: device } = useDevice(deviceName);
   const [qualityScore, setQualityScore] = useState<ConnectionQuality>("good");
   const [lastBytesReceived, setLastBytesReceived] = useState<number>(0);
   const [throughput, setThroughput] = useState<number>(0);
@@ -92,9 +94,17 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
             const kbps = newThroughput / 1024;
             let newQuality: ConnectionQuality = "excellent";
 
-            if (kbps < 50) newQuality = "poor";
-            else if (kbps < 100) newQuality = "fair";
-            else if (kbps < 150) newQuality = "good";
+            if (kbps < (device?.expand?.device.stream_quality?.poor ?? 50))
+              newQuality = "poor";
+            else if (
+              kbps < (device?.expand?.device.stream_quality?.fair ?? 100)
+            )
+              newQuality = "fair";
+            else if (
+              kbps < (device?.expand?.device.stream_quality?.good ?? 150)
+            )
+              newQuality = "good";
+            else newQuality = "excellent";
 
             setQualityScore(newQuality);
 
@@ -137,7 +147,15 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
     return () => {
       clearInterval(interval);
     };
-  }, [deviceName, connectionStatus, lastBytesReceived, lastFetchTime]);
+  }, [
+    deviceName,
+    connectionStatus,
+    lastBytesReceived,
+    lastFetchTime,
+    device?.expand?.device.stream_quality?.poor,
+    device?.expand?.device.stream_quality?.fair,
+    device?.expand?.device.stream_quality?.good,
+  ]);
 
   const statusConfig = {
     initializing: {
