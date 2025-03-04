@@ -8,10 +8,12 @@ import {
 } from "@/types/db.types";
 
 export type ModelStreamQulity = {
-  excellent: number;
-  good: number;
-  fair: number;
-  poor: number;
+  [key: string]: {
+    excellent: number;
+    good: number;
+    fair: number;
+    poor: number;
+  };
 };
 
 export type ModelModeConfigs = {

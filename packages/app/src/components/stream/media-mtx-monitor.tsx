@@ -94,14 +94,21 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
             const kbps = newThroughput / 1024;
             let newQuality: ConnectionQuality = "excellent";
 
-            if (kbps < (device?.expand?.device.stream_quality?.poor ?? 50))
+            if (
+              kbps <
+              (device?.expand?.device.stream_quality?.[device.mode]?.poor ?? 50)
+            )
               newQuality = "poor";
             else if (
-              kbps < (device?.expand?.device.stream_quality?.fair ?? 100)
+              kbps <
+              (device?.expand?.device.stream_quality?.[device.mode]?.fair ??
+                100)
             )
               newQuality = "fair";
             else if (
-              kbps < (device?.expand?.device.stream_quality?.good ?? 150)
+              kbps <
+              (device?.expand?.device.stream_quality?.[device.mode]?.good ??
+                150)
             )
               newQuality = "good";
             else newQuality = "excellent";
@@ -152,9 +159,8 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
     connectionStatus,
     lastBytesReceived,
     lastFetchTime,
-    device?.expand?.device.stream_quality?.poor,
-    device?.expand?.device.stream_quality?.fair,
-    device?.expand?.device.stream_quality?.good,
+    device?.expand?.device.stream_quality,
+    device?.mode,
   ]);
 
   const statusConfig = {
