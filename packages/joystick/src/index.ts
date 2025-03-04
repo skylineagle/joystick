@@ -1,3 +1,4 @@
+import { STREAM_API_URL, SWITCHER_API_URL } from "@/config";
 import { pb } from "@/pocketbase";
 import { type ActionsResponse, RunTargetOptions } from "@/types/db.types";
 import type { DeviceResponse, RunResponse } from "@/types/types";
@@ -7,7 +8,6 @@ import { Elysia, t } from "elysia";
 import { validate } from "jsonschema";
 import { enhancedLogger, setupLoggingMiddleware } from "./enhanced-logger";
 import { generateRandomCPSIResult, updateStatus } from "./utils";
-import { STREAM_API_URL, SWITCHER_API_URL } from "@/config";
 
 const app = new Elysia();
 
@@ -200,6 +200,36 @@ app.get("/api/healtcheck", async () => {
     status: "connected",
     lastConnected: new Date().toISOString(),
   };
+});
+
+app.get("/api/ping/:device", async ({ params }) => {
+  try {
+    if (!params.device) {
+      return {
+        success: false,
+        error: "Device ID is required",
+      };
+    }
+
+    const device = await pb
+      .collection("devices")
+      .getOne<DeviceResponse>(params.device);
+
+    if (!device) {
+      return {
+        success: false,
+        available: false,
+        error: "Device not found",
+      };
+    }
+
+    const result = await $`ping -c 1 ${device?.information?.host}`.text();
+    const isOnline = result.includes("1 packets received");
+
+    return isOnline;
+  } catch (error) {
+    return false;
+  }
 });
 
 app.use(cors()).listen(Bun.env.PORT || 8000);
