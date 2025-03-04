@@ -30,7 +30,7 @@ export const Controls = () => {
   const { isSupported: isSetBitrateSupported, isLoading: isSetBitrateLoading } =
     useIsSupported(deviceId!, ["set-bitrate", "get-bitrate"]);
   const { isSupported: isSetModeSupported, isLoading: isSetModeLoading } =
-    useIsSupported(deviceId!, ["set-mode", "get-mode"]);
+    useIsSupported(deviceId!, "set-mode");
   const {
     isSupported: isGetServicesStatusSupported,
     isLoading: isGetServicesStatusLoading,
