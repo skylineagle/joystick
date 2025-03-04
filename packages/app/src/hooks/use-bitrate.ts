@@ -1,15 +1,19 @@
 import { runAction } from "@/lib/joystick-api";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/utils/toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useBitrate(deviceId: string) {
   const queryClient = useQueryClient();
-  const { data: bitrate } = useQuery({
+  const { data: bitrate, refetch } = useQuery({
     queryKey: ["bitrate", deviceId],
     queryFn: async () => {
       const data = await runAction({ deviceId, action: "get-bitrate" });
+      toast.success({
+        message: "Bitrate fetched successfully",
+      });
       return data;
     },
+
     enabled: !!deviceId,
   });
   const { mutate: setBitrate } = useMutation({
@@ -29,5 +33,5 @@ export function useBitrate(deviceId: string) {
     },
   });
 
-  return { bitrate, setBitrate };
+  return { bitrate, setBitrate, refreshBitrate: refetch };
 }

@@ -6,7 +6,11 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 export function useAction(deviceId: string, action: string) {
   const { data: device } = useDevice(deviceId);
-  const { data: run, isLoading } = useQuery({
+  const {
+    data: run,
+    isLoading,
+    refetch: reRun,
+  } = useQuery({
     queryKey: ["device-action", deviceId, action],
     queryFn: () => gethDeviceAction(deviceId, action),
     enabled: !!deviceId && !!action,
@@ -35,5 +39,6 @@ export function useAction(deviceId: string, action: string) {
     runAction: runActionMutation.mutate,
     isRunning: runActionMutation.isPending,
     isLoading,
+    reRun,
   };
 }

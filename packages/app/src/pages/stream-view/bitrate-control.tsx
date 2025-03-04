@@ -15,7 +15,7 @@ import {
 import { useBitrate } from "@/hooks/use-bitrate";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown, Plus } from "lucide-react";
+import { Check, ChevronsUpDown, Plus, RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
 
 const BITRATE_PRESETS = [
@@ -33,7 +33,8 @@ export function BitrateControll({ deviceId }: BitrateControllProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const { isMobileLandscape } = useMobileLandscape();
-  const { bitrate, setBitrate } = useBitrate(deviceId);
+  const { bitrate, setBitrate, refreshBitrate } = useBitrate(deviceId);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleSelect = (value: string) => {
     const numValue = parseInt(value);
@@ -55,10 +56,32 @@ export function BitrateControll({ deviceId }: BitrateControllProps) {
     return isNotPreset;
   }, [search]);
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refreshBitrate();
+    setIsRefreshing(false);
+  };
+
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-2">
         <Label className="text-xs sm:text-sm">Bitrate</Label>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className={cn("h-6 w-6", isMobileLandscape ? "h-5 w-5" : "h-6 w-6")}
+        >
+          <RefreshCw
+            className={cn(
+              "h-3 w-3",
+              isMobileLandscape ? "h-2.5 w-2.5" : "h-3 w-3",
+              isRefreshing && "animate-spin"
+            )}
+          />
+          <span className="sr-only">Refresh bitrate</span>
+        </Button>
       </div>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
