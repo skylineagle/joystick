@@ -28,7 +28,14 @@ async function initializeJobs() {
   }
 }
 
-initializeJobs();
+// Wrap the initialization with try-catch
+try {
+  initializeJobs();
+  logger.info("Baker initialization started");
+} catch (error) {
+  logger.error("Failed to start baker initialization", error);
+  // Don't rethrow the error to prevent the application from crashing
+}
 
 export async function createJob(
   device: string,
