@@ -5,7 +5,7 @@ import { Healthcheck } from "@/pages/status/healthcheck";
 import { Frame } from "@/pages/stream-view/stream-view";
 import { useParams } from "react-router-dom";
 import { CellularStatus } from "./cellular-status";
-import { ServicesTable } from "./services-table";
+import { ServicesStatus } from "./services-status";
 
 export function StatusPage() {
   const { device: deviceId } = useParams();
@@ -39,6 +39,7 @@ export function StatusPage() {
         <div className="flex-1 p-2">
           {device && (
             <Frame
+              deviceId={deviceId!}
               deviceName={device.name}
               isMediaMtx={isMediaMtx}
               mode="view"
@@ -50,7 +51,7 @@ export function StatusPage() {
             <CellularStatus deviceId={deviceId!} />
           )}
           {hasServicesStatus && !isServicesStatusLoading && (
-            <ServicesTable deviceId={deviceId!} />
+            <ServicesStatus deviceId={deviceId!} />
           )}
           {hasHealthcheck && !isHealthcheckLoading && (
             <Healthcheck deviceId={deviceId!} />

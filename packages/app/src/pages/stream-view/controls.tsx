@@ -11,7 +11,7 @@ import { useIsSupported } from "@/hooks/use-is-supported";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { cn } from "@/lib/utils";
 import { CellularStatus } from "@/pages/status/cellular-status";
-import { ServicesStatus } from "@/pages/status/services-table";
+import { ServicesStatus } from "@/pages/status/services-status";
 import { BitrateControll } from "@/pages/stream-view/bitrate-control";
 import { RoiModeControl } from "@/pages/stream-view/roi/roi-mode-control";
 import { BarChart, Cpu, Signal } from "lucide-react";
