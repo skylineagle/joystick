@@ -174,6 +174,7 @@
         "elysia": "^1.2.23",
         "pino": "^9.6.0",
         "pino-pretty": "^13.0.0",
+        "pocketbase": "^0.25.1",
       },
       "devDependencies": {
         "@types/bun": "latest",
