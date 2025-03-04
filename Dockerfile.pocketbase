@@ -1,3 +1,5 @@
 FROM ghcr.io/muchobien/pocketbase:latest
 
 COPY ./pocketbase/pb_migrations /pb_migrations
+COPY ./pocketbase/pb_hooks /pb_hooks
+COPY ./pocketbase/pb_public /pb_public
