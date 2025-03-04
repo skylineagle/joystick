@@ -12,7 +12,13 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { UserProfile } from "@/components/user-profile";
-import { Home, LayoutDashboard, Send, Settings, Terminal } from "lucide-react";
+import {
+  ArrowLeft,
+  Home,
+  Send,
+  Settings,
+  Terminal
+} from "lucide-react";
 import * as React from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -75,7 +81,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <Button variant="ghost" size="sm" className="w-full mt-2" asChild>
           <Link to="/">
-            <LayoutDashboard className="mr-2 h-4 w-4" />
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Dashboard
           </Link>
         </Button>

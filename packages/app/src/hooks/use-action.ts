@@ -1,9 +1,11 @@
+import { useDevice } from "@/hooks/use-device";
 import { gethDeviceAction } from "@/lib/device";
 import { runAction } from "@/lib/joystick-api";
 import { toast } from "@/utils/toast";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export function useAction(deviceId: string, action: string) {
+  const { data: device } = useDevice(deviceId);
   const { data: run, isLoading } = useQuery({
     queryKey: ["device-action", deviceId, action],
     queryFn: () => gethDeviceAction(deviceId, action),
@@ -16,7 +18,9 @@ export function useAction(deviceId: string, action: string) {
     },
     onMutate: () => {},
     onSuccess: () => {
-      toast.success({ message: "Action executed successfully" });
+      toast.success({
+        message: `Successfully sent ${action} to ${device?.name}`,
+      });
     },
     onError: (error) => {
       toast.error({

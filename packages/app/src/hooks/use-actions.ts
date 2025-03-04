@@ -36,7 +36,9 @@ export function useActions(deviceId: string) {
     onSuccess: (data) => {
       if (toastRef.current) baseToast.dismiss(toastRef.current);
 
-      toast.success({ message: "Action executed successfully" });
+      toast.success({
+        message: `Successfully sent ${currentAction} to ${device?.name}`,
+      });
       setActionResult(data);
     },
     onError: (error) => {
