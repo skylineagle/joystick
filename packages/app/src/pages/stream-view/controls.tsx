@@ -69,14 +69,18 @@ export const Controls = () => {
           </div>
         )}
 
-        <Separator className="my-2" />
-        <div className="grid grid-cols-2 grid-rows-1 items-center gap-2">
-          <Label className="text-muted-foreground">Auto mode:</Label>
-          <AutomateToggle
-            deviceId={deviceId!}
-            isAutomated={device?.auto ?? false}
-          />
-        </div>
+        {device?.automation && (
+          <>
+            <Separator className="my-2" />
+            <div className="grid grid-cols-2 grid-rows-1 items-center gap-2">
+              <Label className="text-muted-foreground">Auto mode:</Label>
+              <AutomateToggle
+                deviceId={deviceId!}
+                isAutomated={device?.auto ?? false}
+              />
+            </div>
+          </>
+        )}
 
         {isSetBitrateSupported && !isSetBitrateLoading && (
           <>
