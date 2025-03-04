@@ -64,7 +64,7 @@ const app = new Elysia()
     );
   });
 
-app.post("/api/send-sms", async ({ body, set }) => {
+app.post("/api/send-sms", async ({ body, set, request, query }) => {
   const { phoneNumbers, message } = body as SmsMessage;
 
   if (!phoneNumbers || !phoneNumbers.length || !message) {
@@ -77,6 +77,10 @@ app.post("/api/send-sms", async ({ body, set }) => {
     const result = await apiClient.send({ phoneNumbers, message });
     if (result.state === "Failed") {
       throw new Error("Failed to send SMS");
+    }
+
+    if ((query?.["response"] ?? "false") === "false") {
+      return;
     }
 
     const phoneKey = phoneNumbers[0];
