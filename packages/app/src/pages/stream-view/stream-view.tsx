@@ -90,7 +90,7 @@ export function StreamView() {
         <div className="flex-1 min-h-0 relative">
           <Frame
             deviceId={device.id}
-            deviceName={device.name}
+            deviceName={device.configuration?.name || ""}
             isMediaMtx={isMediaMtx}
             mode={mode}
           />
