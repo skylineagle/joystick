@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
 import { toast } from "@/utils/toast";
+import { useCallback, useEffect, useState } from "react";
 
 // Konami Code sequence
 const konamiCode = [
@@ -234,11 +234,6 @@ export const Konami = () => {
     setTimeout(() => {
       rootElement.classList.remove("flip");
     }, 4000);
-
-    // Also add a keyboard shortcut for easier testing
-    console.log(
-      "Barrel roll activated! You can also press F8 to trigger this effect."
-    );
   };
 
   // Add a keyboard shortcut for easier testing

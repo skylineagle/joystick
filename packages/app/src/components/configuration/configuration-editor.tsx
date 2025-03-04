@@ -155,7 +155,6 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
         }
         return;
       }
-      console.log(editingConfig.automation);
 
       updateDeviceMutation({
         id: editingConfig.id,
@@ -301,6 +300,7 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
                     <div className="flex flex-row items-center gap-3">
                       <div className="flex items-center gap-3">
                         <SelectMode
+                          deviceId={device.id}
                           mode={editingConfig?.automation?.on?.mode ?? ""}
                           handleModeChange={(value) =>
                             setEditingConfig((prev) => {
@@ -368,6 +368,7 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
                     <div className="flex flex-row items-center gap-3">
                       <div className="flex items-center gap-3">
                         <SelectMode
+                          deviceId={device.id}
                           mode={editingConfig?.automation?.off?.mode ?? ""}
                           handleModeChange={(value) =>
                             setEditingConfig((prev) => {
@@ -436,6 +437,7 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
                     <div className="flex flex-row items-center gap-3">
                       <div className="flex items-center gap-3">
                         <SelectMode
+                          deviceId={device.id}
                           mode={editingConfig?.automation?.on?.mode ?? ""}
                           handleModeChange={(value) =>
                             setEditingConfig((prev) => {
@@ -544,6 +546,7 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
                     <div className="flex flex-row items-center gap-3">
                       <div className="flex items-center gap-3">
                         <SelectMode
+                          deviceId={device.id}
                           mode={editingConfig?.automation?.off?.mode ?? ""}
                           handleModeChange={(value) =>
                             setEditingConfig((prev) => {

@@ -1,4 +1,3 @@
-import { getDefaultModeConfig, modeConfig } from "@/components/device/consts";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -6,10 +5,13 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import { useModeConfig } from "@/hooks/use-model-configs";
 import { cn } from "@/lib/utils";
+import { DynamicIcon, IconName } from "lucide-react/dynamic";
 import { motion } from "motion/react";
 
 export interface SelectModeProps {
+  deviceId: string;
   mode: string;
   handleModeChange: (value: string) => void;
   isLoading: boolean;
@@ -17,21 +19,21 @@ export interface SelectModeProps {
 }
 
 export const SelectMode = ({
+  deviceId,
   mode,
   handleModeChange,
   isLoading,
   availableModes,
 }: SelectModeProps) => {
-  const currentMode = Object.keys(modeConfig).includes(mode ?? "")
-    ? modeConfig[mode as keyof typeof modeConfig]
-    : getDefaultModeConfig(mode ?? "");
+  const { data: configs } = useModeConfig(deviceId);
+  const config = configs?.[mode as keyof typeof configs] ?? {};
 
   return (
     <Select value={mode} onValueChange={handleModeChange} disabled={isLoading}>
       <SelectTrigger
         className={cn(
           "w-40 transition-all duration-300 ease-in-out border-1",
-          currentMode.bgColor,
+          config.bgColor,
           "border-transparent",
           isLoading && "opacity-50 cursor-not-allowed"
         )}
@@ -55,19 +57,24 @@ export const SelectMode = ({
               stiffness: 200,
             }}
           >
-            <currentMode.icon className={cn("h-4 w-4", currentMode.color)} />
+            <DynamicIcon
+              name={config.icon as IconName}
+              className={cn("h-4 w-4", config.color)}
+            />
           </motion.div>
-          <span className="truncate">{currentMode.label}</span>
+          <span className="truncate">{config.label}</span>
         </motion.div>
       </SelectTrigger>
 
       <SelectContent className="w-44 border-none bg-popover/95 backdrop-blur-sm shadow-xl">
         {availableModes.map((actionName) => {
-          const config =
-            modeConfig[actionName as keyof typeof modeConfig] ||
-            getDefaultModeConfig(actionName);
-
-          const { label, color, bgColor, hoverColor, icon: Icon } = config;
+          const {
+            label,
+            color,
+            bgColor,
+            hoverColor,
+            icon: Icon,
+          } = configs?.[actionName as keyof typeof configs] ?? {};
 
           const isSelected = mode === actionName;
 
@@ -82,7 +89,8 @@ export const SelectMode = ({
               )}
             >
               <div className="flex flex-row items-center cursor-pointer my-0.5 px-2 py-1.5">
-                <Icon
+                <DynamicIcon
+                  name={Icon as IconName}
                   className={cn(
                     "h-4 w-4 mr-2",
                     isSelected ? color : "text-muted-foreground",

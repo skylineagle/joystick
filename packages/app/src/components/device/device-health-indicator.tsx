@@ -29,7 +29,6 @@ export function DeviceHealthIndicator() {
         action: "healthcheck",
         params: {},
       });
-      console.log(data);
       return data === "true";
     },
     enabled: !!deviceId && isHealthcheckSupported,

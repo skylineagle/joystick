@@ -7,6 +7,19 @@ import {
   UsersResponse,
 } from "@/types/db.types";
 
+export type ModelModeConfigs = {
+  [key: string]: {
+    label: string;
+    icon: string;
+    description: string;
+    color: string;
+    bgColor: string;
+    hoverColor: string;
+  };
+};
+
+export type ModelResponse = ModelsResponse<ModelModeConfigs, unknown>;
+
 export type CPSIResult = {
   technology: string;
   status: string;
@@ -62,7 +75,7 @@ export type DeviceResponse = DevicesResponse<
   DeviceAutomation,
   DeviceConfiguration,
   DeviceInformation,
-  { device: ModelsResponse }
+  { device: ModelResponse }
 >;
 
 export type InsertDevice = Omit<DevicesResponse, "id" | "created" | "updated">;

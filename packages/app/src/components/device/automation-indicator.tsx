@@ -189,6 +189,7 @@ export function AutomationIndicator({ device }: AutomationIndicatorProps) {
             }`}
           >
             <NextModeIndication
+              deviceId={device.id}
               next={
                 data.until === "on"
                   ? device.automation.on

@@ -66,5 +66,15 @@ export default {
       },
     },
   },
+  safelist: [
+    {
+      pattern: /bg-.+/,
+      variants: ["hover", "focus"],
+    },
+    {
+      pattern: /text-.+/,
+      variants: ["hover", "focus"],
+    },
+  ],
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 };

@@ -45,8 +45,6 @@ export function DeviceSwitcher() {
 
       if (isCmdOrCtrl && event.key === "n") {
         event.preventDefault();
-        // Handle add device action here
-        console.log("Add device shortcut triggered");
       }
 
       // Handle number shortcuts (⌘1-9) for quick device selection

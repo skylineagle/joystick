@@ -55,27 +55,19 @@ export function StreamView() {
         rois: roiData,
       }}
       onAfterDraw={(roi) => {
-        console.log("onAfterDraw", roi);
-
         setRoiData((prev) => [...prev, roi]);
       }}
       onAfterMove={(selectedRoiId, roi) => {
-        console.log("onAfterMove", selectedRoiId, roi);
-
         setRoiData((prev) =>
           prev.map((r) => (r.id === selectedRoiId ? { ...r, ...roi } : r))
         );
       }}
       onAfterResize={(selectedRoiId, roi) => {
-        console.log("onAfterResize", selectedRoiId, roi);
-
         setRoiData((prev) =>
           prev.map((r) => (r.id === selectedRoiId ? { ...r, ...roi } : r))
         );
       }}
       onAfterRotate={(selectedRoiId, roi) => {
-        console.log("onAfterRotate", selectedRoiId, roi);
-
         setRoiData((prev) =>
           prev.map((r) => (r.id === selectedRoiId ? { ...r, ...roi } : r))
         );

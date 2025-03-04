@@ -41,7 +41,6 @@ export const Controls = () => {
   } = useIsSupported(deviceId!, ["get-cpsi"]);
 
   const isMediaMtx = device?.expand?.device.stream === "mediamtx";
-  console.log(isGetCpsiStatusSupported, isGetCpsiStatusLoading);
 
   return (
     <Card
