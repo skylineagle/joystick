@@ -1,15 +1,14 @@
+import { ResetDevice } from "@/components/device/reset-device";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useAction } from "@/hooks/use-action";
 import { useIsSupported } from "@/hooks/use-is-supported";
 import { runAction } from "@/lib/joystick-api";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Power, Wifi, WifiOff } from "lucide-react";
+import { Wifi, WifiOff } from "lucide-react";
 import { useParams } from "react-router-dom";
 
 export function DeviceHealthIndicator() {
@@ -36,23 +35,6 @@ export function DeviceHealthIndicator() {
     enabled: !!deviceId && isHealthcheckSupported,
     refetchInterval: 10000,
   });
-
-  const { runAction: runReset, isRunning: isResetRunning } = useAction(
-    deviceId ?? "",
-    "reset"
-  );
-
-  async function handleReset() {
-    if (!deviceId) return;
-
-    try {
-      runReset({
-        params: {},
-      });
-    } catch (error) {
-      console.error("Failed to reset device:", error);
-    }
-  }
 
   if (!deviceId || isSupportedLoading || !isHealthcheckSupported) {
     return null;
@@ -91,20 +73,7 @@ export function DeviceHealthIndicator() {
       {isResetSupported && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-destructive"
-              onClick={handleReset}
-              disabled={isResetRunning}
-            >
-              {isResetRunning ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Power className="h-4 w-4" />
-              )}
-              <span className="sr-only">Reset Device</span>
-            </Button>
+            <ResetDevice deviceId={deviceId ?? ""} />
           </TooltipTrigger>
           <TooltipContent>
             <p>Reset Device</p>
