@@ -136,7 +136,7 @@ onRecordUpdateRequest((e) => {
   const current = $app.findRecordById("devices", e.record.id);
   const auto = e.record.get("auto");
 
-  if (auto && auto !== current.get("auto")) {
+  if (auto !== current.get("auto")) {
     $app.logger().info("Mode changed, syncing camera state");
 
     try {
