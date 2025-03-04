@@ -11,6 +11,7 @@ import { customDarkTheme, customLightTheme } from "./terminal-theme";
 
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
+import { useIsPermitted } from "@/hooks/use-is-permitted";
 import "xterm/css/xterm.css";
 
 // ASCII art for the easter egg as individual lines for better terminal display
@@ -33,6 +34,7 @@ export function TerminalPage() {
   const { device: deviceId } = useParams();
   const { data: selectedDevice } = useDevice(deviceId ?? "");
   const [isMarioKartActive, setIsMarioKartActive] = useState(false);
+  const isEasterEggsPermitted = useIsPermitted("easter-eggs");
   const terminalInstance = useRef<Terminal | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
@@ -377,61 +379,62 @@ export function TerminalPage() {
         // Enter key
         const command = commandBufferRef.current.trim();
 
-        if (command === "joystick-ascii") {
-          // Display the ASCII art line by line
-          terminal.write("\r\n\n"); // Add some space
+        if (isEasterEggsPermitted) {
+          if (command === "joystick-ascii") {
+            // Display the ASCII art line by line
+            terminal.write("\r\n\n"); // Add some space
 
-          // Write each line of the ASCII art with proper line breaks
-          joystickAsciiLines.forEach((line) => {
-            terminal.write(line + "\r\n");
-          });
+            // Write each line of the ASCII art with proper line breaks
+            joystickAsciiLines.forEach((line) => {
+              terminal.write(line + "\r\n");
+            });
 
-          terminal.write("\r\nYou found a hidden easter egg! 🎉\r\n\n");
+            terminal.write("\r\nYou found a hidden easter egg! 🎉\r\n\n");
 
-          // Show toast notification
-          toast.success({ message: "Terminal Easter Egg Activated!" });
+            // Show toast notification
+            toast.success({ message: "Terminal Easter Egg Activated!" });
 
-          // Clear the command buffer
-          commandBufferRef.current = "";
+            // Clear the command buffer
+            commandBufferRef.current = "";
 
-          // Send a new line to the terminal to maintain proper cursor position
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.send(
-              JSON.stringify({
-                type: "data",
-                device: selectedDevice.id,
-                data: "\r",
-              })
-            );
+            // Send a new line to the terminal to maintain proper cursor position
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(
+                JSON.stringify({
+                  type: "data",
+                  device: selectedDevice.id,
+                  data: "\r",
+                })
+              );
+            }
+            return;
+          } else if (command === "matrix") {
+            // Run the Matrix effect
+            terminal.write("\r\n\nEntering the Matrix...\r\n\n");
+
+            // Clear the command buffer
+            commandBufferRef.current = "";
+
+            // Start the Matrix effect after a short delay
+            setTimeout(runMatrixEffect, 1000);
+            return;
+          } else if (command === "snake") {
+            // Run the Snake game
+            terminal.write("\r\n\nStarting Snake game...\r\n\n");
+
+            // Clear the command buffer
+            commandBufferRef.current = "";
+
+            // Start the Snake game after a short delay
+            setTimeout(runSnakeGame, 1000);
+            return;
+          } else if (command === "mariokart") {
+            // Run the Mario Kart game
+            terminal.write("\r\n\nStarting Mario Kart...\r\n\n");
+            setIsMarioKartActive(true);
+            return;
           }
-          return;
-        } else if (command === "matrix") {
-          // Run the Matrix effect
-          terminal.write("\r\n\nEntering the Matrix...\r\n\n");
-
-          // Clear the command buffer
-          commandBufferRef.current = "";
-
-          // Start the Matrix effect after a short delay
-          setTimeout(runMatrixEffect, 1000);
-          return;
-        } else if (command === "snake") {
-          // Run the Snake game
-          terminal.write("\r\n\nStarting Snake game...\r\n\n");
-
-          // Clear the command buffer
-          commandBufferRef.current = "";
-
-          // Start the Snake game after a short delay
-          setTimeout(runSnakeGame, 1000);
-          return;
-        } else if (command === "mariokart") {
-          // Run the Mario Kart game
-          terminal.write("\r\n\nStarting Mario Kart...\r\n\n");
-          setIsMarioKartActive(true);
-          return;
         }
-
         // Reset command buffer on enter
         commandBufferRef.current = "";
       } else if (data === "\u007f") {
@@ -491,7 +494,7 @@ export function TerminalPage() {
       fitAddonRef.current = null;
       commandBufferRef.current = "";
     };
-  }, [selectedDevice, theme]);
+  }, [isEasterEggsPermitted, selectedDevice, theme]);
 
   if (!selectedDevice) return <div>Please select a device first</div>;
 
