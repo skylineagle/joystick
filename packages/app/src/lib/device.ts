@@ -24,7 +24,9 @@ export async function fetchDevice(deviceId: string) {
       });
 
     return device;
-  } catch {
+  } catch (error) {
+    console.log(error);
+
     throw new Error("Failed to fetch device");
   }
 }

@@ -19,9 +19,38 @@ Bun.serve({
     const url = new URL(req.url);
     if (url.pathname === "/terminal") {
       const success = server.upgrade(req);
-      if (!success)
-        return new Response("WebSocket upgrade failed", { status: 400 });
+      if (!success) {
+        const response = new Response("WebSocket upgrade failed", {
+          status: 400,
+        });
+        response.headers.set("Access-Control-Allow-Origin", "*");
+        response.headers.set(
+          "Access-Control-Allow-Methods",
+          "GET, POST, PUT, DELETE, OPTIONS"
+        );
+        return response;
+      }
       return undefined;
+    }
+    // Standard health check endpoint
+    else if (url.pathname === "/api/health") {
+      const response = new Response(
+        JSON.stringify({
+          status: "healthy",
+          service: "panel",
+          uptime: process.uptime(),
+          timestamp: new Date().toISOString(),
+          memory: process.memoryUsage(),
+          version: process.env.npm_package_version || "unknown",
+        }),
+        { status: 200 }
+      );
+      response.headers.set("Access-Control-Allow-Origin", "*");
+      response.headers.set(
+        "Access-Control-Allow-Methods",
+        "GET, POST, PUT, DELETE, OPTIONS"
+      );
+      return response;
     }
   },
   websocket: {

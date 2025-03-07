@@ -85,7 +85,7 @@ export function ActionForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <Card>
+        <Card className="border-none">
           <CardHeader>
             <CardTitle>Action Parameters</CardTitle>
             <CardDescription>

@@ -142,6 +142,18 @@ app.get("/jobs/:device/next", async ({ params }) => {
   }
 });
 
+// Standard health check endpoint
+app.get("/api/health", async () => {
+  return {
+    status: "healthy",
+    service: "baker",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    memory: process.memoryUsage(),
+    version: process.env.npm_package_version || "unknown",
+  };
+});
+
 app.use(cors()).listen(3000);
 logger.info("🦊 Baker API server running at http://localhost:3000");
 logger.debug(`Pocketbase URL: ${POCKETBASE_URL}`);

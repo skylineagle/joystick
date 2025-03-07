@@ -70,6 +70,18 @@ app.post("/api/mode/:device/:mode", async ({ params, body }) => {
   }
 });
 
+// Standard health check endpoint
+app.get("/api/health", async () => {
+  return {
+    status: "healthy",
+    service: "switcher",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    memory: process.memoryUsage(),
+    version: process.env.npm_package_version || "unknown",
+  };
+});
+
 app.use(cors()).listen(Bun.env.PORT || 8080);
 logger.info(
   `🦊 Switcher API server running at ${Bun.env.HOST}:${Bun.env.PORT || 8080}`

@@ -12,6 +12,7 @@ import { useDeviceStore } from "@/store/device-store";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { Toaster } from "sonner";
 import { ConfettiEasterEgg } from "@/components/confetti-easter-egg";
+import { AppStatusIndicator } from "@/components/app-status-indicator";
 
 export function DashboardPage() {
   const { user } = useAuthStore();
@@ -37,6 +38,7 @@ export function DashboardPage() {
               <h1 className="text-3xl font-bold">
                 {user?.email.includes("user") ? "HaTomer" : "Joystick"}
               </h1>
+              <AppStatusIndicator />
             </div>
 
             <div className="flex items-center gap-5">

@@ -32,18 +32,17 @@ export function useActions(deviceId: string) {
       setActionResult(null);
       return runAction({ deviceId, action, params });
     },
-    onMutate: () => {},
+    retry: false,
     onSuccess: (data) => {
       if (toastRef.current) baseToast.dismiss(toastRef.current);
 
       toast.success({
         message: `Successfully sent ${currentAction} to ${device?.name}`,
       });
-      setActionResult(data);
+      setActionResult(data ?? null);
     },
     onError: (error) => {
       if (toastRef.current) baseToast.dismiss(toastRef.current);
-      console.log(error);
 
       toast.error({
         message:

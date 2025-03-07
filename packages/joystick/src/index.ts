@@ -3,7 +3,7 @@ import { pb } from "@/pocketbase";
 import { type ActionsResponse, RunTargetOptions } from "@/types/db.types";
 import type { DeviceResponse, RunResponse } from "@/types/types";
 import cors from "@elysiajs/cors";
-import { $ } from "bun";
+import { $, ShellError } from "bun";
 import { Elysia, t } from "elysia";
 import { validate } from "jsonschema";
 import { enhancedLogger, setupLoggingMiddleware } from "./enhanced-logger";
@@ -115,8 +115,8 @@ app.post(
 
       await updateStatus(params.device);
 
-      const authStore = pb.authStore.model;
-      const userId = authStore ? authStore.id : "system";
+      const auth = pb.authStore.record;
+      const userId = auth?.id ?? "system";
 
       await enhancedLogger.logCommandAction({
         userId,
@@ -138,14 +138,21 @@ app.post(
 
       return response;
     } catch (error) {
+      const errorMessage =
+        error instanceof Error && error.name === "ShellError"
+          ? (error as unknown as { stderr: string }).stderr
+          : error instanceof Error
+          ? error.message
+          : String(error);
+
       enhancedLogger.error(
-        { error: error instanceof Error ? error.message : String(error) },
+        {
+          error: errorMessage,
+        },
         "Error executing command"
       );
 
-      // Get the current user for the action logging
-      const authStore = pb.authStore.model;
-      const userId = authStore ? authStore.id : "system";
+      const userId = pb.authStore.record ? pb.authStore.record.id : "system";
 
       // If we have action info, log the failed action
       if (params?.device && params?.action) {
@@ -162,7 +169,7 @@ app.post(
             actionId: actionResult[0].id,
             parameters: body || {},
             result: {
-              error: error instanceof Error ? error.message : String(error),
+              error: errorMessage,
             },
             success: false,
           });
@@ -171,7 +178,7 @@ app.post(
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: errorMessage,
       };
     }
   },
@@ -184,19 +191,15 @@ app.get("/api/cpsi", async () => {
   return generateRandomCPSIResult();
 });
 
-app.get("/api/healtcheck", async () => {
-  // Log a system heartbeat action
-  await enhancedLogger.logSystemAction({
-    actionName: "heartbeat",
-    details: {
-      timestamp: new Date().toISOString(),
-      service: "joystick",
-    },
-  });
-
+// Standard health check endpoint
+app.get("/api/health", async () => {
   return {
-    status: "connected",
-    lastConnected: new Date().toISOString(),
+    status: "healthy",
+    service: "joystick",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    memory: process.memoryUsage(),
+    version: process.env.npm_package_version || "unknown",
   };
 });
 

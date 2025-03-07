@@ -191,7 +191,7 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] border-none">
         <DialogHeader>
           <DialogTitle>Device Settings</DialogTitle>
           <DialogDescription>

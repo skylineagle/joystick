@@ -359,6 +359,7 @@ class EnhancedLogger {
 
       // Use system user ID if available
       const systemUserId = pb.authStore.model?.id || "system";
+      console.log(systemUserId);
 
       await this.logCommandAction({
         userId: systemUserId,

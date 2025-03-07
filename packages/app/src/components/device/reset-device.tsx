@@ -18,7 +18,7 @@ export function ResetDevice({ deviceId }: { deviceId: string }) {
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger>
+      <AlertDialogTrigger asChild>
         <Button variant="ghost" size="icon">
           <Power className="h-4 w-4 text-destructive" />
         </Button>

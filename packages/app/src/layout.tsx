@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar";
+import { AppStatusIndicator } from "@/components/app-status-indicator";
 import { DeviceHealthIndicator } from "@/components/device/device-health-indicator";
 import {
   SidebarInset,
@@ -26,6 +27,7 @@ export function Layout({ children }: LayoutProps) {
           <header className="flex h-16 shrink-0 items-center justify-between gap-2">
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
+              <AppStatusIndicator />
             </div>
             {deviceId && (
               <div className="flex items-center gap-2 px-4">

@@ -32,6 +32,9 @@ export const urls = {
   get baker() {
     return getServiceUrl("baker");
   },
+  get switcher() {
+    return getServiceUrl("switcher");
+  },
   get pocketbase() {
     return getServiceUrl("pocketbase");
   },

@@ -184,7 +184,17 @@ app.post("/api/receive-sms", ({ body, set }) => {
   return { success: true };
 });
 
-app.get("/health", () => ({ status: "ok" }));
+// Standard health check endpoint
+app.get("/api/health", async () => {
+  return {
+    status: "healthy",
+    service: "whisper",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    memory: process.memoryUsage(),
+    version: process.env.npm_package_version || "unknown",
+  };
+});
 
 app
   .use(cors())

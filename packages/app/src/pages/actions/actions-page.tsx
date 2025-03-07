@@ -85,7 +85,7 @@ export function ActionsPage() {
             <TabsContent
               key={action}
               value={action}
-              className="mt-0 border-0 space-y-4"
+              className="flex align-start flex-col gap-4"
             >
               <ActionForm
                 deviceId={deviceId}
@@ -95,7 +95,7 @@ export function ActionsPage() {
               />
 
               {currentAction === action && actionResult && (
-                <Card>
+                <Card className="border-none shadow-xl">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex justify-between items-center">
                       <span>Action Result</span>
