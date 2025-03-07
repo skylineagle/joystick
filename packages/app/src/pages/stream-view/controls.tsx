@@ -5,6 +5,7 @@ import { MediaMtxMonitor } from "@/components/stream/media-mtx-monitor";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDevice } from "@/hooks/use-device";
 import { useIsSupported } from "@/hooks/use-is-supported";
@@ -59,52 +60,104 @@ export const Controls = () => {
           isMobileLandscape ? "gap-2" : "space-y-4"
         )}
       >
-        {isSetModeSupported && !isSetModeLoading && !isDeviceLoading && (
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-4">
-              <ModeSelector deviceId={deviceId!} />
-              <div className="self-center">
-                <StatusIndicator status={device?.status ?? "unknown"} />
+        {/* Mode Selector Section */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-4">
+            {isSetModeLoading || isDeviceLoading ? (
+              <div className="flex items-center gap-4">
+                <Skeleton className="w-40 h-10" />
+                <Skeleton className="w-6 h-6 rounded-full" />
               </div>
-            </div>
+            ) : isSetModeSupported ? (
+              <>
+                <ModeSelector deviceId={deviceId!} />
+                <div className="self-center">
+                  <StatusIndicator status={device?.status ?? "unknown"} />
+                </div>
+              </>
+            ) : null}
           </div>
-        )}
+        </div>
 
-        {device?.automation && (
-          <>
-            <Separator className="my-2" />
-            <div className="grid grid-cols-2 grid-rows-1 items-center gap-2">
-              <Label className="text-muted-foreground">Auto mode:</Label>
-              <AutomateToggle
-                deviceId={deviceId!}
-                isAutomated={device?.auto ?? false}
-              />
-            </div>
-            <AutomationIndicator device={device} />
-          </>
-        )}
+        {/* Automation Section */}
+        <div className="flex flex-col gap-2">
+          {device?.automation ? (
+            <>
+              <Separator className="my-2" />
+              {isDeviceLoading ? (
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 grid-rows-1 items-center gap-2">
+                    <Skeleton className="h-5 w-20" />
+                    <Skeleton className="h-6 w-12" />
+                  </div>
+                  <Skeleton className="h-6 w-full" />
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 grid-rows-1 items-center gap-2">
+                    <Label className="text-muted-foreground">Auto mode:</Label>
+                    <AutomateToggle
+                      deviceId={deviceId!}
+                      isAutomated={device?.auto ?? false}
+                    />
+                  </div>
+                  {device.auto && <AutomationIndicator device={device} />}
+                </>
+              )}
+            </>
+          ) : null}
+        </div>
 
-        {isSetBitrateSupported && !isSetBitrateLoading && (
-          <>
-            <Separator className="my-2" />
-            <BitrateControll deviceId={deviceId!} />
-          </>
-        )}
+        {/* Bitrate Control Section */}
+        <div>
+          {isSetBitrateSupported ? (
+            <>
+              <Separator className="my-2" />
+              {isSetBitrateLoading ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <Skeleton className="h-5 w-16" />
+                    <Skeleton className="h-6 w-6 rounded-full" />
+                  </div>
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              ) : (
+                <BitrateControll deviceId={deviceId!} />
+              )}
+            </>
+          ) : null}
+        </div>
 
-        {isRoiSupported && !isRoiLoading && (
-          <>
-            <Separator className="my-2" />
-            <RoiModeControl />
-          </>
-        )}
+        {/* ROI Control Section */}
+        <div>
+          {isRoiSupported ? (
+            <>
+              <Separator className="my-2" />
+              {isRoiLoading ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <Skeleton className="h-5 w-16" />
+                  </div>
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              ) : (
+                <RoiModeControl />
+              )}
+            </>
+          ) : null}
+        </div>
 
-        <Card className="p-3 border-none shadow-xl mt-3">
+        <div className="flex-1" />
+
+        {/* Tabs Section - Always at the bottom */}
+        <Card className="p-3 border-none shadow-xl">
           <Tabs
             defaultValue="stream"
             value={activeTab}
             onValueChange={(v) => setActiveTab(v as TabValue)}
             className="w-full"
           >
+            {/* Tab Content */}
             {isMediaMtx && (
               <TabsContent value="stream" className="m-0 pt-2">
                 {device?.configuration?.name &&
@@ -126,6 +179,7 @@ export const Controls = () => {
               </TabsContent>
             )}
 
+            {/* Tab Triggers */}
             <TabsList
               className={`grid grid-cols-${
                 (isMediaMtx ? 1 : 0) +
@@ -154,8 +208,6 @@ export const Controls = () => {
             </TabsList>
           </Tabs>
         </Card>
-
-        <div className="flex-1" />
       </div>
     </Card>
   );

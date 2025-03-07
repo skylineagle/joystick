@@ -1,3 +1,4 @@
+import { ConfigurationEditor } from "@/components/configuration/configuration-editor";
 import { ResetDevice } from "@/components/device/reset-device";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -5,6 +6,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useDevice } from "@/hooks/use-device";
 import { useIsSupported } from "@/hooks/use-is-supported";
 import { runAction } from "@/lib/joystick-api";
 import { useQuery } from "@tanstack/react-query";
@@ -13,6 +15,7 @@ import { useParams } from "react-router-dom";
 
 export function DeviceHealthIndicator() {
   const { device: deviceId } = useParams();
+  const { data: device } = useDevice(deviceId ?? "");
   const { isSupported: isHealthcheckSupported, isLoading: isSupportedLoading } =
     useIsSupported(deviceId ?? "", "healthcheck");
   const { isSupported: isResetSupported } = useIsSupported(
@@ -68,6 +71,8 @@ export function DeviceHealthIndicator() {
           <span className="text-xs">Disconnected</span>
         </Badge>
       )}
+
+      {device && <ConfigurationEditor device={device} />}
 
       {isResetSupported && (
         <Tooltip>
