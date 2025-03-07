@@ -12,12 +12,8 @@ export function useMode(deviceId: string) {
   );
   const { data: device } = useDevice(deviceId);
   const mode = device?.mode;
-  const { mutate: setMode } = useMutation({
+  const { mutate: setMode, isPending: isSetModePending } = useMutation({
     mutationFn: (mode: string) => {
-      // if (!isSupported) {
-      //   throw new Error("Device does not support mode setting");
-      // }
-
       return runAction({
         deviceId,
         action: "set-mode",
@@ -42,6 +38,7 @@ export function useMode(deviceId: string) {
     mode,
     isAutomated: device?.auto,
     setMode,
+    isSetModePending,
     isLoading: isActionLoading,
   };
 }

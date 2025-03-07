@@ -18,7 +18,8 @@ export interface ModeSelectorProps {
 }
 
 export const ModeSelector = ({ deviceId }: ModeSelectorProps) => {
-  const { action, mode, setMode, isAutomated, isLoading } = useMode(deviceId);
+  const { action, mode, setMode, isAutomated, isLoading, isSetModePending } =
+    useMode(deviceId);
   const availableModes = useMemo(
     () => getModeOptionsFromSchema(action?.parameters ?? {}),
     [action]
@@ -102,35 +103,40 @@ export const ModeSelector = ({ deviceId }: ModeSelectorProps) => {
               "w-40 transition-all duration-300 ease-in-out border-1",
               currentMode?.bgColor,
               "border-transparent",
-              (isLoading || isAutomated) && "opacity-50 cursor-not-allowed"
+              (isLoading || isAutomated || isSetModePending) &&
+                "opacity-50 cursor-not-allowed"
             )}
             aria-label="Select camera mode"
           >
-            <motion.div
-              className="flex items-center gap-2"
-              initial={false}
-              animate={{ scale: isLoading ? 0.95 : 1 }}
-              transition={{ duration: 0.2 }}
-            >
+            {isSetModePending ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
               <motion.div
+                className="flex items-center gap-2"
                 initial={false}
-                animate={{
-                  rotate: mode === "auto" ? 360 : 0,
-                  scale: 1,
-                }}
-                transition={{
-                  duration: 0.3,
-                  type: "spring",
-                  stiffness: 200,
-                }}
+                animate={{ scale: isLoading ? 0.95 : 1 }}
+                transition={{ duration: 0.2 }}
               >
-                <DynamicIcon
-                  name={currentMode?.icon as IconName}
-                  className={cn("h-4 w-4", currentMode?.color)}
-                />
+                <motion.div
+                  initial={false}
+                  animate={{
+                    rotate: mode === "auto" ? 360 : 0,
+                    scale: 1,
+                  }}
+                  transition={{
+                    duration: 0.3,
+                    type: "spring",
+                    stiffness: 200,
+                  }}
+                >
+                  <DynamicIcon
+                    name={currentMode?.icon as IconName}
+                    className={cn("h-4 w-4", currentMode?.color)}
+                  />
+                </motion.div>
+                <span className="truncate">{currentMode?.label}</span>
               </motion.div>
-              <span className="truncate">{currentMode?.label}</span>
-            </motion.div>
+            )}
           </SelectTrigger>
 
           <SelectContent className="w-44 border-none bg-popover/95 backdrop-blur-sm shadow-xl">

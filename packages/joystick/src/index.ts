@@ -115,11 +115,9 @@ app.post(
 
       await updateStatus(params.device);
 
-      // Get the current user for the action logging
       const authStore = pb.authStore.model;
       const userId = authStore ? authStore.id : "system";
 
-      // Log the action completion using helper function
       await enhancedLogger.logCommandAction({
         userId,
         deviceId: params.device,
