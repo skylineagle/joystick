@@ -32,8 +32,7 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
       });
 
       if (typeof data === "string") {
-        const parsedResult = parseCPSIResult(data);
-        return parsedResult;
+        return parseCPSIResult(data);
       }
 
       return data;
@@ -145,21 +144,21 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
               <span className="font-medium text-sm truncate">
                 {data?.operator || "Unknown Operator"}
               </span>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => refetchCpsi()}
-                disabled={isCpsiLoading}
-                className="h-7 w-7 flex-shrink-0"
-              >
-                <RefreshCw className="h-3 w-3" />
-                <span className="sr-only">Refresh cellular status</span>
-              </Button>
             </div>
-            <div className="flex items-center gap-1 flex-shrink-0">
-              {getNetworkTypeBadge(data?.technology)}
-              {getStatusBadge(data?.status)}
-            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => refetchCpsi()}
+              disabled={isCpsiLoading}
+              className="h-7 w-7 flex-shrink-0"
+            >
+              <RefreshCw className="h-3 w-3" />
+              <span className="sr-only">Refresh cellular status</span>
+            </Button>
+          </div>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {getNetworkTypeBadge(data?.technology)}
+            {getStatusBadge(data?.status)}
           </div>
 
           <div className="grid grid-cols-2 gap-x-2 gap-y-2 pt-1 text-xs w-full">

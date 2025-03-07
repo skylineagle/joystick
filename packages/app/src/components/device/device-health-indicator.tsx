@@ -35,7 +35,7 @@ export function DeviceHealthIndicator() {
       return data === "true";
     },
     enabled: !!deviceId && isHealthcheckSupported,
-    refetchInterval: 10000,
+    refetchInterval: 5000,
   });
 
   if (!deviceId || isSupportedLoading || !isHealthcheckSupported) {
