@@ -561,7 +561,12 @@ export function TerminalPage() {
         terminalInstance.current = null;
       }
     };
-  }, [selectedDevice?.configuration, selectedDevice?.id, theme]);
+  }, [
+    isEasterEggsPermitted,
+    selectedDevice?.configuration,
+    selectedDevice?.id,
+    theme,
+  ]);
 
   if (!selectedDevice) return <div>Please select a device first</div>;
 
@@ -595,13 +600,7 @@ export function TerminalPage() {
             </div>
           </div>
         )}
-        <div
-          ref={terminalRef}
-          className="h-full w-full"
-          onKeyDown={(e) => {
-            // ... existing key handling logic
-          }}
-        />
+        <div ref={terminalRef} className="h-full w-full" />
       </div>
     </div>
   );
