@@ -18,6 +18,7 @@ import { BarChart, Cpu, Signal } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { DevicesStatusOptions } from "@/types/db.types";
+import { AutomationIndicator } from "@/components/device/automation-indicator";
 
 type TabValue = "stream" | "device" | "cell";
 
@@ -79,6 +80,7 @@ export const Controls = () => {
                 isAutomated={device?.auto ?? false}
               />
             </div>
+            <AutomationIndicator device={device} />
           </>
         )}
 

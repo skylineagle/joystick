@@ -1,16 +1,10 @@
-import { Label } from "@/components/ui/label";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { NextModeIndication } from "@/components/device/next-mode-indication";
 import { urls } from "@/lib/urls";
 import { DeviceResponse } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, Clock } from "lucide-react";
 import { motion } from "motion/react";
 import Countdown from "react-countdown";
-import { NextModeIndication } from "@/components/device/next-mode-indication";
 
 type CountdownData = {
   countdownTime: number;
@@ -117,34 +111,6 @@ export function AutomationIndicator({ device }: AutomationIndicatorProps) {
     return null;
   }
 
-  function renderTooltipContent() {
-    if (!device.automation) return null;
-
-    const { automationType, on, off } = device.automation;
-
-    if (automationType === "duration") {
-      return (
-        <>
-          <Label className="text-xs">On: {on?.minutes} minutes</Label>
-          <Label className="text-xs">Off: {off?.minutes} minutes</Label>
-        </>
-      );
-    } else {
-      return (
-        <>
-          <Label className="text-xs">
-            On at: {String(on?.hourOfDay || 0).padStart(2, "0")}:
-            {String(on?.minuteOfDay || 0).padStart(2, "0")}
-          </Label>
-          <Label className="text-xs">
-            Off at: {String(off?.hourOfDay || 0).padStart(2, "0")}:
-            {String(off?.minuteOfDay || 0).padStart(2, "0")}
-          </Label>
-        </>
-      );
-    }
-  }
-
   // Check if the data is valid
   const isValidCountdown =
     data?.countdownTime &&
@@ -162,26 +128,13 @@ export function AutomationIndicator({ device }: AutomationIndicatorProps) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="text-sm text-muted-foreground"
+        className="flex-1 w-full text-sm text-muted-foreground"
       >
-        <div className="flex items-center gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Clock className="h-3 w-3" />
-              </motion.div>
-            </TooltipTrigger>
-            <TooltipContent
-              className="flex flex-col gap-1 items-start border-none"
-              side="top"
-              sideOffset={10}
-            >
-              {renderTooltipContent()}
-            </TooltipContent>
-          </Tooltip>
+        <div className="w-full flex items-center gap-2">
+          <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+            <Clock className="h-3 w-3" />
+          </motion.div>
+
           <span>Going</span>
           <div
             className={`font-medium ${
