@@ -31,11 +31,11 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
         params: {},
       });
 
-      if (typeof data === "string") {
-        return parseCPSIResult(data);
+      try {
+        return JSON.parse(data ?? "");
+      } catch {
+        return parseCPSIResult(data ?? "");
       }
-
-      return data;
     },
     enabled: !!deviceId,
   });

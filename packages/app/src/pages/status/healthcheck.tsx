@@ -59,7 +59,7 @@ export function Healthcheck({ deviceId }: HealthcheckProps) {
             <Skeleton className="h-6 w-2/3" />
           </div>
         ) : (
-          <ConnectionStatus data={healthcheck} />
+          <ConnectionStatus data={healthcheck ?? null} />
         )}
       </CardContent>
     </Card>

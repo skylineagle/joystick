@@ -43,7 +43,7 @@ export function ServicesStatus({ deviceId }: ServicesTableProps) {
         return JSON.parse(data);
       }
 
-      return data;
+      return [];
     },
 
     enabled: !!deviceId,
