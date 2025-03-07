@@ -24,7 +24,6 @@ export const ModeSelector = ({ deviceId }: ModeSelectorProps) => {
     [action]
   );
   const { data: modes, isLoading: isModesLoading } = useModeConfig(deviceId);
-  console.log(modes);
   const currentMode = modes[mode as keyof typeof modes];
 
   const handleModeChange = useCallback(

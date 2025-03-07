@@ -19,16 +19,14 @@ export function useModeConfig(deviceId: string) {
       }
 
       const device = devices[0];
-      const res = Object.entries(device.expand?.device?.mode_configs ?? {}).reduce(
-        (acc, [mode, config]) => {
-          return {
-            ...acc,
-            [mode]: config,
-          };
-        },
-        modeConfig
-        );
-      console.log(res);
+      const res = Object.entries(
+        device.expand?.device?.mode_configs ?? {}
+      ).reduce((acc, [mode, config]) => {
+        return {
+          ...acc,
+          [mode]: config,
+        };
+      }, modeConfig);
 
       return res;
     },

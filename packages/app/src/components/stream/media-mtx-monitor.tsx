@@ -27,6 +27,13 @@ type ConnectionStatus =
   | "initializing";
 type ConnectionQuality = "excellent" | "good" | "fair" | "poor";
 
+const qualityConfig = {
+  excellent: { label: "Excellent", color: "bg-green-500", width: "w-full" },
+  good: { label: "Good", color: "bg-green-400", width: "w-3/4" },
+  fair: { label: "Fair", color: "bg-yellow-400", width: "w-1/2" },
+  poor: { label: "Poor", color: "bg-red-500", width: "w-1/4" },
+};
+
 export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>("initializing");
@@ -180,13 +187,6 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
       icon: <MegaphoneOff className="h-4 w-4 text-red-500" />,
       label: "Disconnected",
     },
-  };
-
-  const qualityConfig = {
-    excellent: { label: "Excellent", color: "bg-green-500", width: "w-full" },
-    good: { label: "Good", color: "bg-green-400", width: "w-3/4" },
-    fair: { label: "Fair", color: "bg-yellow-400", width: "w-1/2" },
-    poor: { label: "Poor", color: "bg-red-500", width: "w-1/4" },
   };
 
   // Format throughput

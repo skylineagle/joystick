@@ -17,6 +17,7 @@ import { RoiModeControl } from "@/pages/stream-view/roi/roi-mode-control";
 import { BarChart, Cpu, Signal } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { DevicesStatusOptions } from "@/types/db.types";
 
 type TabValue = "stream" | "device" | "cell";
 
@@ -104,9 +105,10 @@ export const Controls = () => {
           >
             {isMediaMtx && (
               <TabsContent value="stream" className="m-0 pt-2">
-                {device?.configuration?.name && (
-                  <MediaMtxMonitor deviceName={device.configuration.name} />
-                )}
+                {device?.configuration?.name &&
+                  device.status !== DevicesStatusOptions.off && (
+                    <MediaMtxMonitor deviceName={device.configuration.name} />
+                  )}
               </TabsContent>
             )}
 
