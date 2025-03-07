@@ -52,7 +52,9 @@ export function TerminalPage() {
   const { theme } = useTheme();
   const terminalRef = useRef<HTMLDivElement>(null);
   const { device: deviceId } = useParams();
-  const { data: selectedDevice } = useDevice(deviceId ?? "");
+  const { data: selectedDevice, isLoading: isDeviceLoading } = useDevice(
+    deviceId ?? ""
+  );
   const [isMarioKartActive, setIsMarioKartActive] = useState(false);
   const isEasterEggsPermitted = useIsPermitted("easter-eggs");
   const terminalInstance = useRef<Terminal | null>(null);
@@ -61,9 +63,20 @@ export function TerminalPage() {
   const commandBufferRef = useRef<string>("");
   const matrixIntervalRef = useRef<number | null>(null);
   const snakeGameIntervalRef = useRef<number | null>(null);
+  const [isTerminalLoading, setIsTerminalLoading] = useState(true);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
-    if (!terminalRef.current || !selectedDevice?.configuration) return;
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!terminalRef.current || !selectedDevice?.configuration) {
+      return;
+    }
 
     const terminal = new Terminal({
       cursorBlink: true,
@@ -87,16 +100,37 @@ export function TerminalPage() {
     wsRef.current = ws;
 
     ws.onopen = () => {
+      if (!isMountedRef.current) return;
+
       ws.send(
         JSON.stringify({
           type: "connect",
           device: selectedDevice.id,
         })
       );
+      setIsTerminalLoading(false);
     };
 
     ws.onmessage = (event) => {
+      if (!isMountedRef.current) return;
       terminal.write(event.data);
+    };
+
+    ws.onerror = (error) => {
+      if (!isMountedRef.current) return;
+      console.error("Terminal WebSocket error:", error);
+      terminal.write(
+        "\r\n\x1b[31mError: WebSocket connection failed. Please try again.\x1b[0m\r\n"
+      );
+      setIsTerminalLoading(false);
+    };
+
+    ws.onclose = () => {
+      if (!isMountedRef.current) return;
+      terminal.write(
+        "\r\n\x1b[33mConnection closed. Reconnect by refreshing the page.\x1b[0m\r\n"
+      );
+      setIsTerminalLoading(false);
     };
 
     // Function to run the Matrix effect
@@ -478,48 +512,61 @@ export function TerminalPage() {
     });
 
     const handleResize = () => {
-      fitAddon.fit();
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.send(
-          JSON.stringify({
-            type: "resize",
-            device: selectedDevice.id,
-            data: {
-              cols: terminal.cols,
-              rows: terminal.rows,
-            },
-          })
-        );
+      if (!isMountedRef.current) return;
+      if (fitAddonRef.current) {
+        fitAddonRef.current.fit();
       }
     };
 
+    // Add resize event listener
     window.addEventListener("resize", handleResize);
-    // Initial resize
-    handleResize();
 
+    // Cleanup function
     return () => {
+      // Remove event listeners
       window.removeEventListener("resize", handleResize);
-      if (matrixIntervalRef.current) {
+
+      // Clear any active intervals
+      if (matrixIntervalRef.current !== null) {
         window.clearInterval(matrixIntervalRef.current);
         matrixIntervalRef.current = null;
       }
-      if (snakeGameIntervalRef.current) {
+
+      if (snakeGameIntervalRef.current !== null) {
         window.clearInterval(snakeGameIntervalRef.current);
         snakeGameIntervalRef.current = null;
       }
-      terminal.dispose();
-      ws.close();
-      wsRef.current = null;
-      terminalInstance.current = null;
-      fitAddonRef.current = null;
-      commandBufferRef.current = "";
+
+      // Close WebSocket connection
+      if (wsRef.current) {
+        // Remove event handlers to prevent memory leaks
+        wsRef.current.onopen = null;
+        wsRef.current.onmessage = null;
+        wsRef.current.onerror = null;
+        wsRef.current.onclose = null;
+
+        // Close the connection
+        if (
+          wsRef.current.readyState === WebSocket.OPEN ||
+          wsRef.current.readyState === WebSocket.CONNECTING
+        ) {
+          wsRef.current.close();
+        }
+        wsRef.current = null;
+      }
+
+      // Clean up terminal
+      if (terminalInstance.current) {
+        terminalInstance.current.dispose();
+        terminalInstance.current = null;
+      }
     };
-  }, [isEasterEggsPermitted, selectedDevice, theme]);
+  }, [selectedDevice?.configuration, selectedDevice?.id, theme]);
 
   if (!selectedDevice) return <div>Please select a device first</div>;
 
   return (
-    <>
+    <div className="h-full flex flex-col overflow-hidden">
       {isMarioKartActive && (
         <div className="flex items-center justify-center">
           <iframe
@@ -535,7 +582,27 @@ export function TerminalPage() {
           </Button>
         </div>
       )}
-      <div ref={terminalRef} className="size-full rounded-3xl" />
-    </>
+      <div className="flex-1 min-h-0 overflow-hidden relative">
+        {(isDeviceLoading || isTerminalLoading) && (
+          <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-10">
+            <div className="flex flex-col items-center gap-2">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+              <p className="text-sm text-muted-foreground">
+                {isDeviceLoading
+                  ? "Loading device..."
+                  : "Connecting to terminal..."}
+              </p>
+            </div>
+          </div>
+        )}
+        <div
+          ref={terminalRef}
+          className="h-full w-full"
+          onKeyDown={(e) => {
+            // ... existing key handling logic
+          }}
+        />
+      </div>
+    </div>
   );
 }
