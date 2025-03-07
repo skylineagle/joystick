@@ -40,6 +40,7 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
     },
     enabled: !!deviceId,
   });
+
   if (!data) {
     return (
       <div className="flex justify-center items-center h-32 text-muted-foreground">
@@ -97,10 +98,10 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
     );
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string | undefined) => {
     if (
-      status.toLowerCase() === "online" ||
-      status.toLowerCase() === "connected"
+      status?.toLowerCase() === "online" ||
+      status?.toLowerCase() === "connected"
     ) {
       return (
         <Badge
@@ -142,7 +143,7 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
             <div className="flex items-center gap-1 min-w-0 truncate">
               {getSignalIcon()}
               <span className="font-medium text-sm truncate">
-                {data.operator || "Unknown Operator"}
+                {data?.operator || "Unknown Operator"}
               </span>
               <Button
                 variant="ghost"
@@ -156,49 +157,49 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
               </Button>
             </div>
             <div className="flex items-center gap-1 flex-shrink-0">
-              {getNetworkTypeBadge(data.technology)}
-              {getStatusBadge(data.status)}
+              {getNetworkTypeBadge(data?.technology)}
+              {getStatusBadge(data?.status)}
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-x-2 gap-y-2 pt-1 text-xs w-full">
             <div className="flex flex-col">
               <span className="text-xs text-muted-foreground">MCC-MNC</span>
-              <span className="truncate">{data.mccMnc || "N/A"}</span>
+              <span className="truncate">{data?.mccMnc || "N/A"}</span>
             </div>
 
             <div className="flex flex-col">
               <span className="text-xs text-muted-foreground">Band</span>
-              <span className="truncate">{data.band || "N/A"}</span>
+              <span className="truncate">{data?.band || "N/A"}</span>
             </div>
 
             <div className="flex flex-col">
               <span className="text-xs text-muted-foreground">ARFCN</span>
               <span className="truncate">
-                {data.arfcn !== undefined ? data.arfcn : "N/A"}
+                {data?.arfcn !== undefined ? data?.arfcn : "N/A"}
               </span>
             </div>
 
-            {data.technology === "LTE" ? (
+            {data?.technology === "LTE" ? (
               <>
                 <div className="flex flex-col">
                   <span className="text-xs text-muted-foreground">RSRP</span>
                   <span className="truncate">
-                    {formatSignalMetric(data.rsrp, "dBm")}
+                    {formatSignalMetric(data?.rsrp, "dBm")}
                   </span>
                 </div>
 
                 <div className="flex flex-col">
                   <span className="text-xs text-muted-foreground">SINR</span>
                   <span className="truncate">
-                    {formatSignalMetric(data.sinr, "dB")}
+                    {formatSignalMetric(data?.sinr, "dB")}
                   </span>
                 </div>
 
                 <div className="flex flex-col">
                   <span className="text-xs text-muted-foreground">RSRQ</span>
                   <span className="truncate">
-                    {formatSignalMetric(data.rsrq, "dB")}
+                    {formatSignalMetric(data?.rsrq, "dB")}
                   </span>
                 </div>
               </>
@@ -207,26 +208,26 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
                 <div className="flex flex-col">
                   <span className="text-xs text-muted-foreground">RSSI</span>
                   <span className="truncate">
-                    {formatSignalMetric(data.rssi, "dBm")}
+                    {formatSignalMetric(data?.rssi, "dBm")}
                   </span>
                 </div>
 
-                {data.technology === "GSM" && (
+                {data?.technology === "GSM" && (
                   <div className="flex flex-col">
                     <span className="text-xs text-muted-foreground">BSIC</span>
                     <span className="truncate">
-                      {data.bsic !== undefined ? data.bsic : "N/A"}
+                      {data?.bsic !== undefined ? data?.bsic : "N/A"}
                     </span>
                   </div>
                 )}
 
-                {data.technology === "GSM" &&
-                  data.timingAdvance !== undefined && (
+                {data?.technology === "GSM" &&
+                  data?.timingAdvance !== undefined && (
                     <div className="flex flex-col">
                       <span className="text-xs text-muted-foreground">
                         Timing Adv
                       </span>
-                      <span className="truncate">{data.timingAdvance}</span>
+                      <span className="truncate">{data?.timingAdvance}</span>
                     </div>
                   )}
               </>
