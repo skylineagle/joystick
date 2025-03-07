@@ -34,6 +34,34 @@ const qualityConfig = {
   poor: { label: "Poor", color: "bg-red-500", width: "w-1/4" },
 };
 
+const statusConfig = {
+  initializing: {
+    icon: <Activity className="h-4 w-4 text-blue-500" />,
+    label: "Initializing",
+  },
+  connected: {
+    icon: <CheckCircle className="h-4 w-4 text-green-500" />,
+    label: "Connected",
+  },
+  degraded: {
+    icon: <Activity className="h-4 w-4 text-yellow-500" />,
+    label: "Degraded",
+  },
+  disconnected: {
+    icon: <MegaphoneOff className="h-4 w-4 text-red-500" />,
+    label: "No stream",
+  },
+};
+
+const formatThroughput = (bps: number): string => {
+  const kbps = bps / 1024;
+  if (kbps < 1000) {
+    return `${kbps.toFixed(1)} KB/s`;
+  } else {
+    return `${(kbps / 1024).toFixed(2)} MB/s`;
+  }
+};
+
 export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>("initializing");
@@ -170,34 +198,7 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
     device?.mode,
   ]);
 
-  const statusConfig = {
-    initializing: {
-      icon: <Activity className="h-4 w-4 text-blue-500" />,
-      label: "Initializing",
-    },
-    connected: {
-      icon: <CheckCircle className="h-4 w-4 text-green-500" />,
-      label: "Connected",
-    },
-    degraded: {
-      icon: <Activity className="h-4 w-4 text-yellow-500" />,
-      label: "Degraded",
-    },
-    disconnected: {
-      icon: <MegaphoneOff className="h-4 w-4 text-red-500" />,
-      label: "Disconnected",
-    },
-  };
-
   // Format throughput
-  const formatThroughput = (bps: number): string => {
-    const kbps = bps / 1024;
-    if (kbps < 1000) {
-      return `${kbps.toFixed(1)} KB/s`;
-    } else {
-      return `${(kbps / 1024).toFixed(2)} MB/s`;
-    }
-  };
 
   // Render the Stream Performance tab content
   const { icon, label } = statusConfig[connectionStatus];

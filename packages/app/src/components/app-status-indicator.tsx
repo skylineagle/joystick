@@ -21,6 +21,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Database,
+  RefreshCw,
   ServerCrash,
   Wifi,
   WifiOff,
@@ -183,8 +184,6 @@ export function AppStatusIndicator() {
     // Invalidate queries that might be dependent on service availability
     queryClient.invalidateQueries({ queryKey: ["devices"] });
     queryClient.invalidateQueries({ queryKey: ["cameras"] });
-
-    toast.success({ message: "Refreshing system status..." });
   }, [
     queryClient,
     refetchJoystick,
@@ -345,7 +344,7 @@ export function AppStatusIndicator() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-4">
+          <div className="flex flex-col gap-4 py-2">
             {/* Network Status */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -512,7 +511,7 @@ export function AppStatusIndicator() {
               </div>
             </div>
 
-            <div className="mt-6 flex justify-between">
+            <div className="mt-4 flex items-center justify-between">
               <span className="text-xs text-muted-foreground">
                 Last updated: {systemStatus.lastChecked.toLocaleTimeString()}
               </span>
@@ -524,6 +523,7 @@ export function AppStatusIndicator() {
                   toast.success({ message: "Refreshing system status..." });
                 }}
               >
+                <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
             </div>
