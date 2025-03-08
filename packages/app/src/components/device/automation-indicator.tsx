@@ -17,7 +17,7 @@ interface AutomationIndicatorProps {
 
 export function AutomationIndicator({ device }: AutomationIndicatorProps) {
   const { data } = useQuery<CountdownData>({
-    queryKey: ["next-job", device.id],
+    queryKey: ["device", device.id, "next-job"],
     queryFn: async () => {
       const response = await fetch(`${urls.baker}/jobs/${device.id}/next`);
       const data = await response.json();
@@ -103,7 +103,7 @@ export function AutomationIndicator({ device }: AutomationIndicatorProps) {
         until: device.status === "off" ? "on" : "off",
       };
     },
-    refetchInterval: 1500, // Reduced from 1000 to avoid excessive API calls
+    refetchInterval: 10000, // Reduced from 1000 to avoid excessive API calls
     retry: 3,
   });
 

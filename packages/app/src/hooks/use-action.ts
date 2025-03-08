@@ -23,7 +23,7 @@ export function useAction(deviceId: string, action: string) {
     onMutate: () => {},
     onSuccess: () => {
       toast.success({
-        message: `Successfully sent ${action} to ${device?.name}`,
+        message: `Sent ${action} to ${device?.name}`,
       });
     },
     onError: (error) => {
