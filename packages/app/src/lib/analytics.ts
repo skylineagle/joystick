@@ -182,8 +182,6 @@ export async function calculateActionAnalytics(
         actionSuccessRates[log.action] = { success: 0, failure: 0 };
       }
 
-      console.log(log?.expand?.action?.name, log.result);
-
       if (log.result?.success) {
         actionSuccessRates[log.action].success++;
       } else {

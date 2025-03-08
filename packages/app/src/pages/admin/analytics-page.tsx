@@ -36,6 +36,8 @@ import { ArrowLeft, Filter, X } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { DateRange } from "react-day-picker";
 import { ActionOverviewChart } from "./action-overview-chart";
+import { ActionSuccessRateChart } from "./action-success-rate-chart";
+import { ActionExecutionTimeChart } from "./action-execution-time-chart";
 import { DatePickerWithRange } from "./date-range-picker";
 import { AnimatedThemeToggle } from "@/components/ui/animated-theme-toggle";
 import { Link } from "react-router-dom";
@@ -588,11 +590,11 @@ export function AnalyticsPage() {
             </Card>
           </div>
 
-          <Tabs defaultValue="overview">
+          <Tabs defaultValue="recent">
             <TabsList className="w-full justify-start">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="details">Action Details</TabsTrigger>
               <TabsTrigger value="recent">Recent Actions</TabsTrigger>
+              <TabsTrigger value="details">Action Details</TabsTrigger>
+              <TabsTrigger value="overview">Charts</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="mt-4">
@@ -623,18 +625,6 @@ export function AnalyticsPage() {
 
                 <Card className="border-none shadow-2xl">
                   <CardHeader>
-                    <CardTitle>Actions by User</CardTitle>
-                  </CardHeader>
-                  <CardContent className="h-80">
-                    <ActionOverviewChart
-                      data={data.actionsByUser}
-                      nameMapping={nameMappings.users}
-                    />
-                  </CardContent>
-                </Card>
-
-                <Card className="border-none shadow-2xl">
-                  <CardHeader>
                     <CardTitle>Actions Success Rate</CardTitle>
                     <CardDescription>
                       Success vs. failure rates for most used actions
@@ -646,27 +636,30 @@ export function AnalyticsPage() {
                         No data available
                       </p>
                     ) : (
-                      <ActionOverviewChart
-                        data={Object.entries(data.actionSuccessRates)
-                          .sort(
-                            (a, b) =>
-                              b[1].success +
-                              b[1].failure -
-                              (a[1].success + a[1].failure)
-                          )
-                          .slice(0, 10)
-                          .reduce((acc, [actionId, counts]) => {
-                            const total = counts.success + counts.failure;
-                            const successRate =
-                              total > 0
-                                ? Math.round((counts.success / total) * 100)
-                                : 0;
-
-                            acc[actionId] = successRate;
-                            return acc;
-                          }, {} as Record<string, number>)}
+                      <ActionSuccessRateChart
+                        data={data.actionSuccessRates}
                         nameMapping={nameMappings.actions}
-                        isPercentage={true}
+                      />
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card className="border-none shadow-2xl">
+                  <CardHeader>
+                    <CardTitle>Avg. Execution Time per Action</CardTitle>
+                    <CardDescription>
+                      Average execution time in milliseconds
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="h-80">
+                    {Object.keys(data.executionTimeByAction).length === 0 ? (
+                      <p className="text-muted-foreground text-center">
+                        No data available
+                      </p>
+                    ) : (
+                      <ActionExecutionTimeChart
+                        data={data.executionTimeByAction}
+                        nameMapping={nameMappings.actions}
                       />
                     )}
                   </CardContent>
@@ -675,7 +668,7 @@ export function AnalyticsPage() {
             </TabsContent>
 
             <TabsContent value="details" className="mt-4">
-              <Card>
+              <Card className="border-none shadow-2xl">
                 <CardHeader>
                   <CardTitle>Action Execution Times</CardTitle>
                   <CardDescription>
@@ -723,7 +716,7 @@ export function AnalyticsPage() {
             </TabsContent>
 
             <TabsContent value="recent" className="mt-4">
-              <Card>
+              <Card className="border-none shadow-2xl">
                 <CardHeader>
                   <CardTitle>Recent Actions</CardTitle>
                   <CardDescription>Latest recorded actions</CardDescription>

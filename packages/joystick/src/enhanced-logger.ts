@@ -9,6 +9,7 @@ import pino from "pino";
 import { Elysia } from "elysia";
 import { dirname } from "path";
 import { mkdirSync, appendFileSync } from "fs";
+import { logger } from "@/logger";
 
 // Base console logger using Pino
 const pinoLogger = pino({
@@ -243,6 +244,7 @@ class EnhancedLogger {
       }
 
       const executionTime = this.getExecutionTime();
+      logger.info(executionTime);
 
       const logEntry: ActionLogEntry = {
         timestamp: new Date().toISOString(),
