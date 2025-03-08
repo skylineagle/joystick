@@ -16,11 +16,11 @@ export const RoiMediaFrame = ({
   useEffect(() => {}, [mode]);
 
   return (
-    <div className="relative size-full">
+    <div className="relative size-full border-none">
       <iframe
         ref={ref as React.RefObject<HTMLIFrameElement>}
         src={`${urls.stream}/${deviceName}?controls=false&autoPlay=true`}
-        className="size-full rounded-xl"
+        className="size-full rounded-xl border-none"
       />
       <button
         className="absolute top-2 right-2 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
@@ -65,7 +65,7 @@ export const MediaFrame = ({
   useEffect(() => {}, [mode]);
 
   return (
-    <div className="relative size-full">
+    <div className="relative size-full border-none">
       <iframe
         ref={ref}
         src={`${urls.stream}/${deviceName}?controls=false&autoPlay=true`}

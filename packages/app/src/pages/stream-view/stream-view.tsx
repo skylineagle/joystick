@@ -75,11 +75,11 @@ export function StreamView() {
     >
       <div
         className={cn(
-          "flex gap-4 md:gap-6 h-full",
+          "flex gap-4 md:gap-6 h-full border-none",
           isMobileLandscape ? "flex-row" : "flex-col md:flex-row"
         )}
       >
-        <div className="flex-1 min-h-0 relative">
+        <div className="flex-1 min-h-0 relative border-none">
           <Frame
             deviceId={device.id}
             deviceName={device.configuration?.name || ""}

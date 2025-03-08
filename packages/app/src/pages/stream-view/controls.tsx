@@ -54,12 +54,7 @@ export const Controls = () => {
           : "p-4 hidden md:flex w-[320px] gap-4"
       )}
     >
-      <div
-        className={cn(
-          "flex flex-col h-full",
-          isMobileLandscape ? "gap-2" : "space-y-4"
-        )}
-      >
+      <div className="flex flex-col h-full gap-2">
         {/* Mode Selector Section */}
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-4">
@@ -114,7 +109,7 @@ export const Controls = () => {
             <>
               <Separator className="my-2" />
               {isSetBitrateLoading ? (
-                <div className="space-y-2">
+                <div>
                   <div className="flex items-center justify-between mb-2">
                     <Skeleton className="h-5 w-16" />
                     <Skeleton className="h-6 w-6 rounded-full" />
