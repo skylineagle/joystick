@@ -1,6 +1,6 @@
 const PORTS = {
   joystick: 8000,
-  stream: 8888,
+  stream: 8889,
   stream_api: 9997,
   pocketbase: 8090,
   panel: 4000,
