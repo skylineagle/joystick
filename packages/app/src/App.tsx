@@ -8,6 +8,7 @@ import { pb } from "@/lib/pocketbase";
 import { DashboardPage } from "@/pages/dashboard/dashboard-page";
 import { ParamsPage } from "@/pages/params/params-page";
 import { StreamView } from "@/pages/stream-view/stream-view";
+import { AdminPage } from "@/pages/admin/admin-page";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 import { useEffect, useState } from "react";
@@ -113,6 +114,14 @@ function App() {
                     ) : (
                       <LoginForm />
                     )
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute>
+                      <AdminPage />
+                    </ProtectedRoute>
                   }
                 />
                 <Route

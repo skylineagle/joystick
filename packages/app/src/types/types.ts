@@ -1,4 +1,5 @@
 import {
+  ActionLogsResponse as BaseActionLogsResponse,
   ActionsResponse,
   RunResponse as BaseRunResponse,
   DevicesResponse,
@@ -107,5 +108,15 @@ export type RunResponse = BaseRunResponse<
   {
     device: ModelsResponse;
     action: ActionsResponse;
+  }
+>;
+
+export type ActionLogsResponse = BaseActionLogsResponse<
+  Record<string, unknown>,
+  { output?: string; error?: string; success: boolean },
+  {
+    action: ActionsResponse;
+    device: ModelsResponse;
+    user: UsersResponse;
   }
 >;
