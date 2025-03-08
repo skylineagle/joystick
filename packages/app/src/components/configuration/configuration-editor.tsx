@@ -1,6 +1,11 @@
 import { AutomationEditor } from "@/components/configuration/automation-editor";
 import { deviceConfigSchema } from "@/components/configuration/consts";
 import { EditorConfig, EditorMarker } from "@/components/configuration/types";
+import {
+  CountrySelect,
+  FlagComponent,
+  PhoneInput,
+} from "@/components/phone-input";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,11 +37,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Pencil } from "lucide-react";
 import type * as Monaco from "monaco-editor";
 import { useCallback, useRef, useState } from "react";
-import {
-  PhoneInput,
-  CountrySelect,
-  FlagComponent,
-} from "@/components/phone-input";
 import * as RPNInput from "react-phone-number-input";
 
 export interface ConfigurationEditorProps {
@@ -274,11 +274,15 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
                   <Input
                     id="deviceId"
                     type="text"
-                    value={
-                      editingConfig?.config
-                        ? JSON.parse(editingConfig.config).name || ""
-                        : ""
-                    }
+                    value={(() => {
+                      if (!editingConfig?.config) return "";
+                      try {
+                        const config = JSON.parse(editingConfig.config);
+                        return config.name || "";
+                      } catch {
+                        return "";
+                      }
+                    })()}
                     onChange={(e) => {
                       if (!editingConfig) return;
                       try {
@@ -289,15 +293,16 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
                           config: JSON.stringify(config, null, 2),
                         });
                       } catch {
-                        // Handle JSON parse error
+                        toast.error({
+                          message: "Invalid JSON configuration",
+                        });
                       }
                     }}
                   />
                 </div>
               </div>
 
-              <h3 className="text-sm font-medium">Device Information</h3>
-              <div className="grid gap-4 grid-cols-2">
+              <div className="grid gap-4 grid-cols-2 pt-8">
                 <div className="grid gap-2">
                   <Label htmlFor="user" className="text-sm font-medium">
                     Username
