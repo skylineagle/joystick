@@ -4,8 +4,50 @@ import { pb } from "@/pocketbase";
 import type { DeviceResponse } from "@/types/types";
 import cors from "@elysiajs/cors";
 import { Elysia } from "elysia";
+import { createJob } from "../../baker/src/baker";
 
 export const TO_REPLACE = ["camera", "action"];
+
+async function addDevice(deviceName: string, configuration: any) {
+  await fetch(`${MEDIAMTX_API}/v3/config/paths/add/${deviceName}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(configuration),
+  });
+}
+
+async function deleteDevice(deviceName: string) {
+  await fetch(`${MEDIAMTX_API}/v3/config/paths/delete/${deviceName}`, {
+    method: "DELETE",
+  });
+}
+
+async function initializeDevices() {
+  try {
+    const devices = await pb
+      .collection("devices")
+      .getFullList<DeviceResponse>();
+
+    logger.info(`Found ${devices.length} devices`);
+    for (const device of devices) {
+      if (device.mode === "live") {
+        if (!device.configuration?.name) {
+          throw new Error("Device name not found, cant initialize device");
+        }
+        await addDevice(device.configuration?.name, device.configuration);
+        logger.info(`Initialized device ${device.configuration?.name}`);
+      }
+    }
+
+    logger.info("All devices initialized successfully");
+  } catch (error) {
+    logger.error(error);
+    logger.error("Failed to initialize devices", error);
+    throw error;
+  }
+}
 
 const app = new Elysia()
   .onError(({ code, error, request }) => {
@@ -36,34 +78,19 @@ app.post("/api/mode/:device/:mode", async ({ params, body }) => {
 
   const device = deviceResult[0];
 
+  if (!device.configuration?.name) {
+    throw new Error("Device name not found");
+  }
+
   switch (mode) {
     case "live":
-      const addResponse = await fetch(
-        `${MEDIAMTX_API}/v3/config/paths/add/${device.configuration?.name}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(device.configuration),
-        }
-      );
+      addDevice(device.configuration?.name, device.configuration);
       break;
     case "off":
-      const deleteResponse = await fetch(
-        `${MEDIAMTX_API}/v3/config/paths/delete/${device.configuration?.name}`,
-        {
-          method: "DELETE",
-        }
-      );
+      deleteDevice(device.configuration?.name);
       break;
     case "auto":
-      const response = await fetch(
-        `${MEDIAMTX_API}/v3/config/paths/delete/${device.configuration?.name}`,
-        {
-          method: "DELETE",
-        }
-      );
+      deleteDevice(device.configuration?.name);
       break;
     default:
       throw new Error("Invalid mode");
@@ -86,4 +113,10 @@ app.use(cors()).listen(Bun.env.PORT || 8080);
 logger.info(
   `🦊 Switcher API server running at ${Bun.env.HOST}:${Bun.env.PORT || 8080}`
 );
-logger.debug(`MEDIAMTX URL: ${MEDIAMTX_API}`);
+
+try {
+  await initializeDevices();
+} catch (error) {
+  logger.error("Failed to initialize devices", error);
+  throw error;
+}
