@@ -9,11 +9,10 @@ const PORTS = {
 } as const;
 
 function getServiceUrl(service: keyof typeof PORTS): string {
-  const protocol = window.location.protocol;
   const hostname = window.location.hostname;
   const port = PORTS[service];
 
-  return `${protocol}//${hostname}:${port}`;
+  return `http://${hostname}:${port}`;
 }
 
 export const urls = {
