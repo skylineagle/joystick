@@ -55,7 +55,7 @@ export function TerminalPage() {
   const { data: selectedDevice, isLoading: isDeviceLoading } = useDevice(
     deviceId ?? ""
   );
-  const [isMarioKartActive, setIsMarioKartActive] = useState(false);
+  const [activeMiniGame, setActiveMiniGame] = useState<string | null>(null);
   const isEasterEggsPermitted = useIsPermitted("easter-eggs");
   const terminalInstance = useRef<Terminal | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -434,7 +434,43 @@ export function TerminalPage() {
         const command = commandBufferRef.current.trim();
 
         if (isEasterEggsPermitted) {
-          if (command === "joystick") {
+          if (command === "help") {
+            // Display all available terminal easter eggs
+            terminal.write("\r\n\n"); // Add some space
+            terminal.write("🎮 Available Terminal Easter Eggs 🎮\r\n");
+            terminal.write("================================\r\n\n");
+            terminal.write("joystick  - Display ASCII art of a joystick\r\n");
+            terminal.write("matrix    - Enter the Matrix effect\r\n");
+            terminal.write("snake     - Play the classic Snake game\r\n");
+            terminal.write("mariokart - Start Mario Kart game\r\n\n");
+            terminal.write("Other Easter Eggs (Keyboard Shortcuts):\r\n");
+            terminal.write("--------------------------------\r\n");
+            terminal.write("F1 - Retro Game Mode\r\n");
+            terminal.write("F2 - Glitch Mode\r\n");
+            terminal.write("F3 - Bubble effect\r\n");
+            terminal.write("F4 - Pirate mode (arr, matey!)\r\n");
+            terminal.write("F6 - Gravity effect (everything falls)\r\n");
+            terminal.write("F7     - Confetti party\r\n");
+            terminal.write("F8     - Barrel roll\r\n");
+            terminal.write("F9     - Disco mode\r\n");
+            terminal.write("F10 - Typewriter effect\r\n");
+            terminal.write("↑↑↓↓←→←→BA - Konami code\r\n\n");
+
+            // Clear the command buffer
+            commandBufferRef.current = "";
+
+            // Send a new line to the terminal to maintain proper cursor position
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(
+                JSON.stringify({
+                  type: "data",
+                  device: selectedDevice.id,
+                  data: "\r",
+                })
+              );
+            }
+            return;
+          } else if (command === "joystick") {
             // Display the ASCII art line by line
             terminal.write("\r\n\n"); // Add some space
 
@@ -485,7 +521,22 @@ export function TerminalPage() {
           } else if (command === "mariokart") {
             // Run the Mario Kart game
             terminal.write("\r\n\nStarting Mario Kart...\r\n\n");
-            setIsMarioKartActive(true);
+            setActiveMiniGame("mariokart");
+            return;
+          } else if (command === "ninja") {
+            // Run the Ninja Game Mode
+            terminal.write("\r\n\nStarting Fruit Ninja Game Mode...\r\n\n");
+            setActiveMiniGame("ninja");
+            return;
+          } else if (command === "driver") {
+            // Run the Driver Game Mode
+            terminal.write("\r\n\nStarting Drunk Driving Game Mode...\r\n\n");
+            setActiveMiniGame("driver");
+            return;
+          } else if (command === "angrybirds") {
+            // Run the Angry Birds Game Mode
+            terminal.write("\r\n\nStarting Angry Birds Game Mode...\r\n\n");
+            setActiveMiniGame("angrybirds");
             return;
           }
         }
@@ -512,14 +563,14 @@ export function TerminalPage() {
     });
 
     const handleResize = () => {
-      if (!isMountedRef.current) return;
-      if (fitAddonRef.current) {
-        fitAddonRef.current.fit();
-      }
+      // if (!isMountedRef.current) return;
+      // if (fitAddonRef.current) {
+      //   fitAddonRef.current.fit();
+      // }
     };
 
     // Add resize event listener
-    window.addEventListener("resize", handleResize);
+    // window.addEventListener("resize", handleResize);
 
     // Cleanup function
     return () => {
@@ -572,14 +623,31 @@ export function TerminalPage() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      {isMarioKartActive && (
+      {activeMiniGame && (
         <div className="flex items-center justify-center">
-          <iframe
-            src="https://funhtml5games.com?embed=mariokart"
-            className="h-[400px] w-[640px] rounded-3xl self-center"
-          />
+          {activeMiniGame === "mariokary" ? (
+            <iframe
+              src="https://funhtml5games.com?embed=mariokart"
+              className="h-[400px] w-[640px] rounded-3xl self-center"
+            />
+          ) : activeMiniGame === "ninja" ? (
+            <iframe
+              src="https://funhtml5games.com?embed=blockninja"
+              className="h-[400px] w-[640px] rounded-3xl self-center"
+            />
+          ) : activeMiniGame === "driver" ? (
+            <iframe
+              src="https://funhtml5games.com?embed=drunkdrive"
+              className="h-[400px] w-[640px] rounded-3xl self-center"
+            />
+          ) : activeMiniGame === "angrybirds" ? (
+            <iframe
+              src="https://funhtml5games.com?embed=angrybirds"
+              className="h-[400px] w-[640px] rounded-3xl self-center"
+            />
+          ) : null}
           <Button
-            onClick={() => setIsMarioKartActive(false)}
+            onClick={() => setActiveMiniGame(null)}
             className="relative top-2 left-2 bg-black/70 hover:bg-black/90 text-white rounded-full p-2 z-10 transition-colors"
             aria-label="Close Mario Kart"
           >

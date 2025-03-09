@@ -4,12 +4,10 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 
-if (process.env.NODE_ENV !== "production") {
-  scan({
-    enabled: true,
-    trackUnnecessaryRenders: true,
-  });
-}
+scan({
+  enabled: process.env.NODE_ENV !== "production",
+  trackUnnecessaryRenders: true,
+});
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

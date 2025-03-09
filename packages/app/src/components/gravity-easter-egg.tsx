@@ -7,7 +7,7 @@ export function GravityEasterEgg() {
   // Listen for the secret key combination (Ctrl+G)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.metaKey && e.shiftKey && e.key === "g") {
+      if (e.key === "F6") {
         e.preventDefault();
         setIsActive((prev) => !prev);
       }

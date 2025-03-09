@@ -7,7 +7,7 @@ export function TypewriterEasterEgg() {
   // Listen for the secret key combination (Command+Shift+T for Mac compatibility)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.metaKey && e.shiftKey && e.key === "o") {
+      if (e.key === "F10") {
         e.preventDefault();
         setIsActive((prev) => !prev);
       }

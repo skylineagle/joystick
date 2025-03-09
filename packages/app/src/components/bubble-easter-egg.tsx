@@ -7,7 +7,7 @@ export function BubbleEasterEgg() {
   // Listen for the secret key combination (Alt+B)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.metaKey && e.shiftKey && e.key === "b") {
+      if (e.key === "F3") {
         e.preventDefault();
         setIsActive((prev) => !prev);
       }

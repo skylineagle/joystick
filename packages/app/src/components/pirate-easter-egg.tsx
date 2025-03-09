@@ -7,7 +7,7 @@ export function PirateEasterEgg() {
   // Listen for the secret key combination (Alt+P)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.metaKey && e.shiftKey && e.key === "p") {
+      if (e.key === "F4") {
         e.preventDefault();
         setIsPirateMode((prev) => !prev);
       }

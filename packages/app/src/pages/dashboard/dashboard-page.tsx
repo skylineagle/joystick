@@ -20,12 +20,10 @@ import { Toaster } from "sonner";
 
 export function DashboardPage() {
   const { user } = useAuthStore();
-  const { devices, isLoading } = useDevicesQuery();
+  const { devices } = useDevicesQuery();
   const { selectedDevices, selectDevice, selectAllDevices, clearSelection } =
     useDeviceStore();
   const isAdmin = useIsPermitted("admin-dashboard");
-
-  if (isLoading) return <div>Loading...</div>;
 
   return (
     <TooltipProvider>

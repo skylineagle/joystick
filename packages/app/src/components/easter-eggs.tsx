@@ -1,9 +1,11 @@
+import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { Konami } from "@/konami";
+import { BubbleEasterEgg } from "./bubble-easter-egg";
+import { GlitchEasterEgg } from "./glitch-easter-egg";
 import { GravityEasterEgg } from "./gravity-easter-egg";
 import { PirateEasterEgg } from "./pirate-easter-egg";
+import { RetroGameEasterEgg } from "./retro-game-easter-egg";
 import { TypewriterEasterEgg } from "./typewriter-easter-egg";
-import { BubbleEasterEgg } from "./bubble-easter-egg";
-import { useIsPermitted } from "@/hooks/use-is-permitted";
 
 export function EasterEggs() {
   const isEasterEggsPermitted = useIsPermitted("easter-eggs");
@@ -20,6 +22,8 @@ export function EasterEggs() {
       <PirateEasterEgg />
       <TypewriterEasterEgg />
       <BubbleEasterEgg />
+      <RetroGameEasterEgg />
+      <GlitchEasterEgg />
     </>
   );
 }

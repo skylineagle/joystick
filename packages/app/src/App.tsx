@@ -12,6 +12,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { HashLoader } from "react-spinners";
 import { Toaster } from "sonner";
 import { Layout } from "./layout";
+import { TerminalPage } from "@/pages/terminal/terminal-page";
 
 // Lazy load components
 const DashboardPage = lazy(() =>
@@ -37,11 +38,6 @@ const AdminPage = lazy(() =>
 const ActionsPage = lazy(() =>
   import("@/pages/actions/actions-page").then((module) => ({
     default: module.ActionsPage,
-  }))
-);
-const TerminalPage = lazy(() =>
-  import("@/pages/terminal/terminal-page").then((module) => ({
-    default: module.TerminalPage,
   }))
 );
 
