@@ -65,7 +65,7 @@ export const Controls = () => {
               </div>
             ) : isSetModeSupported ? (
               <>
-                <ModeSelector deviceId={deviceId!} />
+                {device && <ModeSelector device={device} />}
                 <div className="self-center">
                   <StatusIndicator status={device?.status ?? "unknown"} />
                 </div>
@@ -96,7 +96,13 @@ export const Controls = () => {
                       isAutomated={device?.auto ?? false}
                     />
                   </div>
-                  {device.auto && <AutomationIndicator device={device} />}
+                  {device?.auto && (
+                    <AutomationIndicator
+                      deviceId={deviceId!}
+                      automation={device?.automation}
+                      status={device?.status}
+                    />
+                  )}
                 </>
               )}
             </>

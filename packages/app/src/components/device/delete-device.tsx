@@ -10,13 +10,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { deleteDevice } from "@/lib/device";
-import { DeviceResponse } from "@/types/types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash2 } from "lucide-react";
 import { toast } from "@/utils/toast";
 import { Button } from "@/components/ui/button";
 
-export function DeleteDevice({ device }: { device: DeviceResponse }) {
+export function DeleteDevice({ deviceId }: { deviceId: string }) {
   const queryClient = useQueryClient();
   const { mutate: deleteDeviceMutation } = useMutation({
     mutationFn: async (id: string) => {
@@ -47,7 +46,7 @@ export function DeleteDevice({ device }: { device: DeviceResponse }) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={() => deleteDeviceMutation(device.id)}>
+          <AlertDialogAction onClick={() => deleteDeviceMutation(deviceId)}>
             Delete
           </AlertDialogAction>
         </AlertDialogFooter>

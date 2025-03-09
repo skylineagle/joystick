@@ -1,21 +1,20 @@
 import { useAction } from "@/hooks/use-action";
-import { useDevice } from "@/hooks/use-device";
 import { runAction } from "@/lib/joystick-api";
+import { DeviceResponse } from "@/types/types";
 import { toast } from "@/utils/toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-export function useMode(deviceId: string) {
+export function useMode(device: DeviceResponse) {
   const queryClient = useQueryClient();
   const { action, isLoading: isActionLoading } = useAction(
-    deviceId,
+    device?.id,
     "set-mode"
   );
-  const { data: device } = useDevice(deviceId);
   const mode = device?.mode;
   const { mutate: setMode, isPending: isSetModePending } = useMutation({
     mutationFn: (mode: string) => {
       return runAction({
-        deviceId,
+        deviceId: device.id,
         action: "set-mode",
         params: { mode },
       });
@@ -29,7 +28,7 @@ export function useMode(deviceId: string) {
       toast.success({
         message: "Mode set successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["device", deviceId] });
+      queryClient.invalidateQueries({ queryKey: ["device", device.id] });
     },
   });
 

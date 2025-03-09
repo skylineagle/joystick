@@ -30,7 +30,6 @@ export function useModeConfig(deviceId: string) {
 
       return res;
     },
-    staleTime: 1000,
     enabled: !!deviceId,
   });
 

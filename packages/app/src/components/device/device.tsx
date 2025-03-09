@@ -8,21 +8,20 @@ import { StatusIndicator } from "@/components/device/status-indicator";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { useDevice } from "@/hooks/use-device";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
+import { DeviceResponse } from "@/types/types";
 import { ExternalLink } from "lucide-react";
 import { memo } from "react";
 import { Link } from "react-router-dom";
 
 interface DeviceProps {
-  deviceId: string;
+  device: DeviceResponse;
   isSelected?: boolean;
   onSelect?: (id: string, checked: boolean) => void;
 }
 
 export const DeviceRow = memo(
-  ({ deviceId, isSelected, onSelect }: DeviceProps) => {
-    const { data: device } = useDevice(deviceId);
+  ({ device, isSelected, onSelect }: DeviceProps) => {
     const isAllowedToControlDevice = useIsPermitted("control-device");
     const isAllowedToDeleteDevice = useIsPermitted("delete-device");
     const isAllowedToEditDevice = useIsPermitted("edit-device");
@@ -36,7 +35,7 @@ export const DeviceRow = memo(
             <Checkbox
               checked={isSelected}
               onCheckedChange={(checked) =>
-                onSelect?.(deviceId, checked as boolean)
+                onSelect?.(device.id, checked as boolean)
               }
               aria-label={`Select ${device.name || device.configuration?.name}`}
             />
@@ -49,11 +48,11 @@ export const DeviceRow = memo(
           />
         </TableCell>
         <TableCell className="w-[20%]">
-          <ModeSelector deviceId={deviceId} />
+          {device && <ModeSelector device={device} />}
         </TableCell>
         <TableCell className="w-[10%]">
           {device.automation && (
-            <AutomateToggle deviceId={deviceId} isAutomated={device.auto} />
+            <AutomateToggle deviceId={device.id} isAutomated={device.auto} />
           )}
         </TableCell>
         <TableCell className="w-[10%]">
@@ -61,21 +60,29 @@ export const DeviceRow = memo(
         </TableCell>
         <TableCell className="w-[25%]">
           {device.auto && device.automation && (
-            <AutomationIndicator device={device} />
+            <AutomationIndicator
+              deviceId={device.id}
+              automation={device.automation}
+              status={device.status}
+            />
           )}
         </TableCell>
         <TableCell className="w-[10%]">
           <div className="flex gap-2">
             {isAllowedToEditDevice && <ConfigurationEditor device={device} />}
             {isAllowedToControlDevice && (
-              <Link target="_blank" to={`/${deviceId}`} className="self-center">
+              <Link
+                target="_blank"
+                to={`/${device.id}`}
+                className="self-center"
+              >
                 <Button variant="ghost" size="icon">
                   <ExternalLink className="h-4 w-4" />
                   <span className="sr-only">View device</span>
                 </Button>
               </Link>
             )}
-            {isAllowedToDeleteDevice && <DeleteDevice device={device} />}
+            {isAllowedToDeleteDevice && <DeleteDevice deviceId={device.id} />}
           </div>
         </TableCell>
       </TableRow>

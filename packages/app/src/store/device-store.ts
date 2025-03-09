@@ -1,16 +1,22 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { SortState, SortableColumn } from "@/types/table";
+import { DeviceResponse } from "@/types/types";
 
-interface DeviceFilters {
+interface DeviceStore {
   searchQuery: string;
   selectedModes: string[];
   sortState: SortState;
   selectedDevices: string[];
   isReversed: boolean;
+  devices: DeviceResponse[];
 }
 
 interface DeviceActions {
+  updateDevice: (device: DeviceResponse) => void;
+  deleteDevice: (id: string) => void;
+  addDevice: (device: DeviceResponse) => void;
+  setDevices: (devices: DeviceResponse[]) => void;
   setSearchQuery: (query: string) => void;
   toggleMode: (mode: string) => void;
   setSortState: (column: SortableColumn) => void;
@@ -22,7 +28,8 @@ interface DeviceActions {
   toggleReversed: () => void;
 }
 
-const initialState: DeviceFilters = {
+const initialState: DeviceStore = {
+  devices: [],
   searchQuery: "",
   selectedModes: [],
   sortState: {
@@ -33,10 +40,22 @@ const initialState: DeviceFilters = {
   isReversed: false,
 };
 
-export const useDeviceStore = create<DeviceFilters & DeviceActions>()(
+export const useDeviceStore = create<DeviceStore & DeviceActions>()(
   persist(
     (set) => ({
       ...initialState,
+      setDevices: (devices) => set({ devices }),
+
+      deleteDevice: (id) =>
+        set((state) => ({
+          devices: state.devices.filter((d) => d.id !== id),
+        })),
+      addDevice: (device) =>
+        set((state) => ({ devices: [...state.devices, device] })),
+      updateDevice: (device) =>
+        set((state) => ({
+          devices: state.devices.map((d) => (d.id === device.id ? device : d)),
+        })),
       setSearchQuery: (query) => set({ searchQuery: query }),
       toggleMode: (mode) =>
         set((state) => ({

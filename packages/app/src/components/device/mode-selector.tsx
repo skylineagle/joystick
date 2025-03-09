@@ -8,23 +8,24 @@ import {
 import { useMode } from "@/hooks/use-mode";
 import { useModeConfig } from "@/hooks/use-model-configs";
 import { cn, getModeOptionsFromSchema } from "@/lib/utils";
+import { DeviceResponse } from "@/types/types";
 import { Loader2 } from "lucide-react";
 import { DynamicIcon, IconName } from "lucide-react/dynamic";
 import { motion } from "motion/react";
 import { useCallback, useMemo } from "react";
 
 export interface ModeSelectorProps {
-  deviceId: string;
+  device: DeviceResponse;
 }
 
-export const ModeSelector = ({ deviceId }: ModeSelectorProps) => {
+export const ModeSelector = ({ device }: ModeSelectorProps) => {
   const { action, mode, setMode, isAutomated, isLoading, isSetModePending } =
-    useMode(deviceId);
+    useMode(device);
   const availableModes = useMemo(
     () => getModeOptionsFromSchema(action?.parameters ?? {}),
     [action]
   );
-  const { data: modes, isLoading: isModesLoading } = useModeConfig(deviceId);
+  const { data: modes, isLoading: isModesLoading } = useModeConfig(device.id);
   const currentMode = modes[mode as keyof typeof modes];
 
   const handleModeChange = useCallback(

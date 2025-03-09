@@ -91,7 +91,7 @@ export function DashboardPage() {
                       {devices?.map((device) => (
                         <DeviceRow
                           key={device.id}
-                          deviceId={device.id}
+                          device={device}
                           isSelected={selectedDevices.includes(device.id)}
                           onSelect={selectDevice}
                         />

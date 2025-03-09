@@ -1,7 +1,6 @@
 import { runAction } from "@/lib/joystick-api";
 import { ActionsResponse } from "@/types/db.types";
 import {
-  ActionResponse,
   RunResponse,
   type DeviceResponse,
   type UpdateDevice,
@@ -26,7 +25,6 @@ export async function fetchDevice(deviceId: string) {
     return device;
   } catch (error) {
     console.log(error);
-
     throw new Error("Failed to fetch device");
   }
 }
@@ -105,18 +103,9 @@ export async function fetchModelActions(modelId?: string) {
   return actions.map((action) => action?.expand?.action.name);
 }
 
-export async function gethDeviceAction(deviceId: string, actionName: string) {
-  const device = await fetchDevice(deviceId);
-
-  const result = await pb.collection("actions").getFullList<ActionResponse>({
-    filter: `name = "${actionName}"`,
-  });
-
-  if (!result || result.length !== 1) return [];
-
-  const action = result[0];
+export async function getDeviceAction(modelId: string, actionName: string) {
   const runAction = await pb.collection("run").getFullList<RunResponse>({
-    filter: `device = "${device.expand?.device.id}" && action = "${action.id}"`,
+    filter: `device = "${modelId}" && action.name = "${actionName}"`,
     expand: "action,device",
   });
 

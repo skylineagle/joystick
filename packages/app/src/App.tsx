@@ -1,3 +1,4 @@
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { LoginForm } from "@/components/auth/login-form";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { EasterEggs } from "@/components/easter-eggs";
@@ -5,20 +6,51 @@ import { ErrorBoundary } from "@/components/error-boundary";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ApiError } from "@/lib/api-client";
 import { pb } from "@/lib/pocketbase";
-import { DashboardPage } from "@/pages/dashboard/dashboard-page";
-import { ParamsPage } from "@/pages/params/params-page";
-import { StreamView } from "@/pages/stream-view/stream-view";
-import { AdminPage } from "@/pages/admin/admin-page";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
-import { useEffect, useState } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import { Layout } from "./layout";
-import { ActionsPage } from "./pages/actions/actions-page";
-import { TerminalPage } from "./pages/terminal/terminal-page";
 
-// Create query and mutation caches with global error handlers
+// Lazy load components
+const DashboardPage = lazy(() =>
+  import("@/pages/dashboard/dashboard-page").then((module) => ({
+    default: module.DashboardPage,
+  }))
+);
+const ParamsPage = lazy(() =>
+  import("@/pages/params/params-page").then((module) => ({
+    default: module.ParamsPage,
+  }))
+);
+const StreamView = lazy(() =>
+  import("@/pages/stream-view/stream-view").then((module) => ({
+    default: module.StreamView,
+  }))
+);
+const AdminPage = lazy(() =>
+  import("@/pages/admin/admin-page").then((module) => ({
+    default: module.AdminPage,
+  }))
+);
+const ActionsPage = lazy(() =>
+  import("@/pages/actions/actions-page").then((module) => ({
+    default: module.ActionsPage,
+  }))
+);
+const TerminalPage = lazy(() =>
+  import("@/pages/terminal/terminal-page").then((module) => ({
+    default: module.TerminalPage,
+  }))
+);
+
+// Loading fallback component
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+  </div>
+);
 
 // Create a query client with robust error handling and retry logic
 const queryClient = new QueryClient({
@@ -50,12 +82,16 @@ const queryClient = new QueryClient({
       // Exponential backoff with jitter for retries
       retryDelay: (attemptIndex) =>
         Math.min(1000 * 2 ** attemptIndex + Math.random() * 1000, 30000),
-      // Queries stay fresh for 5 seconds
-      staleTime: 5000,
-      // Refresh when tab focus returns
-      refetchOnWindowFocus: true,
+      // Increase stale time to reduce refetches on slow networks
+      staleTime: 30000, // 30 seconds
+      // Cache time of 10 minutes
+      gcTime: 10 * 60 * 1000,
+      // Refresh when tab focus returns, but not too aggressively
+      refetchOnWindowFocus: "always",
       // Refresh when network reconnects
-      refetchOnReconnect: true,
+      refetchOnReconnect: "always",
+      // Reduce network load by not refetching on mount if data is stale but not invalidated
+      refetchOnMount: false,
     },
     mutations: {
       // Configure retry behavior for mutations
@@ -102,7 +138,9 @@ function App() {
                   path="/"
                   element={
                     <ProtectedRoute>
-                      <DashboardPage />
+                      <Suspense fallback={<LoadingFallback />}>
+                        <DashboardPage />
+                      </Suspense>
                     </ProtectedRoute>
                   }
                 />
@@ -120,7 +158,9 @@ function App() {
                   path="/admin"
                   element={
                     <ProtectedRoute>
-                      <AdminPage />
+                      <Suspense fallback={<LoadingFallback />}>
+                        <AdminPage />
+                      </Suspense>
                     </ProtectedRoute>
                   }
                 />
@@ -132,10 +172,38 @@ function App() {
                     </ProtectedRoute>
                   }
                 >
-                  <Route index element={<StreamView />} />
-                  <Route path="params" element={<ParamsPage />} />
-                  <Route path="actions" element={<ActionsPage />} />
-                  <Route path="terminal" element={<TerminalPage />} />
+                  <Route
+                    index
+                    element={
+                      <Suspense fallback={<LoadingFallback />}>
+                        <StreamView />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="params"
+                    element={
+                      <Suspense fallback={<LoadingFallback />}>
+                        <ParamsPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="actions"
+                    element={
+                      <Suspense fallback={<LoadingFallback />}>
+                        <ActionsPage />
+                      </Suspense>
+                    }
+                  />
+                  <Route
+                    path="terminal"
+                    element={
+                      <Suspense fallback={<LoadingFallback />}>
+                        <TerminalPage />
+                      </Suspense>
+                    }
+                  />
                 </Route>
               </Routes>
             </BrowserRouter>
@@ -144,6 +212,7 @@ function App() {
             <EasterEggs />
           </ThemeProvider>
         </NuqsAdapter>
+        <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </ErrorBoundary>
   );

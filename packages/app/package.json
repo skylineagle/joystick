@@ -10,9 +10,7 @@
     "preview": "vite preview",
     "joystick:server": "HOST=0.0.0.0 PORT=8000 bun run ./src/server/index.ts --watch",
     "joystick:panel": "PORT=8080 bun run ./src/server/panel.ts --watch",
-    "db:generate": "pocketbase-typegen -d ../../pocketbase/pb_data/data.db -o ./src/types/db.types.ts",
-    "ws:server": "bun run src/lib/frame-test-server.ts",
-    "ws:client": "bun run src/lib/frame-test-client.ts"
+    "db:generate": "pocketbase-typegen -d ../../pocketbase/pb_data/data.db -o ./src/types/db.types.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.2.0",

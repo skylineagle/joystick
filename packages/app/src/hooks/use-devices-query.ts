@@ -1,36 +1,51 @@
 import { GetDevicesOptions, getDevices } from "@/lib/device";
 import { pb } from "@/lib/pocketbase";
 import { useDeviceStore } from "@/store/device-store";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { DeviceResponse } from "@/types/types";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 
 export function useDevicesQuery(options?: GetDevicesOptions) {
-  const { searchQuery, sortState, isReversed } = useDeviceStore();
+  const {
+    devices,
+    updateDevice,
+    deleteDevice,
+    addDevice,
+    setDevices,
+    searchQuery,
+    sortState,
+    isReversed,
+  } = useDeviceStore();
   const queryClient = useQueryClient();
-  const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["devices", options?.modes, options?.search],
-    queryFn: async () => {
-      const devices = await getDevices(options || {});
-      return devices;
-    },
-  });
 
   useEffect(() => {
-    pb.collection("devices").subscribe("*", (e) => {
-      if (e.action === "create" || e.action === "delete") {
-        queryClient.invalidateQueries({ queryKey: ["devices"] });
+    const initialDevices = async () => {
+      const devices = await getDevices(options || {});
+      setDevices(devices);
+    };
+
+    initialDevices();
+
+    pb.collection("devices").subscribe<DeviceResponse>("*", (e) => {
+      if (e.action === "create") {
+        const device = e.record;
+        addDevice(device);
+      } else if (e.action === "delete") {
+        const device = e.record;
+        deleteDevice(device.id);
       } else if (e.action === "update") {
-        queryClient.invalidateQueries({ queryKey: ["device", e.record.id] });
+        const device = e.record;
+        updateDevice(device);
       }
     });
 
     return () => {
       pb.collection("devices").unsubscribe("*");
     };
-  }, [queryClient]);
+  }, [addDevice, deleteDevice, options, queryClient, setDevices, updateDevice]);
 
   const sortedAndFilteredDevices = useMemo(() => {
-    let result = data;
+    let result = devices;
 
     // Apply search filter
     if (searchQuery.trim()) {
@@ -77,12 +92,9 @@ export function useDevicesQuery(options?: GetDevicesOptions) {
     }
 
     return result;
-  }, [data, searchQuery, sortState, isReversed]);
+  }, [devices, searchQuery, sortState.direction, sortState.column, isReversed]);
 
   return {
     devices: sortedAndFilteredDevices,
-    isLoading,
-    isError,
-    error,
   };
 }
