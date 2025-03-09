@@ -20,7 +20,7 @@ export interface ModeSelectorProps {
 
 export const ModeSelector = ({ device }: ModeSelectorProps) => {
   const { action, mode, setMode, isAutomated, isLoading, isSetModePending } =
-    useMode(device);
+    useMode(device?.id);
   const availableModes = useMemo(
     () => getModeOptionsFromSchema(action?.parameters ?? {}),
     [action]
