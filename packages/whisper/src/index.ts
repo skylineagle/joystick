@@ -105,7 +105,7 @@ app.post(
         throw new Error("Failed to send SMS");
       }
 
-      if ((query?.["response"] ?? "false") === "false") {
+      if ((query?.["response"] ?? "true") === "false") {
         return;
       }
 
