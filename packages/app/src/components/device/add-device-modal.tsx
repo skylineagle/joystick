@@ -25,6 +25,7 @@ import { pb } from "@/lib/pocketbase";
 import { cn } from "@/lib/utils";
 import { ModelsResponse } from "@/types/db.types";
 import { DeviceResponse } from "@/types/types";
+import { toast } from "@/utils/toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
@@ -32,7 +33,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as RPNInput from "react-phone-number-input";
 import { Country } from "react-phone-number-input";
-import { toast } from "sonner";
 import * as z from "zod";
 
 const formSchema = z.object({
@@ -132,12 +132,16 @@ export function AddDeviceModal() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["devices"] });
-      toast.success("Device added successfully");
+      toast.success({
+        message: "Device added successfully",
+      });
       setOpen(false);
       form.reset();
     },
     onError: (error) => {
-      toast.error("Failed to add device: " + error.message);
+      toast.error({
+        message: "Failed to add device: " + error.message,
+      });
     },
   });
 
