@@ -442,7 +442,10 @@ export function TerminalPage() {
             terminal.write("joystick  - Display ASCII art of a joystick\r\n");
             terminal.write("matrix    - Enter the Matrix effect\r\n");
             terminal.write("snake     - Play the classic Snake game\r\n");
-            terminal.write("mariokart - Start Mario Kart game\r\n\n");
+            terminal.write("mariokart - Start Mario Kart game\r\n");
+            terminal.write("ninja - Start Fruit Ninja game\r\n");
+            terminal.write("driver - Start Drunk Driving game\r\n");
+            terminal.write("angrybirds - Start Angry Birds game\r\n");
             terminal.write("Other Easter Eggs (Keyboard Shortcuts):\r\n");
             terminal.write("--------------------------------\r\n");
             terminal.write("F1 - Retro Game Mode\r\n");
