@@ -286,9 +286,6 @@ export function AddDeviceModal() {
                   defaultCountry={defaultCountry?.value as Country}
                   countrySelectComponent={CountrySelect}
                   inputComponent={PhoneInput}
-                  numberInputProps={{
-                    ...form.register("information.phone"),
-                  }}
                   id="phone"
                   placeholder="Enter phone number"
                   value={form.getValues("information.phone")}
