@@ -203,7 +203,7 @@ app.get("/api/health", async () => {
   };
 });
 
-app.get("/api/ping/:device", async ({ params }) => {
+app.get("/api/ping/:device", async ({ params, query }) => {
   try {
     if (!params.device) {
       return {
@@ -224,8 +224,9 @@ app.get("/api/ping/:device", async ({ params }) => {
       };
     }
 
+    const expectedResult = query?.["result"] ?? "1 packets received";
     const result = await $`ping -c 1 ${device?.information?.host}`.text();
-    const isOnline = result.includes("1 packets received");
+    const isOnline = result.includes(expectedResult);
 
     return isOnline;
   } catch (error) {
