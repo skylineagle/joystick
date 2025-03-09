@@ -66,6 +66,7 @@
     "react-phone-number-input": "^3.4.12",
     "react-roi": "^1.5.0",
     "react-router-dom": "^7.3.0",
+    "react-spinners": "^0.15.0",
     "react-timeago": "^7.2.0",
     "recharts": "^2.15.1",
     "sharp": "^0.33.5",

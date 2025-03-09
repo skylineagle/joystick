@@ -1,4 +1,3 @@
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { LoginForm } from "@/components/auth/login-form";
 import { ProtectedRoute } from "@/components/auth/protected-route";
 import { EasterEggs } from "@/components/easter-eggs";
@@ -10,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 import { Suspense, lazy, useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { HashLoader } from "react-spinners";
 import { Toaster } from "sonner";
 import { Layout } from "./layout";
 
@@ -48,7 +48,7 @@ const TerminalPage = lazy(() =>
 // Loading fallback component
 const LoadingFallback = () => (
   <div className="flex items-center justify-center h-screen">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    <HashLoader color="#000" size={150} />
   </div>
 );
 
@@ -212,7 +212,6 @@ function App() {
             <EasterEggs />
           </ThemeProvider>
         </NuqsAdapter>
-        <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </ErrorBoundary>
   );
