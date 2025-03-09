@@ -145,7 +145,7 @@ export function BatchOperations({
               onClick={() =>
                 batchSetMode({
                   ids: selectedDevices,
-                  mode: "offline",
+                  mode: "off",
                 })
               }
             >
