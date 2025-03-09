@@ -234,4 +234,8 @@ app.get("/api/ping/:device", async ({ params }) => {
 });
 
 app.use(cors()).listen(Bun.env.PORT || 8000);
-console.log(`🦊 Server is running at ${Bun.env.HOST}:${Bun.env.PORT}`);
+console.log(
+  `🦊 Server is running at ${Bun.env.HOST ?? "localhost"}:${
+    Bun.env.PORT ?? 8000
+  }`
+);
