@@ -115,8 +115,7 @@ app.post(
 
       await updateStatus(params.device);
 
-      const auth = pb.authStore.record;
-      const userId = auth?.id ?? "system";
+      const userId = headers["x-user-id"] ?? "system";
 
       await enhancedLogger.logCommandAction({
         userId,
@@ -152,7 +151,7 @@ app.post(
         "Error executing command"
       );
 
-      const userId = pb.authStore.record ? pb.authStore.record.id : "system";
+      const userId = headers["x-user-id"] ?? "system";
 
       // If we have action info, log the failed action
       if (params?.device && params?.action) {

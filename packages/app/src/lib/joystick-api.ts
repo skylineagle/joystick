@@ -1,6 +1,7 @@
 import { urls } from "@/lib/urls";
 import { ParamPath } from "@/types/params";
 import { ApiError, createUrl, joystickApi } from "./api-client";
+import { pb } from "@/lib/pocketbase";
 
 type JoystickApiResponse<T = unknown> = {
   success: boolean;
@@ -90,7 +91,11 @@ export async function runAction({
       success: boolean;
       output?: string;
       error?: string;
-    }>(url, params ?? {});
+    }>(url, params ?? {}, {
+      headers: {
+        "x-user-id": pb.authStore.record?.id ?? "unknown",
+      },
+    });
 
     if (!data.success) {
       throw new ApiError(data.error || "Failed to run action");
