@@ -2,7 +2,10 @@ import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { useDevice } from "@/hooks/use-device";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
+import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { urls } from "@/lib/urls";
+import { cn } from "@/lib/utils";
+import { Controls } from "@/pages/stream-view/controls";
 import { toast } from "@/utils/toast";
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -57,6 +60,7 @@ export function TerminalPage() {
   );
   const [activeMiniGame, setActiveMiniGame] = useState<string | null>(null);
   const isEasterEggsPermitted = useIsPermitted("easter-eggs");
+  const { isMobileLandscape } = useMobileLandscape();
   const terminalInstance = useRef<Terminal | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const fitAddonRef = useRef<FitAddon | null>(null);
@@ -446,6 +450,7 @@ export function TerminalPage() {
             terminal.write("ninja - Start Fruit Ninja game\r\n");
             terminal.write("driver - Start Drunk Driving game\r\n");
             terminal.write("angrybirds - Start Angry Birds game\r\n");
+            terminal.write("doodle - Start Doodle Jump game\r\n");
             terminal.write("Other Easter Eggs (Keyboard Shortcuts):\r\n");
             terminal.write("--------------------------------\r\n");
             terminal.write("F1 - Retro Game Mode\r\n");
@@ -453,9 +458,9 @@ export function TerminalPage() {
             terminal.write("F3 - Bubble effect\r\n");
             terminal.write("F4 - Pirate mode (arr, matey!)\r\n");
             terminal.write("F6 - Gravity effect (everything falls)\r\n");
-            terminal.write("F7     - Confetti party\r\n");
-            terminal.write("F8     - Barrel roll\r\n");
-            terminal.write("F9     - Disco mode\r\n");
+            terminal.write("F7 - Confetti party\r\n");
+            terminal.write("F8 - Barrel roll\r\n");
+            terminal.write("F9 - Disco mode\r\n");
             terminal.write("F10 - Typewriter effect\r\n");
             terminal.write("↑↑↓↓←→←→BA - Konami code\r\n\n");
 
@@ -463,12 +468,12 @@ export function TerminalPage() {
             commandBufferRef.current = "";
 
             // Send a new line to the terminal to maintain proper cursor position
-            if (ws.readyState === WebSocket.OPEN) {
-              ws.send(
+            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+              wsRef.current.send(
                 JSON.stringify({
                   type: "data",
                   device: selectedDevice.id,
-                  data: "\r",
+                  data: "\x03",
                 })
               );
             }
@@ -525,26 +530,71 @@ export function TerminalPage() {
             // Run the Mario Kart game
             terminal.write("\r\n\nStarting Mario Kart...\r\n\n");
             setActiveMiniGame("mariokart");
+            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+              wsRef.current.send(
+                JSON.stringify({
+                  type: "data",
+                  device: selectedDevice.id,
+                  data: "\x03",
+                })
+              );
+            }
             return;
           } else if (command === "ninja") {
             // Run the Ninja Game Mode
             terminal.write("\r\n\nStarting Fruit Ninja Game Mode...\r\n\n");
             setActiveMiniGame("ninja");
+            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+              wsRef.current.send(
+                JSON.stringify({
+                  type: "data",
+                  device: selectedDevice.id,
+                  data: "\x03",
+                })
+              );
+            }
             return;
           } else if (command === "driver") {
             // Run the Driver Game Mode
             terminal.write("\r\n\nStarting Drunk Driving Game Mode...\r\n\n");
             setActiveMiniGame("driver");
+            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+              wsRef.current.send(
+                JSON.stringify({
+                  type: "data",
+                  device: selectedDevice.id,
+                  data: "\x03",
+                })
+              );
+            }
             return;
           } else if (command === "angrybirds") {
             // Run the Angry Birds Game Mode
             terminal.write("\r\n\nStarting Angry Birds Game Mode...\r\n\n");
             setActiveMiniGame("angrybirds");
+            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+              wsRef.current.send(
+                JSON.stringify({
+                  type: "data",
+                  device: selectedDevice.id,
+                  data: "\x03",
+                })
+              );
+            }
             return;
           } else if (command === "doodle") {
             // Run the Doodle Jump Game Mode
             terminal.write("\r\n\nStarting Doodle Jump Game Mode...\r\n\n");
             setActiveMiniGame("doodle");
+            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+              wsRef.current.send(
+                JSON.stringify({
+                  type: "data",
+                  device: selectedDevice.id,
+                  data: "\x03",
+                })
+              );
+            }
             return;
           }
         }
@@ -571,14 +621,14 @@ export function TerminalPage() {
     });
 
     const handleResize = () => {
-      // if (!isMountedRef.current) return;
-      // if (fitAddonRef.current) {
-      //   fitAddonRef.current.fit();
-      // }
+      if (!isMountedRef.current) return;
+      if (fitAddonRef.current) {
+        fitAddonRef.current.fit();
+      }
     };
 
     // Add resize event listener
-    // window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize);
 
     // Cleanup function
     return () => {
@@ -661,22 +711,7 @@ export function TerminalPage() {
             />
           ) : null}
           <Button
-            onClick={() => {
-              setActiveMiniGame(null);
-              // Send Ctrl+C to get a new line in terminal
-              if (
-                wsRef.current &&
-                wsRef.current.readyState === WebSocket.OPEN
-              ) {
-                wsRef.current.send(
-                  JSON.stringify({
-                    type: "data",
-                    device: selectedDevice.id,
-                    data: "\x03",
-                  })
-                );
-              }
-            }}
+            onClick={() => setActiveMiniGame(null)}
             className="relative top-2 left-2 bg-black/70 hover:bg-black/90 text-white rounded-full p-2 z-10 transition-colors"
             aria-label="Close Mario Kart"
           >
@@ -697,7 +732,17 @@ export function TerminalPage() {
             </div>
           </div>
         )}
-        <div ref={terminalRef} className="h-full w-full" />
+        <div
+          className={cn(
+            "flex gap-4 md:gap-6 h-full border-none",
+            isMobileLandscape ? "flex-row" : "flex-col md:flex-row"
+          )}
+        >
+          <div className="flex-1 min-h-0 relative border-none">
+            <div ref={terminalRef} className="h-full w-full" />
+          </div>
+          <Controls />
+        </div>
       </div>
     </div>
   );
