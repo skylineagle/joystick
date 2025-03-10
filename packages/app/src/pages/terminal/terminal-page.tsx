@@ -541,6 +541,11 @@ export function TerminalPage() {
             terminal.write("\r\n\nStarting Angry Birds Game Mode...\r\n\n");
             setActiveMiniGame("angrybirds");
             return;
+          } else if (command === "doodle") {
+            // Run the Doodle Jump Game Mode
+            terminal.write("\r\n\nStarting Doodle Jump Game Mode...\r\n\n");
+            setActiveMiniGame("doodle");
+            return;
           }
         }
         // Reset command buffer on enter
@@ -648,9 +653,30 @@ export function TerminalPage() {
               src="https://funhtml5games.com?embed=angrybirds"
               className="h-[400px] w-[640px] rounded-3xl self-center"
             />
+          ) : activeMiniGame === "doodle" ? (
+            <iframe
+              src="https://funhtml5games.com?embed=doodlejump"
+              style={{ width: "422px", height: "572px", border: "none" }}
+              className="h-[400px] w-[640px] rounded-3xl self-center"
+            />
           ) : null}
           <Button
-            onClick={() => setActiveMiniGame(null)}
+            onClick={() => {
+              setActiveMiniGame(null);
+              // Send Ctrl+C to get a new line in terminal
+              if (
+                wsRef.current &&
+                wsRef.current.readyState === WebSocket.OPEN
+              ) {
+                wsRef.current.send(
+                  JSON.stringify({
+                    type: "data",
+                    device: selectedDevice.id,
+                    data: "\x03",
+                  })
+                );
+              }
+            }}
             className="relative top-2 left-2 bg-black/70 hover:bg-black/90 text-white rounded-full p-2 z-10 transition-colors"
             aria-label="Close Mario Kart"
           >
