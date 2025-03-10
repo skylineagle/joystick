@@ -462,6 +462,11 @@ export function TerminalPage() {
             terminal.write("F8 - Barrel roll\r\n");
             terminal.write("F9 - Disco mode\r\n");
             terminal.write("F10 - Typewriter effect\r\n");
+            terminal.write("F11 - Rain effect\r\n");
+            terminal.write("⌘+E - Neon mode\r\n");
+            terminal.write("⌘+S - Slow motion mode\r\n");
+            terminal.write("⌘+P - Pixel art mode\r\n");
+            terminal.write("⌘+M - Mirror mode\r\n");
             terminal.write("↑↑↓↓←→←→BA - Konami code\r\n\n");
 
             // Clear the command buffer
