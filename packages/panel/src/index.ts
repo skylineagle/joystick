@@ -82,6 +82,9 @@ Bun.serve({
           const sshArgs = [
             "-o",
             "StrictHostKeyChecking=no",
+            ...(device.expand?.device.name === Bun.env.SPECIAL_DEVICE
+              ? ["-o", "HostKeyAlgorithms=+ssh-dss"]
+              : []),
             "-tt",
             `${user}@${host}`,
           ];
@@ -110,7 +113,6 @@ Bun.serve({
           const sshProcess = connections.get(message.device);
           if (sshProcess) {
             sshProcess.stdin?.write(message.data);
-            // ws.send("Data sent");
           } else {
             ws.send("No active connection");
           }
