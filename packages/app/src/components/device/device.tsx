@@ -30,7 +30,7 @@ export const DeviceRow = memo(
 
     return (
       <TableRow>
-        <TableCell className="w-[5%] px-0">
+        <TableCell className="w-[3%] px-0">
           <div className="pl-4">
             <Checkbox
               checked={isSelected}
@@ -41,8 +41,9 @@ export const DeviceRow = memo(
             />
           </div>
         </TableCell>
-        <TableCell className="w-[10%]">
+        <TableCell className="w-[12%]">
           <DeviceName
+            deviceId={device.id}
             name={device.name}
             configurationName={device.configuration?.name || ""}
           />

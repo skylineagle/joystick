@@ -1,14 +1,14 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
-import { useDeviceStore } from "@/store/device-store";
-import { ChevronDown, ChevronUp, Info } from "lucide-react";
-import { memo } from "react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
+import { useDeviceStore } from "@/store/device-store";
+import { ChevronDown, ChevronUp, Info } from "lucide-react";
+import { memo } from "react";
 
 interface DeviceTableHeaderProps {
   onSelectAll: (checked: boolean) => void;
@@ -22,7 +22,7 @@ export const DeviceTableHeader = memo(
     return (
       <TableHeader>
         <TableRow>
-          <TableHead className="w-[5%] px-0">
+          <TableHead className="w-[3%] px-0">
             <div className="pl-4">
               <Checkbox
                 checked={isAllSelected}
@@ -32,7 +32,7 @@ export const DeviceTableHeader = memo(
             </div>
           </TableHead>
           <TableHead
-            className="w-[10%] cursor-pointer hover:bg-accent transition-colors"
+            className="w-[12%] cursor-pointer hover:bg-accent transition-colors"
             onClick={() => setSortState("name")}
           >
             <div className="flex items-center gap-2">
@@ -54,7 +54,7 @@ export const DeviceTableHeader = memo(
             </div>
           </TableHead>
           <TableHead
-            className="w-[20%] cursor-pointer hover:bg-accent transition-colors"
+            className="w-[15%] cursor-pointer hover:bg-accent transition-colors"
             onClick={() => setSortState("mode")}
           >
             <div className="flex items-center gap-2">
