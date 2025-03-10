@@ -1,7 +1,6 @@
+import { pb } from "@/pocketbase";
 import { ChildProcess, spawn } from "node:child_process";
-import PocketBase from "pocketbase";
 import { logger } from "./logger";
-import type { TypedPocketBase } from "./types/db.types";
 import type { DeviceResponse } from "./types/types";
 
 type WebSocketMessage = {
@@ -10,7 +9,6 @@ type WebSocketMessage = {
   data?: string;
 };
 
-const pb = new PocketBase(Bun.env.POCKETBASE_URL) as TypedPocketBase;
 const connections = new Map<string, ChildProcess>();
 
 Bun.serve({
