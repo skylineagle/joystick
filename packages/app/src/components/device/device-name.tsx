@@ -45,7 +45,7 @@ export const DeviceName = memo(
     });
 
     const getBadgeVariant = (): BadgeVariant => {
-      if (!isHealthcheckSupported) return "default";
+      if (!isHealthcheckSupported) return "secondary";
 
       if (isHealthcheckLoading) {
         return "loading";
