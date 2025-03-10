@@ -628,7 +628,7 @@ export function TerminalPage() {
     <div className="h-full flex flex-col overflow-hidden">
       {activeMiniGame && (
         <div className="flex items-center justify-center">
-          {activeMiniGame === "mariokary" ? (
+          {activeMiniGame === "mariokart" ? (
             <iframe
               src="https://funhtml5games.com?embed=mariokart"
               className="h-[400px] w-[640px] rounded-3xl self-center"
