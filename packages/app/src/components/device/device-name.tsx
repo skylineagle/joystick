@@ -41,7 +41,7 @@ export const DeviceName = memo(
         return data === "true";
       },
       enabled: !!deviceId && isHealthcheckSupported,
-      refetchInterval: 5000,
+      refetchInterval: 15000,
     });
 
     const getBadgeVariant = (): BadgeVariant => {
@@ -52,7 +52,7 @@ export const DeviceName = memo(
       }
 
       if (isConnected) {
-        return "connected";
+        return "default";
       }
 
       return "disconnected";

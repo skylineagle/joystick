@@ -4,12 +4,7 @@ import { BatchOperations } from "@/components/device/batch-operations";
 import { DeviceRow } from "@/components/device/device";
 import { AnimatedThemeToggle } from "@/components/ui/animated-theme-toggle";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody } from "@/components/ui/table";
 import { UserProfile } from "@/components/user-profile";
 import { useDevicesQuery } from "@/hooks/use-devices-query";
@@ -19,15 +14,9 @@ import { DeviceTableHeader } from "@/pages/dashboard/devices-header";
 import { Filters } from "@/pages/dashboard/filters";
 import { useDeviceStore } from "@/store/device-store";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
-import { Gauge, InfoIcon } from "lucide-react";
+import { Gauge } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Toaster } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 export function DashboardPage() {
   const { user } = useAuthStore();
@@ -109,36 +98,6 @@ export function DashboardPage() {
                   </Table>
                 </div>
               </CardContent>
-              <CardFooter className="py-3">
-                <div className="flex items-center gap-2">
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <InfoIcon className="h-4 w-4 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent side="top">
-                      Device connection status indicators
-                    </TooltipContent>
-                  </Tooltip>
-                  <div className="text-sm text-muted-foreground">Status:</div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1.5">
-                      <Badge variant="connected" className="h-5">
-                        Connected
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Badge variant="disconnected" className="h-5">
-                        Disconnected
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Badge variant="loading" className="h-5">
-                        Checking
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </CardFooter>
             </Card>
           </div>
         </div>

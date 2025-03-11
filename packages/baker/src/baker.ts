@@ -270,17 +270,25 @@ async function updateStatus() {
         (path: { name: string; ready: boolean }) =>
           path.name === device.configuration?.name
       );
+      const currentStatus = device.status;
+      const newStatus = status
+        ? paths.find(
+            (path: { name: string; ready: boolean }) =>
+              path.name === device.configuration?.name
+          ).ready
+          ? "on"
+          : "waiting"
+        : "off";
 
-      await pb.collection("devices").update(device.id, {
-        status: status
-          ? paths.find(
-              (path: { name: string; ready: boolean }) =>
-                path.name === device.configuration?.name
-            ).ready
-            ? "on"
-            : "waiting"
-          : "off",
-      });
+      if (currentStatus !== newStatus) {
+        logger.info(
+          `Updating status for device ${device.id} from ${currentStatus} to ${newStatus}`
+        );
+
+        await pb.collection("devices").update(device.id, {
+          status: newStatus,
+        });
+      }
     }
   } catch (error) {
     logger.error(error);

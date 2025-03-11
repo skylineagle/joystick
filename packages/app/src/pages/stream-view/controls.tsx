@@ -163,7 +163,7 @@ export const Controls = () => {
               <TabsContent value="stream" className="m-0 pt-2">
                 {device?.configuration?.name &&
                   device.status !== DevicesStatusOptions.off && (
-                    <MediaMtxMonitor deviceName={device.configuration.name} />
+                    <MediaMtxMonitor deviceId={deviceId!} />
                   )}
               </TabsContent>
             )}
