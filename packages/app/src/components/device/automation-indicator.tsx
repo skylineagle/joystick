@@ -154,6 +154,7 @@ export const AutomationIndicator = memo(
             <ArrowRight className="h-3 w-3" />
             {automation.automationType === "timeOfDay" ? (
               <span>
+                at{" "}
                 {new Date(countdownTime).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
