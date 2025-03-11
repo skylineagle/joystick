@@ -173,4 +173,16 @@ onRecordAfterDeleteSuccess((e) => {
   e.next();
 }, "devices");
 
+// Cron job to clean up action_row table every 5 days
+cronAdd("cleanup_action_rows", "0 0 */5 * *", () => {
+  try {
+    $app.logger().info("Starting scheduled cleanup of action_row table");
 
+    // Get all records from action_row table
+    // Use a batch delete operation instead of fetching and deleting individually
+    $app.db().newQuery("DELETE FROM action_logs").execute();
+  } catch (error) {
+    $app.logger().error(error);
+    $app.logger().error("Failed to clean up action_row table", error);
+  }
+});
