@@ -3,6 +3,8 @@ import { Konami } from "@/konami";
 import { BubbleEasterEgg } from "./bubble-easter-egg";
 import { GlitchEasterEgg } from "./glitch-easter-egg";
 import { GravityEasterEgg } from "./gravity-easter-egg";
+import { JitterEasterEgg } from "./jitter-easter-egg";
+import { MatrixEasterEgg } from "./matrix-easter-egg";
 import { MirrorEasterEgg } from "./mirror-easter-egg";
 import { NeonEasterEgg } from "./neon-easter-egg";
 import { PixelArtEasterEgg } from "./pixel-art-easter-egg";
@@ -10,7 +12,10 @@ import { PirateEasterEgg } from "./pirate-easter-egg";
 import { RainEasterEgg } from "./rain-easter-egg";
 import { RetroGameEasterEgg } from "./retro-game-easter-egg";
 import { SlowMotionEasterEgg } from "./slow-motion-easter-egg";
+import { SparkleEasterEgg } from "./sparkle-easter-egg";
 import { TypewriterEasterEgg } from "./typewriter-easter-egg";
+import { VaporwaveEasterEgg } from "./vaporwave-easter-egg";
+import { ZoomEasterEgg } from "./zoom-easter-egg";
 
 export function EasterEggs() {
   const isEasterEggsPermitted = useIsPermitted("easter-eggs");
@@ -34,6 +39,11 @@ export function EasterEggs() {
       <SlowMotionEasterEgg />
       <PixelArtEasterEgg />
       <MirrorEasterEgg />
+      <MatrixEasterEgg />
+      <ZoomEasterEgg />
+      <SparkleEasterEgg />
+      <JitterEasterEgg />
+      <VaporwaveEasterEgg />
     </>
   );
 }

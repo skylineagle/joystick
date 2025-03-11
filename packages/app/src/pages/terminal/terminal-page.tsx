@@ -466,6 +466,10 @@ export function TerminalPage() {
             terminal.write("Shift+S - Slow motion mode\r\n");
             terminal.write("Shift+P - Pixel art mode\r\n");
             terminal.write("Shift+M - Mirror mode\r\n");
+            terminal.write("Shift+V - Vaporwave mode\r\n");
+            terminal.write("Shift+Z - Zoom mode\r\n");
+            terminal.write("Shift+J - Jitter mode\r\n");
+            terminal.write("Shift+A - Sparkle mode\r\n");
             terminal.write("↑↑↓↓←→←→BA - Konami code\r\n\n");
 
             // Clear the command buffer
