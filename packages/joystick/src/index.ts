@@ -109,11 +109,13 @@ app.post(
         output,
       };
 
-      await pb.collection("devices").update(params.device, {
-        mode: body?.mode,
-      });
-
-      await updateStatus(params.device);
+      if (params.action === "set-mode") {
+        enhancedLogger.info("set-mode");
+        await pb.collection("devices").update(params.device, {
+          mode: body?.mode,
+        });
+        await updateStatus(params.device);
+      }
 
       const userId = headers["x-user-id"] ?? "system";
 

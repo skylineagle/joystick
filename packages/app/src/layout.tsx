@@ -8,7 +8,11 @@ import {
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
+import { pb } from "@/lib/pocketbase";
 import { cn } from "@/lib/utils";
+import { DeviceResponse } from "@/types/types";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Outlet, useParams } from "react-router-dom";
 
 interface LayoutProps {
@@ -16,8 +20,21 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
+  const queryClient = useQueryClient();
   const { isMobileLandscape } = useMobileLandscape();
   const { device: deviceId } = useParams();
+
+  useEffect(() => {
+    pb.collection("devices").subscribe<DeviceResponse>(deviceId!, (e) => {
+      if (e.action === "update") {
+        queryClient.invalidateQueries({ queryKey: ["device", e.record.id] });
+      }
+    });
+
+    return () => {
+      pb.collection("devices").unsubscribe(deviceId!);
+    };
+  }, [deviceId, queryClient]);
 
   return (
     <TooltipProvider>

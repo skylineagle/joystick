@@ -36,6 +36,7 @@ export function useDevicesQuery(options?: GetDevicesOptions) {
       } else if (e.action === "update") {
         const device = e.record;
         updateDevice(device);
+        queryClient.invalidateQueries({ queryKey: ["device", device?.id] });
       }
     });
 
