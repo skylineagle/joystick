@@ -6,7 +6,7 @@ import { Activity, CheckCircle, MegaphoneOff } from "lucide-react";
 import { useEffect, useState } from "react";
 
 interface MediaMtxMonitorProps {
-  deviceName: string;
+  deviceId: string;
 }
 
 interface MediaMtxPathResponse {
@@ -62,10 +62,10 @@ const formatThroughput = (bps: number): string => {
   }
 };
 
-export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
+export function MediaMtxMonitor({ deviceId }: MediaMtxMonitorProps) {
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>("initializing");
-  const { data: device } = useDevice(deviceName);
+  const { data: device } = useDevice(deviceId);
   const [qualityScore, setQualityScore] = useState<ConnectionQuality>("good");
   const [lastBytesReceived, setLastBytesReceived] = useState<number>(0);
   const [throughput, setThroughput] = useState<number>(0);
@@ -76,7 +76,7 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
       try {
         const currentTime = Date.now();
         const response = await fetch(
-          `${urls.stream_api}/v3/paths/get/${deviceName}`
+          `${urls.stream_api}/v3/paths/get/${device?.configuration?.name}`
         );
 
         if (!response.ok) {
@@ -169,7 +169,7 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
     const initialFetch = async () => {
       try {
         const response = await fetch(
-          `${urls.stream_api}/v3/paths/get/${deviceName}`
+          `${urls.stream_api}/v3/paths/get/${device?.configuration?.name}`
         );
         if (response.ok) {
           const path: MediaMtxPathResponse = await response.json();
@@ -190,12 +190,13 @@ export function MediaMtxMonitor({ deviceName }: MediaMtxMonitorProps) {
       clearInterval(interval);
     };
   }, [
-    deviceName,
+    deviceId,
     connectionStatus,
     lastBytesReceived,
     lastFetchTime,
     device?.expand?.device.stream_quality,
     device?.mode,
+    device?.configuration?.name,
   ]);
 
   // Format throughput
