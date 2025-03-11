@@ -52,13 +52,14 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
     // For LTE, use RSRP as the signal quality indicator
     if (data.technology === "LTE" && data.rsrp !== undefined) {
       // RSRP ranges typically from -140 dBm (poor) to -80 dBm (excellent)
-      if (data.rsrp >= -80)
-        return <SignalHigh className="h-5 w-5 text-green-500" />;
+      if (data.rsrp >= -75) return <Signal className="size-7 text-green-500" />;
+      if (data.rsrp >= -85)
+        return <SignalHigh className="size-7 text-green-500" />;
       if (data.rsrp >= -100)
-        return <SignalMedium className="h-5 w-5 text-green-400" />;
+        return <SignalMedium className="size-7 text-yellow-500" />;
       if (data.rsrp >= -110)
-        return <SignalLow className="h-5 w-5 text-yellow-500" />;
-      return <SignalZero className="h-5 w-5 text-red-500" />;
+        return <SignalLow className="size-7 text-yellow-500" />;
+      return <SignalZero className="size-7 text-red-500" />;
     }
 
     // For GSM and WCDMA, use RSSI as the signal quality indicator
@@ -97,31 +98,6 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
     );
   };
 
-  const getStatusBadge = (status: string | undefined) => {
-    if (
-      status?.toLowerCase() === "online" ||
-      status?.toLowerCase() === "connected"
-    ) {
-      return (
-        <Badge
-          variant="outline"
-          className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300"
-        >
-          {status}
-        </Badge>
-      );
-    }
-
-    return (
-      <Badge
-        variant="outline"
-        className="bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300"
-      >
-        {status}
-      </Badge>
-    );
-  };
-
   // Helper function to format signal metrics
   const formatSignalMetric = (value: number | undefined, unit: string) => {
     if (value === undefined) return "N/A";
@@ -141,9 +117,8 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
           <div className="flex items-center justify-between gap-1 flex-wrap w-full">
             <div className="flex items-center gap-1 min-w-0 truncate">
               {getSignalIcon()}
-              <span className="font-medium text-sm truncate">
-                {data?.operator || "Unknown Operator"}
-              </span>
+              {getNetworkTypeBadge(data?.technology)}
+              <Badge variant="connected">{data?.operator || "Unknown"}</Badge>
             </div>
             <Button
               variant="ghost"
@@ -157,26 +132,16 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
             </Button>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
-            {getNetworkTypeBadge(data?.technology)}
-            {getStatusBadge(data?.status)}
+            <span className="text-xs text-muted-foreground">Cell ID:</span>
+            <span className="text-xs font-medium truncate">
+              {data?.cellId || "N/A"}
+            </span>
           </div>
 
           <div className="grid grid-cols-2 gap-x-2 gap-y-2 pt-1 text-xs w-full">
             <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground">MCC-MNC</span>
-              <span className="truncate">{data?.mccMnc || "N/A"}</span>
-            </div>
-
-            <div className="flex flex-col">
               <span className="text-xs text-muted-foreground">Band</span>
               <span className="truncate">{data?.band || "N/A"}</span>
-            </div>
-
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground">ARFCN</span>
-              <span className="truncate">
-                {data?.arfcn !== undefined ? data?.arfcn : "N/A"}
-              </span>
             </div>
 
             {data?.technology === "LTE" ? (

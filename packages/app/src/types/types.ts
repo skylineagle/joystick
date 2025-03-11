@@ -37,6 +37,7 @@ export type ModelResponse = ModelsResponse<
 export type CPSIResult = {
   technology: string;
   status: string;
+  cellId?: string;
   operator?: string;
   mccMnc?: string;
   band?: string;

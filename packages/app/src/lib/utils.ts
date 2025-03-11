@@ -17,11 +17,13 @@ export function parseCPSIResult(input: string): CPSIResult | null {
   if (!technology || !status) return null;
 
   const result: CPSIResult = { technology, status };
+  console.log(input);
 
   switch (technology) {
     case "LTE":
       if (parts.length >= 11) {
         result.operator = parts[2]?.trim();
+        result.cellId = parts[3]?.trim();
         result.mccMnc = parts[3]?.trim();
         result.band = parts[4]?.trim();
         result.arfcn = parseInt(parts[5], 10);
