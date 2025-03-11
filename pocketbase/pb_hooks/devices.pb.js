@@ -174,7 +174,7 @@ onRecordAfterDeleteSuccess((e) => {
 }, "devices");
 
 // Cron job to clean up action_row table every 5 days
-cronAdd("cleanup_action_rows", "0 0 */5 * *", () => {
+cronAdd("cleanup_action_rows", "0 0 */10 * *", () => {
   try {
     $app.logger().info("Starting scheduled cleanup of action_row table");
 
