@@ -5,7 +5,6 @@ import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
-import { Controls } from "@/pages/stream-view/controls";
 import { toast } from "@/utils/toast";
 import { X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
