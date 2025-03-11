@@ -196,6 +196,48 @@ app.get("/api/health", async () => {
   };
 });
 
+// SMS server health check proxy endpoint
+app.get("/api/health/sms", async () => {
+  try {
+    const smsServerUrl = Bun.env.SMS_SERVER_URL || "https://api.sms-gate.app";
+    const response = await fetch(
+      `${smsServerUrl}/${
+        Bun.env.SMS_SERVER_URL ? "/health" : "3rdparty/v1/health"
+      }`
+    );
+
+    if (response.status === 200) {
+      return {
+        status: "healthy",
+        service: "sms-server",
+        uptime: null, // SMS server doesn't provide this information
+        timestamp: new Date().toISOString(),
+        smsServerUrl,
+        proxyService: "whisper",
+      };
+    } else {
+      return {
+        status: "offline",
+        service: "sms-server",
+        timestamp: new Date().toISOString(),
+        error: `SMS server returned status ${response.status}`,
+        smsServerUrl,
+        proxyService: "whisper",
+      };
+    }
+  } catch (error) {
+    logger.error({ error }, "Failed to check SMS server health");
+    return {
+      status: "offline",
+      service: "sms-server",
+      timestamp: new Date().toISOString(),
+      error: error instanceof Error ? error.message : "Unknown error",
+      smsServerUrl: Bun.env.SMS_SERVER_URL || "https://api.sms-gate.app",
+      proxyService: "whisper",
+    };
+  }
+});
+
 app
   .use(cors())
   .listen(Bun.env.PORT || 8081, () =>

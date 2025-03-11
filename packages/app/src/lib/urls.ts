@@ -6,6 +6,7 @@ const PORTS = {
   panel: 4000,
   baker: 3000,
   switcher: 8080,
+  whisper: 8081,
 } as const;
 
 function getServiceUrl(service: keyof typeof PORTS): string {
@@ -30,6 +31,9 @@ export const urls = {
   },
   get baker() {
     return getServiceUrl("baker");
+  },
+  get whisper() {
+    return getServiceUrl("whisper");
   },
   get switcher() {
     return getServiceUrl("switcher");

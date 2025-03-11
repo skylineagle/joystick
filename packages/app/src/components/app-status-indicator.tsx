@@ -38,6 +38,8 @@ interface SystemStatus {
   switcherStatus: ServiceStatus;
   bakerStatus: ServiceStatus;
   panelStatus: ServiceStatus;
+  whisperStatus: ServiceStatus;
+  smsServerStatus: ServiceStatus;
   lastChecked: Date;
 }
 
@@ -48,6 +50,47 @@ interface HealthResponse {
   version?: string;
   [key: string]: string | number | boolean | undefined;
 }
+
+const getStatusIcon = (status: ServiceStatus) => {
+  switch (status) {
+    case "healthy":
+      return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+    case "degraded":
+      return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+    case "offline":
+      return <ServerCrash className="h-4 w-4 text-red-500" />;
+    default:
+      return <AlertCircle className="h-4 w-4 text-gray-400" />;
+  }
+};
+
+const getStatusLabel = (status: ServiceStatus) => {
+  switch (status) {
+    case "healthy":
+      return "Healthy";
+    case "degraded":
+      return "Degraded";
+    case "offline":
+      return "Offline";
+    default:
+      return "Unknown";
+  }
+};
+
+const getStatusColor = (status: ServiceStatus) => {
+  console.log(status);
+
+  switch (status) {
+    case "healthy":
+      return "bg-green-500";
+    case "degraded":
+      return "bg-yellow-500";
+    case "offline":
+      return "bg-red-500";
+    default:
+      return "bg-gray-400";
+  }
+};
 
 export function AppStatusIndicator() {
   const [isOpen, setIsOpen] = useState(false);
@@ -61,6 +104,8 @@ export function AppStatusIndicator() {
     switcherStatus: "unknown",
     bakerStatus: "unknown",
     panelStatus: "unknown",
+    whisperStatus: "unknown",
+    smsServerStatus: "unknown",
     lastChecked: new Date(),
   });
 
@@ -129,6 +174,38 @@ export function AppStatusIndicator() {
     meta: { suppressGlobalErrors: true },
   });
 
+  const { data: whisperHealth, refetch: refetchWhisper } = useQuery({
+    queryKey: ["health", "whisper"],
+    queryFn: async () => {
+      return joystickApi.get<HealthResponse>(
+        createUrl(urls.whisper, "/api/health")
+      );
+    },
+    retry: 1,
+    refetchInterval: 60000, // Check every minute
+    refetchOnWindowFocus: false,
+    gcTime: 0, // Don't cache health check results
+    staleTime: 55000, // Consider stale after 55 seconds
+    // Prevent global error handler from showing errors for health checks
+    meta: { suppressGlobalErrors: true },
+  });
+
+  const { data: smsServerHealth, refetch: refetchSmsServer } = useQuery({
+    queryKey: ["health", "sms-server"],
+    queryFn: async () => {
+      return joystickApi.get<HealthResponse>(
+        createUrl(urls.whisper, "/api/health/sms")
+      );
+    },
+    retry: 1,
+    refetchInterval: 60000, // Check every minute
+    refetchOnWindowFocus: false,
+    gcTime: 0, // Don't cache health check results
+    staleTime: 55000, // Consider stale after 55 seconds
+    // Prevent global error handler from showing errors for health checks
+    meta: { suppressGlobalErrors: true },
+  });
+
   // Query to check stream API health
   const { data: streamHealth, refetch: refetchStream } = useQuery({
     queryKey: ["health", "stream"],
@@ -179,19 +256,23 @@ export function AppStatusIndicator() {
     refetchBaker();
     refetchPanel();
     refetchStream();
+    refetchWhisper();
+    refetchSmsServer();
     refetchPocketbase();
 
     // Invalidate queries that might be dependent on service availability
     queryClient.invalidateQueries({ queryKey: ["devices"] });
     queryClient.invalidateQueries({ queryKey: ["cameras"] });
   }, [
-    queryClient,
     refetchJoystick,
-    refetchPocketbase,
-    refetchStream,
     refetchSwitcher,
     refetchBaker,
     refetchPanel,
+    refetchStream,
+    refetchWhisper,
+    refetchSmsServer,
+    refetchPocketbase,
+    queryClient,
   ]); // Add dependencies here
 
   // Update system status whenever health data changes
@@ -208,6 +289,10 @@ export function AppStatusIndicator() {
         switcherHealth?.status === "healthy" ? "healthy" : "offline",
       bakerStatus: bakerHealth?.status === "healthy" ? "healthy" : "offline",
       panelStatus: panelHealth?.status === "healthy" ? "healthy" : "offline",
+      whisperStatus:
+        whisperHealth?.status === "healthy" ? "healthy" : "offline",
+      smsServerStatus:
+        smsServerHealth?.status === "healthy" ? "healthy" : "offline",
       lastChecked: new Date(),
     }));
   }, [
@@ -216,7 +301,9 @@ export function AppStatusIndicator() {
     pocketbaseHealth,
     switcherHealth,
     bakerHealth,
-    panelHealth?.status,
+    panelHealth,
+    whisperHealth,
+    smsServerHealth,
   ]);
 
   // Update network status on online/offline events
@@ -255,51 +342,17 @@ export function AppStatusIndicator() {
       systemStatus.joystickApiStatus,
       systemStatus.streamApiStatus,
       systemStatus.pocketbaseStatus,
+      systemStatus.switcherStatus,
+      systemStatus.bakerStatus,
+      systemStatus.panelStatus,
+      systemStatus.whisperStatus,
+      systemStatus.smsServerStatus,
     ];
 
     if (services.some((s) => s === "offline")) return "degraded";
     if (services.every((s) => s === "healthy")) return "healthy";
 
     return "degraded";
-  };
-
-  const getStatusIcon = (status: ServiceStatus) => {
-    switch (status) {
-      case "healthy":
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
-      case "degraded":
-        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
-      case "offline":
-        return <ServerCrash className="h-4 w-4 text-red-500" />;
-      default:
-        return <AlertCircle className="h-4 w-4 text-gray-400" />;
-    }
-  };
-
-  const getStatusLabel = (status: ServiceStatus) => {
-    switch (status) {
-      case "healthy":
-        return "Healthy";
-      case "degraded":
-        return "Degraded";
-      case "offline":
-        return "Offline";
-      default:
-        return "Unknown";
-    }
-  };
-
-  const getStatusColor = (status: ServiceStatus) => {
-    switch (status) {
-      case "healthy":
-        return "bg-green-500";
-      case "degraded":
-        return "bg-yellow-500";
-      case "offline":
-        return "bg-red-500";
-      default:
-        return "bg-gray-400";
-    }
   };
 
   const currentStatus = overallStatus();
@@ -437,6 +490,7 @@ export function AppStatusIndicator() {
               </div>
             </div>
 
+            {/* Panel API Status */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {getStatusIcon(systemStatus.panelStatus)}
@@ -454,6 +508,50 @@ export function AppStatusIndicator() {
                   )}
                 >
                   {getStatusLabel(systemStatus.panelStatus)}
+                </span>
+              </div>
+            </div>
+
+            {/* Whisper API Status */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {getStatusIcon(systemStatus.whisperStatus)}
+                <span>Whisper API</span>
+              </div>
+              <div>
+                <span
+                  className={cn(
+                    "px-2 py-1 text-xs rounded-full",
+                    systemStatus.whisperStatus === "healthy"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                      : systemStatus.whisperStatus === "degraded"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                      : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
+                  )}
+                >
+                  {getStatusLabel(systemStatus.whisperStatus)}
+                </span>
+              </div>
+            </div>
+
+            {/* SMS Server Status */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {getStatusIcon(systemStatus.smsServerStatus)}
+                <span>SMS Server</span>
+              </div>
+              <div>
+                <span
+                  className={cn(
+                    "px-2 py-1 text-xs rounded-full",
+                    systemStatus.smsServerStatus === "healthy"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                      : systemStatus.smsServerStatus === "degraded"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                      : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
+                  )}
+                >
+                  {getStatusLabel(systemStatus.smsServerStatus)}
                 </span>
               </div>
             </div>
