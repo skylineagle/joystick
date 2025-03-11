@@ -8,7 +8,7 @@ export function SlowMotionEasterEgg() {
   // Listen for the secret key combination (Alt+S)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.metaKey && e.key.toLowerCase() === "s") {
+      if (e.shiftKey && e.key.toLowerCase() === "s") {
         e.preventDefault();
         setIsActive((prev) => !prev);
       }
