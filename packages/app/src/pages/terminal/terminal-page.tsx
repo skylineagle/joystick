@@ -739,14 +739,11 @@ export function TerminalPage() {
         )}
         <div
           className={cn(
-            "flex gap-4 md:gap-6 h-full border-none",
+            "flex gap-4 md:gap-6 h-full",
             isMobileLandscape ? "flex-row" : "flex-col md:flex-row"
           )}
         >
-          <div className="flex-1 min-h-0 relative border-none">
-            <div ref={terminalRef} className="h-full w-full" />
-          </div>
-          <Controls />
+          <div ref={terminalRef} className="size-full" />
         </div>
       </div>
     </div>

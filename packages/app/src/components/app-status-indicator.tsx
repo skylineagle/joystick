@@ -78,8 +78,6 @@ const getStatusLabel = (status: ServiceStatus) => {
 };
 
 const getStatusColor = (status: ServiceStatus) => {
-  console.log(status);
-
   switch (status) {
     case "healthy":
       return "bg-green-500";
