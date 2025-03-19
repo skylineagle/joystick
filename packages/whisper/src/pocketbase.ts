@@ -3,6 +3,7 @@ import type { TypedPocketBase } from "@/types/db.types";
 import PocketBase from "pocketbase";
 
 export const pb = new PocketBase(POCKETBASE_URL) as TypedPocketBase;
+pb.autoCancellation(false);
 await pb.collection("users").authWithPassword(USERNAME, PASSWORD);
 
 setInterval(() => {
