@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -160,6 +161,7 @@ export function AddDeviceModal() {
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Add Device</DialogTitle>
+          <DialogDescription />
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 my-2">
           <div className="space-y-6">

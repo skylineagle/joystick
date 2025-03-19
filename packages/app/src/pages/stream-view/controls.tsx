@@ -1,4 +1,5 @@
 import { AutomateToggle } from "@/components/device/automate-toggle";
+import { AutomationIndicator } from "@/components/device/automation-indicator";
 import { ModeSelector } from "@/components/device/mode-selector";
 import { StatusIndicator } from "@/components/device/status-indicator";
 import { MediaMtxMonitor } from "@/components/stream/media-mtx-monitor";
@@ -11,17 +12,17 @@ import { useDevice } from "@/hooks/use-device";
 import { useIsSupported } from "@/hooks/use-is-supported";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { cn } from "@/lib/utils";
+import { BatteryStatus } from "@/pages/status/battery-status";
 import { CellularStatus } from "@/pages/status/cellular-status";
 import { ServicesStatus } from "@/pages/status/services-status";
 import { BitrateControll } from "@/pages/stream-view/bitrate-control";
 import { RoiModeControl } from "@/pages/stream-view/roi/roi-mode-control";
-import { BarChart, Cpu, Signal } from "lucide-react";
+import { DevicesStatusOptions } from "@/types/db.types";
+import { BarChart, Battery, Cpu, Signal } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { DevicesStatusOptions } from "@/types/db.types";
-import { AutomationIndicator } from "@/components/device/automation-indicator";
 
-type TabValue = "stream" | "device" | "cell";
+type TabValue = "stream" | "device" | "cell" | "battery";
 
 export const Controls = () => {
   const [activeTab, setActiveTab] = useState<TabValue>("stream");
@@ -42,6 +43,8 @@ export const Controls = () => {
     isSupported: isGetCpsiStatusSupported,
     isLoading: isGetCpsiStatusLoading,
   } = useIsSupported(deviceId!, ["get-cpsi"]);
+  const { isSupported: isGetBatterySupported, isLoading: isGetBatteryLoading } =
+    useIsSupported(deviceId!, ["get-battery"]);
 
   const isMediaMtx = device?.expand?.device.stream === "mediamtx";
 
@@ -180,12 +183,19 @@ export const Controls = () => {
               </TabsContent>
             )}
 
+            {isGetBatterySupported && !isGetBatteryLoading && (
+              <TabsContent value="battery" className="m-0 pt-2">
+                <BatteryStatus deviceId={deviceId!} />
+              </TabsContent>
+            )}
+
             {/* Tab Triggers */}
             <TabsList
               className={`grid grid-cols-${
                 (isMediaMtx ? 1 : 0) +
                 (isGetServicesStatusSupported ? 1 : 0) +
-                (isGetCpsiStatusSupported ? 1 : 0)
+                (isGetCpsiStatusSupported ? 1 : 0) +
+                (isGetBatterySupported ? 1 : 0)
               } mt-2 h-7`}
             >
               {isMediaMtx && (
@@ -204,6 +214,12 @@ export const Controls = () => {
                 <TabsTrigger value="cell" className="text-xs py-0.5 px-1">
                   <Signal className="h-3 w-3 mr-1" />
                   Cell
+                </TabsTrigger>
+              )}
+              {isGetBatterySupported && !isGetBatteryLoading && (
+                <TabsTrigger value="battery" className="text-xs py-0.5 px-1">
+                  <Battery className="h-3 w-3 mr-1" />
+                  Battery
                 </TabsTrigger>
               )}
             </TabsList>

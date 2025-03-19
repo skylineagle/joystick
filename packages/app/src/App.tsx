@@ -6,6 +6,7 @@ import { PageTransition } from "@/components/page-transition";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ApiError } from "@/lib/api-client";
 import { pb } from "@/lib/pocketbase";
+import { TerminalPage } from "@/pages/terminal/terminal-page";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
@@ -20,7 +21,6 @@ import {
 import { HashLoader } from "react-spinners";
 import { Toaster } from "sonner";
 import { Layout } from "./layout";
-import { TerminalPage } from "@/pages/terminal/terminal-page";
 
 // Lazy load components
 const DashboardPage = lazy(() =>

@@ -84,6 +84,7 @@ export type DeviceInformation = {
   password: string;
   host: string;
   phone?: string;
+  battery_capacity?: number;
 };
 
 export type DeviceResponse = DevicesResponse<
