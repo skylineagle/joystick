@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { DeviceResponse } from "@/types/types";
-import { ExternalLink } from "lucide-react";
+import { Joystick } from "lucide-react";
 import { memo } from "react";
 import { Link } from "react-router-dom";
 
@@ -72,14 +72,9 @@ export const DeviceRow = memo(
           <div className="flex gap-2">
             {isAllowedToEditDevice && <ConfigurationEditor device={device} />}
             {isAllowedToControlDevice && (
-              <Link
-                target="_blank"
-                to={`/${device.id}`}
-                className="self-center"
-              >
+              <Link to={`/${device.id}`} className="self-center">
                 <Button variant="ghost" size="icon">
-                  <ExternalLink className="h-4 w-4" />
-                  <span className="sr-only">View device</span>
+                  <Joystick className="h-4 w-4" />
                 </Button>
               </Link>
             )}

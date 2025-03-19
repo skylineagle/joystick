@@ -4,8 +4,8 @@ import { useRoiMode } from "@/hooks/use-roi-mode";
 import { cn } from "@/lib/utils";
 import { Controls } from "@/pages/stream-view/controls";
 import { Roi } from "@/pages/stream-view/roi/roi";
-import { memo, useState } from "react";
-import { CommittedRoiProperties, RoiProvider } from "react-roi";
+import { memo } from "react";
+import { RoiProvider } from "@/pages/stream-view/roi/roi-provider";
 import { useParams } from "react-router-dom";
 import { MediaFrame, RoiMediaFrame } from "./media-frame";
 import { WsFrame } from "./ws-frame";
@@ -36,9 +36,9 @@ export const Frame = memo(
 );
 
 export function StreamView() {
-  const [roiData, setRoiData] = useState<CommittedRoiProperties<unknown>[]>([]);
   const { isMobileLandscape } = useMobileLandscape();
   const { device: deviceId } = useParams();
+
   const { data: device } = useDevice(deviceId ?? "");
   const { roiMode } = useRoiMode();
 
@@ -48,31 +48,7 @@ export function StreamView() {
   const mode = roiMode === "hide" ? "view" : "edit";
 
   return (
-    <RoiProvider
-      initialConfig={{
-        commitRoiBoxStrategy: "exact",
-        resizeStrategy: "none",
-        rois: roiData,
-      }}
-      onAfterDraw={(roi) => {
-        setRoiData((prev) => [...prev, roi]);
-      }}
-      onAfterMove={(selectedRoiId, roi) => {
-        setRoiData((prev) =>
-          prev.map((r) => (r.id === selectedRoiId ? { ...r, ...roi } : r))
-        );
-      }}
-      onAfterResize={(selectedRoiId, roi) => {
-        setRoiData((prev) =>
-          prev.map((r) => (r.id === selectedRoiId ? { ...r, ...roi } : r))
-        );
-      }}
-      onAfterRotate={(selectedRoiId, roi) => {
-        setRoiData((prev) =>
-          prev.map((r) => (r.id === selectedRoiId ? { ...r, ...roi } : r))
-        );
-      }}
-    >
+    <RoiProvider deviceId={device.id}>
       <div
         className={cn(
           "flex gap-4 md:gap-6 h-full border-none",

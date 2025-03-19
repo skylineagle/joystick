@@ -1,7 +1,9 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { CPSIResult } from "@/types/types";
-
+import { CommittedRoiProperties } from "react-roi";
+import { v4 as uuidv4 } from "uuid";
+import { ParamPath } from "@/types/params";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -17,7 +19,6 @@ export function parseCPSIResult(input: string): CPSIResult | null {
   if (!technology || !status) return null;
 
   const result: CPSIResult = { technology, status };
-  console.log(input);
 
   switch (technology) {
     case "LTE":
@@ -100,4 +101,34 @@ export function getModeOptionsFromSchema(
   }
 
   return [];
+}
+
+/**
+ * Transforms coordinates into a CommittedRoiProperties object
+ * @param coordinates - Object containing x1, x2, y1, y2 coordinates
+ * @returns CommittedRoiProperties object
+ */
+export function transformToCommittedRoiProperties(coordinates: {
+  x1: number;
+  x2: number;
+  y1: number;
+  y2: number;
+}): CommittedRoiProperties {
+  return {
+    id: uuidv4(),
+    x: Math.min(coordinates.x1, coordinates.x2),
+    y: Math.min(coordinates.y1, coordinates.y2),
+    width: Math.abs(coordinates.x2 - coordinates.x1),
+    height: Math.abs(coordinates.y2 - coordinates.y1),
+    angle: 0,
+  };
+}
+
+export function getParamPath(path: ParamPath) {
+  return path.length > 0
+    ? `${path[0]} ${path
+        .slice(1)
+        .map((segment) => `/${segment}`)
+        .join("")}`
+    : "";
 }

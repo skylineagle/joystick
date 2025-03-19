@@ -2,6 +2,7 @@ import { urls } from "@/lib/urls";
 import { ParamPath } from "@/types/params";
 import { ApiError, createUrl, joystickApi } from "./api-client";
 import { pb } from "@/lib/pocketbase";
+import { getParamPath } from "@/lib/utils";
 
 type JoystickApiResponse<T = unknown> = {
   success: boolean;
@@ -24,6 +25,7 @@ export type RunActionRequest = {
   deviceId: string;
   action: string;
   params?: Record<string, unknown>;
+  timeout?: number;
 };
 
 export async function writeParams({
@@ -34,7 +36,7 @@ export async function writeParams({
   try {
     const url = createUrl(urls.joystick, `/api/run/${deviceId}/write`);
     const data = await joystickApi.post(url, {
-      path: path.join("."),
+      path: getParamPath(path),
       value,
     });
 
@@ -61,7 +63,7 @@ export async function readParams({
   try {
     const url = createUrl(urls.joystick, `/api/run/${deviceId}/read`);
     const data = await joystickApi.post(url, {
-      path: path.join("."),
+      path: getParamPath(path),
     });
 
     return { success: true, data };
@@ -84,18 +86,24 @@ export async function runAction({
   deviceId,
   action,
   params,
-}: RunActionRequest) {
+  timeout,
+}: RunActionRequest): Promise<string | undefined> {
   try {
     const url = createUrl(urls.joystick, `/api/run/${deviceId}/${action}`);
     const data = await joystickApi.post<{
       success: boolean;
       output?: string;
       error?: string;
-    }>(url, params ?? {}, {
-      headers: {
-        "x-user-id": pb.authStore.record?.id ?? "unknown",
+    }>(
+      url,
+      params ?? {},
+      {
+        headers: {
+          "x-user-id": pb.authStore.record?.id ?? "unknown",
+        },
       },
-    });
+      timeout
+    );
 
     if (!data.success) {
       throw new ApiError(data.error || "Failed to run action");

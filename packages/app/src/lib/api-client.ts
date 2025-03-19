@@ -52,7 +52,8 @@ export class ApiClient {
    */
   async request<T = unknown>(
     url: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    timeout?: number
   ): Promise<T> {
     // Create a new AbortController for each request
     this.controller = new AbortController();
@@ -68,7 +69,7 @@ export class ApiClient {
     // Set up timeout
     const timeoutId = setTimeout(() => {
       this.controller.abort();
-    }, this.options.timeout || 15000);
+    }, timeout || this.options.timeout || 15000);
 
     try {
       // Check for network connectivity
@@ -176,44 +177,60 @@ export class ApiClient {
   async post<T = unknown, D = unknown>(
     url: string,
     data: D,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    timeout?: number
   ): Promise<T> {
-    return this.request<T>(url, {
-      ...options,
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+    return this.request<T>(
+      url,
+      {
+        ...options,
+        method: "POST",
+        body: JSON.stringify(data),
+      },
+      timeout
+    );
   }
 
   async put<T = unknown, D = unknown>(
     url: string,
     data: D,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    timeout?: number
   ): Promise<T> {
-    return this.request<T>(url, {
-      ...options,
-      method: "PUT",
-      body: JSON.stringify(data),
-    });
+    return this.request<T>(
+      url,
+      {
+        ...options,
+        method: "PUT",
+        body: JSON.stringify(data),
+      },
+      timeout
+    );
   }
 
   async patch<T = unknown, D = unknown>(
     url: string,
     data: D,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    timeout?: number
   ): Promise<T> {
-    return this.request<T>(url, {
-      ...options,
-      method: "PATCH",
-      body: JSON.stringify(data),
-    });
+    return this.request<T>(
+      url,
+      {
+        ...options,
+        method: "PATCH",
+        body: JSON.stringify(data),
+      },
+      timeout
+    );
   }
 
   async delete<T = unknown>(
     url: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    timeout?: number
   ): Promise<T> {
-    return this.request<T>(url, { ...options, method: "DELETE" });
+    return this.request<T>(url, { ...options, method: "DELETE" }, timeout);
   }
 }
 
@@ -225,8 +242,6 @@ export const joystickApi = new ApiClient({
 export const streamApi = new ApiClient({
   baseUrl: urls.stream_api,
 });
-
-
 
 // Helper function to create full URLs with base URL
 export function createUrl(baseUrl: string, path: string): string {

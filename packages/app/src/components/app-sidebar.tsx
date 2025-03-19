@@ -12,13 +12,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { UserProfile } from "@/components/user-profile";
-import {
-  ArrowLeft,
-  Home,
-  Send,
-  Settings,
-  Terminal
-} from "lucide-react";
+import { ArrowLeft, Home, Send, Settings, Terminal } from "lucide-react";
 import * as React from "react";
 import { Link, useParams } from "react-router-dom";
 
