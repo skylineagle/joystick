@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { logout, useAuthStore } from "@/lib/auth";
 import { urls } from "@/lib/urls";
-import { LogOut } from "lucide-react";
+import { LogOut, Settings } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export function UserProfile() {
   const { user, isAuthenticated } = useAuthStore();
@@ -59,6 +60,15 @@ export function UserProfile() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link
+            to="/settings"
+            className="flex items-center w-full cursor-pointer"
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Settings</span>
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => logout()}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>

@@ -48,6 +48,11 @@ const ActionsPage = lazy(() =>
     default: module.ActionsPage,
   }))
 );
+const SettingsPage = lazy(() =>
+  import("@/pages/settings/settings-page").then((module) => ({
+    default: module.SettingsPage,
+  }))
+);
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -239,6 +244,18 @@ function AnimatedRoutes() {
             }
           />
         </Route>
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Suspense fallback={<LoadingFallback />}>
+                <PageTransition>
+                  <SettingsPage />
+                </PageTransition>
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </AnimatePresence>
   );

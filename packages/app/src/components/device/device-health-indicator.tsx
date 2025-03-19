@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useDevice } from "@/hooks/use-device";
 import { useIsSupported } from "@/hooks/use-is-supported";
+import { useApplicationSettings } from "@/hooks/use-application-settings";
 import { runAction } from "@/lib/joystick-api";
 import { useQuery } from "@tanstack/react-query";
 import { Wifi, WifiOff } from "lucide-react";
@@ -22,7 +23,7 @@ export function DeviceHealthIndicator() {
     deviceId ?? "",
     "reset"
   );
-
+  const { generalSettings } = useApplicationSettings();
   const { data: isConnected, isLoading: isHealthcheckLoading } = useQuery({
     queryKey: ["healthcheck-indicator", deviceId, isHealthcheckSupported],
     queryFn: async () => {
@@ -31,11 +32,12 @@ export function DeviceHealthIndicator() {
         deviceId: deviceId!,
         action: "healthcheck",
         params: {},
+        timeout: generalSettings.healthcheckTimeout * 1000,
       });
       return data === "true";
     },
     enabled: !!deviceId && isHealthcheckSupported,
-    refetchInterval: 15000,
+    refetchInterval: generalSettings.healthCheckInterval * 1000 || 5000,
   });
 
   if (!deviceId || isSupportedLoading || !isHealthcheckSupported) {
