@@ -89,7 +89,7 @@ app.post(
 
       const command = Object.entries({ ...body, ...defaultParamters }).reduce(
         (acc, [key, value]) => {
-          if (acc.includes(`$${key}`)) {
+          if (typeof value === "string" && acc.includes(`$${key}`)) {
             return acc.replace(`$${key}`, value);
           }
           return acc;
@@ -190,6 +190,26 @@ app.post(
 
 app.get("/api/cpsi", async () => {
   return generateRandomCPSIResult();
+});
+
+// Battery status endpoint that returns random battery data
+app.get("/api/battery", async () => {
+  // Generate random battery values within realistic ranges
+  const voltage = 3200 + Math.random() * 1300; // Between 3200mV and 4500mV
+  const current = 50 + Math.random() * 450; // Between 50mA and 500mA
+  const consumption = Math.random() * 1400; // Between 0 and 1400mAh
+  // Calculate power in milliwatts (voltage in V * current in mA = power in mW)
+  const power = (voltage * current).toFixed(2);
+
+  return {
+    success: true,
+    data: {
+      voltage: parseFloat(voltage.toFixed(2)),
+      current: parseFloat(current.toFixed(2)),
+      power: parseFloat((voltage * current).toFixed(2)),
+      consumption: parseFloat(consumption.toFixed(2)),
+    },
+  };
 });
 
 // Standard health check endpoint

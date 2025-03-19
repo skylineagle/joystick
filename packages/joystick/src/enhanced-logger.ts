@@ -7,8 +7,8 @@ import type {
 } from "@/types/db.types";
 import pino from "pino";
 import { Elysia } from "elysia";
-import { dirname } from "path";
-import { mkdirSync, appendFileSync } from "fs";
+import { dirname, join } from "path";
+import { mkdirSync, writeFileSync } from "fs";
 import { logger } from "@/logger";
 
 // Base console logger using Pino
@@ -23,8 +23,8 @@ const pinoLogger = pino({
   },
 });
 
-// Check if file logging is enabled
-const FILE_LOG_PATH = Bun.env.MONITOR_LOG;
+// Check if file logging is enabled with directory path
+const LOG_DIR_PATH = Bun.env.MONITOR_LOG;
 
 // Check if expanded logging is enabled (defaults to true)
 const EXPANDED_LOGGING = Bun.env.EXPANDED_LOGGING !== "false";
@@ -33,17 +33,16 @@ const EXPANDED_LOGGING = Bun.env.EXPANDED_LOGGING !== "false";
 const PERF_THRESHOLD_MS = parseInt(Bun.env.LOG_PERF_THRESHOLD || "100", 10);
 
 // Ensure the log directory exists if file logging is enabled
-if (FILE_LOG_PATH) {
-  const dir = dirname(FILE_LOG_PATH);
+if (LOG_DIR_PATH) {
   try {
-    const dirFile = Bun.file(dir);
+    const dirFile = Bun.file(LOG_DIR_PATH);
     const exists = await dirFile.exists();
     if (!exists) {
       // Use Node.js fs for directory creation as Bun doesn't have mkdir
-      mkdirSync(dir, { recursive: true });
+      mkdirSync(LOG_DIR_PATH, { recursive: true });
     }
   } catch (error) {
-    console.error(`Failed to create log directory: ${dir}`, error);
+    console.error(`Failed to create log directory: ${LOG_DIR_PATH}`, error);
   }
 }
 
@@ -202,19 +201,21 @@ class EnhancedLogger {
   }
 
   private async writeToFile(logEntry: ActionLogEntry): Promise<void> {
-    if (!FILE_LOG_PATH) return;
+    if (!LOG_DIR_PATH) return;
 
     const logStart = performance.now();
     try {
       // Create the file log entry with object format
       const fileEntry = await this.createFileLogEntry(logEntry);
 
-      // Format as single-line JSON with timestamp prefix
-      const logLine = JSON.stringify(fileEntry) + "\n";
+      const filename = `action_log_${Date.now()}.json`;
+      const filePath = join(LOG_DIR_PATH, filename);
 
-      // Use Node.js fs for efficient append operations
-      // This is more efficient for large files than reading the entire file content first
-      appendFileSync(FILE_LOG_PATH, logLine);
+      // Format as JSON
+      const logContent = JSON.stringify(fileEntry, null, 2);
+
+      // Write to a new file
+      writeFileSync(filePath, logContent);
 
       // Check performance
       const duration = performance.now() - logStart;
@@ -227,7 +228,7 @@ class EnhancedLogger {
     } catch (error) {
       this.error(
         { error: String(error) },
-        `Failed to write log to file: ${FILE_LOG_PATH}`
+        `Failed to write log to file in directory: ${LOG_DIR_PATH}`
       );
     }
   }
@@ -388,7 +389,7 @@ class EnhancedLogger {
     result?: Record<string, unknown>;
     success?: boolean;
   }): Promise<void> {
-    if (!FILE_LOG_PATH) return;
+    if (!LOG_DIR_PATH) return;
 
     const logEntry: ActionLogEntry = {
       timestamp: new Date().toISOString(),
@@ -421,7 +422,7 @@ class EnhancedLogger {
     } catch (error) {
       this.error(
         { error: String(error) },
-        `Failed to write log to file: ${FILE_LOG_PATH}`
+        `Failed to write log to file in directory: ${LOG_DIR_PATH}`
       );
     }
   }
