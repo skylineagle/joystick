@@ -18,7 +18,6 @@ export const Roi = ({ children }: RoiProps) => {
       lockPan
     >
       <RoiList
-        allowRotate
         getOverlayOpacity={() => 0.8}
         getStyle={(roi) => ({
           resizeHandlerColor:

@@ -29,7 +29,7 @@ export function RoiModeControl() {
   const rois = useCommittedRois();
   const [editingRegionId, setEditingRegionId] = useState<string | null>(null);
   const [regionNames, setRegionNames] = useState<RegionName[]>([]);
-  const selectedButtonRef = useRef<HTMLButtonElement>(null);
+  const selectedButtonRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { isMobileLandscape } = useMobileLandscape();
 
@@ -164,7 +164,7 @@ export function RoiModeControl() {
                 const isEditing = editingRegionId === roi.id;
 
                 return (
-                  <button
+                  <div
                     key={roi.id}
                     ref={roi.id === selectedRoi ? selectedButtonRef : undefined}
                     onClick={() => handleRegionClick(roi.id)}
@@ -193,7 +193,37 @@ export function RoiModeControl() {
                         onClick={(e) => e.stopPropagation()}
                       />
                     ) : (
-                      regionName
+                      <div className="flex flex-col">
+                        <span>{regionName}</span>
+                        {roi.id === selectedRoi && (
+                          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] mt-0.5 font-mono">
+                            <div className="flex items-center">
+                              <span className="w-3 text-muted-foreground">
+                                X:
+                              </span>
+                              {roi.x}
+                            </div>
+                            <div className="flex items-center">
+                              <span className="w-3 text-muted-foreground">
+                                W:
+                              </span>
+                              {roi.width}
+                            </div>
+                            <div className="flex items-center">
+                              <span className="w-3 text-muted-foreground">
+                                Y:
+                              </span>
+                              {roi.y}
+                            </div>
+                            <div className="flex items-center">
+                              <span className="w-3 text-muted-foreground">
+                                H:
+                              </span>
+                              {roi.height}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     )}
                     {roi.id === selectedRoi &&
                       roiMode === "edit" &&
@@ -205,7 +235,7 @@ export function RoiModeControl() {
                           <X className="h-3 w-3 sm:h-4 sm:w-4" />
                         </button>
                       )}
-                  </button>
+                  </div>
                 );
               })}
             </div>
