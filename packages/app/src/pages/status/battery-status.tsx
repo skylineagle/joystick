@@ -36,11 +36,11 @@ export function BatteryStatus({ deviceId }: BatteryStatusProps) {
         params: {},
       });
       try {
-        const parsedResult = batteryDataSchema.parse(result);
+        const parsedResult = batteryDataSchema.parse(
+          JSON.parse(result ?? "{}")
+        );
         return parsedResult as BatteryData;
       } catch (error) {
-        console.error(error);
-
         if (error instanceof z.ZodError) {
           throw new Error("Invalid battery data format received from device");
         }
