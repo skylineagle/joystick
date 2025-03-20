@@ -3,7 +3,7 @@ import { pb } from "@/pocketbase";
 import { type ActionsResponse, RunTargetOptions } from "@/types/db.types";
 import type { DeviceResponse, RunResponse } from "@/types/types";
 import cors from "@elysiajs/cors";
-import { $, ShellError } from "bun";
+import { $ } from "bun";
 import { Elysia, t } from "elysia";
 import { validate } from "jsonschema";
 import { enhancedLogger, setupLoggingMiddleware } from "./enhanced-logger";
@@ -208,6 +208,29 @@ app.get("/api/battery", async () => {
       current: parseFloat(current.toFixed(2)),
       power: parseFloat((voltage * current).toFixed(2)),
       consumption: parseFloat(consumption.toFixed(2)),
+    },
+  };
+});
+
+app.get("/api/imu", async () => {
+  // Generate more realistic IMU data that simulates gentle movement
+  // Values typically range from -2 to 2 for accelerometer data
+  const now = Date.now();
+
+  // Create smooth sinusoidal motion with different frequencies
+  const x = Math.sin(now / 2000) * 0.8; // Slower x-axis movement
+  const y = Math.sin(now / 1500) * 0.6; // Medium y-axis movement
+  const z = Math.sin(now / 1000) * 0.4 + 1; // Faster z-axis movement with offset (gravity)
+
+  // Add some small random noise to make it more realistic
+  const noise = 0.05;
+
+  return {
+    success: true,
+    data: {
+      x: parseFloat((x + (Math.random() * noise * 2 - noise)).toFixed(3)),
+      y: parseFloat((y + (Math.random() * noise * 2 - noise)).toFixed(3)),
+      z: parseFloat((z + (Math.random() * noise * 2 - noise)).toFixed(3)),
     },
   };
 });
