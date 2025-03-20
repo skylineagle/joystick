@@ -9,12 +9,9 @@ import { z } from "zod";
 const BoxScene = lazy(() => import("@/components/3d/box-scene"));
 
 const imuSchema = z.object({
-  success: z.boolean(),
-  data: z.object({
-    x: z.number(),
-    y: z.number(),
-    z: z.number(),
-  }),
+  x: z.number(),
+  y: z.number(),
+  z: z.number(),
 });
 
 // Custom hook to fetch IMU data using React Query
@@ -34,11 +31,8 @@ const useGetIMUData = (deviceId: string) => {
       // Validate against schema
       try {
         const validatedData = imuSchema.parse(parsedResponse);
-        if (!validatedData.success) {
-          throw new Error("IMU data validation failed");
-        }
 
-        return validatedData.data;
+        return validatedData;
       } catch (error) {
         throw new Error(
           `Failed to fetch IMU data: ${

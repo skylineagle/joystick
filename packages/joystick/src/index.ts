@@ -202,13 +202,10 @@ app.get("/api/battery", async () => {
   const power = (voltage * current).toFixed(2);
 
   return {
-    success: true,
-    data: {
-      voltage: parseFloat(voltage.toFixed(2)),
-      current: parseFloat(current.toFixed(2)),
-      power: parseFloat((voltage * current).toFixed(2)),
-      consumption: parseFloat(consumption.toFixed(2)),
-    },
+    voltage: parseFloat(voltage.toFixed(2)),
+    current: parseFloat(current.toFixed(2)),
+    power: parseFloat((voltage * current).toFixed(2)),
+    consumption: parseFloat(consumption.toFixed(2)),
   };
 });
 
@@ -226,12 +223,9 @@ app.get("/api/imu", async () => {
   const noise = 0.05;
 
   return {
-    success: true,
-    data: {
-      x: parseFloat((x + (Math.random() * noise * 2 - noise)).toFixed(3)),
-      y: parseFloat((y + (Math.random() * noise * 2 - noise)).toFixed(3)),
-      z: parseFloat((z + (Math.random() * noise * 2 - noise)).toFixed(3)),
-    },
+    x: parseFloat((x + (Math.random() * noise * 2 - noise)).toFixed(3)),
+    y: parseFloat((y + (Math.random() * noise * 2 - noise)).toFixed(3)),
+    z: parseFloat((z + (Math.random() * noise * 2 - noise)).toFixed(3)),
   };
 });
 

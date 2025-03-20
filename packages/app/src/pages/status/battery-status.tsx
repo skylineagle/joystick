@@ -36,9 +36,7 @@ export function BatteryStatus({ deviceId }: BatteryStatusProps) {
         params: {},
       });
       try {
-        const parsedResult = batteryDataSchema.parse(
-          JSON.parse(result ?? "")?.data
-        );
+        const parsedResult = batteryDataSchema.parse(result);
         return parsedResult as BatteryData;
       } catch (error) {
         console.error(error);
