@@ -97,7 +97,7 @@ export type ActionLogsRecord<Tparameters = unknown, Tresult = unknown> = {
 	action?: RecordIdString
 	created?: IsoDateString
 	device?: RecordIdString
-	execution_time?: IsoDateString
+	execution_time?: number
 	id: string
 	ip_address?: string
 	parameters?: null | Tparameters
@@ -123,6 +123,7 @@ export type DevicesRecord<Tautomation = unknown, Tconfiguration = unknown, Tinfo
 	allow?: RecordIdString[]
 	auto?: boolean
 	automation?: null | Tautomation
+	client?: string
 	configuration?: null | Tconfiguration
 	created?: IsoDateString
 	description?: HTMLString

@@ -93,14 +93,15 @@ export type SuperusersRecord = {
 	verified?: boolean
 }
 
-export type ActionLogsRecord<Tparameters = unknown> = {
+export type ActionLogsRecord<Tparameters = unknown, Tresult = unknown> = {
 	action?: RecordIdString
 	created?: IsoDateString
 	device?: RecordIdString
-	execution_time?: IsoDateString
+	execution_time?: number
 	id: string
 	ip_address?: string
 	parameters?: null | Tparameters
+	result?: null | Tresult
 	updated?: IsoDateString
 	user?: RecordIdString
 	user_agent?: string
@@ -122,6 +123,7 @@ export type DevicesRecord<Tautomation = unknown, Tconfiguration = unknown, Tinfo
 	allow?: RecordIdString[]
 	auto?: boolean
 	automation?: null | Tautomation
+	client?: string
 	configuration?: null | Tconfiguration
 	created?: IsoDateString
 	description?: HTMLString
@@ -139,12 +141,14 @@ export enum ModelsStreamOptions {
 	"mediamtx" = "mediamtx",
 	"ws" = "ws",
 }
-export type ModelsRecord<Tparams = unknown> = {
+export type ModelsRecord<Tmode_configs = unknown, Tparams = unknown, Tstream_quality = unknown> = {
 	created?: IsoDateString
 	id: string
+	mode_configs?: null | Tmode_configs
 	name: string
 	params: null | Tparams
 	stream?: ModelsStreamOptions
+	stream_quality?: null | Tstream_quality
 	updated?: IsoDateString
 }
 
@@ -207,10 +211,10 @@ export type ExternalauthsResponse<Texpand = unknown> = Required<ExternalauthsRec
 export type MfasResponse<Texpand = unknown> = Required<MfasRecord> & BaseSystemFields<Texpand>
 export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemFields<Texpand>
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
-export type ActionLogsResponse<Tparameters = unknown, Texpand = unknown> = Required<ActionLogsRecord<Tparameters>> & BaseSystemFields<Texpand>
+export type ActionLogsResponse<Tparameters = unknown, Tresult = unknown, Texpand = unknown> = Required<ActionLogsRecord<Tparameters, Tresult>> & BaseSystemFields<Texpand>
 export type ActionsResponse<Texpand = unknown> = Required<ActionsRecord> & BaseSystemFields<Texpand>
 export type DevicesResponse<Tautomation = unknown, Tconfiguration = unknown, Tinformation = unknown, Texpand = unknown> = Required<DevicesRecord<Tautomation, Tconfiguration, Tinformation>> & BaseSystemFields<Texpand>
-export type ModelsResponse<Tparams = unknown, Texpand = unknown> = Required<ModelsRecord<Tparams>> & BaseSystemFields<Texpand>
+export type ModelsResponse<Tmode_configs = unknown, Tparams = unknown, Tstream_quality = unknown, Texpand = unknown> = Required<ModelsRecord<Tmode_configs, Tparams, Tstream_quality>> & BaseSystemFields<Texpand>
 export type PermissionsResponse<Texpand = unknown> = Required<PermissionsRecord> & BaseSystemFields<Texpand>
 export type RulesResponse<Texpand = unknown> = Required<RulesRecord> & BaseSystemFields<Texpand>
 export type RunResponse<Tparameters = unknown, Texpand = unknown> = Required<RunRecord<Tparameters>> & BaseSystemFields<Texpand>

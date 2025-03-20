@@ -1,6 +1,7 @@
 import { ConfigurationEditor } from "@/components/configuration/configuration-editor";
 import { AutomateToggle } from "@/components/device/automate-toggle";
 import { AutomationIndicator } from "@/components/device/automation-indicator";
+import { ClientFileDownload } from "@/components/device/client-file-download";
 import { DeleteDevice } from "@/components/device/delete-device";
 import { DeviceName } from "@/components/device/device-name";
 import { ModeSelector } from "@/components/device/mode-selector";
@@ -25,6 +26,7 @@ export const DeviceRow = memo(
     const isAllowedToControlDevice = useIsPermitted("control-device");
     const isAllowedToDeleteDevice = useIsPermitted("delete-device");
     const isAllowedToEditDevice = useIsPermitted("edit-device");
+    const isAllowedToDownloadClientFile = useIsPermitted("download-client");
 
     if (!device) return null;
 
@@ -77,6 +79,9 @@ export const DeviceRow = memo(
                   <Joystick className="h-4 w-4" />
                 </Button>
               </Link>
+            )}
+            {isAllowedToDownloadClientFile && (
+              <ClientFileDownload device={device} />
             )}
             {isAllowedToDeleteDevice && <DeleteDevice deviceId={device.id} />}
           </div>
