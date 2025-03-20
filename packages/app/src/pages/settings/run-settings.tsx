@@ -471,7 +471,7 @@ export function RunSettings() {
         </Dialog>
       </div>
 
-      <Card className="shadow-sm">
+      <Card className="shadow-2xl rounded-md">
         <CardContent className="p-0">
           <div className="rounded-md overflow-hidden">
             <div className="relative">

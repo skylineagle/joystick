@@ -25,7 +25,7 @@ import { DeviceResponse } from "@/types/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Search, Users } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/utils/toast";
 
 export function DeviceSettings() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -72,12 +72,16 @@ export function DeviceSettings() {
       return await pb.collection("devices").update(id, { hide });
     },
     onSuccess: () => {
-      toast.success("Device visibility updated");
+      toast.success({
+        message: "Device visibility updated",
+      });
       queryClient.invalidateQueries({ queryKey: ["devices"] });
     },
     onError: (error) => {
       console.error("Error updating device visibility:", error);
-      toast.error("Failed to update device visibility");
+      toast.error({
+        message: "Failed to update device visibility",
+      });
     },
   });
 
@@ -87,13 +91,17 @@ export function DeviceSettings() {
       return await pb.collection("devices").update(id, { allow });
     },
     onSuccess: () => {
-      toast.success("Device permissions updated");
+      toast.success({
+        message: "Device permissions updated",
+      });
       queryClient.invalidateQueries({ queryKey: ["devices"] });
       setIsPermissionsDialogOpen(false);
     },
     onError: (error) => {
       console.error("Error updating device permissions:", error);
-      toast.error("Failed to update device permissions");
+      toast.error({
+        message: "Failed to update device permissions",
+      });
     },
   });
 

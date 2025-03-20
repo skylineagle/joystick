@@ -19,7 +19,7 @@ export const LiveIndicator: React.FC<LiveIndicatorProps> = ({
   size = "medium",
   status,
 }) => {
-  const { theme } = useTheme();
+  const { getActualColorMode } = useTheme();
   return (
     <Badge
       variant="default"
@@ -38,7 +38,9 @@ export const LiveIndicator: React.FC<LiveIndicatorProps> = ({
               <div
                 className={cn(
                   `absolute inset-0 rounded-full animate-ping`,
-                  theme === "light" ? "bg-current" : "bg-slate-800",
+                  getActualColorMode() === "dark"
+                    ? "bg-current"
+                    : "bg-slate-800",
                   i === 0 && "animation-delay-0",
                   i === 1 && "animation-delay-300",
                   i === 2 && "animation-delay-600"
@@ -50,7 +52,9 @@ export const LiveIndicator: React.FC<LiveIndicatorProps> = ({
               <div
                 className={cn(
                   `relative ${sizeClasses[size]} rounded-full`,
-                  theme === "light" ? "bg-current" : "bg-slate-800"
+                  getActualColorMode() === "dark"
+                    ? "bg-current"
+                    : "bg-slate-800"
                 )}
               ></div>
             </div>
@@ -60,13 +64,13 @@ export const LiveIndicator: React.FC<LiveIndicatorProps> = ({
             <div
               className={cn(
                 `absolute inset-0 bg-current rounded-full animate-ping`,
-                theme === "light" ? "bg-current" : "bg-slate-800"
+                getActualColorMode() === "dark" ? "bg-current" : "bg-slate-800"
               )}
             ></div>
             <div
               className={cn(
                 `relative ${sizeClasses[size]} rounded-full`,
-                theme === "light" ? "bg-current" : "bg-slate-800"
+                getActualColorMode() === "dark" ? "bg-current" : "bg-slate-800"
               )}
             ></div>
           </div>
@@ -76,7 +80,7 @@ export const LiveIndicator: React.FC<LiveIndicatorProps> = ({
       <Label
         className={cn(
           "text-sm",
-          theme === "light" ? "text-current" : "text-slate-800"
+          getActualColorMode() === "dark" ? "text-current" : "text-slate-800"
         )}
       >
         {status === "on" ? "Live" : "Waiting"}

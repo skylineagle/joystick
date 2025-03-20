@@ -5,7 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { useApplicationSettings } from "@/hooks/use-application-settings";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/utils/toast";
 
 export function GeneralSettings() {
   const { generalSettings, setGeneralSettings } = useApplicationSettings();
@@ -22,10 +22,14 @@ export function GeneralSettings() {
       setIsSaving(true);
       // Save settings happens automatically with useLocalStorage
       // We just need to show a success message
-      toast.success("Settings saved successfully");
+      toast.success({
+        message: "Settings saved successfully",
+      });
     } catch (error) {
       console.error("Error saving settings:", error);
-      toast.error("Failed to save settings");
+      toast.error({
+        message: "Failed to save settings",
+      });
     } finally {
       setIsSaving(false);
     }

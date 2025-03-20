@@ -45,7 +45,7 @@ export interface ConfigurationEditorProps {
 
 export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
   const queryClient = useQueryClient();
-  const { theme } = useTheme();
+  const { getActualColorMode } = useTheme();
   const isAllowedToEditConfig = useIsPermitted("edit-configuration");
   const { action, isLoading: isActionLoading } = useAction(
     device.id,
@@ -226,7 +226,7 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
           <TabsContent value="config" className="py-4">
             <Editor
               height="400px"
-              theme={theme === "dark" ? "vs-dark" : "light"}
+              theme={getActualColorMode() === "dark" ? "vs-dark" : "light"}
               defaultLanguage="json"
               value={editingConfig?.config ?? ""}
               onChange={(value) =>

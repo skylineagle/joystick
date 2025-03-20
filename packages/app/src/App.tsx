@@ -266,7 +266,11 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <NuqsAdapter>
-          <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+          <ThemeProvider
+            defaultColorMode="dark"
+            defaultDesignTheme="default"
+            storageKeyPrefix="vite-ui-theme"
+          >
             <BrowserRouter>
               <AnimatedRoutes />
             </BrowserRouter>

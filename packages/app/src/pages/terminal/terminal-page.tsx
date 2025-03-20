@@ -51,7 +51,7 @@ const matrixChars =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%\"'#&_(),.;:?!\\|{}<>[]^~";
 
 export function TerminalPage() {
-  const { theme } = useTheme();
+  const { getActualColorMode } = useTheme();
   const terminalRef = useRef<HTMLDivElement>(null);
   const { device: deviceId } = useParams();
   const { data: selectedDevice, isLoading: isDeviceLoading } = useDevice(
@@ -102,7 +102,8 @@ export function TerminalPage() {
 
     const terminal = new Terminal({
       cursorBlink: true,
-      theme: theme === "dark" ? customDarkTheme : customLightTheme,
+      theme:
+        getActualColorMode() === "dark" ? customDarkTheme : customLightTheme,
       fontFamily: "JetBrains Mono, monospace",
       fontSize: 14,
       lineHeight: 1.2,
@@ -698,10 +699,10 @@ export function TerminalPage() {
       }
     };
   }, [
+    getActualColorMode,
     isEasterEggsPermitted,
     selectedDevice?.configuration,
     selectedDevice?.id,
-    theme,
   ]);
 
   // Function to handle refresh button click
@@ -766,7 +767,6 @@ export function TerminalPage() {
     isEasterEggsPermitted,
     selectedDevice?.configuration,
     selectedDevice?.id,
-    theme,
     initializeTerminal,
   ]);
 

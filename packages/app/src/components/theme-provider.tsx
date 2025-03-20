@@ -1,59 +1,100 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "dark" | "light" | "system";
+type ColorMode = "dark" | "light" | "system";
+type DesignTheme = "default" | "purple" | "blue" | "green";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
-  defaultTheme?: Theme;
-  storageKey?: string;
+  defaultColorMode?: ColorMode;
+  defaultDesignTheme?: DesignTheme;
+  storageKeyPrefix?: string;
 };
 
 type ThemeProviderState = {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
+  colorMode: ColorMode;
+  designTheme: DesignTheme;
+  setColorMode: (colorMode: ColorMode) => void;
+  setDesignTheme: (designTheme: DesignTheme) => void;
+  getActualColorMode: () => "dark" | "light";
 };
 
 const initialState: ThemeProviderState = {
-  theme: "system",
-  setTheme: () => null,
+  colorMode: "system",
+  designTheme: "default",
+  setColorMode: () => null,
+  setDesignTheme: () => null,
+  getActualColorMode: () => "light",
 };
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
-  defaultTheme = "system",
-  storageKey = "vite-ui-theme",
+  defaultColorMode = "system",
+  defaultDesignTheme = "default",
+  storageKeyPrefix = "vite-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+  const [colorMode, setColorMode] = useState<ColorMode>(
+    () =>
+      (localStorage.getItem(`${storageKeyPrefix}-mode`) as ColorMode) ||
+      defaultColorMode
   );
+
+  const [designTheme, setDesignTheme] = useState<DesignTheme>(
+    () =>
+      (localStorage.getItem(`${storageKeyPrefix}-design`) as DesignTheme) ||
+      defaultDesignTheme
+  );
+
+  const getActualColorMode = (): "dark" | "light" => {
+    if (colorMode === "system") {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    }
+    return colorMode;
+  };
 
   useEffect(() => {
     const root = window.document.documentElement;
 
+    // Handle color mode
     root.classList.remove("light", "dark");
 
-    if (theme === "system") {
+    if (colorMode === "system") {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
         .matches
         ? "dark"
         : "light";
 
       root.classList.add(systemTheme);
-      return;
+    } else {
+      root.classList.add(colorMode);
     }
 
-    root.classList.add(theme);
-  }, [theme]);
+    // Handle design theme
+    root.classList.remove(
+      "default-theme",
+      "purple-theme",
+      "blue-theme",
+      "green-theme"
+    );
+    root.classList.add(`${designTheme}-theme`);
+  }, [colorMode, designTheme]);
 
   const value = {
-    theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
+    colorMode,
+    designTheme,
+    setColorMode: (mode: ColorMode) => {
+      localStorage.setItem(`${storageKeyPrefix}-mode`, mode);
+      setColorMode(mode);
     },
+    setDesignTheme: (theme: DesignTheme) => {
+      localStorage.setItem(`${storageKeyPrefix}-design`, theme);
+      setDesignTheme(theme);
+    },
+    getActualColorMode,
   };
 
   return (

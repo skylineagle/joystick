@@ -1,25 +1,22 @@
 import { AnimatedThemeToggle } from "@/components/ui/animated-theme-toggle";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuthStore } from "@/lib/auth";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DeviceSettings } from "./device-settings";
-import { GeneralSettings } from "./general-settings";
 import { PermissionsSettings } from "./permissions-settings";
 import { RunSettings } from "./run-settings";
+import { useAuthStore } from "@/lib/auth";
+import { UserProfile } from "@/components/user-profile";
 
 export function SettingsPage() {
   const { user } = useAuthStore();
   const isAdmin = user?.email.startsWith("admin");
+
+  if (!isAdmin) {
+    return <div>You are not authorized to access this page</div>;
+  }
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -40,53 +37,30 @@ export function SettingsPage() {
             </Link>
           </Button>
           <AnimatedThemeToggle />
+          <UserProfile />
         </div>
       </div>
 
       <Separator className="my-6" />
 
-      <Tabs defaultValue="general" className="w-full">
+      <Tabs defaultValue="permissions" className="w-full">
         <TabsList className="mb-4">
-          <TabsTrigger value="general">General</TabsTrigger>
-          {isAdmin && (
-            <>
-              <TabsTrigger value="permissions">Permissions</TabsTrigger>
-              <TabsTrigger value="run">Run Configuration</TabsTrigger>
-              <TabsTrigger value="devices">Device Management</TabsTrigger>
-            </>
-          )}
+          <TabsTrigger value="permissions">Permissions</TabsTrigger>
+          <TabsTrigger value="run">Run Configuration</TabsTrigger>
+          <TabsTrigger value="devices">Device Management</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="general">
-          <Card>
-            <CardHeader>
-              <CardTitle>General Settings</CardTitle>
-              <CardDescription>
-                Configure general application settings like health check
-                intervals and timeouts
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <GeneralSettings />
-            </CardContent>
-          </Card>
+        <TabsContent value="permissions">
+          <PermissionsSettings />
         </TabsContent>
 
-        {isAdmin && (
-          <>
-            <TabsContent value="permissions">
-              <PermissionsSettings />
-            </TabsContent>
+        <TabsContent value="run">
+          <RunSettings />
+        </TabsContent>
 
-            <TabsContent value="run">
-              <RunSettings />
-            </TabsContent>
-
-            <TabsContent value="devices">
-              <DeviceSettings />
-            </TabsContent>
-          </>
-        )}
+        <TabsContent value="devices">
+          <DeviceSettings />
+        </TabsContent>
       </Tabs>
     </div>
   );

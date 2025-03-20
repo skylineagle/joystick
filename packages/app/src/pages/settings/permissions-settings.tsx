@@ -31,7 +31,7 @@ import { PermissionsResponse, UsersResponse } from "@/types/db.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
+import { toast } from "@/utils/toast";
 
 export function PermissionsSettings() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -73,7 +73,9 @@ export function PermissionsSettings() {
       return await pb.collection("permissions").create(data);
     },
     onSuccess: () => {
-      toast.success("Permission created successfully");
+      toast.success({
+        message: "Permission created successfully",
+      });
       queryClient.invalidateQueries({ queryKey: ["permissions"] });
       setIsAddDialogOpen(false);
       setNewPermissionName("");
@@ -81,7 +83,9 @@ export function PermissionsSettings() {
     },
     onError: (error) => {
       console.error("Error creating permission:", error);
-      toast.error("Failed to create permission");
+      toast.error({
+        message: "Failed to create permission",
+      });
     },
   });
 
@@ -93,12 +97,16 @@ export function PermissionsSettings() {
         .update(data.id, { users: data.users });
     },
     onSuccess: () => {
-      toast.success("Permission updated successfully");
+      toast.success({
+        message: "Permission updated successfully",
+      });
       queryClient.invalidateQueries({ queryKey: ["permissions"] });
     },
     onError: (error) => {
       console.error("Error updating permission:", error);
-      toast.error("Failed to update permission");
+      toast.error({
+        message: "Failed to update permission",
+      });
     },
   });
 
@@ -108,18 +116,24 @@ export function PermissionsSettings() {
       return await pb.collection("permissions").delete(id);
     },
     onSuccess: () => {
-      toast.success("Permission deleted successfully");
+      toast.success({
+        message: "Permission deleted successfully",
+      });
       queryClient.invalidateQueries({ queryKey: ["permissions"] });
     },
     onError: (error) => {
       console.error("Error deleting permission:", error);
-      toast.error("Failed to delete permission");
+      toast.error({
+        message: "Failed to delete permission",
+      });
     },
   });
 
   const handleCreatePermission = () => {
     if (!newPermissionName.trim()) {
-      toast.error("Permission name is required");
+      toast.error({
+        message: "Permission name is required",
+      });
       return;
     }
 

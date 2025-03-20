@@ -32,12 +32,12 @@ interface IconProps {
 }
 
 export function Icon({ icon, style }: IconProps) {
-  const { theme } = useTheme();
+  const { getActualColorMode } = useTheme();
   const ref = useRef<LottieRefCurrentProps>(null);
 
   return (
     <Lottie
-      animationData={icons[icon][(theme as "dark" | "light") ?? "dark"]}
+      animationData={icons[icon][getActualColorMode()]}
       style={style}
       lottieRef={ref}
       autoplay={false}

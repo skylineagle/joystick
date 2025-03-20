@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 export function AnimatedThemeToggle() {
   const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
+  const { setColorMode, getActualColorMode } = useTheme();
 
   useEffect(() => {
     setMounted(true);
@@ -15,17 +15,28 @@ export function AnimatedThemeToggle() {
     return null;
   }
 
+  const toggleColorMode = () => {
+    const actualMode = getActualColorMode();
+    if (actualMode === "dark") {
+      setColorMode("light");
+    } else {
+      setColorMode("dark");
+    }
+  };
+
   return (
     <motion.button
       className="relative inline-flex h-8 w-16 items-center rounded-full bg-muted p-1 shadow-inner dark:bg-muted"
-      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-      aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+      onClick={toggleColorMode}
+      aria-label={`Switch to ${
+        getActualColorMode() === "light" ? "dark" : "light"
+      } mode`}
       whileTap={{ scale: 0.95 }}
     >
       <motion.div
         className="absolute flex h-6 w-6 items-center justify-center rounded-full bg-background shadow-sm dark:bg-background"
         animate={{
-          x: theme === "light" ? 0 : "calc(140% - 4px)",
+          x: getActualColorMode() === "light" ? 0 : "calc(140% - 4px)",
         }}
         transition={{
           type: "spring",
@@ -35,13 +46,13 @@ export function AnimatedThemeToggle() {
       >
         <motion.div
           animate={{
-            rotate: theme === "light" ? 180 : 0,
+            rotate: getActualColorMode() === "light" ? 180 : 0,
             scale: 1,
           }}
           initial={{ scale: 0.5 }}
           transition={{ duration: 0.2 }}
         >
-          {theme === "light" ? (
+          {getActualColorMode() === "light" ? (
             <Sun className="h-4 w-4 text-[hsl(var(--chart-4))]" />
           ) : (
             <Moon className="h-4 w-4 text-[hsl(var(--chart-1))]" />
@@ -49,7 +60,7 @@ export function AnimatedThemeToggle() {
         </motion.div>
       </motion.div>
       <span className="sr-only">
-        {theme === "light" ? "Light mode" : "Dark mode"}
+        {getActualColorMode() === "light" ? "Light mode" : "Dark mode"}
       </span>
     </motion.button>
   );
