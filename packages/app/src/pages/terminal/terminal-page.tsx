@@ -6,8 +6,8 @@ import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 import { toast } from "@/utils/toast";
-import { X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { RefreshCw, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
@@ -68,18 +68,37 @@ export function TerminalPage() {
   const snakeGameIntervalRef = useRef<number | null>(null);
   const [isTerminalLoading, setIsTerminalLoading] = useState(true);
   const isMountedRef = useRef(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
+  // Function to initialize the terminal and connection
+  const initializeTerminal = useCallback(() => {
     if (!terminalRef.current || !selectedDevice?.configuration) {
       return;
     }
+
+    // Clean up existing terminal and connection
+    if (wsRef.current) {
+      wsRef.current.onopen = null;
+      wsRef.current.onmessage = null;
+      wsRef.current.onerror = null;
+      wsRef.current.onclose = null;
+
+      if (
+        wsRef.current.readyState === WebSocket.OPEN ||
+        wsRef.current.readyState === WebSocket.CONNECTING
+      ) {
+        wsRef.current.close();
+      }
+      wsRef.current = null;
+    }
+
+    if (terminalInstance.current) {
+      terminalInstance.current.dispose();
+      terminalInstance.current = null;
+    }
+
+    setIsTerminalLoading(true);
+    setIsRefreshing(false);
 
     const terminal = new Terminal({
       cursorBlink: true,
@@ -131,7 +150,7 @@ export function TerminalPage() {
     ws.onclose = () => {
       if (!isMountedRef.current) return;
       terminal.write(
-        "\r\n\x1b[33mConnection closed. Reconnect by refreshing the page.\x1b[0m\r\n"
+        "\r\n\x1b[33mConnection closed. Click the refresh button to reconnect.\x1b[0m\r\n"
       );
       setIsTerminalLoading(false);
     };
@@ -685,6 +704,72 @@ export function TerminalPage() {
     theme,
   ]);
 
+  // Function to handle refresh button click
+  const handleRefresh = useCallback(() => {
+    setIsRefreshing(true);
+    toast.info({ message: "Reconnecting terminal..." });
+
+    // Small delay to allow UI to update
+    setTimeout(() => {
+      initializeTerminal();
+    }, 100);
+  }, [initializeTerminal]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    initializeTerminal();
+
+    // Cleanup function
+    return () => {
+      // Clear any active intervals
+      if (matrixIntervalRef.current !== null) {
+        window.clearInterval(matrixIntervalRef.current);
+        matrixIntervalRef.current = null;
+      }
+
+      if (snakeGameIntervalRef.current !== null) {
+        window.clearInterval(snakeGameIntervalRef.current);
+        snakeGameIntervalRef.current = null;
+      }
+
+      // Close WebSocket connection
+      if (wsRef.current) {
+        // Remove event handlers to prevent memory leaks
+        wsRef.current.onopen = null;
+        wsRef.current.onmessage = null;
+        wsRef.current.onerror = null;
+        wsRef.current.onclose = null;
+
+        // Close the connection
+        if (
+          wsRef.current.readyState === WebSocket.OPEN ||
+          wsRef.current.readyState === WebSocket.CONNECTING
+        ) {
+          wsRef.current.close();
+        }
+        wsRef.current = null;
+      }
+
+      // Clean up terminal
+      if (terminalInstance.current) {
+        terminalInstance.current.dispose();
+        terminalInstance.current = null;
+      }
+    };
+  }, [
+    isEasterEggsPermitted,
+    selectedDevice?.configuration,
+    selectedDevice?.id,
+    theme,
+    initializeTerminal,
+  ]);
+
   if (!selectedDevice) return <div>Please select a device first</div>;
 
   return (
@@ -728,6 +813,20 @@ export function TerminalPage() {
         </div>
       )}
       <div className="flex-1 min-h-0 overflow-hidden relative">
+        <div className="absolute top-2 right-2 z-20">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="bg-background/80 hover:bg-background/60"
+            onClick={handleRefresh}
+            disabled={isTerminalLoading || isRefreshing}
+            title="Refresh terminal connection"
+          >
+            <RefreshCw
+              className={cn("h-4 w-4", isRefreshing && "animate-spin")}
+            />
+          </Button>
+        </div>
         {(isDeviceLoading || isTerminalLoading) && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-10">
             <div className="flex flex-col items-center gap-2">
