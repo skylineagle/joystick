@@ -1,5 +1,6 @@
 import { pb } from "@/pocketbase";
 import { ChildProcess, spawn } from "node:child_process";
+import { join } from "node:path";
 import { logger } from "./logger";
 import type { DeviceResponse } from "./types/types";
 
@@ -10,6 +11,7 @@ type WebSocketMessage = {
 };
 
 const connections = new Map<string, ChildProcess>();
+const tempKeyFiles = new Map<string, string>(); // Track temporary key files for cleanup
 
 Bun.serve({
   port: Number(Bun.env.PORT) || 4000,
@@ -75,21 +77,70 @@ Bun.serve({
             return;
           }
 
+          // Use safe destructuring with default values to avoid TypeScript errors
           const { host, user, password } = device.information;
+          const sshKey = device.information.key as string | undefined;
 
-          const sshArgs = [
-            "-o",
-            "StrictHostKeyChecking=no",
-            ...(device.expand?.device.name === Bun.env.SPECIAL_DEVICE
-              ? ["-o", "HostKeyAlgorithms=+ssh-dss"]
-              : []),
-            "-tt",
-            `${user}@${host}`,
-          ];
+          let sshProcess: ChildProcess;
 
-          const sshProcess = password
-            ? spawn("sshpass", ["-p", password, "ssh", ...sshArgs])
-            : spawn("ssh", sshArgs);
+          if (sshKey) {
+            // Use SSH key authentication
+            // Create a temporary file to store the SSH key
+            const tmpDir = Bun.env.TMPDIR || "/tmp";
+            const keyFileName = join(
+              tmpDir,
+              `ssh_key_${message.device}_${Date.now()}`
+            );
+
+            try {
+              // Write the SSH key to the temporary file with correct permissions using Bun's file utilities
+              await Bun.write(keyFileName, sshKey);
+              // Set correct permissions (Bun.write doesn't support permissions directly)
+              Bun.spawn(["chmod", "600", keyFileName]);
+
+              // Store the key file path for cleanup
+              tempKeyFiles.set(message.device, keyFileName);
+
+              const sshArgs = [
+                "-o",
+                "StrictHostKeyChecking=no",
+                "-i",
+                keyFileName,
+                ...(device.expand?.device.name === Bun.env.SPECIAL_DEVICE
+                  ? ["-o", "HostKeyAlgorithms=+ssh-dss"]
+                  : []),
+                "-tt",
+                `${user}@${host}`,
+              ];
+
+              sshProcess = spawn("ssh", sshArgs);
+
+              logger.info(`Connecting to ${host} with SSH key`);
+            } catch (error) {
+              logger.error(`Failed to write SSH key file: ${error}`);
+              ws.send(
+                `Failed to establish connection: ${(error as Error).message}`
+              );
+              return;
+            }
+          } else if (password) {
+            // Use password authentication as fallback
+            const sshArgs = [
+              "-o",
+              "StrictHostKeyChecking=no",
+              ...(device.expand?.device.name === Bun.env.SPECIAL_DEVICE
+                ? ["-o", "HostKeyAlgorithms=+ssh-dss"]
+                : []),
+              "-tt",
+              `${user}@${host}`,
+            ];
+
+            sshProcess = spawn("sshpass", ["-p", password, "ssh", ...sshArgs]);
+            logger.info(`Connecting to ${host} with password`);
+          } else {
+            ws.send("No authentication method available");
+            return;
+          }
 
           connections.set(message.device, sshProcess);
 
@@ -102,6 +153,17 @@ Bun.serve({
           });
 
           sshProcess.on("close", () => {
+            // Clean up the temporary key file if it exists
+            const keyFile = tempKeyFiles.get(message.device ?? "");
+            if (keyFile) {
+              try {
+                Bun.spawn(["rm", keyFile]);
+              } catch (error) {
+                logger.error(`Failed to remove temporary key file: ${error}`);
+              }
+              tempKeyFiles.delete(message.device ?? "");
+            }
+
             connections.delete(message.device ?? "");
             ws.send("Connection closed");
           });
@@ -130,10 +192,21 @@ Bun.serve({
       }
     },
     close() {
-      // Clean up any active connections
+      // Clean up any active connections and temporary key files
       for (const [deviceId, sshProcess] of connections.entries()) {
         sshProcess.kill();
         connections.delete(deviceId);
+
+        // Clean up any temporary key files
+        const keyFile = tempKeyFiles.get(deviceId);
+        if (keyFile) {
+          try {
+            Bun.spawn(["rm", keyFile]);
+          } catch (error) {
+            logger.error(`Failed to remove temporary key file: ${error}`);
+          }
+          tempKeyFiles.delete(deviceId);
+        }
       }
     },
   },

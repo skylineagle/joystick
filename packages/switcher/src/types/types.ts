@@ -44,6 +44,7 @@ export type DeviceConfiguration = {
 export type DeviceInformation = {
   user: string;
   password: string;
+  key: string;
   host: string;
   phone?: string;
   battery_capacity?: number;
