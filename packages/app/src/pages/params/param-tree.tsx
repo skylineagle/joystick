@@ -12,6 +12,7 @@ import { ParamNode, ParamPath, ParamValue } from "@/types/params";
 import { Check, ChevronRight, PencilLine, RotateCw } from "lucide-react";
 
 interface ParamTreeProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schema: any;
   path: ParamPath;
   expanded: Set<string>;
@@ -51,7 +52,21 @@ export function ParamTree({
       collectPaths(schema, path);
 
       // Read all child parameters
-      await Promise.all(childPaths.map(readValue));
+      await Promise.all(
+        childPaths.map((childPath) => {
+          // Get the parameter schema to determine its type
+          let paramSchema = schema;
+          for (const segment of childPath) {
+            if (
+              paramSchema.type === "object" &&
+              paramSchema.properties[segment]
+            ) {
+              paramSchema = paramSchema.properties[segment];
+            }
+          }
+          return readValue(childPath, paramSchema.type);
+        })
+      );
     }
   };
 

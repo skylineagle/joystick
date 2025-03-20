@@ -1,15 +1,18 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { DeviceValue, ParamPath } from "@/types/params";
+import { DeviceValue, ParamPath, ParamValue } from "@/types/params";
 import { readParams, writeParams } from "@/lib/joystick-api";
+import { toast } from "@/utils/toast";
+import { parseParamValue } from "@/lib/utils";
 
 interface ParamsState {
   values: Record<string, DeviceValue>;
   deviceId: string | null;
+  schema: Record<string, ParamValue>;
   setDeviceId: (deviceId: string) => void;
   setEditedValue: (path: ParamPath, value: unknown) => void;
   commitValue: (path: ParamPath) => Promise<void>;
-  readValue: (path: ParamPath) => Promise<void>;
+  readValue: (path: ParamPath, expectedType?: string) => Promise<void>;
   readAllValues: () => Promise<void>;
 }
 
@@ -103,7 +106,7 @@ export const useParamsStore = create<ParamsState>()(
       }
     },
 
-    readValue: async (path: ParamPath) => {
+    readValue: async (path: ParamPath, expectedType?: string) => {
       const pathStr = path.join(".");
       const value = get().values[pathStr];
       const deviceId = get().deviceId;
@@ -122,17 +125,29 @@ export const useParamsStore = create<ParamsState>()(
       }));
 
       try {
-        const response = await readParams({ deviceId, path });
+        const response = await readParams<string>({
+          deviceId,
+          path,
+        });
 
         if (!response.success) {
+          toast.error({ message: response.error || "Failed to read value" });
           throw new Error(response.error || "Failed to read value");
         }
+
+        if (!response.output) {
+          toast.error({ message: "Failed to read value" });
+        }
+
+        const parsedOutput = expectedType
+          ? parseParamValue(response.output!, expectedType)
+          : response.output;
 
         set((state) => ({
           values: {
             ...state.values,
             [pathStr]: {
-              current: response.data,
+              current: parsedOutput,
               pending: null,
               edited: null,
               isLoading: false,
@@ -141,11 +156,14 @@ export const useParamsStore = create<ParamsState>()(
           },
         }));
       } catch (error) {
+        toast.error({ message: "Failed to parse value" });
         set((state) => ({
           values: {
             ...state.values,
             [pathStr]: {
-              ...value,
+              current: null,
+              pending: null,
+              edited: null,
               isLoading: false,
               error:
                 error instanceof Error ? error.message : "Failed to read value",

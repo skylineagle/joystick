@@ -6,7 +6,7 @@ import { getParamPath } from "@/lib/utils";
 
 type JoystickApiResponse<T = unknown> = {
   success: boolean;
-  data?: T;
+  output?: T;
   error?: string;
 };
 
@@ -40,7 +40,7 @@ export async function writeParams({
       value,
     });
 
-    return { success: true, data };
+    return { success: true, output: data };
   } catch (error) {
     const message =
       error instanceof ApiError
@@ -56,17 +56,18 @@ export async function writeParams({
   }
 }
 
-export async function readParams({
+export async function readParams<T>({
   deviceId,
   path,
-}: ReadParamsRequest): Promise<JoystickApiResponse> {
+}: ReadParamsRequest): Promise<JoystickApiResponse<T>> {
   try {
     const url = createUrl(urls.joystick, `/api/run/${deviceId}/read`);
     const data = await joystickApi.post(url, {
       path: getParamPath(path),
     });
+    console.log(data);
 
-    return { success: true, data };
+    return data as JoystickApiResponse<T>;
   } catch (error) {
     const message =
       error instanceof ApiError

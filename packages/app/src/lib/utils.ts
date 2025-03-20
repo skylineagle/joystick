@@ -132,3 +132,21 @@ export function getParamPath(path: ParamPath) {
         .join("")}`
     : "";
 }
+
+export function parseParamValue(value: string, type: string) {
+  switch (type) {
+    case "number":
+      return parseFloat(value);
+    case "integer": {
+      const result = parseInt(value);
+      if (isNaN(result)) {
+        throw new Error("Failed to parse value");
+      }
+      return result;
+    }
+    case "boolean":
+      return value === "true";
+    default:
+      return value;
+  }
+}
