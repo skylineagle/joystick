@@ -2,7 +2,6 @@ import { AutomateToggle } from "@/components/device/automate-toggle";
 import { AutomationIndicator } from "@/components/device/automation-indicator";
 import { ModeSelector } from "@/components/device/mode-selector";
 import { StatusIndicator } from "@/components/device/status-indicator";
-import { MediaMtxMonitor } from "@/components/stream/media-mtx-monitor";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -15,18 +14,18 @@ import { useRoiMode } from "@/hooks/use-roi-mode";
 import { cn } from "@/lib/utils";
 import { BatteryStatus } from "@/pages/status/battery-status";
 import { CellularStatus } from "@/pages/status/cellular-status";
+import { GPSStatus } from "@/pages/status/gps-status";
 import { IMUStatus } from "@/pages/status/imu-status";
 import { ServicesStatus } from "@/pages/status/services-status";
 import { BitrateControll } from "@/pages/stream-view/bitrate-control";
 import { RoiModeControl } from "@/pages/stream-view/roi/roi-mode-control";
-import { DevicesStatusOptions } from "@/types/db.types";
 import { AnimatePresence, motion } from "framer-motion";
-import { Battery, Cpu, Navigation, Signal, VideoIcon } from "lucide-react";
+import { Battery, Cpu, Map, Navigation, Signal } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useParams } from "react-router-dom";
 import { z } from "zod";
 
-type TabValue = "stream" | "device" | "cell" | "battery" | "imu";
+type TabValue = "device" | "cell" | "battery" | "imu" | "gps";
 
 const MotionCard = motion(Card);
 const MotionTabsContent = motion(TabsContent);
@@ -36,7 +35,7 @@ export const Controls = () => {
   // const [activeTab, setActiveTab] = useState<TabValue>("stream");
   const [activeTab, setActiveTab] = useQueryState(
     "activeTab",
-    z.enum(["stream", "device", "cell", "battery", "imu"]).default("stream")
+    z.enum(["device", "cell", "battery", "imu", "gps"]).default("device")
   );
   const { isMobileLandscape } = useMobileLandscape();
   const { device: deviceId } = useParams<{ device: string }>();
@@ -59,9 +58,9 @@ export const Controls = () => {
     useIsSupported(deviceId!, ["get-battery"]);
   const { isSupported: isGetImuSupported, isLoading: isGetImuLoading } =
     useIsSupported(deviceId!, ["get-imu"]);
+  const { isSupported: isGetGpsSupported, isLoading: isGetGpsLoading } =
+    useIsSupported(deviceId!, ["get-gps"]);
   const { roiMode } = useRoiMode();
-
-  const isMediaMtx = device?.expand?.device.stream === "mediamtx";
 
   return (
     <MotionCard
@@ -202,27 +201,11 @@ export const Controls = () => {
             transition={{ delay: 0.7, duration: 0.3 }}
           >
             <Tabs
-              defaultValue="stream"
-              value={activeTab ?? "stream"}
+              defaultValue="device"
+              value={activeTab ?? "device"}
               onValueChange={(v) => setActiveTab(v as TabValue)}
               className="w-full"
             >
-              {/* Tab Content */}
-              {isMediaMtx && (
-                <MotionTabsContent
-                  value="stream"
-                  className="m-0 pt-2"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  {device?.configuration?.name &&
-                    device.status !== DevicesStatusOptions.off && (
-                      <MediaMtxMonitor deviceId={deviceId!} />
-                    )}
-                </MotionTabsContent>
-              )}
-
               {isGetServicesStatusSupported && !isGetServicesStatusLoading && (
                 <MotionTabsContent
                   value="device"
@@ -271,75 +254,63 @@ export const Controls = () => {
                 </MotionTabsContent>
               )}
 
+              {isGetGpsSupported && !isGetGpsLoading && (
+                <MotionTabsContent
+                  value="gps"
+                  className="m-0 pt-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <GPSStatus deviceId={deviceId!} />
+                </MotionTabsContent>
+              )}
+
               {/* Tab Triggers */}
               <TabsList
                 className={cn("mt-2 h-7 grid", {
+                  "grid-cols-5":
+                    [
+                      isGetServicesStatusSupported,
+                      isGetCpsiStatusSupported,
+                      isGetBatterySupported,
+                      isGetImuSupported,
+                      isGetGpsSupported,
+                    ].filter(Boolean).length >= 5,
                   "grid-cols-4":
                     [
-                      isMediaMtx,
                       isGetServicesStatusSupported,
                       isGetCpsiStatusSupported,
                       isGetBatterySupported,
                       isGetImuSupported,
-                    ].filter(Boolean).length >= 4,
+                      isGetGpsSupported,
+                    ].filter(Boolean).length === 4,
                   "grid-cols-3":
                     [
-                      isMediaMtx,
                       isGetServicesStatusSupported,
                       isGetCpsiStatusSupported,
                       isGetBatterySupported,
                       isGetImuSupported,
+                      isGetGpsSupported,
                     ].filter(Boolean).length === 3,
                   "grid-cols-2":
                     [
-                      isMediaMtx,
                       isGetServicesStatusSupported,
                       isGetCpsiStatusSupported,
                       isGetBatterySupported,
                       isGetImuSupported,
+                      isGetGpsSupported,
                     ].filter(Boolean).length === 2,
                   "grid-cols-1":
                     [
-                      isMediaMtx,
                       isGetServicesStatusSupported,
                       isGetCpsiStatusSupported,
                       isGetBatterySupported,
                       isGetImuSupported,
+                      isGetGpsSupported,
                     ].filter(Boolean).length === 1,
                 })}
               >
-                {isMediaMtx && (
-                  <MotionTabsTrigger
-                    value="stream"
-                    className="text-xs py-0.5 px-1"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    initial={
-                      activeTab !== "stream" ? { opacity: 0.7 } : { opacity: 1 }
-                    }
-                    animate={
-                      activeTab === "stream"
-                        ? { opacity: 1, scale: 1 }
-                        : { opacity: 0.7, scale: 1 }
-                    }
-                    transition={{ duration: 0.2 }}
-                  >
-                    <VideoIcon className="h-3 w-3 mr-1" />
-                    <AnimatePresence mode="wait">
-                      {activeTab === "stream" && (
-                        <motion.span
-                          key="stream-text"
-                          initial={{ opacity: 0, width: 0 }}
-                          animate={{ opacity: 1, width: "auto" }}
-                          exit={{ opacity: 0, width: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          Stream
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </MotionTabsTrigger>
-                )}
                 {isGetServicesStatusSupported &&
                   !isGetServicesStatusLoading && (
                     <MotionTabsTrigger
@@ -468,6 +439,38 @@ export const Controls = () => {
                           transition={{ duration: 0.2 }}
                         >
                           IMU
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </MotionTabsTrigger>
+                )}
+                {isGetGpsSupported && !isGetGpsLoading && (
+                  <MotionTabsTrigger
+                    value="gps"
+                    className="text-xs py-0.5 px-1"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    initial={
+                      activeTab !== "gps" ? { opacity: 0.7 } : { opacity: 1 }
+                    }
+                    animate={
+                      activeTab === "gps"
+                        ? { opacity: 1, scale: 1 }
+                        : { opacity: 0.7, scale: 1 }
+                    }
+                    transition={{ duration: 0.2 }}
+                  >
+                    <Map className="h-3 w-3 mr-1" />
+                    <AnimatePresence mode="wait">
+                      {activeTab === "gps" && (
+                        <motion.span
+                          key="gps-text"
+                          initial={{ opacity: 0, width: 0 }}
+                          animate={{ opacity: 1, width: "auto" }}
+                          exit={{ opacity: 0, width: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          GPS
                         </motion.span>
                       )}
                     </AnimatePresence>

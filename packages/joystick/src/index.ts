@@ -209,6 +209,28 @@ app.get("/api/battery", async () => {
   };
 });
 
+// GPS status endpoint that returns random GPS data
+app.get("/api/gps", async () => {
+  // Generate random GPS coordinates within realistic ranges
+  // Base coordinates (can be adjusted to any desired location)
+  const baseLat = 37.7749; // Example: San Francisco latitude
+  const baseLng = -122.4194; // Example: San Francisco longitude
+
+  // Add small random variations to simulate movement or GPS accuracy
+  const variation = 0.01; // Approximately 1km of variation
+  const latitude = baseLat + (Math.random() * variation * 2 - variation);
+  const longitude = baseLng + (Math.random() * variation * 2 - variation);
+
+  // Generate random altitude
+  const altitude = 10 + Math.random() * 100; // Between 10 and 110 meters
+
+  return {
+    latitude: parseFloat(latitude.toFixed(6)),
+    longitude: parseFloat(longitude.toFixed(6)),
+    altitude: parseFloat(altitude.toFixed(2)),
+  };
+});
+
 app.get("/api/imu", async () => {
   // Generate more realistic IMU data that simulates gentle movement
   // Values typically range from -2 to 2 for accelerometer data
