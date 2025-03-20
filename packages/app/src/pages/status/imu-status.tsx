@@ -6,7 +6,6 @@ import { RefreshCw } from "lucide-react";
 import { lazy, Suspense } from "react";
 import { z } from "zod";
 
-// const MangoScene = lazy(() => import("@/components/3d/mango-scene"));
 const BoxScene = lazy(() => import("@/components/3d/box-scene"));
 
 const imuSchema = z.object({
