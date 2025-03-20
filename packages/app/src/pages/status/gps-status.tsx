@@ -324,7 +324,7 @@ export const GPSStatus = ({ deviceId }: { deviceId: string }) => {
         <div className="grid gap-3 items-center">
           {/* Map Component */}
           <div className="relative h-40 w-full rounded-md overflow-hidden border">
-            <Map height="100%" initialZoom={15} />
+            <Map height="100%" initialZoom={12} />
             <div className="absolute top-2 right-2 z-[1000] transform-gpu">
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
@@ -344,7 +344,7 @@ export const GPSStatus = ({ deviceId }: { deviceId: string }) => {
                 <DialogContent className="sm:max-w-xl">
                   <div className="h-[350px] w-full rounded-md overflow-hidden">
                     <Map
-                      height="350px"
+                      height="550px"
                       initialZoom={14}
                       showControls
                       isLargeMap
