@@ -22,7 +22,7 @@ export const BoxModel = ({
     <group ref={groupRef}>
       {/* Main box with edges */}
       <mesh>
-        <boxGeometry args={[1.5, 1.5, 1.5]} />
+        <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial
           color="#3B82F6"
           roughness={0.3}
@@ -34,24 +34,24 @@ export const BoxModel = ({
 
       {/* Edges for better visibility */}
       <lineSegments>
-        <edgesGeometry args={[new THREE.BoxGeometry(1.5, 1.5, 1.5)]} />
+        <edgesGeometry args={[new THREE.BoxGeometry(1, 1, 1)]} />
         <lineBasicMaterial color="#1E40AF" linewidth={1} />
       </lineSegments>
 
       {/* X axis indicator (red) */}
-      <mesh position={[1, 0, 0]} scale={[0.6, 0.1, 0.1]}>
+      <mesh position={[1, 0, 0]} scale={[0.6, 0.05, 0.05]}>
         <boxGeometry />
         <meshStandardMaterial color="#EF4444" />
       </mesh>
 
       {/* Y axis indicator (green) */}
-      <mesh position={[0, 1, 0]} scale={[0.1, 0.6, 0.1]}>
+      <mesh position={[0, 1, 0]} scale={[0.05, 0.6, 0.05]}>
         <boxGeometry />
         <meshStandardMaterial color="#22C55E" />
       </mesh>
 
       {/* Z axis indicator (blue) */}
-      <mesh position={[0, 0, 1]} scale={[0.1, 0.1, 0.6]}>
+      <mesh position={[0, 0, 1]} scale={[0.05, 0.05, 0.6]}>
         <boxGeometry />
         <meshStandardMaterial color="#3B82F6" />
       </mesh>
