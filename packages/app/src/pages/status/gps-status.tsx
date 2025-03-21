@@ -5,7 +5,7 @@ import { runAction } from "@/lib/joystick-api";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import "leaflet/dist/leaflet.css";
-import { Maximize2, RefreshCw } from "lucide-react";
+import { Check, Copy, Maximize2, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   MapContainer,
@@ -209,6 +209,7 @@ export const GPSStatus = ({ deviceId }: { deviceId: string }) => {
   const [smallMapState, setSmallMapState] = useState<MapState | null>(null);
   const [largeMapState, setLargeMapState] = useState<MapState | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const formatAltitude = (value?: number) => {
     if (value === undefined) return "N/A";
@@ -218,6 +219,18 @@ export const GPSStatus = ({ deviceId }: { deviceId: string }) => {
   const formatTimestamp = (timestamp?: number) => {
     if (timestamp === undefined) return new Date().toLocaleTimeString();
     return new Date(timestamp).toLocaleTimeString();
+  };
+
+  const copyCoordinates = () => {
+    if (!gpsData) return;
+
+    const coordsString = `${gpsData.latitude.toFixed(
+      6
+    )}, ${gpsData.longitude.toFixed(6)}`;
+    navigator.clipboard.writeText(coordsString);
+
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
   const Map = ({
@@ -356,23 +369,33 @@ export const GPSStatus = ({ deviceId }: { deviceId: string }) => {
           </div>
 
           {/* GPS Information Card */}
-          <div className="flex items-center gap-1 justify-center">
-            {/* <Compass className="h-4 w-4 text-primary" /> */}
-            <div className="flex gap-1 items-center">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1">
               <span className="text-xs font-mono">
                 {formatCompactCoordinate(gpsData.latitude, "lat")}
               </span>
-              {/* <span className="text-muted-foreground">•</span> */}
               <span className="text-xs font-mono">/</span>
               <span className="text-xs font-mono">
                 {formatCompactCoordinate(gpsData.longitude, "lng")}
               </span>
               <span className="text-xs font-mono">/</span>
-              {/* <span className="text-muted-foreground">•</span> */}
               <span className="text-xs font-mono">
                 {formatAltitude(gpsData.altitude)}
               </span>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="px-2"
+              onClick={copyCoordinates}
+              disabled={isLoading}
+            >
+              {isCopied ? (
+                <Check className="size-1.5 " />
+              ) : (
+                <Copy className="size-1.5" />
+              )}
+            </Button>
           </div>
         </div>
       )}

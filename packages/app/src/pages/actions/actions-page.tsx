@@ -66,7 +66,7 @@ export function ActionsPage() {
       className="size-full p-2 flex w-full gap-4"
     >
       <TabsList className="flex-col w-64 bg-transparent rounded-md">
-        <Label className="font-bold text-md self-start">Actions</Label>
+        <Label className="font-bold text-md self-start mb-4">Actions</Label>
         <ScrollArea className="h-[calc(100vh-180px)]">
           {filteredActions.map((action) => (
             <TabsTrigger
