@@ -12,7 +12,7 @@ import { useApplicationSettings } from "@/hooks/use-application-settings";
 import { runAction } from "@/lib/joystick-api";
 import { useQuery } from "@tanstack/react-query";
 import { Wifi, WifiOff } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 
 export function DeviceHealthIndicator() {
   const { device: deviceId } = useParams();

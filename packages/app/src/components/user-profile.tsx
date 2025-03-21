@@ -17,7 +17,7 @@ import {
 import { logout, useAuthStore } from "@/lib/auth";
 import { urls } from "@/lib/urls";
 import { Computer, LogOut, Moon, Palette, Settings, Sun } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 const colorModeIcons = {
   light: <Sun className="h-4 w-4" />,

@@ -15,7 +15,7 @@ import { Filters } from "@/pages/dashboard/filters";
 import { useDeviceStore } from "@/store/device-store";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { Gauge } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { Toaster } from "sonner";
 
 export function DashboardPage() {

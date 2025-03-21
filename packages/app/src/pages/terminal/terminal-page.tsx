@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "@/utils/toast";
 import { RefreshCw, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import { WebLinksAddon } from "xterm-addon-web-links";

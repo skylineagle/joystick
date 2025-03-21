@@ -21,9 +21,8 @@ import { BitrateControll } from "@/pages/stream-view/bitrate-control";
 import { RoiModeControl } from "@/pages/stream-view/roi/roi-mode-control";
 import { AnimatePresence, motion } from "framer-motion";
 import { Battery, Cpu, Map, Navigation, Signal } from "lucide-react";
-import { useQueryState } from "nuqs";
-import { useParams } from "react-router-dom";
-import { z } from "zod";
+import { parseAsStringEnum, useQueryState } from "nuqs";
+import { useParams } from "react-router";
 
 type TabValue = "device" | "cell" | "battery" | "imu" | "gps";
 
@@ -32,11 +31,6 @@ const MotionTabsContent = motion(TabsContent);
 const MotionTabsTrigger = motion(TabsTrigger);
 
 export const Controls = () => {
-  // const [activeTab, setActiveTab] = useState<TabValue>("stream");
-  const [activeTab, setActiveTab] = useQueryState(
-    "activeTab",
-    z.enum(["device", "cell", "battery", "imu", "gps"]).default("device")
-  );
   const { isMobileLandscape } = useMobileLandscape();
   const { device: deviceId } = useParams<{ device: string }>();
   const { data: device, isLoading: isDeviceLoading } = useDevice(deviceId!);
@@ -60,6 +54,26 @@ export const Controls = () => {
     useIsSupported(deviceId!, ["get-imu"]);
   const { isSupported: isGetGpsSupported, isLoading: isGetGpsLoading } =
     useIsSupported(deviceId!, ["get-gps"]);
+  const [activeTab, setActiveTab] = useQueryState(
+    "activeTab",
+    parseAsStringEnum(["device", "cell", "battery", "imu", "gps"])
+      .withDefault(
+        isGetServicesStatusSupported
+          ? "device"
+          : isGetCpsiStatusSupported
+          ? "cell"
+          : isGetBatterySupported
+          ? "battery"
+          : isGetImuSupported
+          ? "imu"
+          : isGetGpsSupported
+          ? "gps"
+          : "device"
+      )
+      .withOptions({
+        shallow: true,
+      })
+  );
   const { roiMode } = useRoiMode();
 
   return (

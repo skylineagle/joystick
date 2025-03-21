@@ -17,11 +17,11 @@ import { useDevices } from "@/hooks/use-devices";
 import { cn } from "@/lib/utils";
 import { ChevronsUpDown, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router";
 
 export function DeviceSwitcher() {
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
 
   const { device: deviceId } = useParams();
   const currentPage = pathname.split(deviceId ?? "")[1].replaceAll("/", "");
@@ -57,7 +57,7 @@ export function DeviceSwitcher() {
         const index = parseInt(event.key) - 1;
         const device = devices[index];
         if (device) {
-          navigate(`/${device.id}/${currentPage}`);
+          navigate(`/${device.id}/${currentPage}${search}`);
           setOpen(false);
         }
       }
@@ -65,7 +65,7 @@ export function DeviceSwitcher() {
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [navigate, open, devices, currentPage]);
+  }, [navigate, open, devices, currentPage, search]);
 
   return (
     <SidebarMenu>
@@ -113,7 +113,7 @@ export function DeviceSwitcher() {
                 <DropdownMenuItem
                   key={device.id}
                   onClick={() => {
-                    navigate(`/${device.id}/${currentPage}`);
+                    navigate(`/${device.id}/${currentPage}${search}`);
                     setOpen(false);
                   }}
                   className={cn("gap-2", device.id === deviceId && "bg-accent")}

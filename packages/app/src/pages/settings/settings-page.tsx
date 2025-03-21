@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { DeviceSettings } from "./device-settings";
 import { PermissionsSettings } from "./permissions-settings";
 import { RunSettings } from "./run-settings";

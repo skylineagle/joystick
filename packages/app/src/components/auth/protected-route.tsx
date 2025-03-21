@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/lib/auth";
 import { pb } from "@/lib/pocketbase";
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { useInterval } from "usehooks-ts";
 
 interface ProtectedRouteProps {

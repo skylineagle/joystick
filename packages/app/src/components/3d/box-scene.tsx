@@ -66,9 +66,6 @@ export const BoxScene = ({
 
         <Loader />
       </ErrorBoundary>
-      <div className="absolute top-2 right-2 rounded-md bg-background/80 px-2 py-1 text-xs text-muted-foreground">
-        Box rotates based on IMU data
-      </div>
     </div>
   );
 };

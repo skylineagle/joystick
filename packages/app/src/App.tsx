@@ -8,16 +8,10 @@ import { ApiError } from "@/lib/api-client";
 import { pb } from "@/lib/pocketbase";
 import { TerminalPage } from "@/pages/terminal/terminal-page";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 import { Suspense, lazy, useEffect, useState } from "react";
-import {
-  BrowserRouter,
-  Navigate,
-  Route,
-  Routes,
-  useLocation,
-} from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { HashLoader } from "react-spinners";
 import { Toaster } from "sonner";
 import { Layout } from "./layout";
@@ -143,7 +137,6 @@ const queryClient = new QueryClient({
 
 // AnimatedRoutes component to handle route transitions
 function AnimatedRoutes() {
-  const location = useLocation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -157,107 +150,105 @@ function AnimatedRoutes() {
   }, []);
 
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Suspense fallback={<LoadingFallback />}>
-                <PageTransition>
-                  <DashboardPage />
-                </PageTransition>
-              </Suspense>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/" replace />
-            ) : (
+    <Routes>
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<LoadingFallback />}>
               <PageTransition>
-                <LoginForm />
+                <DashboardPage />
               </PageTransition>
-            )
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          isAuthenticated ? (
+            <Navigate to="/" replace />
+          ) : (
+            <PageTransition>
+              <LoginForm />
+            </PageTransition>
+          )
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <PageTransition>
+                <AdminPage />
+              </PageTransition>
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/:device"
+        element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }
+      >
+        <Route
+          index
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <PageTransition>
+                <StreamView />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
-          path="/admin"
+          path="params"
           element={
-            <ProtectedRoute>
-              <Suspense fallback={<LoadingFallback />}>
-                <PageTransition>
-                  <AdminPage />
-                </PageTransition>
-              </Suspense>
-            </ProtectedRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <PageTransition>
+                <ParamsPage />
+              </PageTransition>
+            </Suspense>
           }
         />
         <Route
-          path="/:device"
+          path="actions"
           element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }
-        >
-          <Route
-            index
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <PageTransition>
-                  <StreamView />
-                </PageTransition>
-              </Suspense>
-            }
-          />
-          <Route
-            path="params"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <PageTransition>
-                  <ParamsPage />
-                </PageTransition>
-              </Suspense>
-            }
-          />
-          <Route
-            path="actions"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <PageTransition>
-                  <ActionsPage />
-                </PageTransition>
-              </Suspense>
-            }
-          />
-          <Route
-            path="terminal"
-            element={
-              <Suspense fallback={<LoadingFallback />}>
-                <PageTransition>
-                  <TerminalPage />
-                </PageTransition>
-              </Suspense>
-            }
-          />
-        </Route>
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <Suspense fallback={<LoadingFallback />}>
-                <PageTransition>
-                  <SettingsPage />
-                </PageTransition>
-              </Suspense>
-            </ProtectedRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <PageTransition>
+                <ActionsPage />
+              </PageTransition>
+            </Suspense>
           }
         />
-      </Routes>
-    </AnimatePresence>
+        <Route
+          path="terminal"
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <PageTransition>
+                <TerminalPage />
+              </PageTransition>
+            </Suspense>
+          }
+        />
+      </Route>
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <PageTransition>
+                <SettingsPage />
+              </PageTransition>
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   );
 }
 

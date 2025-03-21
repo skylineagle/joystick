@@ -40,7 +40,7 @@ import { ActionSuccessRateChart } from "./action-success-rate-chart";
 import { ActionExecutionTimeChart } from "./action-execution-time-chart";
 import { DatePickerWithRange } from "./date-range-picker";
 import { AnimatedThemeToggle } from "@/components/ui/animated-theme-toggle";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 export function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState<string>("30");

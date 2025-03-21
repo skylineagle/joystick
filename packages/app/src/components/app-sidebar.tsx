@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/sidebar";
 import { UserProfile } from "@/components/user-profile";
 import { ArrowLeft, Home, Send, Settings, Terminal } from "lucide-react";
+import { useQueryState } from "nuqs";
 import * as React from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router";
 
 const navItems = [
   {
@@ -45,6 +46,8 @@ const navItems = [
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { device: deviceId } = useParams();
+  const [activeTab] = useQueryState("activeTab");
+  const location = useLocation();
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -63,10 +66,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   `/${deviceId}${item.path ? `/${item.path}` : ""}`
                 }
               >
-                <a href={`/${deviceId}${item.path ? `/${item.path}` : ""}`}>
+                <Link
+                  to={{
+                    pathname: `/${deviceId}${item.path ? `/${item.path}` : ""}`,
+                    search: `?activeTab=${activeTab}`,
+                  }}
+                  preventScrollReset={true}
+                  replace={false}
+                  key={item.path}
+                >
                   <item.icon />
                   <Label>{item.label}</Label>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
@@ -74,7 +85,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter>
         <Button variant="ghost" size="sm" className="w-full mt-2" asChild>
-          <Link to="/">
+          <Link
+            to={{
+              pathname: "/",
+              search: location.search,
+            }}
+          >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Dashboard
           </Link>

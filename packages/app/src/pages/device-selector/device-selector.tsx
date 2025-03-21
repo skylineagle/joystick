@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { useDevices } from "@/hooks/use-devices";
 import DOMPurify from "dompurify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 export function DeviceSelector() {
   const navigate = useNavigate();

@@ -13,7 +13,7 @@ import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { DeviceResponse } from "@/types/types";
 import { Joystick } from "lucide-react";
 import { memo } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 interface DeviceProps {
   device: DeviceResponse;

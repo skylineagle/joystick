@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Icon } from "@/icons/icon";
 import { cn } from "@/lib/utils";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { useSidebar } from "./sidebar-provider";
 
 const navItems = [

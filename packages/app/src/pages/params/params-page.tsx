@@ -5,7 +5,7 @@ import { useParamsStore } from "@/lib/params.store";
 import { ParamTree } from "@/pages/params/param-tree";
 import { ParamPath } from "@/types/params";
 import { useCallback, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 
 export function ParamsPage() {
   const { device: deviceId } = useParams();

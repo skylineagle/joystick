@@ -15,7 +15,7 @@ import { useActions } from "@/hooks/use-actions";
 import { cn } from "@/lib/utils";
 import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 import { ActionForm } from "./action-form";
 
 export function ActionsPage() {
