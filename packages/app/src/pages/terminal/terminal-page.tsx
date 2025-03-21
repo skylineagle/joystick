@@ -12,7 +12,16 @@ import { useParams } from "react-router";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import { WebLinksAddon } from "xterm-addon-web-links";
-import { customDarkTheme, customLightTheme } from "./terminal-theme";
+import {
+  blueDarkTheme,
+  blueLightTheme,
+  defaultDarkTheme,
+  defaultLightTheme,
+  greenDarkTheme,
+  greenLightTheme,
+  purpleDarkTheme,
+  purpleLightTheme,
+} from "./terminal-theme";
 
 import "xterm/css/xterm.css";
 
@@ -50,8 +59,22 @@ const joystickAsciiLines = [
 const matrixChars =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%\"'#&_(),.;:?!\\|{}<>[]^~";
 
+// Function to get the correct terminal theme based on current theme and color mode
+function getTerminalTheme(mode: string, designTheme: string) {
+  switch (designTheme) {
+    case "purple":
+      return mode === "dark" ? purpleDarkTheme : purpleLightTheme;
+    case "blue":
+      return mode === "dark" ? blueDarkTheme : blueLightTheme;
+    case "green":
+      return mode === "dark" ? greenDarkTheme : greenLightTheme;
+    default: // "default"
+      return mode === "dark" ? defaultDarkTheme : defaultLightTheme;
+  }
+}
+
 export function TerminalPage() {
-  const { getActualColorMode } = useTheme();
+  const { getActualColorMode, designTheme } = useTheme();
   const terminalRef = useRef<HTMLDivElement>(null);
   const { device: deviceId } = useParams();
   const { data: selectedDevice, isLoading: isDeviceLoading } = useDevice(
@@ -102,8 +125,7 @@ export function TerminalPage() {
 
     const terminal = new Terminal({
       cursorBlink: true,
-      theme:
-        getActualColorMode() === "dark" ? customDarkTheme : customLightTheme,
+      theme: getTerminalTheme(getActualColorMode(), designTheme),
       fontFamily: "JetBrains Mono, monospace",
       fontSize: 14,
       lineHeight: 1.2,
@@ -651,6 +673,7 @@ export function TerminalPage() {
       }
     });
   }, [
+    designTheme,
     getActualColorMode,
     isEasterEggsPermitted,
     selectedDevice?.configuration,
