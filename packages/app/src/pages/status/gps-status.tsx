@@ -329,9 +329,9 @@ export const GPSStatus = ({ deviceId }: { deviceId: string }) => {
               <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogTrigger asChild>
                   <Button
-                    variant="ghost"
+                    variant="secondary"
                     size="sm"
-                    className="h-7 w-7 p-1 bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white transition-all duration-200 transform-gpu"
+                    className="size-7 p-1 backdrop-blur-sm shadow-sm transition-all duration-200 transform-gpu"
                     style={{
                       WebkitBackfaceVisibility: "hidden",
                       backfaceVisibility: "hidden",
