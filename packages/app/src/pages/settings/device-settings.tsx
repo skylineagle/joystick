@@ -26,6 +26,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Search, Users } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/utils/toast";
+import { AddDeviceModal } from "@/components/device/add-device-modal";
 
 export function DeviceSettings() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -155,8 +156,7 @@ export function DeviceSettings() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h3 className="text-lg font-medium">Device Management</h3>
-        <div className="relative w-full sm:w-64">
+        <div className="flex-1 flex items-center gap-2 relative sm:w-64">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search devices..."
@@ -165,6 +165,7 @@ export function DeviceSettings() {
             className="pl-8"
           />
         </div>
+        <AddDeviceModal />
       </div>
 
       <Card>
