@@ -165,7 +165,6 @@ Bun.serve({
             }
 
             connections.delete(message.device ?? "");
-            ws.send("Connection closed");
           });
         }
 
@@ -173,17 +172,6 @@ Bun.serve({
           const sshProcess = connections.get(message.device);
           if (sshProcess) {
             sshProcess.stdin?.write(message.data);
-          } else {
-            ws.send("No active connection");
-          }
-        }
-
-        if (message.type === "resize" && message.device) {
-          const sshProcess = connections.get(message.device);
-          if (sshProcess) {
-            // TODO: Implement terminal resize using SIGWINCH if needed
-          } else {
-            ws.send("No active connection");
           }
         }
       } catch (error) {

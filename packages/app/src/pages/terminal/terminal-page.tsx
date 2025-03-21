@@ -116,6 +116,9 @@ export function TerminalPage() {
     terminal.open(terminalRef.current);
     fitAddon.fit();
 
+    // Auto-focus the terminal when it opens
+    terminal.focus();
+
     terminalInstance.current = terminal;
     fitAddonRef.current = fitAddon;
 
@@ -647,57 +650,6 @@ export function TerminalPage() {
         );
       }
     });
-
-    const handleResize = () => {
-      if (!isMountedRef.current) return;
-      if (fitAddonRef.current) {
-        fitAddonRef.current.fit();
-      }
-    };
-
-    // Add resize event listener
-    window.addEventListener("resize", handleResize);
-
-    // Cleanup function
-    return () => {
-      // Remove event listeners
-      window.removeEventListener("resize", handleResize);
-
-      // Clear any active intervals
-      if (matrixIntervalRef.current !== null) {
-        window.clearInterval(matrixIntervalRef.current);
-        matrixIntervalRef.current = null;
-      }
-
-      if (snakeGameIntervalRef.current !== null) {
-        window.clearInterval(snakeGameIntervalRef.current);
-        snakeGameIntervalRef.current = null;
-      }
-
-      // Close WebSocket connection
-      if (wsRef.current) {
-        // Remove event handlers to prevent memory leaks
-        wsRef.current.onopen = null;
-        wsRef.current.onmessage = null;
-        wsRef.current.onerror = null;
-        wsRef.current.onclose = null;
-
-        // Close the connection
-        if (
-          wsRef.current.readyState === WebSocket.OPEN ||
-          wsRef.current.readyState === WebSocket.CONNECTING
-        ) {
-          wsRef.current.close();
-        }
-        wsRef.current = null;
-      }
-
-      // Clean up terminal
-      if (terminalInstance.current) {
-        terminalInstance.current.dispose();
-        terminalInstance.current = null;
-      }
-    };
   }, [
     getActualColorMode,
     isEasterEggsPermitted,
@@ -718,16 +670,16 @@ export function TerminalPage() {
 
   useEffect(() => {
     isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
 
-  useEffect(() => {
-    initializeTerminal();
+    // Initialize the terminal
+    setTimeout(() => {
+      initializeTerminal();
+    }, 200);
 
     // Cleanup function
     return () => {
+      isMountedRef.current = false;
+
       // Clear any active intervals
       if (matrixIntervalRef.current !== null) {
         window.clearInterval(matrixIntervalRef.current);
@@ -763,12 +715,7 @@ export function TerminalPage() {
         terminalInstance.current = null;
       }
     };
-  }, [
-    isEasterEggsPermitted,
-    selectedDevice?.configuration,
-    selectedDevice?.id,
-    initializeTerminal,
-  ]);
+  }, [initializeTerminal]);
 
   if (!selectedDevice) return <div>Please select a device first</div>;
 
@@ -806,7 +753,7 @@ export function TerminalPage() {
           <Button
             onClick={() => setActiveMiniGame(null)}
             className="relative top-2 left-2 bg-black/70 hover:bg-black/90 text-white rounded-full p-2 z-10 transition-colors"
-            aria-label="Close Mario Kart"
+            aria-label="Close Mini Game"
           >
             <X />
           </Button>

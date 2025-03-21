@@ -5,7 +5,7 @@ import "./index.css";
 import App from "./App.tsx";
 
 scan({
-  enabled: true,
+  enabled: import.meta.env.NODE_ENV !== "production",
   trackUnnecessaryRenders: true,
 });
 

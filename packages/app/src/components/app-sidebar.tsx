@@ -12,17 +12,17 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { UserProfile } from "@/components/user-profile";
-import { ArrowLeft, Home, Send, Settings, Terminal } from "lucide-react";
+import { ArrowLeft, Video, Send, Settings, Terminal } from "lucide-react";
 import { useQueryState } from "nuqs";
 import * as React from "react";
 import { Link, useLocation, useParams } from "react-router";
 
 const navItems = [
   {
-    label: "Home",
-    icon: Home,
-    path: "",
-    description: "Device overview and status",
+    label: "Stream",
+    icon: Video,
+    path: "stream",
+    description: "Live video stream and controls",
   },
   {
     label: "Parameters",

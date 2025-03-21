@@ -195,8 +195,9 @@ function AnimatedRoutes() {
           </ProtectedRoute>
         }
       >
+        <Route index element={<Navigate to="stream" replace />} />
         <Route
-          index
+          path="stream"
           element={
             <Suspense fallback={<LoadingFallback />}>
               <PageTransition>
