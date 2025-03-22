@@ -92,7 +92,7 @@ app.post(
       const command = Object.entries({ ...body, ...defaultParamters }).reduce(
         (acc, [key, value]) => {
           if (acc.includes(`$${key}`)) {
-            return acc.replace(`$${key}`, value.toString());
+            return acc.replaceAll(`$${key}`, value.toString());
           }
           return acc;
         },
