@@ -128,6 +128,25 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  studio:
+    image: ghcr.io/skylineagle/joystick/studio:latest
+    network_mode: "host"
+    restart: unless-stopped
+    environment:
+      - POCKETBASE_URL=http://pocketbase:8090
+      - JOYSTICK_API_URL=http://joystick:8000
+      - PORT=8001
+    depends_on:
+      pocketbase:
+        condition: service_healthy
+      mediamtx:
+        condition: service_started
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   whisper:
     image: ghcr.io/skylineagle/joystick/whisper:latest
     network_mode: "host"

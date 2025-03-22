@@ -135,8 +135,12 @@ export function TerminalPage() {
     terminal.loadAddon(fitAddon);
     terminal.loadAddon(new WebLinksAddon());
 
-    terminal.open(terminalRef.current);
-    fitAddon.fit();
+    // setInterval(() => {
+    if (terminalRef.current) {
+      terminal.open(terminalRef.current);
+      fitAddon.fit();
+    }
+    // }, 100);
 
     // Auto-focus the terminal when it opens
     terminal.focus();

@@ -47,6 +47,11 @@ const SettingsPage = lazy(() =>
     default: module.SettingsPage,
   }))
 );
+const GalleryPage = lazy(() =>
+  import("@/pages/gallery/gallery-page").then((module) => ({
+    default: module.default,
+  }))
+);
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -230,8 +235,16 @@ function AnimatedRoutes() {
           path="terminal"
           element={
             <Suspense fallback={<LoadingFallback />}>
+              <TerminalPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="gallery"
+          element={
+            <Suspense fallback={<LoadingFallback />}>
               <PageTransition>
-                <TerminalPage />
+                <GalleryPage />
               </PageTransition>
             </Suspense>
           }

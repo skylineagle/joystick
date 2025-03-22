@@ -1,7 +1,11 @@
 import { STREAM_API_URL } from "@/config";
 import { logger } from "@/logger";
 import { pb } from "@/pocketbase";
-import type { DeviceResponse } from "@/types/types";
+import type { DeviceInformation, DeviceResponse } from "@/types/types";
+import { ChildProcess, spawn } from "node:child_process";
+import { join } from "node:path";
+import { RunTargetOptions } from "@/types/db.types";
+import { $ } from "bun";
 
 export function generateRandomCPSIResult(): string {
   // Randomly choose a technology type

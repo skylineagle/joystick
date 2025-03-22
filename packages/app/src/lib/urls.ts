@@ -5,6 +5,7 @@ const PORTS = {
   pocketbase: 8090,
   panel: 4000,
   baker: 3000,
+  studio: 8001,
   switcher: 8080,
   whisper: 8081,
 } as const;
@@ -40,5 +41,8 @@ export const urls = {
   },
   get pocketbase() {
     return getServiceUrl("pocketbase");
+  },
+  get studio() {
+    return getServiceUrl("studio");
   },
 };

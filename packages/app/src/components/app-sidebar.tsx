@@ -12,7 +12,14 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { UserProfile } from "@/components/user-profile";
-import { ArrowLeft, Video, Send, Settings, Terminal } from "lucide-react";
+import {
+  ArrowLeft,
+  Video,
+  Send,
+  Settings,
+  Terminal,
+  Image,
+} from "lucide-react";
 import { useQueryState } from "nuqs";
 import * as React from "react";
 import { Link, useLocation, useParams } from "react-router";
@@ -41,6 +48,12 @@ const navItems = [
     icon: Terminal,
     path: "terminal",
     description: "Device terminal access",
+  },
+  {
+    label: "Gallery",
+    icon: Image,
+    path: "gallery",
+    description: "View and manage device events",
   },
 ];
 

@@ -1,5 +1,6 @@
 import { STREAM_API_URL, SWITCHER_API_URL } from "@/config";
 import { pb } from "@/pocketbase";
+import { runCommandOnDevice } from "@/ssh";
 import { type ActionsResponse, RunTargetOptions } from "@/types/db.types";
 import type { DeviceResponse, RunResponse } from "@/types/types";
 import cors from "@elysiajs/cors";
@@ -10,6 +11,7 @@ import { enhancedLogger, setupLoggingMiddleware } from "./enhanced-logger";
 import { generateRandomCPSIResult, updateStatus } from "./utils";
 
 const app = new Elysia();
+
 
 // Apply the logging middleware
 setupLoggingMiddleware(app);
@@ -99,10 +101,13 @@ app.post(
 
       const output =
         run.target === RunTargetOptions.device
-          ? device.information?.password
-            ? await $`sshpass -p ${device.information?.password} ssh -o StrictHostKeyChecking=no ${device.information?.user}@${device.information?.host} '${command}'`.text()
-            : await $`ssh -o StrictHostKeyChecking=no ${device.information?.user}@${device.information?.host} '${command}'`.text()
+          ? await runCommandOnDevice(device, command)
           : await $`${{ raw: command }}`.text();
+      // run.target === RunTargetOptions.device
+      //   ? device.information?.password
+      //     ? await $`sshpass -p ${device.information?.password} ssh -o StrictHostKeyChecking=no ${device.information?.user}@${device.information?.host} '${command}'`.text()
+      //     : await $`ssh -o StrictHostKeyChecking=no ${device.information?.user}@${device.information?.host} '${command}'`.text()
+      //   : await $`${{ raw: command }}`.text();
 
       const response = {
         success: true,
@@ -291,6 +296,27 @@ app.get("/api/ping/:device", async ({ params, query }) => {
     return isOnline;
   } catch (error) {
     return false;
+  }
+});
+
+// Gallery endpoints
+app.get("/api/gallery/:device/events", async ({ params }) => {
+  try {
+    const events = await pb.collection("gallery").getFullList({
+      filter: `device = "${params.device}"`,
+      sort: "-created",
+    });
+
+    return { success: true, events };
+  } catch (error) {
+    enhancedLogger.error(
+      { error, device: params.device },
+      "Error listing gallery events"
+    );
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    };
   }
 });
 
