@@ -55,14 +55,14 @@ export function Layout({ children }: LayoutProps) {
                 </div>
               )}
             </header>
-            <main className={cn("flex-1 p-2", isMobileLandscape && "p-2")}>
+            <main className="flex-1 p-2 overflow-hidden max-h-[calc(100vh-5rem)]">
               <div
                 className={cn(
                   "flex gap-4 md:gap-6 h-full border-none",
                   isMobileLandscape ? "flex-row" : "flex-col md:flex-row"
                 )}
               >
-                <div className="flex-1 min-h-0 relative border-none">
+                <div className="flex-1 min-h-0 relative border-none overflow-auto">
                   {children || <Outlet />}
                 </div>
                 <Controls />

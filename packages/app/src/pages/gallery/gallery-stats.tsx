@@ -25,6 +25,7 @@ export const GalleryStats: FC<GalleryStatsProperties> = ({ deviceId }) => {
       const data = await response.json();
       return data.stats as GalleryStatsType;
     },
+    enabled: !!deviceId,
   });
 
   if (isLoadingStats) return <Loader2 className="h-5 w-5 animate-spin" />;

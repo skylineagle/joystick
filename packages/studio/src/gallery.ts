@@ -1,12 +1,13 @@
 import { pb } from "@/pocketbase";
-import { type GalleryResponse } from "@/types/db.types";
-import type { DeviceResponse } from "@/types/types";
+import { type GalleryResponse, type RunResponse } from "@/types/db.types";
+import type { ActionResponse, DeviceResponse } from "@/types/types";
 import { $ } from "bun";
 import { existsSync, mkdirSync, readFileSync } from "fs";
 import { join } from "path";
 import { logger } from "@/logger";
 import { runCommandOnDevice } from "@/ssh";
 import { Baker } from "cronbake";
+import { JOYSTICK_API_URL } from "../../baker/src/config";
 const GALLERY_BASE_PATH = join(process.cwd(), "data", "gallery");
 
 // Ensure gallery directory exists
@@ -44,7 +45,7 @@ export class GalleryService {
     if (this.intervals.has(deviceId)) {
       this.stopGalleryService(deviceId);
     }
-    logger.info(this.baker.getStatus(deviceId));
+
     if (this.baker.getStatus(deviceId) === "running") {
       logger.info(`Gallery service already running for device ${deviceId}`);
       return;
@@ -129,8 +130,29 @@ export class GalleryService {
   }
 
   private async listEvents(device: DeviceResponse): Promise<GalleryEvent[]> {
-    // TODO: use an action
-    const command = `ls -1 /gallery/*.jpg`;
+    const action = await pb
+      .collection("actions")
+      .getFirstListItem(`name = "list-events"`);
+
+    if (!action) {
+      logger.error(`Action "list-events" not found`);
+      throw new Error(`Action "list-events" not found`);
+    }
+
+    const runResult = await pb.collection("run").getFullList<RunResponse>(1, {
+      filter: `action = "${action.id}" && device = "${device.expand?.device.id}"`,
+    });
+
+    if (runResult.length === 0) {
+      logger.error(`Action "list-events" not found for device ${device.name}`);
+      throw new Error(
+        `Action "list-events" not found for device ${device.name}`
+      );
+    }
+
+    const run = runResult[0];
+    const command =
+      run.command || Bun.env.LIST_EVENTS_COMMAND || `ls -1 /gallery/*.jpg`;
 
     try {
       const output = await runCommandOnDevice(device, command);
@@ -147,7 +169,6 @@ export class GalleryService {
           };
         });
     } catch (error) {
-      logger.debug(JSON.stringify(error, null, 2));
       if (
         error instanceof _ShellError &&
         error.stderr.toString().includes("No such file or directory")
@@ -197,13 +218,33 @@ export class GalleryService {
     event: GalleryEvent,
     thumbnailContent: Buffer
   ) {
-    logger.info(`creating gallery record for event: ${event.id}`);
     await pb.collection("gallery").create({
       device: deviceId,
       event_id: event.id,
       name: event.path,
       thumbnail: new File([thumbnailContent], event.path),
     });
+  }
+
+  private async removeEventFromDevice(
+    device: DeviceResponse,
+    event: GalleryResponse
+  ): Promise<void> {
+    const response = await fetch(
+      `${JOYSTICK_API_URL}/api/run/${device.id}/delete-event`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ event: event.event_id }),
+      }
+    );
+
+    if (!response.ok) {
+      logger.error(`Failed to toggle mode: ${response.statusText}`);
+      throw new Error(`Failed to toggle mode: ${response.statusText}`);
+    }
   }
 
   public async pullEvent(deviceId: string, eventId: string): Promise<void> {
@@ -216,7 +257,7 @@ export class GalleryService {
     if (!galleryEvent) {
       throw new Error(`Gallery event ${eventId} not found`);
     }
-    logger.info(galleryEvent);
+
     const eventFilePath = galleryEvent.name.replace(".jpg", ".mp4");
     const deviceDir = join(GALLERY_BASE_PATH, device.id);
     const videoPath = join(deviceDir, `${galleryEvent.event_id}.mp4`);
@@ -226,9 +267,8 @@ export class GalleryService {
       ? `sshpass -p ${device.information.password} scp -o StrictHostKeyChecking=no ${device.information?.user}@${device.information?.host}:${eventFilePath} ${videoPath}`
       : `scp -o StrictHostKeyChecking=no ${device.information?.user}@${device.information?.host}:${eventFilePath} ${videoPath}`;
 
-    logger.info(`command: ${command}`);
     const output = await $`${{ raw: command }}`.text();
-    logger.info(`output: ${output}`);
+    logger.debug(`output: ${output}`);
 
     logger.info(`Successfully pulled video from device`);
     // Read the video file content
@@ -238,16 +278,11 @@ export class GalleryService {
       event: new File([videoContent], `${galleryEvent.event_id}.mp4`),
     });
 
-    // Delete both video and thumbnail from device after successful pull
     try {
-      await runCommandOnDevice(
-        device,
-        `rm ${eventFilePath} ${galleryEvent.name}`
-      );
+      await this.removeEventFromDevice(device, galleryEvent);
       logger.info(`Successfully deleted event files from device: ${eventId}`);
     } catch (error) {
       logger.error(`Failed to delete event files from device: ${error}`);
-      // Don't throw the error as the files were already pulled successfully
     }
   }
 

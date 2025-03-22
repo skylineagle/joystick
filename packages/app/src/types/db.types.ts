@@ -143,6 +143,7 @@ export type GalleryRecord = {
 	device: RecordIdString
 	event?: string
 	event_id: string
+	flagged?: boolean
 	id: string
 	name?: string
 	thumbnail: string
