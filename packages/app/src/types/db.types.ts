@@ -14,6 +14,7 @@ export enum Collections {
 	ActionLogs = "action_logs",
 	Actions = "actions",
 	Devices = "devices",
+	Gallery = "gallery",
 	Models = "models",
 	Permissions = "permissions",
 	Rules = "rules",
@@ -137,6 +138,19 @@ export type DevicesRecord<Tautomation = unknown, Tconfiguration = unknown, Tinfo
 	updated?: IsoDateString
 }
 
+export type GalleryRecord = {
+	created?: IsoDateString
+	device: RecordIdString
+	event?: string
+	event_id: string
+	flagged?: boolean
+	id: string
+	name?: string
+	thumbnail: string
+	updated?: IsoDateString
+	viewed?: boolean
+}
+
 export enum ModelsStreamOptions {
 	"mediamtx" = "mediamtx",
 	"ws" = "ws",
@@ -214,6 +228,7 @@ export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> &
 export type ActionLogsResponse<Tparameters = unknown, Tresult = unknown, Texpand = unknown> = Required<ActionLogsRecord<Tparameters, Tresult>> & BaseSystemFields<Texpand>
 export type ActionsResponse<Texpand = unknown> = Required<ActionsRecord> & BaseSystemFields<Texpand>
 export type DevicesResponse<Tautomation = unknown, Tconfiguration = unknown, Tinformation = unknown, Texpand = unknown> = Required<DevicesRecord<Tautomation, Tconfiguration, Tinformation>> & BaseSystemFields<Texpand>
+export type GalleryResponse<Texpand = unknown> = Required<GalleryRecord> & BaseSystemFields<Texpand>
 export type ModelsResponse<Tmode_configs = unknown, Tparams = unknown, Tstream_quality = unknown, Texpand = unknown> = Required<ModelsRecord<Tmode_configs, Tparams, Tstream_quality>> & BaseSystemFields<Texpand>
 export type PermissionsResponse<Texpand = unknown> = Required<PermissionsRecord> & BaseSystemFields<Texpand>
 export type RulesResponse<Texpand = unknown> = Required<RulesRecord> & BaseSystemFields<Texpand>
@@ -232,6 +247,7 @@ export type CollectionRecords = {
 	action_logs: ActionLogsRecord
 	actions: ActionsRecord
 	devices: DevicesRecord
+	gallery: GalleryRecord
 	models: ModelsRecord
 	permissions: PermissionsRecord
 	rules: RulesRecord
@@ -249,6 +265,7 @@ export type CollectionResponses = {
 	action_logs: ActionLogsResponse
 	actions: ActionsResponse
 	devices: DevicesResponse
+	gallery: GalleryResponse
 	models: ModelsResponse
 	permissions: PermissionsResponse
 	rules: RulesResponse
@@ -269,6 +286,7 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: 'action_logs'): RecordService<ActionLogsResponse>
 	collection(idOrName: 'actions'): RecordService<ActionsResponse>
 	collection(idOrName: 'devices'): RecordService<DevicesResponse>
+	collection(idOrName: 'gallery'): RecordService<GalleryResponse>
 	collection(idOrName: 'models'): RecordService<ModelsResponse>
 	collection(idOrName: 'permissions'): RecordService<PermissionsResponse>
 	collection(idOrName: 'rules'): RecordService<RulesResponse>

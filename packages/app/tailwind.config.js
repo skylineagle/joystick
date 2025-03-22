@@ -11,6 +11,12 @@ export default {
       },
       animation: {
         "spin-slow": "spin 3s linear",
+        border: "border 4s linear infinite",
+      },
+      keyframes: {
+        border: {
+          to: { "--border-angle": "360deg" },
+        },
       },
       colors: {
         background: "hsl(var(--background))",
