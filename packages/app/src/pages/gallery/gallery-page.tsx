@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { useIsSupported } from "@/hooks/use-is-supported";
 import { pb } from "@/lib/pocketbase";
 import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
@@ -72,6 +73,8 @@ export default function GalleryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedState, setSelectedState] = useState<EventState>("all");
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
+
+  const { isSupported, isLoading } = useIsSupported(deviceId!, "list-events");
 
   // Fetch gallery events
   const { events, isLoading: isLoadingEvents } = useGalleryEvents(deviceId!);
@@ -308,7 +311,19 @@ export default function GalleryPage() {
     });
   };
 
-  if (isLoadingEvents) {
+  if (!isSupported) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full">
+        <div className="text-lg font-medium mb-2">Device not supported</div>
+        <div className="text-sm">
+          Please ensure the device has "list-events" action enabled and try
+          again.
+        </div>
+      </div>
+    );
+  }
+
+  if (isLoadingEvents || isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         <motion.div
