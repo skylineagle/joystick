@@ -7,7 +7,7 @@ import { join } from "path";
 import { logger } from "@/logger";
 import { runCommandOnDevice } from "@/ssh";
 import { Baker } from "cronbake";
-import { JOYSTICK_API_URL } from "../../baker/src/config";
+import { JOYSTICK_API_URL } from "@/config";
 const GALLERY_BASE_PATH = join(process.cwd(), "data", "gallery");
 
 // Ensure gallery directory exists
