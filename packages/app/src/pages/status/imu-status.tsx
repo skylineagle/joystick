@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useDevice } from "@/hooks/use-device";
 import { runAction } from "@/lib/joystick-api";
-import { useQuery } from "@tanstack/react-query";
-import { RefreshCw } from "lucide-react";
+import { pb } from "@/lib/pocketbase";
+import { toast } from "@/utils/toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Crosshair, RefreshCw } from "lucide-react";
 import { lazy, Suspense } from "react";
 import { z } from "zod";
 
@@ -16,6 +19,8 @@ const imuSchema = z.object({
 
 // Custom hook to fetch IMU data using React Query
 const useGetIMUData = (deviceId: string) => {
+  const { data: device } = useDevice(deviceId);
+
   return useQuery({
     queryKey: ["imu-data", deviceId],
     queryFn: async () => {
@@ -32,6 +37,15 @@ const useGetIMUData = (deviceId: string) => {
       try {
         const validatedData = imuSchema.parse(parsedResponse);
 
+        // Apply reset values if they exist
+        if (device?.information?.imuResetValues) {
+          return {
+            x: validatedData.x - device.information.imuResetValues.x,
+            y: validatedData.y - device.information.imuResetValues.y,
+            z: validatedData.z - device.information.imuResetValues.z,
+          };
+        }
+
         return validatedData;
       } catch (error) {
         throw new Error(
@@ -46,11 +60,41 @@ const useGetIMUData = (deviceId: string) => {
 };
 
 export const IMUStatus = ({ deviceId }: { deviceId: string }) => {
+  const queryClient = useQueryClient();
   const {
     data: imuData = { x: 0, y: 0, z: 0 },
     isLoading,
     refetch,
   } = useGetIMUData(deviceId);
+
+  const resetIMUMutation = useMutation({
+    mutationFn: async () => {
+      // Save current IMU values as reset values in device information
+      await pb.collection("devices").update(deviceId, {
+        information: {
+          imuResetValues: {
+            x: imuData.x,
+            y: imuData.y,
+            z: imuData.z,
+          },
+        },
+      });
+    },
+    onSuccess: () => {
+      toast.success({
+        message: "IMU reset values saved successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: ["device", deviceId] });
+    },
+    onError: (error) => {
+      toast.error({
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to save IMU reset values",
+      });
+    },
+  });
 
   return (
     <div className="space-y-4">
@@ -60,6 +104,16 @@ export const IMUStatus = ({ deviceId }: { deviceId: string }) => {
           <span className="text-xs text-muted-foreground">
             {new Date().toLocaleTimeString()}
           </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 p-0"
+            onClick={() => resetIMUMutation.mutate()}
+            disabled={isLoading || resetIMUMutation.isPending}
+          >
+            <Crosshair className="h-4 w-4" />
+            <span className="sr-only">Reset IMU</span>
+          </Button>
           <Button
             variant="ghost"
             size="sm"
