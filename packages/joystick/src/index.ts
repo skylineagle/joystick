@@ -12,7 +12,6 @@ import { generateRandomCPSIResult, updateStatus } from "./utils";
 
 const app = new Elysia();
 
-
 // Apply the logging middleware
 setupLoggingMiddleware(app);
 
@@ -296,27 +295,6 @@ app.get("/api/ping/:device", async ({ params, query }) => {
     return isOnline;
   } catch (error) {
     return false;
-  }
-});
-
-// Gallery endpoints
-app.get("/api/gallery/:device/events", async ({ params }) => {
-  try {
-    const events = await pb.collection("gallery").getFullList({
-      filter: `device = "${params.device}"`,
-      sort: "-created",
-    });
-
-    return { success: true, events };
-  } catch (error) {
-    enhancedLogger.error(
-      { error, device: params.device },
-      "Error listing gallery events"
-    );
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : String(error),
-    };
   }
 });
 

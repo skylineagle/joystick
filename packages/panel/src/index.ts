@@ -84,6 +84,7 @@ Bun.serve({
           let sshProcess: ChildProcess;
 
           if (sshKey) {
+            logger.debug("using ssh key for ssh session");
             // Use SSH key authentication
             // Create a temporary file to store the SSH key
             const tmpDir = Bun.env.TMPDIR || "/tmp";

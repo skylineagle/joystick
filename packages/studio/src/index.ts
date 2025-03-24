@@ -125,6 +125,17 @@ app.get("/api/gallery/:device/stats", async ({ params }) => {
   }
 });
 
+app.get("/api/health", async () => {
+  return {
+    status: "healthy",
+    service: "studio",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    memory: process.memoryUsage(),
+    version: process.env.npm_package_version || "unknown",
+  };
+});
+
 app.use(cors()).listen(Bun.env.PORT || 8001);
 console.log(
   `🦊 Server is running at ${Bun.env.HOST ?? "localhost"}:${

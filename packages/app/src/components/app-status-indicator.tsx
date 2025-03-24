@@ -38,6 +38,7 @@ interface SystemStatus {
   switcherStatus: ServiceStatus;
   bakerStatus: ServiceStatus;
   panelStatus: ServiceStatus;
+  studioStatus: ServiceStatus;
   whisperStatus: ServiceStatus;
   smsServerStatus: ServiceStatus;
   lastChecked: Date;
@@ -102,6 +103,7 @@ export function AppStatusIndicator() {
     switcherStatus: "unknown",
     bakerStatus: "unknown",
     panelStatus: "unknown",
+    studioStatus: "unknown",
     whisperStatus: "unknown",
     smsServerStatus: "unknown",
     lastChecked: new Date(),
@@ -116,7 +118,7 @@ export function AppStatusIndicator() {
       );
     },
     retry: 1,
-    refetchInterval: 60000, // Check every minute
+    refetchInterval: 60000 * 3, // Check every minute
     refetchOnWindowFocus: false,
     gcTime: 0, // Don't cache health check results
     staleTime: 55000, // Consider stale after 55 seconds
@@ -132,7 +134,7 @@ export function AppStatusIndicator() {
       );
     },
     retry: 1,
-    refetchInterval: 60000, // Check every minute
+    refetchInterval: 60000 * 3, // Check every minute
     refetchOnWindowFocus: false,
     gcTime: 0, // Don't cache health check results
     staleTime: 55000, // Consider stale after 55 seconds
@@ -148,7 +150,7 @@ export function AppStatusIndicator() {
       );
     },
     retry: 1,
-    refetchInterval: 60000, // Check every minute
+    refetchInterval: 60000 * 3, // Check every minute
     refetchOnWindowFocus: false,
     gcTime: 0, // Don't cache health check results
     staleTime: 55000, // Consider stale after 55 seconds
@@ -164,7 +166,23 @@ export function AppStatusIndicator() {
       );
     },
     retry: 1,
-    refetchInterval: 60000, // Check every minute
+    refetchInterval: 60000 * 3, // Check every minute
+    refetchOnWindowFocus: false,
+    gcTime: 0, // Don't cache health check results
+    staleTime: 55000, // Consider stale after 55 seconds
+    // Prevent global error handler from showing errors for health checks
+    meta: { suppressGlobalErrors: true },
+  });
+
+  const { data: studioHealth, refetch: refetchStudio } = useQuery({
+    queryKey: ["health", "studio"],
+    queryFn: async () => {
+      return joystickApi.get<HealthResponse>(
+        createUrl(urls.studio, "/api/health")
+      );
+    },
+    retry: 1,
+    refetchInterval: 60000 * 3, // Check every minute
     refetchOnWindowFocus: false,
     gcTime: 0, // Don't cache health check results
     staleTime: 55000, // Consider stale after 55 seconds
@@ -180,7 +198,7 @@ export function AppStatusIndicator() {
       );
     },
     retry: 1,
-    refetchInterval: 60000, // Check every minute
+    refetchInterval: 60000 * 3, // Check every minute
     refetchOnWindowFocus: false,
     gcTime: 0, // Don't cache health check results
     staleTime: 55000, // Consider stale after 55 seconds
@@ -196,7 +214,7 @@ export function AppStatusIndicator() {
       );
     },
     retry: 1,
-    refetchInterval: 60000, // Check every minute
+    refetchInterval: 60000 * 3, // Check every minute
     refetchOnWindowFocus: false,
     gcTime: 0, // Don't cache health check results
     staleTime: 55000, // Consider stale after 55 seconds
@@ -216,7 +234,7 @@ export function AppStatusIndicator() {
       };
     },
     retry: 1,
-    refetchInterval: 60000,
+    refetchInterval: 60000 * 3,
     refetchOnWindowFocus: false,
     gcTime: 0,
     staleTime: 55000,
@@ -240,7 +258,7 @@ export function AppStatusIndicator() {
       } as HealthResponse;
     },
     retry: 1,
-    refetchInterval: 60000,
+    refetchInterval: 60000 * 3,
     refetchOnWindowFocus: false,
     gcTime: 0,
     staleTime: 55000,
@@ -257,7 +275,7 @@ export function AppStatusIndicator() {
     refetchWhisper();
     refetchSmsServer();
     refetchPocketbase();
-
+    refetchStudio();
     // Invalidate queries that might be dependent on service availability
     queryClient.invalidateQueries({ queryKey: ["devices"] });
     queryClient.invalidateQueries({ queryKey: ["cameras"] });
@@ -270,6 +288,7 @@ export function AppStatusIndicator() {
     refetchWhisper,
     refetchSmsServer,
     refetchPocketbase,
+    refetchStudio,
     queryClient,
   ]); // Add dependencies here
 
@@ -287,6 +306,7 @@ export function AppStatusIndicator() {
         switcherHealth?.status === "healthy" ? "healthy" : "offline",
       bakerStatus: bakerHealth?.status === "healthy" ? "healthy" : "offline",
       panelStatus: panelHealth?.status === "healthy" ? "healthy" : "offline",
+      studioStatus: studioHealth?.status === "healthy" ? "healthy" : "offline",
       whisperStatus:
         whisperHealth?.status === "healthy" ? "healthy" : "offline",
       smsServerStatus:
@@ -302,6 +322,7 @@ export function AppStatusIndicator() {
     panelHealth,
     whisperHealth,
     smsServerHealth,
+    studioHealth,
   ]);
 
   // Update network status on online/offline events
@@ -343,6 +364,7 @@ export function AppStatusIndicator() {
       systemStatus.switcherStatus,
       systemStatus.bakerStatus,
       systemStatus.panelStatus,
+      systemStatus.studioStatus,
       systemStatus.whisperStatus,
       systemStatus.smsServerStatus,
     ];
@@ -506,6 +528,28 @@ export function AppStatusIndicator() {
                   )}
                 >
                   {getStatusLabel(systemStatus.panelStatus)}
+                </span>
+              </div>
+            </div>
+
+            {/* Studio API Status */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {getStatusIcon(systemStatus.studioStatus)}
+                <span>Studio API</span>
+              </div>
+              <div>
+                <span
+                  className={cn(
+                    "px-2 py-1 text-xs rounded-full",
+                    systemStatus.studioStatus === "healthy"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                      : systemStatus.studioStatus === "degraded"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                      : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
+                  )}
+                >
+                  {getStatusLabel(systemStatus.studioStatus)}
                 </span>
               </div>
             </div>
