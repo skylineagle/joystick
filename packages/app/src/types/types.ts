@@ -86,6 +86,11 @@ export type DeviceInformation = {
   host: string;
   phone?: string;
   battery_capacity?: number;
+  imuResetValues?: {
+    x: number;
+    y: number;
+    z: number;
+  };
 };
 
 export type DeviceResponse = DevicesResponse<
