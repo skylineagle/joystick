@@ -1,7 +1,27 @@
 services:
+  traefik:
+    image: traefik:v2.11
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "8080:8080"
+      # - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - "--log.level=DEBUG"
+      - "--providers.docker"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.http.address=:80"
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+    networks:
+      - app-network
+
   pocketbase:
     image: ghcr.io/skylineagle/joystick/pb:latest
     restart: unless-stopped
+    platform: linux/amd64
     ports:
       - "8090:8090"
     environment:
@@ -41,11 +61,11 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
   app:
     image: ghcr.io/skylineagle/joystick/app:latest
     restart: unless-stopped
-    ports:
-      - "80:80"
+    platform: linux/amd64
     depends_on:
       - pocketbase
     networks:
@@ -55,10 +75,15 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app.rule=Host(`localhost`) && PathPrefix(`/app`)"
+      - "traefik.http.services.app.loadbalancer.server.port=80"
 
   joystick:
     image: ghcr.io/skylineagle/joystick/joystick:latest
     restart: unless-stopped
+    platform: linux/amd64
     ports:
       - "8000:8000"
     environment:
@@ -66,7 +91,6 @@ services:
       - SWITCHER_API_URL=http://switcher:8080
       - PORT=8000
       - HOST=0.0.0.0
-      #- PASSWORD=Password2@
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -79,16 +103,28 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.joystick.rule=Host(`localhost`) && PathPrefix(`/joystick`)"
+      - "traefik.http.middlewares.joystick-strip.stripprefix.prefixes=/joystick"
+      # - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=*"
+      # - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
+      # - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=*"
+
+      # - "traefik.http.middlewares.cors.headers.addvaryheader=true"
+      # - "traefik.http.routers.joystick.middlewares=cors"
+      - "traefik.http.routers.joystick.middlewares=joystick-strip"
+      - "traefik.http.services.joystick.loadbalancer.server.port=8000"
 
   panel:
     image: ghcr.io/skylineagle/joystick/panel:latest
     restart: unless-stopped
+    platform: linux/amd64
     ports:
       - "4000:4000"
     environment:
       - POCKETBASE_URL=http://pocketbase:8090
       - PORT=4000
-      #- PASSWORD=Password2@
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -101,15 +137,25 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    # labels:
+    # - "traefik.enable=true"
+    # - "traefik.http.routers.panel.rule=Host(`localhost`) && PathPrefix(`/panel`)"
+    # - "traefik.http.middlewares.panel-strip.stripprefix.prefixes=/panel"
+    # - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=*"
+    # - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
+    # - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=*"
+    # - "traefik.http.middlewares.cors.headers.addvaryheader=true"
+    # - "traefik.http.routers.panel.middlewares=panel-strip"
+    # - "traefik.http.services.panel.loadbalancer.server.port=4000"
 
   baker:
     image: ghcr.io/skylineagle/joystick/baker:latest
     restart: unless-stopped
+    platform: linux/amd64
     ports:
       - "3000:3000"
     environment:
       - PORT=3000
-      #- PASSWORD=Password2@
       - MEDIAMTX_API=http://mediamtx:9997
       - POCKETBASE_URL=http://pocketbase:8090
       - JOYSTICK_API_URL=http://joystick:8000
@@ -125,18 +171,28 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.baker.rule=Host(`localhost`) && PathPrefix(`/baker`)"
+    #   - "traefik.http.middlewares.baker-strip.stripprefix.prefixes=/baker"
+    # - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=*"
+    # - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
+    # - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=*"
+    # - "traefik.http.middlewares.cors.headers.addvaryheader=true"
+    # - "traefik.http.routers.baker.middlewares=baker-strip"
+    # - "traefik.http.services.baker.loadbalancer.server.port=3000"
 
   switcher:
     image: ghcr.io/skylineagle/joystick/switcher:latest
     restart: unless-stopped
-    ports:
-      - "8080:8080"
+    platform: linux/amd64
+    # ports:
+    #   - "8084:8084"
     environment:
       - MEDIAMTX_API=http://mediamtx:9997
       - POCKETBASE_URL=http://pocketbase:8090
       - JOYSTICK_API_URL=http://joystick:8000
       - PORT=8080
-      #- PASSWORD=Password2@
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -149,18 +205,28 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.switcher.rule=Host(`localhost`) && PathPrefix(`/switcher`)"
+      - "traefik.http.middlewares.switcher-strip.stripprefix.prefixes=/switcher"
+      # - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=*"
+      # - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
+      # - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlis
+      # - "traefik.http.middlewares.cors.headers.addvaryheader=true"
+      - "traefik.http.routers.switcher.middlewares=switcher-strip"
+      - "traefik.http.services.switcher.loadbalancer.server.port=8080"
 
   whisper:
     image: ghcr.io/skylineagle/joystick/whisper:latest
     restart: unless-stopped
-    ports:
-      - "8081:8081"
+    platform: linux/amd64
+    # ports:
+    #   - "8081:8081"
     environment:
       - MEDIAMTX_API=http://mediamtx:9997
       - POCKETBASE_URL=http://pocketbase:8090
       - JOYSTICK_API_URL=http://joystick:8000
       - PORT=8081
-      #- PASSWORD=Password2@
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -173,6 +239,48 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    # labels:
+    #   - "traefik.enable=true"
+    #   - "traefik.http.routers.whisper.rule=Host(`localhost`) && PathPrefix(`/whisper`)"
+    #   - "traefik.http.middlewares.whisper-strip.stripprefix.prefixes=/whisper"
+    # - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=*"
+    # - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
+    # - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlis
+    # - "traefik.http.middlewares.cors.headers.addvaryheader=true"
+    # - "traefik.http.routers.whisper.middlewares=whisper-strip,cors"
+    # - "traefik.http.services.whisper.loadbalancer.server.port=8081"
+
+  # studio:
+  #   image: ghcr.io/skylineagle/joystick/studio:latest
+  #   restart: unless-stopped
+  #   platform: linux/amd64
+  #   environment:
+  #     - POCKETBASE_URL=http://pocketbase:8090
+  #     - JOYSTICK_API_URL=http://joystick:8000
+  #     - PORT=8001
+  #   networks:
+  #     - app-network
+  #   depends_on:
+  #     pocketbase:
+  #       condition: service_healthy
+  #     mediamtx:
+  #       condition: service_started
+  #   logging:
+  #     driver: "json-file"
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "3"
+  # labels:
+  #   - "traefik.enable=true"
+  #   - "traefik.http.routers.studio.rule=Host(`localhost`) && PathPrefix(`/studio`)"
+  #   - "traefik.http.middlewares.studio-strip.stripprefix.prefixes=/studio"
+  #   - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=*"
+  #   - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
+  #   - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=*"
+  #
+  #   - "traefik.http.middlewares.cors.headers.addvaryheader=true"
+  #   - "traefik.http.routers.studio.middlewares=studio-strip,cors"
+  #   - "traefik.http.services.studio.loadbalancer.server.port=8001"
 
 networks:
   app-network:

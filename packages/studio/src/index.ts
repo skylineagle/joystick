@@ -1,7 +1,6 @@
 import { logger } from "@/logger";
 import { pb } from "@/pocketbase";
 import cors from "@elysiajs/cors";
-import { Baker } from "cronbake";
 import { Elysia, t } from "elysia";
 import { GalleryService } from "./gallery";
 

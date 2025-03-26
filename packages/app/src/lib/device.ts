@@ -16,6 +16,8 @@ export async function getDevicesIds() {
 
 export async function fetchDevice(deviceId: string) {
   try {
+    console.log(deviceId);
+
     const device = await pb
       .collection("devices")
       .getFirstListItem<DeviceResponse>(`id = "${deviceId}"`, {
