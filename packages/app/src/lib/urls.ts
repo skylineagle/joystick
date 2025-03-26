@@ -12,9 +12,6 @@ const PORTS = {
 
 const PREFIXES = {
   joystick: "joystick",
-  stream: "stream",
-  stream_api: "stream",
-  pocketbase: "pb",
   panel: "panel",
   baker: "baker",
   studio: "studio",
@@ -24,10 +21,12 @@ const PREFIXES = {
 
 function getServiceUrl(service: keyof typeof PORTS): string {
   const hostname = window.location.hostname;
-  // const port = PORTS[service];
 
-  return `http://${hostname}/${PREFIXES[service]}`;
-  // return `http://${hostname}:${port}`;
+  return `http://${hostname}${
+    Object.keys(PREFIXES).includes(service)
+      ? `/${PREFIXES[service as keyof typeof PREFIXES]}`
+      : `:${PORTS[service]}`
+  }`;
 }
 
 export const urls = {

@@ -1,5 +1,5 @@
 import { Label } from "@/components/ui/label";
-import { useModeConfig } from "@/hooks/use-model-configs";
+import { useModelConfig } from "@/hooks/use-model-configs";
 import { cn } from "@/lib/utils";
 import { DeviceAutomation } from "@/types/types";
 import { DynamicIcon, IconName } from "lucide-react/dynamic";
@@ -13,7 +13,7 @@ export const NextModeIndication = ({
   deviceId,
   next,
 }: NextModeIndicationProps) => {
-  const { data: config } = useModeConfig(deviceId);
+  const { data: config } = useModelConfig(deviceId);
   const { label, color, icon: Icon } = config[next.mode as keyof typeof config];
 
   return (

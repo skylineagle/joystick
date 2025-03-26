@@ -3,7 +3,7 @@ import { pb } from "@/lib/pocketbase";
 import { DeviceResponse } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
 
-export function useModeConfig(deviceId: string) {
+export function useModelConfig(deviceId: string) {
   const { data, isLoading } = useQuery({
     queryKey: ["model-configs", deviceId],
     queryFn: async () => {

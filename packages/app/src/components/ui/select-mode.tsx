@@ -5,7 +5,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { useModeConfig } from "@/hooks/use-model-configs";
+import { useModelConfig } from "@/hooks/use-model-configs";
 import { cn } from "@/lib/utils";
 import { DynamicIcon, IconName } from "lucide-react/dynamic";
 import { motion } from "motion/react";
@@ -25,7 +25,7 @@ export const SelectMode = ({
   isLoading,
   availableModes,
 }: SelectModeProps) => {
-  const { data: configs } = useModeConfig(deviceId);
+  const { data: configs } = useModelConfig(deviceId);
   const config = configs[mode as keyof typeof configs] ?? {};
 
   return (

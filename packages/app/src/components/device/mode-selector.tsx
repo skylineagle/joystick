@@ -6,7 +6,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { useMode } from "@/hooks/use-mode";
-import { useModeConfig } from "@/hooks/use-model-configs";
+import { useModelConfig } from "@/hooks/use-model-configs";
 import { cn, getModeOptionsFromSchema } from "@/lib/utils";
 import { DeviceResponse } from "@/types/types";
 import { Loader2 } from "lucide-react";
@@ -25,7 +25,7 @@ export const ModeSelector = ({ device }: ModeSelectorProps) => {
     () => getModeOptionsFromSchema(action?.parameters ?? {}),
     [action]
   );
-  const { data: modes, isLoading: isModesLoading } = useModeConfig(device.id);
+  const { data: modes, isLoading: isModesLoading } = useModelConfig(device.id);
   const currentMode = modes[mode as keyof typeof modes];
 
   const handleModeChange = useCallback(
