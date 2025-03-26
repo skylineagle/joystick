@@ -10,11 +10,24 @@ const PORTS = {
   whisper: 8081,
 } as const;
 
+const PREFIXES = {
+  joystick: "joystick",
+  stream: "stream",
+  stream_api: "stream",
+  pocketbase: "pb",
+  panel: "panel",
+  baker: "baker",
+  studio: "studio",
+  switcher: "switcher",
+  whisper: "whisper",
+} as const;
+
 function getServiceUrl(service: keyof typeof PORTS): string {
   const hostname = window.location.hostname;
-  const port = PORTS[service];
+  // const port = PORTS[service];
 
-  return `http://${hostname}:${port}`;
+  return `http://${hostname}/${PREFIXES[service]}`;
+  // return `http://${hostname}:${port}`;
 }
 
 export const urls = {

@@ -148,9 +148,7 @@ export async function createJob(
         },
       });
     } else {
-      throw new Error(
-        `Unsupported automation type: ${automation.automationType}`
-      );
+      logger.error(`Unsupported automation type: ${automation.automationType}`);
     }
   } catch (error) {
     console.error(error);
