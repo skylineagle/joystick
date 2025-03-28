@@ -13,17 +13,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useBitrate } from "@/hooks/use-bitrate";
+import { useDevice } from "@/hooks/use-device";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, Plus, RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
-
-const BITRATE_PRESETS = [
-  { value: "1000", label: "1000 kbps" },
-  { value: "2500", label: "2500 kbps" },
-  { value: "5000", label: "5000 kbps" },
-  { value: "8000", label: "8000 kbps" },
-];
 
 interface BitrateControllProps {
   deviceId: string;
@@ -33,6 +27,7 @@ export function BitrateControll({ deviceId }: BitrateControllProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const { isMobileLandscape } = useMobileLandscape();
+  const { data: device } = useDevice(deviceId);
   const { bitrate, setBitrate, refreshBitrate } = useBitrate(deviceId);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -50,17 +45,26 @@ export function BitrateControll({ deviceId }: BitrateControllProps) {
     const numValue = parseInt(search);
     if (isNaN(numValue)) return false;
 
-    const isNotPreset = !BITRATE_PRESETS.some(
-      (preset) => preset.value === search
-    );
+    const isNotPreset = !device?.information?.bitrate_presets?.[search];
     return isNotPreset;
-  }, [search]);
+  }, [device?.information?.bitrate_presets, search]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await refreshBitrate();
     setIsRefreshing(false);
   };
+
+  const bitratePresets = useMemo(() => {
+    if (!device?.information?.bitrate_presets) return null;
+
+    return Object.entries(device.information.bitrate_presets).map(
+      ([label, value]) => ({
+        value: value.toString(),
+        label,
+      })
+    );
+  }, [device?.information?.bitrate_presets]);
 
   return (
     <div className="w-full">
@@ -126,29 +130,31 @@ export function BitrateControll({ deviceId }: BitrateControllProps) {
                   <span className="truncate">{search} kbps</span>
                 </CommandItem>
               )}
-              <CommandGroup>
-                {BITRATE_PRESETS.map((preset) => (
-                  <CommandItem
-                    key={preset.value}
-                    value={preset.value}
-                    onSelect={() => handleSelect(preset.value)}
-                    className={cn(
-                      "text-xs sm:text-sm px-2",
-                      isMobileLandscape ? "h-7" : "h-8 sm:h-10"
-                    )}
-                  >
-                    <Check
+              {bitratePresets && (
+                <CommandGroup>
+                  {bitratePresets.map((preset) => (
+                    <CommandItem
+                      key={preset.value}
+                      value={preset.value}
+                      onSelect={() => handleSelect(preset.value)}
                       className={cn(
-                        "mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0",
-                        bitrate?.toString() === preset.value
-                          ? "opacity-100"
-                          : "opacity-0"
+                        "text-xs sm:text-sm px-2",
+                        isMobileLandscape ? "h-7" : "h-8 sm:h-10"
                       )}
-                    />
-                    <span className="truncate">{preset.label}</span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
+                    >
+                      <Check
+                        className={cn(
+                          "mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0",
+                          bitrate?.toString() === preset.value
+                            ? "opacity-100"
+                            : "opacity-0"
+                        )}
+                      />
+                      <span className="truncate">{preset.label}</span>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
             </CommandList>
           </Command>
         </PopoverContent>

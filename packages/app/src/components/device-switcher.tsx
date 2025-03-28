@@ -22,10 +22,8 @@ import { useLocation, useNavigate, useParams } from "react-router";
 export function DeviceSwitcher() {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
-
   const { device: deviceId } = useParams();
   const currentPage = pathname.split(deviceId ?? "")[1].replaceAll("/", "");
-
   const { data: currentDevice, isLoading: isLoadingDevice } = useDevice(
     deviceId ?? ""
   );

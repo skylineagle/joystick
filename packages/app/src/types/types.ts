@@ -91,6 +91,9 @@ export type DeviceInformation = {
     y: number;
     z: number;
   };
+  bitrate_presets?: {
+    [key: string]: number;
+  };
 };
 
 export type DeviceResponse = DevicesResponse<
