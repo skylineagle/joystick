@@ -23,6 +23,9 @@ import {
 import { useQueryState } from "nuqs";
 import * as React from "react";
 import { Link, useLocation, useParams } from "react-router";
+import { useIsParamsSupported } from "@/hooks/use-support-params";
+import { useIsTerminalSupported } from "@/hooks/use-support-terminal";
+import { useIsSupported } from "@/hooks/use-is-supported";
 
 const navItems = [
   {
@@ -61,6 +64,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { device: deviceId } = useParams();
   const [activeTab] = useQueryState("activeTab");
   const location = useLocation();
+  const isParamsSupported = useIsParamsSupported(deviceId!);
+  const isTerminalSupported = useIsTerminalSupported(deviceId!);
+  const { isSupported: isGallerySupported, isLoading: isGalleryLoading } =
+    useIsSupported(deviceId!, "list-events");
+
+  const supportedItems = navItems.filter((item) => {
+    if (item.path === "terminal" && !isTerminalSupported) return false;
+    if (item.path === "params" && !isParamsSupported) return false;
+    if (item.path === "gallery" && (!isGallerySupported || isGalleryLoading))
+      return false;
+    return true;
+  });
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -69,7 +84,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu className="my-2 space-y-1 px-2">
-          {navItems.map((item) => (
+          {supportedItems.map((item) => (
             <SidebarMenuItem key={item.path}>
               <SidebarMenuButton
                 asChild
