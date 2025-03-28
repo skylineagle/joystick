@@ -211,7 +211,7 @@ services:
       - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
       - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=*"
       - "traefik.http.middlewares.cors.headers.addvaryheader=true"
-      - "traefik.http.routers.switcher.middlewares=switcher-strip,cords"
+      - "traefik.http.routers.switcher.middlewares=switcher-strip,cors"
       - "traefik.http.services.switcher.loadbalancer.server.port=8080"
 
   whisper:
@@ -278,6 +278,15 @@ services:
       - "traefik.http.middlewares.cors.headers.addvaryheader=true"
       - "traefik.http.routers.studio.middlewares=studio-strip,cors"
       - "traefik.http.services.studio.loadbalancer.server.port=8001"
+
+  dozzle:
+    image: amir20/dozzle:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - app-network
+    ports:
+      - "8085:8080"
 
 networks:
   app-network:
