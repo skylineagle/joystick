@@ -238,14 +238,10 @@ export function RunSettings() {
     }
   };
 
-  const handleToggleTargetType = (
-    id: string,
-    currentTarget: "local" | "device"
-  ) => {
-    const newTarget = currentTarget === "local" ? "device" : "local";
+  const handleToggleTargetType = (id: string, target: "local" | "device") => {
     editRunConfigMutation.mutate({
       id,
-      data: { target: newTarget },
+      data: { target },
     });
   };
 
