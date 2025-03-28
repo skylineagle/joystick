@@ -23,7 +23,8 @@ function getServiceUrl(service: keyof typeof PORTS): string {
   const hostname = window.location.hostname;
 
   return `http://${hostname}${
-    Object.keys(PREFIXES).includes(service)
+    Object.keys(PREFIXES).includes(service) &&
+    import.meta.env.NODE_ENV === "production"
       ? `/${PREFIXES[service as keyof typeof PREFIXES]}`
       : `:${PORTS[service]}`
   }`;

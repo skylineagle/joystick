@@ -35,7 +35,7 @@ export const RoiProvider = ({
 
         return result;
       } catch (error) {
-        console.error(error);
+        console.error("Failed to parse roi result", error);
         return [];
       }
     },
