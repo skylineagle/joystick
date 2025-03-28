@@ -124,7 +124,7 @@ Bun.serve({
               );
               return;
             }
-          } else if (password) {
+          } else {
             // Use password authentication as fallback
             const sshArgs = [
               "-o",
@@ -136,11 +136,10 @@ Bun.serve({
               `${user}@${host}`,
             ];
 
-            sshProcess = spawn("sshpass", ["-p", password, "ssh", ...sshArgs]);
+            sshProcess = password
+              ? spawn("sshpass", ["-p", password, "ssh", ...sshArgs])
+              : spawn("ssh", sshArgs);
             logger.info(`Connecting to ${host} with password`);
-          } else {
-            ws.send("No authentication method available");
-            return;
           }
 
           connections.set(message.device, sshProcess);
