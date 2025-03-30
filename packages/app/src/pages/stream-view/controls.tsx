@@ -207,7 +207,7 @@ export const Controls = () => {
         <div className="flex-1" />
 
         {/* Tabs Section - Always at the bottom */}
-        {roiMode === "hide" && (
+        {roiMode !== "edit" && (
           <MotionCard
             className="p-3 border-none shadow-xl"
             initial={{ opacity: 0, y: 20 }}

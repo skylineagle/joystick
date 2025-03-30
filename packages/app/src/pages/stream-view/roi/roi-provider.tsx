@@ -2,7 +2,7 @@ import { useIsSupported } from "@/hooks/use-is-supported";
 import { runAction } from "@/lib/joystick-api";
 import { transformToCommittedRoiProperties } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   RoiProvider as BaseRoiProvider,
   CommittedRoiProperties,
@@ -11,6 +11,7 @@ import { useLocalStorage } from "usehooks-ts";
 
 const DeviceIdContext = React.createContext<string>("");
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useDeviceId = () => {
   return React.useContext(DeviceIdContext);
 };
@@ -27,13 +28,15 @@ export const RoiProvider = ({
     `rois-${deviceId}`,
     []
   );
+  const [initialized, setInitialized] = useState(false);
+  const [currentRois, setCurrentRois] = useState<CommittedRoiProperties[]>([]);
 
   const { isSupported: isRoiSupported } = useIsSupported(deviceId!, [
     "set-roi",
     "get-roi",
   ]);
 
-  const { data } = useQuery({
+  const { data, isSuccess } = useQuery({
     queryKey: ["get-roi", deviceId, isRoiSupported],
     queryFn: async () => {
       if (!isRoiSupported) return [];
@@ -56,6 +59,31 @@ export const RoiProvider = ({
     },
     enabled: !!deviceId && isRoiSupported,
   });
+
+  // Initialize ROIs after data is loaded
+  useEffect(() => {
+    // Reset and mark as uninitialized on device change
+    setInitialized(false);
+
+    // Explicitly refetch query on device change
+    if (isRoiSupported) {
+      queryClient.invalidateQueries({ queryKey: ["get-roi", deviceId] });
+    }
+  }, [deviceId, isRoiSupported, queryClient]);
+
+  // Handle ROI initialization when data changes
+  useEffect(() => {
+    // Only update when we have a definitive result (success or not supported)
+    if (!initialized && ((isSuccess && data) || !isRoiSupported)) {
+      if (isRoiSupported && data) {
+        setCurrentRois(data);
+      } else {
+        setCurrentRois(localRois);
+      }
+
+      setInitialized(true);
+    }
+  }, [initialized, data, isRoiSupported, isSuccess, localRois]);
 
   const { mutate: setRoi } = useMutation({
     mutationFn: async (roi: Partial<CommittedRoiProperties>) => {
@@ -87,6 +115,11 @@ export const RoiProvider = ({
     }
 
     setLocalRois(updatedRois);
+
+    // Also update current ROIs to ensure UI is in sync
+    if (!isRoiSupported) {
+      setCurrentRois(updatedRois);
+    }
   };
 
   // Use either API or local storage based on support
@@ -98,13 +131,20 @@ export const RoiProvider = ({
     }
   };
 
+  // Don't render the ROI provider until we've initialized the ROIs
+  if (!initialized) {
+    // Show loading or fallback UI
+    return null;
+  }
+
   return (
     <DeviceIdContext.Provider value={deviceId}>
       <BaseRoiProvider
+        key={deviceId}
         initialConfig={{
           commitRoiBoxStrategy: "exact",
           resizeStrategy: "none",
-          rois: isRoiSupported ? data || [] : localRois,
+          rois: currentRois,
         }}
         onAfterDraw={(roi) => {
           handleRoiChange(roi);
