@@ -7,7 +7,7 @@ export function JitterEasterEgg() {
   // Listen for the secret key combination (F7)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key.toLowerCase() === "j") {
+      if (e.shiftKey && e.ctrlKey && e.key.toLowerCase() === "j") {
         e.preventDefault();
         setIsActive((prev) => !prev);
       }

@@ -7,7 +7,7 @@ export function NeonEasterEgg() {
   // Listen for the secret key combination (F12)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key.toLowerCase() === "e") {
+      if (e.shiftKey && e.ctrlKey && e.key.toLowerCase() === "e") {
         e.preventDefault();
         setIsActive((prev) => !prev);
       }

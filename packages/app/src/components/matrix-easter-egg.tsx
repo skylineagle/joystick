@@ -7,7 +7,7 @@ export function MatrixEasterEgg() {
   // Listen for the secret key combination (F4)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key.toLowerCase() === "f") {
+      if (e.shiftKey && e.ctrlKey && e.key.toLowerCase() === "f") {
         e.preventDefault();
         setIsActive((prev) => !prev);
       }

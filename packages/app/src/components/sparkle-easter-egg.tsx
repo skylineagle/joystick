@@ -7,7 +7,7 @@ export function SparkleEasterEgg() {
   // Listen for the secret key combination (F6)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key.toLowerCase() === "a") {
+      if (e.shiftKey && e.ctrlKey && e.key.toLowerCase() === "a") {
         e.preventDefault();
         setIsActive((prev) => !prev);
       }

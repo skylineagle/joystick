@@ -7,7 +7,7 @@ export function PixelArtEasterEgg() {
   // Listen for the secret key combination (Alt+P)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key.toLowerCase() === "p") {
+      if (e.shiftKey && e.ctrlKey && e.key.toLowerCase() === "p") {
         e.preventDefault();
         setIsActive((prev) => !prev);
       }

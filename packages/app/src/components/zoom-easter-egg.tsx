@@ -7,7 +7,7 @@ export function ZoomEasterEgg() {
   // Listen for the secret key combination (F5)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key.toLowerCase() === "z") {
+      if (e.shiftKey && e.ctrlKey && e.key.toLowerCase() === "z") {
         e.preventDefault();
         setIsActive((prev) => !prev);
       }

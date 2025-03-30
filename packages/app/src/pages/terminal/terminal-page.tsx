@@ -512,14 +512,14 @@ export function TerminalPage() {
             terminal.write("F9 - Disco mode\r\n");
             terminal.write("F10 - Typewriter effect\r\n");
             terminal.write("F11 - Rain effect\r\n");
-            terminal.write("Shift+E - Neon mode\r\n");
-            terminal.write("Shift+S - Slow motion mode\r\n");
-            terminal.write("Shift+P - Pixel art mode\r\n");
-            terminal.write("Shift+M - Mirror mode\r\n");
-            terminal.write("Shift+V - Vaporwave mode\r\n");
-            terminal.write("Shift+Z - Zoom mode\r\n");
-            terminal.write("Shift+J - Jitter mode\r\n");
-            terminal.write("Shift+A - Sparkle mode\r\n");
+            terminal.write("Shift+Ctrl+E - Neon mode\r\n");
+            terminal.write("Shift+Ctrl+S - Slow motion mode\r\n");
+            terminal.write("Shift+Ctrl+P - Pixel art mode\r\n");
+            terminal.write("Shift+Ctrl+M - Mirror mode\r\n");
+            terminal.write("Shift+Ctrl+V - Vaporwave mode\r\n");
+            terminal.write("Shift+Ctrl+Z - Zoom mode\r\n");
+            terminal.write("Shift+Ctrl+J - Jitter mode\r\n");
+            terminal.write("Shift+Ctrl+A - Sparkle mode\r\n");
             terminal.write("↑↑↓↓←→←→BA - Konami code\r\n\n");
 
             // Clear the command buffer

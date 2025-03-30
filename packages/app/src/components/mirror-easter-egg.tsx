@@ -7,7 +7,7 @@ export function MirrorEasterEgg() {
   // Listen for the secret key combination (Alt+M)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key.toLowerCase() === "m") {
+      if (e.shiftKey && e.ctrlKey && e.key.toLowerCase() === "m") {
         e.preventDefault();
         setIsActive((prev) => !prev);
       }

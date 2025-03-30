@@ -7,7 +7,7 @@ export function VaporwaveEasterEgg() {
   // Listen for the secret key combination (Alt+V)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.shiftKey && e.key.toLowerCase() === "v") {
+      if (e.shiftKey && e.ctrlKey && e.key.toLowerCase() === "v") {
         e.preventDefault();
         setIsActive((prev) => !prev);
       }
