@@ -35,7 +35,7 @@ export const Controls = () => {
   const { device: deviceId } = useParams<{ device: string }>();
   const { data: device, isLoading: isDeviceLoading } = useDevice(deviceId!);
   const { isSupported: isRoiSupported, isLoading: isRoiLoading } =
-    useIsSupported(deviceId!, ["set-roi", "get-roi"]);
+    useIsSupported(deviceId!, ["get-roi"]);
   const { isSupported: isSetBitrateSupported, isLoading: isSetBitrateLoading } =
     useIsSupported(deviceId!, ["set-bitrate", "get-bitrate"]);
   const { isSupported: isSetModeSupported, isLoading: isSetModeLoading } =
@@ -198,7 +198,7 @@ export const Controls = () => {
                   <Skeleton className="h-10 w-full" />
                 </div>
               ) : (
-                <RoiModeControl />
+                <RoiModeControl deviceId={deviceId!} />
               )}
             </>
           ) : null}

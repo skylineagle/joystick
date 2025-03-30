@@ -15,6 +15,9 @@ import { Edit3, Eye, EyeOff, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useActions, useCommittedRois, useRoiState } from "react-roi";
 import { useLocation } from "react-router";
+import { RoiBoxStyle } from "./roi-box-style";
+import { useDeviceId } from "./roi-provider";
+
 type RoiMode = "hide" | "view" | "edit";
 
 interface RegionName {
@@ -22,7 +25,16 @@ interface RegionName {
   name: string;
 }
 
-export function RoiModeControl() {
+interface RoiModeControlProps {
+  deviceId?: string; // Optional, will use context if not provided
+}
+
+export function RoiModeControl({
+  deviceId: propDeviceId,
+}: RoiModeControlProps = {}) {
+  const contextDeviceId = useDeviceId();
+  const deviceId = propDeviceId || contextDeviceId;
+
   const { pathname } = useLocation();
   const { roiMode, setRoiMode } = useRoiMode();
   const { setMode, removeRoi, selectRoi } = useActions();
@@ -180,8 +192,8 @@ export function RoiModeControl() {
                         "text-xs sm:text-sm rounded transition-colors w-full text-left group relative",
                         isMobileLandscape ? "p-1" : "p-1.5",
                         roi.id === selectedRoi
-                          ? "bg-primary text-primary-foreground pr-7"
-                          : "text-foreground/80 hover:bg-accent"
+                          ? "bg-primary text-primary-foreground pr-20"
+                          : "text-foreground/80 hover:bg-accent pr-10"
                       )}
                     >
                       {isEditing ? (
@@ -232,16 +244,19 @@ export function RoiModeControl() {
                           )}
                         </div>
                       )}
-                      {roi.id === selectedRoi &&
-                        roiMode === "edit" &&
-                        !isEditing && (
-                          <button
-                            onClick={(e) => handleDeleteRegion(roi.id, e)}
-                            className="absolute right-1 sm:right-1.5 top-1/2 -translate-y-1/2 opacity-60 hover:opacity-100"
-                          >
-                            <X className="h-3 w-3 sm:h-4 sm:w-4" />
-                          </button>
-                        )}
+                      <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center">
+                        <RoiBoxStyle deviceId={deviceId} roiId={roi.id} />
+                        {roi.id === selectedRoi &&
+                          roiMode === "edit" &&
+                          !isEditing && (
+                            <button
+                              onClick={(e) => handleDeleteRegion(roi.id, e)}
+                              className="mr-1 sm:mr-1.5 opacity-60 hover:opacity-100"
+                            >
+                              <X className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </button>
+                          )}
+                      </div>
                     </div>
                   );
                 })}

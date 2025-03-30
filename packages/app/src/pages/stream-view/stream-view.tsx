@@ -51,7 +51,7 @@ export function StreamView() {
 
       {roiMode !== "hide" && (
         <div className="absolute inset-0">
-          <Roi>
+          <Roi deviceId={device.id}>
             <div className="absolute inset-0" />
           </Roi>
         </div>
