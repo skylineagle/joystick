@@ -1,6 +1,6 @@
 import { Loader, PerspectiveCamera } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import BoxModel from "./box-model";
 
 export const BoxScene = ({
