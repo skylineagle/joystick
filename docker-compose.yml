@@ -87,6 +87,7 @@ services:
     ports:
       - "8000:8000"
     environment:
+      - STREAM_API_URL=http://mediamtx:9997
       - POCKETBASE_URL=http://pocketbase:8090
       - SWITCHER_API_URL=http://switcher:8080
       - PORT=8000
