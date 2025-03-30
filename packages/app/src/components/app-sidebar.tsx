@@ -10,6 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useIsPermitted } from "@/hooks/use-is-permitted";
 import {
   ArrowLeft,
   History,
@@ -64,6 +65,7 @@ const navItems = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { device: deviceId } = useParams();
   const location = useLocation();
+  const isRecentEventPermitted = useIsPermitted("recent-events");
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -95,7 +97,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
-        <MinimalEventView />
+        {isRecentEventPermitted && <MinimalEventView />}
         <Button variant="ghost" size="sm" className="w-full mt-2" asChild>
           <Link
             to={{
