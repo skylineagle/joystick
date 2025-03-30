@@ -28,8 +28,8 @@ export function BitrateControll({ deviceId }: BitrateControllProps) {
   const [search, setSearch] = useState("");
   const { isMobileLandscape } = useMobileLandscape();
   const { data: device } = useDevice(deviceId);
-  const { bitrate, setBitrate, refreshBitrate } = useBitrate(deviceId);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { bitrate, setBitrate, refreshBitrate, isLoading } =
+    useBitrate(deviceId);
 
   const handleSelect = (value: string) => {
     const numValue = parseInt(value);
@@ -50,9 +50,7 @@ export function BitrateControll({ deviceId }: BitrateControllProps) {
   }, [device?.information?.bitrate_presets, search]);
 
   const handleRefresh = async () => {
-    setIsRefreshing(true);
     await refreshBitrate();
-    setIsRefreshing(false);
   };
 
   const bitratePresets = useMemo(() => {
@@ -74,14 +72,14 @@ export function BitrateControll({ deviceId }: BitrateControllProps) {
           variant="ghost"
           size="icon"
           onClick={handleRefresh}
-          disabled={isRefreshing}
+          disabled={isLoading}
           className={cn("h-6 w-6", isMobileLandscape ? "h-5 w-5" : "h-6 w-6")}
         >
           <RefreshCw
             className={cn(
               "h-3 w-3",
               isMobileLandscape ? "h-2.5 w-2.5" : "h-3 w-3",
-              isRefreshing && "animate-spin"
+              isLoading && "animate-spin"
             )}
           />
           <span className="sr-only">Refresh bitrate</span>
