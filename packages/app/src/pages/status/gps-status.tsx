@@ -205,7 +205,12 @@ const useGetGPSData = (deviceId: string) => {
 };
 
 export const GPSStatus = ({ deviceId }: { deviceId: string }) => {
-  const { data: gpsData, isLoading, refetch } = useGetGPSData(deviceId);
+  const {
+    data: gpsData,
+    isLoading,
+    isRefetching,
+    refetch,
+  } = useGetGPSData(deviceId);
   const [smallMapState, setSmallMapState] = useState<MapState | null>(null);
   const [largeMapState, setLargeMapState] = useState<MapState | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -319,7 +324,13 @@ export const GPSStatus = ({ deviceId }: { deviceId: string }) => {
             onClick={() => refetch()}
             disabled={isLoading}
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw
+              className={cn(
+                "h-4 w-4",
+                isLoading && "animate-spin",
+                isRefetching && "animate-spin"
+              )}
+            />
             <span className="sr-only">Refresh</span>
           </Button>
         </div>

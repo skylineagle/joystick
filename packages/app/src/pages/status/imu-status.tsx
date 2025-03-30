@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { useDevice } from "@/hooks/use-device";
 import { runAction } from "@/lib/joystick-api";
 import { pb } from "@/lib/pocketbase";
+import { cn } from "@/lib/utils";
 import { toast } from "@/utils/toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Crosshair, RefreshCw } from "lucide-react";
@@ -55,7 +56,7 @@ const useGetIMUData = (deviceId: string) => {
         );
       }
     },
-    refetchInterval: 3000, // Refetch data every second
+    refetchInterval: 20000, // Refetch data every 20 seconds
   });
 };
 
@@ -64,6 +65,7 @@ export const IMUStatus = ({ deviceId }: { deviceId: string }) => {
   const {
     data: imuData = { x: 0, y: 0, z: 0 },
     isLoading,
+    isRefetching,
     refetch,
   } = useGetIMUData(deviceId);
 
@@ -121,7 +123,13 @@ export const IMUStatus = ({ deviceId }: { deviceId: string }) => {
             onClick={() => refetch()}
             disabled={isLoading}
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw
+              className={cn(
+                "h-4 w-4",
+                isLoading && "animate-spin",
+                isRefetching && "animate-spin"
+              )}
+            />
             <span className="sr-only">Refresh</span>
           </Button>
         </div>

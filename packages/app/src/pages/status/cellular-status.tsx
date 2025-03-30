@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { runAction } from "@/lib/joystick-api";
-import { parseCPSIResult } from "@/lib/utils";
+import { cn, parseCPSIResult } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import {
   RefreshCw,
@@ -21,6 +21,7 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
   const {
     data,
     isLoading: isCpsiLoading,
+    isRefetching: isCpsiRefetching,
     refetch: refetchCpsi,
   } = useQuery({
     queryKey: ["cpsi", deviceId],
@@ -104,6 +105,8 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
     return `${value} ${unit}`;
   };
 
+  console.log(isCpsiLoading);
+
   return (
     <div className="h-[200px] p-4 pt-0 max-w-full overflow-hidden">
       {isCpsiLoading ? (
@@ -124,10 +127,16 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
               variant="ghost"
               size="icon"
               onClick={() => refetchCpsi()}
-              disabled={isCpsiLoading}
+              disabled={isCpsiLoading || isCpsiRefetching}
               className="h-7 w-7 flex-shrink-0"
             >
-              <RefreshCw className="h-3 w-3" />
+              <RefreshCw
+                className={cn(
+                  "h-3 w-3",
+                  isCpsiLoading && "animate-spin",
+                  isCpsiRefetching && "animate-spin"
+                )}
+              />
               <span className="sr-only">Refresh cellular status</span>
             </Button>
           </div>

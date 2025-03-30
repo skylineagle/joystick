@@ -27,30 +27,31 @@ export function BatteryStatus({ deviceId }: BatteryStatusProps) {
   const { data: deviceData } = useDevice(deviceId);
   const batteryCapacity = deviceData?.information?.battery_capacity;
 
-  const { data, isLoading, isError, refetch } = useQuery<BatteryData | null>({
-    queryKey: ["battery-status", deviceId],
-    queryFn: async () => {
-      const result = await runAction({
-        deviceId,
-        action: "get-battery",
-        params: {},
-      });
-      try {
-        const parsedResult = batteryDataSchema.parse(
-          JSON.parse(result ?? "{}")
-        );
-        return parsedResult as BatteryData;
-      } catch (error) {
-        if (error instanceof z.ZodError) {
-          throw new Error("Invalid battery data format received from device");
-        }
+  const { data, isLoading, isRefetching, isError, refetch } =
+    useQuery<BatteryData | null>({
+      queryKey: ["battery-status", deviceId],
+      queryFn: async () => {
+        const result = await runAction({
+          deviceId,
+          action: "get-battery",
+          params: {},
+        });
+        try {
+          const parsedResult = batteryDataSchema.parse(
+            JSON.parse(result ?? "{}")
+          );
+          return parsedResult as BatteryData;
+        } catch (error) {
+          if (error instanceof z.ZodError) {
+            throw new Error("Invalid battery data format received from device");
+          }
 
-        return null;
-      }
-    },
-    refetchInterval: 30000, // Refetch every 30 seconds
-    enabled: !!deviceId,
-  });
+          return null;
+        }
+      },
+      refetchInterval: 30000, // Refetch every 30 seconds
+      enabled: !!deviceId,
+    });
 
   // Calculate percentage based on consumption and battery capacity
   const calculatePercentage = () => {
@@ -78,7 +79,13 @@ export function BatteryStatus({ deviceId }: BatteryStatusProps) {
           size="icon"
           className="h-6 w-6"
         >
-          <RefreshCw className="h-3 w-3" />
+          <RefreshCw
+            className={cn(
+              "h-3 w-3",
+              isLoading && "animate-spin",
+              isRefetching && "animate-spin"
+            )}
+          />
         </Button>
       </div>
 
