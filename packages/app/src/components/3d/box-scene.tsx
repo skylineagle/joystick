@@ -1,10 +1,13 @@
 import { Loader, PerspectiveCamera } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import BoxModel from "./box-model";
 
-// Simple error boundary component for 3D content
-const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
+export const BoxScene = ({
+  imuData = { x: 0, y: 0, z: 0 },
+}: {
+  imuData?: { x: number; y: number; z: number };
+}) => {
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
@@ -25,47 +28,27 @@ const ErrorBoundary = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  return <>{children}</>;
-};
-
-// Lighting setup for box visualization
-const SceneLighting = () => {
   return (
-    <>
-      <ambientLight intensity={0.8} />
-      <spotLight
-        position={[5, 5, 5]}
-        angle={0.25}
-        penumbra={1}
-        intensity={0.8}
-      />
-      <spotLight
-        position={[-5, 5, -5]}
-        angle={0.3}
-        penumbra={0.8}
-        intensity={0.5}
-      />
-    </>
-  );
-};
-
-export const BoxScene = ({
-  imuData = { x: 0, y: 0, z: 0 },
-}: {
-  imuData?: { x: number; y: number; z: number };
-}) => {
-  return (
-    <div className="w-full h-full aspect-square relative overflow-hidden rounded-xl bg-gradient-to-br from-background to-muted">
-      <ErrorBoundary>
-        <Canvas shadows={false} dpr={[1, 2]} gl={{ antialias: true }}>
-          <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={40} />
-          <SceneLighting />
-          <BoxModel rotation={imuData} />
-          <gridHelper args={[10, 10, "#666666", "#444444"]} />
-        </Canvas>
-
-        <Loader />
-      </ErrorBoundary>
+    <div className="w-full h-[200px] relative overflow-hidden rounded-xl bg-gradient-to-br from-background to-muted">
+      <Canvas shadows={false} dpr={[1, 2]} gl={{ antialias: true }}>
+        <PerspectiveCamera makeDefault position={[0, 0, 5]} fov={40} />
+        <ambientLight intensity={0.8} />
+        <spotLight
+          position={[5, 5, 5]}
+          angle={0.25}
+          penumbra={1}
+          intensity={0.8}
+        />
+        <spotLight
+          position={[-5, 5, -5]}
+          angle={0.3}
+          penumbra={0.8}
+          intensity={0.5}
+        />
+        <BoxModel rotation={imuData} />
+        <gridHelper args={[10, 10, "#666666", "#444444"]} />
+      </Canvas>
+      <Loader />
     </div>
   );
 };

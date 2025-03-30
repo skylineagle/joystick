@@ -146,7 +146,7 @@ export function RoiModeControl({
 
   return (
     pathname.includes("stream") && (
-      <div className="size-full">
+      <div className="flex flex-col h-full">
         <div className="flex items-center justify-between mb-2">
           <Label className="text-xs sm:text-sm">ROI Mode</Label>
         </div>
@@ -177,14 +177,14 @@ export function RoiModeControl({
         </Select>
 
         {rois.length > 0 && roiMode !== "hide" && (
-          <div className="mt-2 size-full">
+          <div className="mt-2 flex-grow min-h-0">
             <ScrollArea
               className={cn(
-                "mt-1",
-                isMobileLandscape ? "h-[80px]" : "h-[320px]"
+                "h-full",
+                isMobileLandscape ? "max-h-[80px]" : "max-h-[110px]"
               )}
             >
-              <div className="flex flex-col gap-1 pr-2">
+              <div className="flex flex-col gap-1 pr-2 pb-1">
                 {rois.map((roi) => {
                   const regionName =
                     regionNames.find((rn) => rn.id === roi.id)?.name ||

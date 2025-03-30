@@ -109,7 +109,7 @@ export const IMUStatus = ({ deviceId }: { deviceId: string }) => {
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0"
+            className="size-8 p-0"
             onClick={() => resetIMUMutation.mutate()}
             disabled={isLoading || resetIMUMutation.isPending}
           >
@@ -119,13 +119,13 @@ export const IMUStatus = ({ deviceId }: { deviceId: string }) => {
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0"
+            className="size-8 p-0"
             onClick={() => refetch()}
             disabled={isLoading}
           >
             <RefreshCw
               className={cn(
-                "h-4 w-4",
+                "size-4",
                 isLoading && "animate-spin",
                 isRefetching && "animate-spin"
               )}
@@ -135,47 +135,9 @@ export const IMUStatus = ({ deviceId }: { deviceId: string }) => {
         </div>
       </div>
 
-      {/* <Tabs defaultValue="3d" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-2 mb-2">
-          <TabsTrigger value="3d">3D Visualization</TabsTrigger>
-          <TabsTrigger value="classic">Classic View</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="3d" className="mt-0">
-          <Card className="p-4 relative aspect-square">
-            <Suspense
-              fallback={
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                  Loading 3D model...
-                </div>
-              }
-            >
-              <MangoScene imuData={imuData} />
-            </Suspense>
-            <div className="absolute top-2 right-2 rounded-md bg-background/80 px-2 py-1 text-xs text-muted-foreground">
-              Mango rotates based on IMU data
-            </div>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="classic" className="mt-0">
-          <Card className="p-4 relative aspect-square">
-            <Suspense
-              fallback={
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                  Loading 3D model...
-                </div>
-              }
-            >
-              <BoxScene imuData={imuData} />
-            </Suspense>
-          </Card>
-        </TabsContent>
-      </Tabs> */}
-
       <Suspense
         fallback={
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+          <div className="size-full flex items-center justify-center text-muted-foreground">
             Loading 3D model...
           </div>
         }

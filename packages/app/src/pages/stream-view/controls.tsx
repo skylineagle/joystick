@@ -10,7 +10,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDevice } from "@/hooks/use-device";
 import { useIsSupported } from "@/hooks/use-is-supported";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
-import { useRoiMode } from "@/hooks/use-roi-mode";
 import { cn } from "@/lib/utils";
 import { BatteryStatus } from "@/pages/status/battery-status";
 import { CellularStatus } from "@/pages/status/cellular-status";
@@ -74,7 +73,6 @@ export const Controls = () => {
         shallow: true,
       })
   );
-  const { roiMode } = useRoiMode();
 
   return (
     <MotionCard
@@ -207,293 +205,286 @@ export const Controls = () => {
         <div className="flex-1" />
 
         {/* Tabs Section - Always at the bottom */}
-        {roiMode !== "edit" && (
-          <MotionCard
-            className="p-3 border-none shadow-xl"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.3 }}
+        <MotionCard
+          className="p-3 border-none shadow-xl"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7, duration: 0.3 }}
+        >
+          <Tabs
+            defaultValue="device"
+            value={activeTab ?? "device"}
+            onValueChange={(v) => setActiveTab(v as TabValue)}
+            className="w-full"
           >
-            <Tabs
-              defaultValue="device"
-              value={activeTab ?? "device"}
-              onValueChange={(v) => setActiveTab(v as TabValue)}
-              className="w-full"
+            {isGetServicesStatusSupported && !isGetServicesStatusLoading && (
+              <MotionTabsContent
+                value="device"
+                className="m-0 pt-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ServicesStatus deviceId={deviceId!} />
+              </MotionTabsContent>
+            )}
+
+            {isGetCpsiStatusSupported && !isGetCpsiStatusLoading && (
+              <MotionTabsContent
+                value="cell"
+                className="m-0 pt-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <CellularStatus deviceId={deviceId!} />
+              </MotionTabsContent>
+            )}
+
+            {isGetBatterySupported && !isGetBatteryLoading && (
+              <MotionTabsContent
+                value="battery"
+                className="m-0 pt-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <BatteryStatus deviceId={deviceId!} />
+              </MotionTabsContent>
+            )}
+
+            {isGetImuSupported && !isGetImuLoading && (
+              <MotionTabsContent
+                value="imu"
+                className="m-0 pt-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <IMUStatus deviceId={deviceId!} />
+              </MotionTabsContent>
+            )}
+
+            {isGetGpsSupported && !isGetGpsLoading && (
+              <MotionTabsContent
+                value="gps"
+                className="m-0 pt-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <GPSStatus deviceId={deviceId!} />
+              </MotionTabsContent>
+            )}
+
+            {/* Tab Triggers */}
+            <TabsList
+              className={cn("mt-2 h-7 grid", {
+                "grid-cols-5":
+                  [
+                    isGetServicesStatusSupported,
+                    isGetCpsiStatusSupported,
+                    isGetBatterySupported,
+                    isGetImuSupported,
+                    isGetGpsSupported,
+                  ].filter(Boolean).length >= 5,
+                "grid-cols-4":
+                  [
+                    isGetServicesStatusSupported,
+                    isGetCpsiStatusSupported,
+                    isGetBatterySupported,
+                    isGetImuSupported,
+                    isGetGpsSupported,
+                  ].filter(Boolean).length === 4,
+                "grid-cols-3":
+                  [
+                    isGetServicesStatusSupported,
+                    isGetCpsiStatusSupported,
+                    isGetBatterySupported,
+                    isGetImuSupported,
+                    isGetGpsSupported,
+                  ].filter(Boolean).length === 3,
+                "grid-cols-2":
+                  [
+                    isGetServicesStatusSupported,
+                    isGetCpsiStatusSupported,
+                    isGetBatterySupported,
+                    isGetImuSupported,
+                    isGetGpsSupported,
+                  ].filter(Boolean).length === 2,
+                "grid-cols-1":
+                  [
+                    isGetServicesStatusSupported,
+                    isGetCpsiStatusSupported,
+                    isGetBatterySupported,
+                    isGetImuSupported,
+                    isGetGpsSupported,
+                  ].filter(Boolean).length === 1,
+              })}
             >
               {isGetServicesStatusSupported && !isGetServicesStatusLoading && (
-                <MotionTabsContent
+                <MotionTabsTrigger
                   value="device"
-                  className="m-0 pt-2"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  className="text-xs py-0.5 px-1"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={
+                    activeTab !== "device" ? { opacity: 0.7 } : { opacity: 1 }
+                  }
+                  animate={
+                    activeTab === "device"
+                      ? { opacity: 1, scale: 1 }
+                      : { opacity: 0.7, scale: 1 }
+                  }
                   transition={{ duration: 0.2 }}
                 >
-                  <ServicesStatus deviceId={deviceId!} />
-                </MotionTabsContent>
+                  <Cpu className="h-3 w-3 mr-1" />
+                  <AnimatePresence mode="wait">
+                    {activeTab === "device" && (
+                      <motion.span
+                        key="device-text"
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: "auto" }}
+                        exit={{ opacity: 0, width: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        Device
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </MotionTabsTrigger>
               )}
-
               {isGetCpsiStatusSupported && !isGetCpsiStatusLoading && (
-                <MotionTabsContent
+                <MotionTabsTrigger
                   value="cell"
-                  className="m-0 pt-2"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  className="text-xs py-0.5 px-1"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={
+                    activeTab !== "cell" ? { opacity: 0.7 } : { opacity: 1 }
+                  }
+                  animate={
+                    activeTab === "cell"
+                      ? { opacity: 1, scale: 1 }
+                      : { opacity: 0.7, scale: 1 }
+                  }
                   transition={{ duration: 0.2 }}
                 >
-                  <CellularStatus deviceId={deviceId!} />
-                </MotionTabsContent>
+                  <Signal className="h-3 w-3 mr-1" />
+                  <AnimatePresence mode="wait">
+                    {activeTab === "cell" && (
+                      <motion.span
+                        key="cell-text"
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: "auto" }}
+                        exit={{ opacity: 0, width: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        Cell
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </MotionTabsTrigger>
               )}
-
               {isGetBatterySupported && !isGetBatteryLoading && (
-                <MotionTabsContent
+                <MotionTabsTrigger
                   value="battery"
-                  className="m-0 pt-2"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  className="text-xs py-0.5 px-1"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={
+                    activeTab !== "battery" ? { opacity: 0.7 } : { opacity: 1 }
+                  }
+                  animate={
+                    activeTab === "battery"
+                      ? { opacity: 1, scale: 1 }
+                      : { opacity: 0.7, scale: 1 }
+                  }
                   transition={{ duration: 0.2 }}
                 >
-                  <BatteryStatus deviceId={deviceId!} />
-                </MotionTabsContent>
+                  <Battery className="h-3 w-3 mr-1" />
+                  <AnimatePresence mode="wait">
+                    {activeTab === "battery" && (
+                      <motion.span
+                        key="battery-text"
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: "auto" }}
+                        exit={{ opacity: 0, width: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        Battery
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </MotionTabsTrigger>
               )}
-
               {isGetImuSupported && !isGetImuLoading && (
-                <MotionTabsContent
+                <MotionTabsTrigger
                   value="imu"
-                  className="m-0 pt-2"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  className="text-xs py-0.5 px-1"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={
+                    activeTab !== "imu" ? { opacity: 0.7 } : { opacity: 1 }
+                  }
+                  animate={
+                    activeTab === "imu"
+                      ? { opacity: 1, scale: 1 }
+                      : { opacity: 0.7, scale: 1 }
+                  }
                   transition={{ duration: 0.2 }}
                 >
-                  <IMUStatus deviceId={deviceId!} />
-                </MotionTabsContent>
+                  <Navigation className="h-3 w-3 mr-1" />
+                  <AnimatePresence mode="wait">
+                    {activeTab === "imu" && (
+                      <motion.span
+                        key="imu-text"
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: "auto" }}
+                        exit={{ opacity: 0, width: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        IMU
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </MotionTabsTrigger>
               )}
-
               {isGetGpsSupported && !isGetGpsLoading && (
-                <MotionTabsContent
+                <MotionTabsTrigger
                   value="gps"
-                  className="m-0 pt-2"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  className="text-xs py-0.5 px-1"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={
+                    activeTab !== "gps" ? { opacity: 0.7 } : { opacity: 1 }
+                  }
+                  animate={
+                    activeTab === "gps"
+                      ? { opacity: 1, scale: 1 }
+                      : { opacity: 0.7, scale: 1 }
+                  }
                   transition={{ duration: 0.2 }}
                 >
-                  <GPSStatus deviceId={deviceId!} />
-                </MotionTabsContent>
+                  <Map className="h-3 w-3 mr-1" />
+                  <AnimatePresence mode="wait">
+                    {activeTab === "gps" && (
+                      <motion.span
+                        key="gps-text"
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: "auto" }}
+                        exit={{ opacity: 0, width: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        GPS
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </MotionTabsTrigger>
               )}
-
-              {/* Tab Triggers */}
-              <TabsList
-                className={cn("mt-2 h-7 grid", {
-                  "grid-cols-5":
-                    [
-                      isGetServicesStatusSupported,
-                      isGetCpsiStatusSupported,
-                      isGetBatterySupported,
-                      isGetImuSupported,
-                      isGetGpsSupported,
-                    ].filter(Boolean).length >= 5,
-                  "grid-cols-4":
-                    [
-                      isGetServicesStatusSupported,
-                      isGetCpsiStatusSupported,
-                      isGetBatterySupported,
-                      isGetImuSupported,
-                      isGetGpsSupported,
-                    ].filter(Boolean).length === 4,
-                  "grid-cols-3":
-                    [
-                      isGetServicesStatusSupported,
-                      isGetCpsiStatusSupported,
-                      isGetBatterySupported,
-                      isGetImuSupported,
-                      isGetGpsSupported,
-                    ].filter(Boolean).length === 3,
-                  "grid-cols-2":
-                    [
-                      isGetServicesStatusSupported,
-                      isGetCpsiStatusSupported,
-                      isGetBatterySupported,
-                      isGetImuSupported,
-                      isGetGpsSupported,
-                    ].filter(Boolean).length === 2,
-                  "grid-cols-1":
-                    [
-                      isGetServicesStatusSupported,
-                      isGetCpsiStatusSupported,
-                      isGetBatterySupported,
-                      isGetImuSupported,
-                      isGetGpsSupported,
-                    ].filter(Boolean).length === 1,
-                })}
-              >
-                {isGetServicesStatusSupported &&
-                  !isGetServicesStatusLoading && (
-                    <MotionTabsTrigger
-                      value="device"
-                      className="text-xs py-0.5 px-1"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      initial={
-                        activeTab !== "device"
-                          ? { opacity: 0.7 }
-                          : { opacity: 1 }
-                      }
-                      animate={
-                        activeTab === "device"
-                          ? { opacity: 1, scale: 1 }
-                          : { opacity: 0.7, scale: 1 }
-                      }
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Cpu className="h-3 w-3 mr-1" />
-                      <AnimatePresence mode="wait">
-                        {activeTab === "device" && (
-                          <motion.span
-                            key="device-text"
-                            initial={{ opacity: 0, width: 0 }}
-                            animate={{ opacity: 1, width: "auto" }}
-                            exit={{ opacity: 0, width: 0 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            Device
-                          </motion.span>
-                        )}
-                      </AnimatePresence>
-                    </MotionTabsTrigger>
-                  )}
-                {isGetCpsiStatusSupported && !isGetCpsiStatusLoading && (
-                  <MotionTabsTrigger
-                    value="cell"
-                    className="text-xs py-0.5 px-1"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    initial={
-                      activeTab !== "cell" ? { opacity: 0.7 } : { opacity: 1 }
-                    }
-                    animate={
-                      activeTab === "cell"
-                        ? { opacity: 1, scale: 1 }
-                        : { opacity: 0.7, scale: 1 }
-                    }
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Signal className="h-3 w-3 mr-1" />
-                    <AnimatePresence mode="wait">
-                      {activeTab === "cell" && (
-                        <motion.span
-                          key="cell-text"
-                          initial={{ opacity: 0, width: 0 }}
-                          animate={{ opacity: 1, width: "auto" }}
-                          exit={{ opacity: 0, width: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          Cell
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </MotionTabsTrigger>
-                )}
-                {isGetBatterySupported && !isGetBatteryLoading && (
-                  <MotionTabsTrigger
-                    value="battery"
-                    className="text-xs py-0.5 px-1"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    initial={
-                      activeTab !== "battery"
-                        ? { opacity: 0.7 }
-                        : { opacity: 1 }
-                    }
-                    animate={
-                      activeTab === "battery"
-                        ? { opacity: 1, scale: 1 }
-                        : { opacity: 0.7, scale: 1 }
-                    }
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Battery className="h-3 w-3 mr-1" />
-                    <AnimatePresence mode="wait">
-                      {activeTab === "battery" && (
-                        <motion.span
-                          key="battery-text"
-                          initial={{ opacity: 0, width: 0 }}
-                          animate={{ opacity: 1, width: "auto" }}
-                          exit={{ opacity: 0, width: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          Battery
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </MotionTabsTrigger>
-                )}
-                {isGetImuSupported && !isGetImuLoading && (
-                  <MotionTabsTrigger
-                    value="imu"
-                    className="text-xs py-0.5 px-1"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    initial={
-                      activeTab !== "imu" ? { opacity: 0.7 } : { opacity: 1 }
-                    }
-                    animate={
-                      activeTab === "imu"
-                        ? { opacity: 1, scale: 1 }
-                        : { opacity: 0.7, scale: 1 }
-                    }
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Navigation className="h-3 w-3 mr-1" />
-                    <AnimatePresence mode="wait">
-                      {activeTab === "imu" && (
-                        <motion.span
-                          key="imu-text"
-                          initial={{ opacity: 0, width: 0 }}
-                          animate={{ opacity: 1, width: "auto" }}
-                          exit={{ opacity: 0, width: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          IMU
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </MotionTabsTrigger>
-                )}
-                {isGetGpsSupported && !isGetGpsLoading && (
-                  <MotionTabsTrigger
-                    value="gps"
-                    className="text-xs py-0.5 px-1"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    initial={
-                      activeTab !== "gps" ? { opacity: 0.7 } : { opacity: 1 }
-                    }
-                    animate={
-                      activeTab === "gps"
-                        ? { opacity: 1, scale: 1 }
-                        : { opacity: 0.7, scale: 1 }
-                    }
-                    transition={{ duration: 0.2 }}
-                  >
-                    <Map className="h-3 w-3 mr-1" />
-                    <AnimatePresence mode="wait">
-                      {activeTab === "gps" && (
-                        <motion.span
-                          key="gps-text"
-                          initial={{ opacity: 0, width: 0 }}
-                          animate={{ opacity: 1, width: "auto" }}
-                          exit={{ opacity: 0, width: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          GPS
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-                  </MotionTabsTrigger>
-                )}
-              </TabsList>
-            </Tabs>
-          </MotionCard>
-        )}
+            </TabsList>
+          </Tabs>
+        </MotionCard>
       </motion.div>
     </MotionCard>
   );
