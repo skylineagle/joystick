@@ -2,12 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { pb } from "@/lib/pocketbase";
 import { Collections } from "@/types/db.types";
 
-interface FilterOptions {
-  actions: Array<{ id: string; name: string }>;
-  devices: Array<{ id: string; name: string }>;
-  users: Array<{ id: string; name: string }>;
-}
-
 export function useFilterOptions() {
   const { data: actions } = useQuery({
     queryKey: ["actions"],
