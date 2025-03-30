@@ -11,7 +11,11 @@ export function useBitrate(deviceId: string) {
   } = useQuery({
     queryKey: ["bitrate", deviceId],
     queryFn: async () => {
-      const data = await runAction({ deviceId, action: "get-bitrate" });
+      const data = await runAction({
+        deviceId,
+        action: "get-bitrate",
+        log: false,
+      });
       return data;
     },
     enabled: !!deviceId,

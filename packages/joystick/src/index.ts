@@ -19,7 +19,7 @@ app.get("/", () => "Command Runner API");
 
 app.post(
   "/api/run/:device/:action",
-  async ({ params, body, headers, request }) => {
+  async ({ params, body, headers, request, query }) => {
     try {
       // Start timing the action
       enhancedLogger.startActionTimer();
@@ -169,7 +169,9 @@ app.post(
             filter: `name="${params.action}"`,
           });
 
-        if (actionResult.length === 1) {
+        enhancedLogger.info(`log: ${query.log}`);
+
+        if (actionResult.length === 1 && query.log !== "false") {
           await enhancedLogger.logCommandAction({
             userId,
             deviceId: params.device,

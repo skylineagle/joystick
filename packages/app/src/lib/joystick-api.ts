@@ -26,6 +26,7 @@ export type RunActionRequest = {
   action: string;
   params?: Record<string, unknown>;
   timeout?: number;
+  log?: boolean;
 };
 
 export async function writeParams({
@@ -88,9 +89,13 @@ export async function runAction({
   action,
   params,
   timeout,
+  log = true,
 }: RunActionRequest): Promise<string | undefined> {
   try {
-    const url = createUrl(urls.joystick, `/api/run/${deviceId}/${action}`);
+    const url = createUrl(
+      urls.joystick,
+      `/api/run/${deviceId}/${action}?log=${log.toString()}`
+    );
     const data = await joystickApi.post<{
       success: boolean;
       output?: string;
