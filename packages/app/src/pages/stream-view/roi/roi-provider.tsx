@@ -2,13 +2,13 @@ import { useIsSupported } from "@/hooks/use-is-supported";
 import { runAction } from "@/lib/joystick-api";
 import { transformToCommittedRoiProperties } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   RoiProvider as BaseRoiProvider,
   CommittedRoiProperties,
 } from "react-roi";
+import { useLocalStorage } from "usehooks-ts";
 
-// Context for providing deviceId to nested components
 const DeviceIdContext = React.createContext<string>("");
 
 export const useDeviceId = () => {
@@ -23,33 +23,17 @@ export const RoiProvider = ({
   children: React.ReactNode;
 }) => {
   const queryClient = useQueryClient();
-  const [localRois, setLocalRois] = useState<CommittedRoiProperties[]>([]);
-  const [isLocalRoisLoaded, setIsLocalRoisLoaded] = useState(false);
+  const [localRois, setLocalRois] = useLocalStorage<CommittedRoiProperties[]>(
+    `rois-${deviceId}`,
+    []
+  );
+
   const { isSupported: isRoiSupported } = useIsSupported(deviceId!, [
     "set-roi",
     "get-roi",
   ]);
 
-  // Load ROIs from local storage when component mounts
-  useEffect(() => {
-    if (!isRoiSupported && deviceId) {
-      try {
-        const storedRois = localStorage.getItem(`rois-${deviceId}`);
-        if (storedRois) {
-          const parsedRois = JSON.parse(storedRois);
-          setLocalRois(Array.isArray(parsedRois) ? parsedRois : []);
-        }
-      } catch (error) {
-        console.error("Failed to parse stored ROIs", error);
-      } finally {
-        setIsLocalRoisLoaded(true);
-      }
-    } else {
-      setIsLocalRoisLoaded(true);
-    }
-  }, [deviceId, isRoiSupported]);
-
-  const { data, isLoading: isApiRoisLoading } = useQuery({
+  const { data } = useQuery({
     queryKey: ["get-roi", deviceId, isRoiSupported],
     queryFn: async () => {
       if (!isRoiSupported) return [];
@@ -103,7 +87,6 @@ export const RoiProvider = ({
     }
 
     setLocalRois(updatedRois);
-    localStorage.setItem(`rois-${deviceId}`, JSON.stringify(updatedRois));
   };
 
   // Use either API or local storage based on support
@@ -115,22 +98,13 @@ export const RoiProvider = ({
     }
   };
 
-  // Determine if we're ready to render
-  const isLoading = isRoiSupported ? isApiRoisLoading : !isLocalRoisLoaded;
-  const rois = isRoiSupported ? data || [] : localRois;
-
-  // Don't render the provider until data is loaded
-  if (isLoading) {
-    return <>{children}</>;
-  }
-
   return (
     <DeviceIdContext.Provider value={deviceId}>
       <BaseRoiProvider
         initialConfig={{
           commitRoiBoxStrategy: "exact",
           resizeStrategy: "none",
-          rois,
+          rois: isRoiSupported ? data || [] : localRois,
         }}
         onAfterDraw={(roi) => {
           handleRoiChange(roi);

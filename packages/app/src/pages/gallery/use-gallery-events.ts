@@ -27,7 +27,6 @@ export function useGalleryEvents(deviceId: string) {
           setEvents((prev) => [...prev, e.record as GalleryResponse]);
           break;
         case "update":
-          console.log("update", e.record);
           setEvents((prev) =>
             prev.map((event) =>
               event.id === e.record.id ? (e.record as GalleryResponse) : event

@@ -23,7 +23,6 @@ interface ParamValueEditorProps {
 export function ParamValueEditor({ schema, path }: ParamValueEditorProps) {
   const pathStr = path.join(".");
   const displayTitle = schema.title || path[path.length - 1];
-  console.log(path, schema);
 
   const value =
     useParamsStore((state) => state.values[pathStr]) ??

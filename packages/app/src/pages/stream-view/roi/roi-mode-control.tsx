@@ -17,6 +17,8 @@ import { useActions, useCommittedRois, useRoiState } from "react-roi";
 import { useLocation } from "react-router";
 import { RoiBoxStyle } from "./roi-box-style";
 import { useDeviceId } from "./roi-provider";
+import { useIsSupported } from "@/hooks/use-is-supported";
+import { useRoiStore } from "@/store/roi-store";
 
 type RoiMode = "hide" | "view" | "edit";
 
@@ -34,9 +36,13 @@ export function RoiModeControl({
 }: RoiModeControlProps = {}) {
   const contextDeviceId = useDeviceId();
   const deviceId = propDeviceId || contextDeviceId;
-
+  const { isSupported: isRoiSupported } = useIsSupported(deviceId!, [
+    "set-roi",
+    "get-roi",
+  ]);
   const { pathname } = useLocation();
   const { roiMode, setRoiMode } = useRoiMode();
+  const { removeRoi: removeRoiFromStore } = useRoiStore();
   const { setMode, removeRoi, selectRoi } = useActions();
   const { selectedRoi } = useRoiState();
   const rois = useCommittedRois();
@@ -101,6 +107,11 @@ export function RoiModeControl({
   const handleDeleteRegion = (roiId: string, event: React.MouseEvent) => {
     event.stopPropagation();
     removeRoi(roiId);
+    if (isRoiSupported) {
+      console.log("should remove roi from device");
+    } else {
+      removeRoiFromStore(roiId);
+    }
     setRegionNames((prev) => prev.filter((rn) => rn.id !== roiId));
     if (selectedRoi === roiId) {
       selectRoi(null);

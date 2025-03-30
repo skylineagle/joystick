@@ -23,7 +23,7 @@ export const RoiMediaFrame = ({
         className="size-full rounded-xl border-none"
       />
       <button
-        className="absolute top-2 right-2 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
+        className="absolute top-2 right-2 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors z-10"
         onClick={() => {
           const iframe = ref.current as HTMLIFrameElement;
           if (iframe) {

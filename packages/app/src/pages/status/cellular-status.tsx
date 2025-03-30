@@ -105,8 +105,6 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
     return `${value} ${unit}`;
   };
 
-  console.log(isCpsiLoading);
-
   return (
     <div className="h-[200px] p-4 pt-0 max-w-full overflow-hidden">
       {isCpsiLoading ? (
