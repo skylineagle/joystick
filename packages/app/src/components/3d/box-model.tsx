@@ -20,17 +20,86 @@ export const BoxModel = ({
 
   return (
     <group ref={groupRef}>
-      {/* Main box with edges */}
-      <mesh>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial
-          color="#3B82F6"
-          roughness={0.3}
-          metalness={0.2}
-          transparent
-          opacity={0.7}
-        />
-      </mesh>
+      {/* Box faces with bottom face darker */}
+      <group>
+        {/* Top face */}
+        <mesh position={[0, 0.5, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[1, 1]} />
+          <meshStandardMaterial
+            color="#3B82F6"
+            roughness={0.3}
+            metalness={0.2}
+            transparent
+            opacity={0.7}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        {/* Bottom face - darker color */}
+        <mesh position={[0, -0.5, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[1, 1]} />
+          <meshStandardMaterial
+            color="#1E3A8A"
+            roughness={0.3}
+            metalness={0.2}
+            transparent
+            opacity={0.7}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        {/* Front face */}
+        <mesh position={[0, 0, 0.5]}>
+          <planeGeometry args={[1, 1]} />
+          <meshStandardMaterial
+            color="#3B82F6"
+            roughness={0.3}
+            metalness={0.2}
+            transparent
+            opacity={0.7}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        {/* Back face */}
+        <mesh position={[0, 0, -0.5]} rotation={[0, Math.PI, 0]}>
+          <planeGeometry args={[1, 1]} />
+          <meshStandardMaterial
+            color="#3B82F6"
+            roughness={0.3}
+            metalness={0.2}
+            transparent
+            opacity={0.7}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        {/* Left face */}
+        <mesh position={[-0.5, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+          <planeGeometry args={[1, 1]} />
+          <meshStandardMaterial
+            color="#3B82F6"
+            roughness={0.3}
+            metalness={0.2}
+            transparent
+            opacity={0.7}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        {/* Right face */}
+        <mesh position={[0.5, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+          <planeGeometry args={[1, 1]} />
+          <meshStandardMaterial
+            color="#3B82F6"
+            roughness={0.3}
+            metalness={0.2}
+            transparent
+            opacity={0.7}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      </group>
 
       {/* Edges for better visibility */}
       <lineSegments>
