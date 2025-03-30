@@ -4,16 +4,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export function useBitrate(deviceId: string) {
   const queryClient = useQueryClient();
-  const { data: bitrate, refetch } = useQuery({
+  const {
+    data: bitrate,
+    refetch,
+    isLoading,
+  } = useQuery({
     queryKey: ["bitrate", deviceId],
     queryFn: async () => {
       const data = await runAction({ deviceId, action: "get-bitrate" });
-      toast.success({
-        message: "Bitrate fetched successfully",
-      });
       return data;
     },
-
     enabled: !!deviceId,
   });
   const { mutate: setBitrate } = useMutation({
@@ -26,12 +26,9 @@ export function useBitrate(deviceId: string) {
       });
     },
     onSuccess: () => {
-      toast.success({
-        message: "Bitrate set successfully",
-      });
       queryClient.invalidateQueries({ queryKey: ["bitrate", deviceId] });
     },
   });
 
-  return { bitrate, setBitrate, refreshBitrate: refetch };
+  return { bitrate, setBitrate, refreshBitrate: refetch, isLoading };
 }

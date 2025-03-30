@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
-import React from "react";
-import { toast } from "@/utils/toast";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle } from "lucide-react";
+import { toast } from "@/utils/toast";
+import { AlertTriangle, RefreshCw } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -65,10 +64,11 @@ export function ErrorBoundary({ children, fallback }: ErrorBoundaryProps) {
               onClick={() => {
                 setHasError(false);
                 setError(null);
-                window.location.href = "/";
+                window.location.reload();
               }}
             >
-              Return to Home
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Refresh Page
             </Button>
           </div>
         </div>

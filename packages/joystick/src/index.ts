@@ -123,14 +123,16 @@ app.post(
 
       const userId = headers["x-user-id"] ?? "system";
 
-      await enhancedLogger.logCommandAction({
-        userId,
-        deviceId: params.device,
-        actionId: action.id,
-        parameters: body || {},
-        result: response,
-        success: true,
-      });
+      if (action.name !== "healthcheck") {
+        await enhancedLogger.logCommandAction({
+          userId,
+          deviceId: params.device,
+          actionId: action.id,
+          parameters: body || {},
+          result: response,
+          success: true,
+        });
+      }
 
       enhancedLogger.info(
         {

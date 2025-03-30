@@ -15,6 +15,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { HashLoader } from "react-spinners";
 import { Toaster } from "sonner";
 import { Layout } from "./layout";
+import { HistoryPage } from "@/pages/history/history-page";
 
 // Lazy load components
 const DashboardPage = lazy(() =>
@@ -160,11 +161,13 @@ function AnimatedRoutes() {
         path="/"
         element={
           <ProtectedRoute>
-            <Suspense fallback={<LoadingFallback />}>
-              <PageTransition>
-                <DashboardPage />
-              </PageTransition>
-            </Suspense>
+            <ErrorBoundary>
+              <Suspense fallback={<LoadingFallback />}>
+                <PageTransition>
+                  <DashboardPage />
+                </PageTransition>
+              </Suspense>
+            </ErrorBoundary>
           </ProtectedRoute>
         }
       />
@@ -185,9 +188,11 @@ function AnimatedRoutes() {
         element={
           <ProtectedRoute>
             <Suspense fallback={<LoadingFallback />}>
-              <PageTransition>
-                <AdminPage />
-              </PageTransition>
+              <ErrorBoundary>
+                <PageTransition>
+                  <AdminPage />
+                </PageTransition>
+              </ErrorBoundary>
             </Suspense>
           </ProtectedRoute>
         }
@@ -205,9 +210,11 @@ function AnimatedRoutes() {
           path="stream"
           element={
             <Suspense fallback={<LoadingFallback />}>
-              <PageTransition>
-                <StreamView />
-              </PageTransition>
+              <ErrorBoundary>
+                <PageTransition>
+                  <StreamView />
+                </PageTransition>
+              </ErrorBoundary>
             </Suspense>
           }
         />
@@ -215,9 +222,11 @@ function AnimatedRoutes() {
           path="params"
           element={
             <Suspense fallback={<LoadingFallback />}>
-              <PageTransition>
-                <ParamsPage />
-              </PageTransition>
+              <ErrorBoundary>
+                <PageTransition>
+                  <ParamsPage />
+                </PageTransition>
+              </ErrorBoundary>
             </Suspense>
           }
         />
@@ -225,9 +234,11 @@ function AnimatedRoutes() {
           path="actions"
           element={
             <Suspense fallback={<LoadingFallback />}>
-              <PageTransition>
-                <ActionsPage />
-              </PageTransition>
+              <ErrorBoundary>
+                <PageTransition>
+                  <ActionsPage />
+                </PageTransition>
+              </ErrorBoundary>
             </Suspense>
           }
         />
@@ -243,9 +254,23 @@ function AnimatedRoutes() {
           path="gallery"
           element={
             <Suspense fallback={<LoadingFallback />}>
-              <PageTransition>
-                <GalleryPage />
-              </PageTransition>
+              <ErrorBoundary>
+                <PageTransition>
+                  <GalleryPage />
+                </PageTransition>
+              </ErrorBoundary>
+            </Suspense>
+          }
+        />
+        <Route
+          path="history"
+          element={
+            <Suspense fallback={<LoadingFallback />}>
+              <ErrorBoundary>
+                <PageTransition>
+                  <HistoryPage />
+                </PageTransition>
+              </ErrorBoundary>
             </Suspense>
           }
         />
@@ -255,9 +280,11 @@ function AnimatedRoutes() {
         element={
           <ProtectedRoute>
             <Suspense fallback={<LoadingFallback />}>
-              <PageTransition>
-                <SettingsPage />
-              </PageTransition>
+              <ErrorBoundary>
+                <PageTransition>
+                  <SettingsPage />
+                </PageTransition>
+              </ErrorBoundary>
             </Suspense>
           </ProtectedRoute>
         }
@@ -268,24 +295,22 @@ function AnimatedRoutes() {
 
 function App() {
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <NuqsAdapter>
-          <ThemeProvider
-            defaultColorMode="dark"
-            defaultDesignTheme="default"
-            storageKeyPrefix="vite-ui-theme"
-          >
-            <BrowserRouter>
-              <AnimatedRoutes />
-            </BrowserRouter>
-            <Toaster position="top-center" richColors visibleToasts={3} />
+    <QueryClientProvider client={queryClient}>
+      <NuqsAdapter>
+        <ThemeProvider
+          defaultColorMode="dark"
+          defaultDesignTheme="default"
+          storageKeyPrefix="vite-ui-theme"
+        >
+          <BrowserRouter>
+            <AnimatedRoutes />
+          </BrowserRouter>
+          <Toaster position="top-center" richColors visibleToasts={3} />
 
-            <EasterEggs />
-          </ThemeProvider>
-        </NuqsAdapter>
-      </QueryClientProvider>
-    </ErrorBoundary>
+          <EasterEggs />
+        </ThemeProvider>
+      </NuqsAdapter>
+    </QueryClientProvider>
   );
 }
 

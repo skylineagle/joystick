@@ -123,7 +123,43 @@ onRecordUpdateRequest((e) => {
     $app.logger().info("Automation settings changed, syncing baker job");
     try {
       createDeviceJob(e.record.id, automation);
+
+      const automation_change_action = $app.findFirstRecordByData(
+        "actions",
+        "name",
+        "automation_change"
+      );
+      const newMode = automation.get("automationType");
+      const parameters =
+        newMode === "duration"
+          ? {
+              on: automation.get("on").minutes,
+              off: automation.get("off").minutes,
+            }
+          : {
+              on: `${automation.get("on").hourOfDay}:${
+                automation.get("on").minute
+              }`,
+              off: `${automation.get("off").hourOfDay}:${
+                automation.get("off").minute
+              }`,
+            };
+
+      const collection = $app.findCollectionByNameOrId("action_logs");
+      const actionLog = new Record(collection);
+      actionLog.set("device", e.record.id);
+      actionLog.set("user", e.auth.id);
+      actionLog.set("action", automation_change_action.id);
+      actionLog.set("parameters", parameters);
+      actionLog.set("result", {
+        success: true,
+        output: `Automation settings changed from ${current.get(
+          "automation"
+        )} to ${automation}`,
+      });
+      $app.save(actionLog);
     } catch (error) {
+      $app.logger().error(error);
       $app.logger().error("Failed to sync baker job", error);
     }
   }
@@ -147,6 +183,29 @@ onRecordUpdateRequest((e) => {
         $app.logger().debug("Stopping job");
         stopDeviceJob(e.record.id);
       }
+
+      const mode_change_action = $app.findFirstRecordByData(
+        "actions",
+        "name",
+        "mode_change"
+      );
+
+      const collection = $app.findCollectionByNameOrId("action_logs");
+      const actionLog = new Record(collection);
+      actionLog.set("device", e.record.id);
+      actionLog.set("user", e.auth.id);
+      actionLog.set("action", mode_change_action.id);
+      actionLog.set("parameters", {
+        previous_mode: current.get("auto") ? "auto" : "manual",
+        new_mode: auto ? "auto" : "manual",
+      });
+      actionLog.set("result", {
+        success: true,
+        output: `Device mode changed from ${
+          current.get("auto") ? "auto" : "manual"
+        } to ${auto ? "auto" : "manual"}`,
+      });
+      $app.save(actionLog);
     } catch (error) {
       $app.logger().error(error);
     }

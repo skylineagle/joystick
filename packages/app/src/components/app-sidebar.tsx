@@ -1,7 +1,6 @@
 import { DeviceSwitcher } from "@/components/device-switcher";
-import { AnimatedThemeToggle } from "@/components/ui/animated-theme-toggle";
+import { MinimalEventView } from "@/components/history-logger/minimal-event-view";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import {
   Sidebar,
   SidebarContent,
@@ -11,21 +10,17 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { UserProfile } from "@/components/user-profile";
 import {
   ArrowLeft,
-  Video,
+  History,
+  Image,
   Send,
   Settings,
   Terminal,
-  Image,
+  Video,
 } from "lucide-react";
-import { useQueryState } from "nuqs";
 import * as React from "react";
 import { Link, useLocation, useParams } from "react-router";
-import { useIsParamsSupported } from "@/hooks/use-support-params";
-import { useIsTerminalSupported } from "@/hooks/use-support-terminal";
-import { useIsSupported } from "@/hooks/use-is-supported";
 
 const navItems = [
   {
@@ -58,24 +53,17 @@ const navItems = [
     path: "gallery",
     description: "View and manage device events",
   },
+  {
+    label: "History",
+    icon: History,
+    path: "history",
+    description: "View action history",
+  },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { device: deviceId } = useParams();
-  const [activeTab] = useQueryState("activeTab");
   const location = useLocation();
-  const isParamsSupported = useIsParamsSupported(deviceId!);
-  const isTerminalSupported = useIsTerminalSupported(deviceId!);
-  const { isSupported: isGallerySupported, isLoading: isGalleryLoading } =
-    useIsSupported(deviceId!, "list-events");
-
-  const supportedItems = navItems.filter((item) => {
-    if (item.path === "terminal" && !isTerminalSupported) return false;
-    if (item.path === "params" && !isParamsSupported) return false;
-    if (item.path === "gallery" && (!isGallerySupported || isGalleryLoading))
-      return false;
-    return true;
-  });
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -83,35 +71,31 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <DeviceSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <SidebarMenu className="my-2 space-y-1 px-2">
-          {supportedItems.map((item) => (
-            <SidebarMenuItem key={item.path}>
-              <SidebarMenuButton
-                asChild
-                size="sm"
-                isActive={
-                  location.pathname ===
-                  `/${deviceId}${item.path ? `/${item.path}` : ""}`
-                }
-              >
-                <Link
-                  to={{
-                    pathname: `/${deviceId}${item.path ? `/${item.path}` : ""}`,
-                    search: `?activeTab=${activeTab}`,
-                  }}
-                  preventScrollReset={true}
-                  replace={false}
-                  key={item.path}
+        <SidebarMenu className="my-2 space-y-1 px-1">
+          {navItems.map((item) => {
+            const isActive = location.pathname.endsWith(item.path);
+            return (
+              <SidebarMenuItem key={item.path}>
+                <SidebarMenuButton
+                  asChild
+                  tooltip={item.description}
+                  isActive={isActive}
                 >
-                  <item.icon />
-                  <Label>{item.label}</Label>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+                  <Link
+                    to={`/${deviceId}/${item.path}`}
+                    className="flex items-center gap-2"
+                  >
+                    <item.icon className="h-4 w-4" />
+                    <span>{item.label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
+        <MinimalEventView />
         <Button variant="ghost" size="sm" className="w-full mt-2" asChild>
           <Link
             to={{
@@ -123,12 +107,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             Back to Dashboard
           </Link>
         </Button>
-        <div className="flex flex-col gap-2 p-4">
-          <div className="flex items-center justify-between">
-            <UserProfile />
-            <AnimatedThemeToggle />
-          </div>
-        </div>
       </SidebarFooter>
     </Sidebar>
   );
