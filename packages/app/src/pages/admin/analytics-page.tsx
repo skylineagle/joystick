@@ -41,6 +41,9 @@ import { ActionExecutionTimeChart } from "./action-execution-time-chart";
 import { DatePickerWithRange } from "./date-range-picker";
 import { AnimatedThemeToggle } from "@/components/ui/animated-theme-toggle";
 import { Link } from "react-router";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { urls } from "@/lib/urls";
+import { UserProfile } from "@/components/user-profile";
 
 export function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState<string>("30");
@@ -233,6 +236,7 @@ export function AnalyticsPage() {
             Refresh Data
           </Button>
           <AnimatedThemeToggle />
+          <UserProfile />
         </div>
       </div>
 
@@ -754,7 +758,7 @@ export function AnalyticsPage() {
                             {log.expand?.action?.name || log.action}
                           </TableCell>
                           <TableCell
-                            className="cursor-pointer hover:underline"
+                            className="cursor-pointer hover:underline flex items-center gap-2"
                             onClick={() =>
                               setFilters((prev) => ({
                                 ...prev,
@@ -762,6 +766,21 @@ export function AnalyticsPage() {
                               }))
                             }
                           >
+                            <Avatar className="size-5">
+                              <AvatarImage
+                                src={`${urls.pocketbase}/api/files/${log.expand?.user.collectionId}/${log.expand?.user.id}/${log.expand?.user.avatar}`}
+                                alt={
+                                  log.expand?.user.username ||
+                                  log.expand?.user.email
+                                }
+                              />
+                              <AvatarFallback>
+                                {log.expand?.user?.name
+                                  ?.split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </AvatarFallback>
+                            </Avatar>
                             {log.expand?.user?.name || log.user}
                           </TableCell>
                           <TableCell
