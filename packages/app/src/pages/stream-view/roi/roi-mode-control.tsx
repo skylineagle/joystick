@@ -42,8 +42,13 @@ export function RoiModeControl({
   ]);
   const { pathname } = useLocation();
   const { roiMode, setRoiMode } = useRoiMode();
-  const { removeRoi: removeRoiFromStore } = useRoiStore();
-  const { setMode, removeRoi, selectRoi } = useActions();
+  const { removeRoi: removeRoiFromStore, updateRoi } = useRoiStore();
+  const {
+    setMode,
+    removeRoi,
+    selectRoi,
+    updateRoi: updateRoiAction,
+  } = useActions();
   const { selectedRoi } = useRoiState();
   const rois = useCommittedRois();
   const [editingRegionId, setEditingRegionId] = useState<string | null>(null);
@@ -118,8 +123,11 @@ export function RoiModeControl({
     }
   };
 
-  const handleDoubleClick = (roiId: string) => {
-    if (roiMode === "edit") {
+  const handleDoubleClick = (roiId: string, event: React.MouseEvent) => {
+    if (
+      roiMode === "edit" &&
+      (event.target as HTMLElement).closest(".roi-name")
+    ) {
       setEditingRegionId(roiId);
       setTimeout(() => {
         inputRef.current?.focus();
@@ -141,6 +149,40 @@ export function RoiModeControl({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       handleNameSubmit();
+    }
+  };
+
+  const handleDimensionChange = (
+    roiId: string,
+    dimension: "x" | "y" | "width" | "height",
+    value: string
+  ) => {
+    const numValue = parseInt(value, 10);
+    if (isNaN(numValue)) return;
+
+    const roi = rois.find((r) => r.id === roiId);
+    if (!roi) return;
+
+    const update = { ...roi };
+    switch (dimension) {
+      case "x":
+        update.x = numValue;
+        break;
+      case "y":
+        update.y = numValue;
+        break;
+      case "width":
+        update.width = numValue;
+        break;
+      case "height":
+        update.height = numValue;
+        break;
+    }
+
+    if (isRoiSupported) {
+      updateRoiAction(roiId, update);
+    } else {
+      updateRoi(roiId, update);
     }
   };
 
@@ -198,7 +240,7 @@ export function RoiModeControl({
                         roi.id === selectedRoi ? selectedButtonRef : undefined
                       }
                       onClick={() => handleRegionClick(roi.id)}
-                      onDoubleClick={() => handleDoubleClick(roi.id)}
+                      onDoubleClick={(e) => handleDoubleClick(roi.id, e)}
                       className={cn(
                         "text-xs sm:text-sm rounded transition-colors w-full text-left group relative",
                         isMobileLandscape ? "p-1" : "p-1.5",
@@ -224,32 +266,100 @@ export function RoiModeControl({
                         />
                       ) : (
                         <div className="flex flex-col">
-                          <span>{regionName}</span>
+                          <span
+                            className="roi-name cursor-text"
+                            onDoubleClick={(e) => handleDoubleClick(roi.id, e)}
+                          >
+                            {regionName}
+                          </span>
                           {roi.id === selectedRoi && (
-                            <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] mt-0.5 font-mono">
+                            <div
+                              className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[10px] mt-0.5 font-mono"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               <div className="flex items-center">
                                 <span className="w-3 text-muted-foreground">
                                   X:
                                 </span>
-                                {roi.x}
+                                {roiMode === "edit" ? (
+                                  <Input
+                                    type="number"
+                                    value={roi.x}
+                                    onChange={(e) =>
+                                      handleDimensionChange(
+                                        roi.id,
+                                        "x",
+                                        e.target.value
+                                      )
+                                    }
+                                    className="h-4 w-12 px-1 py-0 text-[10px]"
+                                  />
+                                ) : (
+                                  roi.x
+                                )}
                               </div>
                               <div className="flex items-center">
                                 <span className="w-3 text-muted-foreground">
                                   W:
                                 </span>
-                                {roi.width}
+                                {roiMode === "edit" ? (
+                                  <Input
+                                    type="number"
+                                    value={roi.width}
+                                    onChange={(e) =>
+                                      handleDimensionChange(
+                                        roi.id,
+                                        "width",
+                                        e.target.value
+                                      )
+                                    }
+                                    className="h-4 w-12 px-1 py-0 text-[10px]"
+                                  />
+                                ) : (
+                                  roi.width
+                                )}
                               </div>
                               <div className="flex items-center">
                                 <span className="w-3 text-muted-foreground">
                                   Y:
                                 </span>
-                                {roi.y}
+                                {roiMode === "edit" ? (
+                                  <Input
+                                    type="number"
+                                    value={roi.y}
+                                    onChange={(e) =>
+                                      handleDimensionChange(
+                                        roi.id,
+                                        "y",
+                                        e.target.value
+                                      )
+                                    }
+                                    className="h-4 w-12 px-1 py-0 text-[10px]"
+                                  />
+                                ) : (
+                                  roi.y
+                                )}
                               </div>
                               <div className="flex items-center">
                                 <span className="w-3 text-muted-foreground">
                                   H:
                                 </span>
-                                {roi.height}
+                                {roiMode === "edit" ? (
+                                  <Input
+                                    type="number"
+                                    value={roi.height}
+                                    onChange={(e) =>
+                                      handleDimensionChange(
+                                        roi.id,
+                                        "height",
+                                        e.target.value
+                                      )
+                                    }
+                                    className="h-4 w-12 px-1 py-0 text-[10px]"
+                                  />
+                                ) : (
+                                  roi.height
+                                )}
                               </div>
                             </div>
                           )}
