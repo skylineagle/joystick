@@ -183,11 +183,7 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
       }}
     >
       <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          disabled={device.status !== DevicesStatusOptions.off}
-        >
+        <Button variant="ghost" size="icon">
           <Pencil className="h-4 w-4" />
         </Button>
       </DialogTrigger>
