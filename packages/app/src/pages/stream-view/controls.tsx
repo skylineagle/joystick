@@ -22,7 +22,7 @@ import { RoiModeControl } from "@/pages/stream-view/roi/roi-mode-control";
 import { AnimatePresence, motion } from "framer-motion";
 import { Battery, Cpu, Map, Navigation, Signal } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
-import { useParams } from "react-router";
+import { useParams, useLocation } from "react-router";
 
 type TabValue = "device" | "cell" | "battery" | "imu" | "gps";
 
@@ -32,6 +32,7 @@ const MotionTabsTrigger = motion(TabsTrigger);
 
 export const Controls = () => {
   const { isMobileLandscape } = useMobileLandscape();
+  const { pathname } = useLocation();
   const { device: deviceId } = useParams<{ device: string }>();
   const { data: device, isLoading: isDeviceLoading } = useDevice(deviceId!);
   const { isSupported: isRoiSupported, isLoading: isRoiLoading } =
@@ -157,7 +158,7 @@ export const Controls = () => {
         </motion.div>
 
         {/* Overlay Toggle Section */}
-        {device?.overlay && (
+        {device?.overlay && pathname.includes("stream") && (
           <motion.div
             className="flex flex-col gap-2"
             initial={{ opacity: 0, y: 10 }}
