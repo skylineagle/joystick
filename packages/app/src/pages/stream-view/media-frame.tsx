@@ -1,27 +1,61 @@
 import { useMode } from "@/hooks/use-mode";
 import { urls } from "@/lib/urls";
+import { cn } from "@/lib/utils";
 import { useEffect, useRef } from "react";
 import { useTargetRef } from "react-roi";
+import { useQueryState } from "nuqs";
+import { parseAsBoolean } from "nuqs/server";
 
 export const RoiMediaFrame = ({
   deviceId,
   deviceName,
+  aspectRatio,
+  overlayPath,
 }: {
   deviceId: string;
   deviceName: string;
+  overlayPath?: string;
+  aspectRatio?: string;
 }) => {
   const { mode } = useMode(deviceId);
   const ref = useTargetRef();
+  const [showOverlay] = useQueryState(
+    "overlay",
+    parseAsBoolean.withDefault(true).withOptions({
+      shallow: true,
+    })
+  );
 
   useEffect(() => {}, [mode]);
 
   return (
     <div className="relative size-full border-none">
-      <iframe
-        ref={ref as React.RefObject<HTMLIFrameElement>}
-        src={`${urls.stream}/${deviceName}?controls=false&autoPlay=true`}
-        className="size-full rounded-xl border-none"
-      />
+      <div className="relative size-full">
+        <iframe
+          ref={ref as React.RefObject<HTMLIFrameElement>}
+          src={`${urls.stream}/${deviceName}?controls=false&autoPlay=true`}
+          className="size-full rounded-xl border-none"
+        />
+        {overlayPath && showOverlay && (
+          <div
+            className={cn(
+              "absolute self-center inset-0 pointer-events-none",
+              aspectRatio
+                ? `aspect-[${aspectRatio}]`
+                : "size-full aspect-square"
+            )}
+          >
+            <img
+              src={overlayPath}
+              alt="Stream overlay"
+              className={cn(
+                "size-full object-contain rounded-xl border-solid border-white border-8",
+                aspectRatio ? `aspect-[${aspectRatio}]` : "aspect-square"
+              )}
+            />
+          </div>
+        )}
+      </div>
       <button
         className="absolute top-2 right-2 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors z-10"
         onClick={() => {
@@ -56,21 +90,54 @@ export const RoiMediaFrame = ({
 export const MediaFrame = ({
   deviceId,
   deviceName,
+  aspectRatio,
+  overlayPath,
 }: {
   deviceId: string;
   deviceName: string;
+  aspectRatio?: string;
+  overlayPath?: string;
 }) => {
   const { mode } = useMode(deviceId);
   const ref = useRef<HTMLIFrameElement>(null);
+  const [showOverlay] = useQueryState(
+    "overlay",
+    parseAsBoolean.withDefault(true).withOptions({
+      shallow: true,
+    })
+  );
+
   useEffect(() => {}, [mode]);
 
   return (
     <div className="relative size-full border-none">
-      <iframe
-        ref={ref}
-        src={`${urls.stream}/${deviceName}?controls=false&autoPlay=true`}
-        className="size-full rounded-xl"
-      />
+      <div className="relative size-full">
+        <iframe
+          ref={ref}
+          src={`${urls.stream}/${deviceName}?controls=false&autoPlay=true`}
+          className="size-full rounded-xl"
+        />
+        {overlayPath && showOverlay && (
+          <div
+            className={cn(
+              "absolute self-center inset-0 pointer-events-none",
+              aspectRatio
+                ? `aspect-[${aspectRatio}]`
+                : "size-full aspect-square"
+            )}
+          >
+            <img
+              src={overlayPath}
+              alt="Stream overlay"
+              className={cn(
+                "size-full object-contain rounded-xl border-solid border-white border-8",
+                aspectRatio ? `aspect-[${aspectRatio}]` : "aspect-square"
+              )}
+            />
+          </div>
+        )}
+      </div>
+
       <button
         className="absolute top-2 right-2 p-2 bg-black/50 rounded-full hover:bg-black/70 transition-colors"
         onClick={() => {

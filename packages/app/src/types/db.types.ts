@@ -134,6 +134,7 @@ export type DevicesRecord<Tautomation = unknown, Tconfiguration = unknown, Tinfo
 	information: null | Tinformation
 	mode: string
 	name?: string
+	overlay?: string
 	status?: DevicesStatusOptions
 	updated?: IsoDateString
 }

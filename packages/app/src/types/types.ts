@@ -86,6 +86,7 @@ export type DeviceInformation = {
   host: string;
   phone?: string;
   battery_capacity?: number;
+  aspectRatio?: string;
   imuResetValues?: {
     x: number;
     y: number;

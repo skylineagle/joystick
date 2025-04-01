@@ -1,6 +1,7 @@
 import { AutomateToggle } from "@/components/device/automate-toggle";
 import { AutomationIndicator } from "@/components/device/automation-indicator";
 import { ModeSelector } from "@/components/device/mode-selector";
+import { OverlayToggle } from "@/components/device/overlay-toggle";
 import { StatusIndicator } from "@/components/device/status-indicator";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -121,7 +122,7 @@ export const Controls = () => {
           className="flex flex-col gap-2"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.2 }}
+          transition={{ delay: 0.5, duration: 0.2 }}
         >
           {device?.automation ? (
             <>
@@ -155,11 +156,24 @@ export const Controls = () => {
           ) : null}
         </motion.div>
 
+        {/* Overlay Toggle Section */}
+        {device?.overlay && (
+          <motion.div
+            className="flex flex-col gap-2"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.2 }}
+          >
+            <Separator className="my-1" />
+            {device && <OverlayToggle deviceId={deviceId!} />}
+          </motion.div>
+        )}
+
         {/* Bitrate Control Section */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.2 }}
+          transition={{ delay: 0.6, duration: 0.2 }}
         >
           {isSetBitrateSupported ? (
             <>
@@ -183,7 +197,7 @@ export const Controls = () => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.2 }}
+          transition={{ delay: 0.7, duration: 0.2 }}
         >
           {isRoiSupported ? (
             <>
@@ -209,7 +223,7 @@ export const Controls = () => {
           className="p-3 border-none shadow-xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.3 }}
+          transition={{ delay: 0.8, duration: 0.3 }}
         >
           <Tabs
             defaultValue="device"
