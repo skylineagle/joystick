@@ -63,7 +63,7 @@ export function DashboardPage() {
                 />
               </CardHeader>
               <CardContent>
-                <div className="overflow-auto h-[calc(100vh-24rem)] scrollbar-thin scrollbar-thumb-secondary scrollbar-track-secondary/20">
+                <div className="h-[calc(100vh-20rem)]">
                   <DeviceDataTable data={devices || []} />
                 </div>
               </CardContent>

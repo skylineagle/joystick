@@ -90,11 +90,11 @@ const columnHelper = createColumnHelper<DeviceResponse>();
 const columnWidths = {
   select: "w-[5%]",
   name: "w-[15%]",
-  mode: "w-[10%]",
+  mode: "w-[15%]",
   auto: "w-[10%]",
   status: "w-[10%]",
-  automation: "w-[30%]",
-  actions: "w-[20%]",
+  automation: "w-[35%]",
+  actions: "w-[10%]",
 };
 
 export function DeviceDataTable({ data }: DeviceDataTableProps) {
@@ -270,7 +270,7 @@ export function DeviceDataTable({ data }: DeviceDataTableProps) {
 
   return (
     <div className="size-full">
-      <div className="flex flex-row items-center gap-4 p-4">
+      <div className="flex flex-row items-center gap-4 py-4">
         <div className="flex-1 relative size-full">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -284,67 +284,73 @@ export function DeviceDataTable({ data }: DeviceDataTableProps) {
       </div>
       <div className="rounded-md border">
         <div className="relative">
-          <Table>
-            <TableHeader className="sticky top-0 z-10 bg-background border-b">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    // Apply specific width classes based on column ID
-                    const widthClass =
-                      columnWidths[header.id as keyof typeof columnWidths] ||
-                      "";
-
-                    return (
-                      <TableHead key={header.id} className={widthClass}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
+          <div className="sticky top-0 z-10 bg-background border-b shadow-sm">
+            <Table className="rounded-t-md">
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
+                    key={headerGroup.id}
+                    className="hover:bg-transparent"
                   >
-                    {row.getVisibleCells().map((cell) => {
-                      // Apply the same width classes to cells as their headers
+                    {headerGroup.headers.map((header) => {
                       const widthClass =
-                        columnWidths[
-                          cell.column.id as keyof typeof columnWidths
-                        ] || "";
-
+                        columnWidths[header.id as keyof typeof columnWidths] ||
+                        "";
                       return (
-                        <TableCell key={cell.id} className={widthClass}>
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </TableCell>
+                        <TableHead key={header.id} className={widthClass}>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                        </TableHead>
                       );
                     })}
                   </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                ))}
+              </TableHeader>
+            </Table>
+          </div>
+          <div className="overflow-auto max-h-[calc(100vh-26rem)] scrollbar-thin scrollbar-thumb-secondary scrollbar-track-secondary/20">
+            <Table className="rounded-b-md">
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                    >
+                      {row.getVisibleCells().map((cell) => {
+                        const widthClass =
+                          columnWidths[
+                            cell.column.id as keyof typeof columnWidths
+                          ] || "";
+
+                        return (
+                          <TableCell key={cell.id} className={widthClass}>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </div>
     </div>
