@@ -119,7 +119,15 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
             <div className="flex items-center gap-1 min-w-0 truncate">
               {getSignalIcon()}
               {getNetworkTypeBadge(data?.technology)}
-              <Badge variant="connected">{data?.operator || "Unknown"}</Badge>
+              <Badge
+                variant="connected"
+                className="max-w-[8em] truncate"
+                title={data?.operator || "Unknown"}
+              >
+                {data?.operator?.length > 12
+                  ? `${data.operator.substring(0, 10)}...`
+                  : data?.operator || "Unknown"}
+              </Badge>
             </div>
             <Button
               variant="ghost"
