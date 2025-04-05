@@ -42,6 +42,7 @@ export class GalleryService {
   }
 
   public async startGalleryService(deviceId: string, config: GalleryConfig) {
+    logger.info(JSON.stringify(config, null, 2));
     if (this.intervals.has(deviceId)) {
       this.stopGalleryService(deviceId);
     }
@@ -78,7 +79,9 @@ export class GalleryService {
   }
 
   public async processGalleryEvents(deviceId: string, autoPull: boolean) {
-    logger.info(`Processing gallery events for device ${deviceId}`);
+    logger.info(
+      `Processing gallery events for device ${deviceId}, autoPull: ${autoPull}`
+    );
     const device = await this.getDevice(deviceId);
     if (!device) {
       throw new Error(`Device ${deviceId} not found`);
@@ -186,7 +189,7 @@ export class GalleryService {
     const result = await pb
       .collection("gallery")
       .getFullList<GalleryResponse>(1, {
-        filter: `device = "${deviceId}" && id = "${eventId}"`,
+        filter: `device = "${deviceId}" && event_id = "${eventId}"`,
       });
 
     return result[0] || null;
@@ -248,13 +251,16 @@ export class GalleryService {
   }
 
   public async pullEvent(deviceId: string, eventId: string): Promise<void> {
+    logger.info(`Pulling event ${eventId} for device ${deviceId}`);
     const device = await this.getDevice(deviceId);
     if (!device) {
+      logger.error(`Device ${deviceId} not found`);
       throw new Error(`Device ${deviceId} not found`);
     }
 
     const galleryEvent = await this.getExistingEvent(deviceId, eventId);
     if (!galleryEvent) {
+      logger.error(`Gallery event ${eventId} not found`);
       throw new Error(`Gallery event ${eventId} not found`);
     }
 
