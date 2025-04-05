@@ -1,6 +1,5 @@
 import {
   getActionDisplayName,
-  getDeviceDisplayName,
   getUserDisplayName,
 } from "@/components/history-logger/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,7 +16,7 @@ import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { Clock, Info, Monitor } from "lucide-react";
+import { Clock, Info, Smartphone } from "lucide-react";
 import { useEffect } from "react";
 
 export function RecentEvents() {
@@ -134,10 +133,7 @@ export function RecentEvents() {
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div className="flex items-center gap-1 text-muted-foreground">
-                          <Monitor className="h-3 w-3" />
-                          <span className="text-[10px] max-w-[60px] truncate">
-                            {log.expand?.device.name || "Unknown"}
-                          </span>
+                          <Smartphone className="h-3 w-3" />
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="top">
