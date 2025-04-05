@@ -39,6 +39,7 @@ import { z } from "zod";
 import { useDeviceStore } from "@/store/device-store";
 import { useAvailableModes } from "@/hooks/use-available-modes";
 import { modeConfig } from "@/components/device/consts";
+import { AddDeviceModal } from "@/components/device/add-device-modal";
 
 interface DeviceDataTableProps {
   data: DeviceResponse[];
@@ -88,13 +89,13 @@ const columnHelper = createColumnHelper<DeviceResponse>();
 
 // Define column widths consistently
 const columnWidths = {
-  select: "w-[5%]",
+  select: "w-[3%]",
   name: "w-[15%]",
   mode: "w-[15%]",
   auto: "w-[10%]",
   status: "w-[10%]",
   automation: "w-[35%]",
-  actions: "w-[10%]",
+  actions: "w-[12%]",
 };
 
 export function DeviceDataTable({ data }: DeviceDataTableProps) {
@@ -270,7 +271,7 @@ export function DeviceDataTable({ data }: DeviceDataTableProps) {
 
   return (
     <div className="size-full">
-      <div className="flex flex-row items-center gap-4 py-4">
+      <div className="flex flex-row items-center gap-4 pb-4">
         <div className="flex-1 relative size-full">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -281,6 +282,7 @@ export function DeviceDataTable({ data }: DeviceDataTableProps) {
           />
         </div>
         <DataTableFilter table={table} />
+        <AddDeviceModal />
       </div>
       <div className="rounded-md border">
         <div className="relative">
