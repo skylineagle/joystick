@@ -29,6 +29,7 @@ export function Layout({ children }: LayoutProps) {
   const { device: deviceId } = useParams();
 
   useEffect(() => {
+    if (!deviceId) return;
     pb.collection("devices").subscribe<DeviceResponse>(deviceId!, (e) => {
       if (e.action === "update") {
         queryClient.invalidateQueries({ queryKey: ["device", e.record.id] });
