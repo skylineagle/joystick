@@ -1,5 +1,5 @@
 import { DeviceSwitcher } from "@/components/device-switcher";
-import { MinimalEventView } from "@/components/history-logger/minimal-event-view";
+import { RecentEvents } from "@/components/history-logger/recent-events";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -111,7 +111,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>
-        {isRecentEventPermitted && <MinimalEventView />}
+        {isRecentEventPermitted && <RecentEvents />}
         <Button variant="ghost" size="sm" className="w-full mt-2" asChild>
           <Link
             to={{

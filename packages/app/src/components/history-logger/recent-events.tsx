@@ -1,6 +1,7 @@
 import {
-  getUserDisplayName,
   getActionDisplayName,
+  getDeviceDisplayName,
+  getUserDisplayName,
 } from "@/components/history-logger/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,10 +17,10 @@ import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { Activity, Info } from "lucide-react";
+import { Clock, Info, Monitor } from "lucide-react";
 import { useEffect } from "react";
 
-export function MinimalEventView() {
+export function RecentEvents() {
   const queryClient = useQueryClient();
   const { data: recentLogs } = useQuery({
     queryKey: ["actionLogs", "recent"],
@@ -66,7 +67,17 @@ export function MinimalEventView() {
                   )}
                 >
                   <div className="flex items-center gap-1.5 flex-1">
-                    <Activity className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                    <Avatar className="size-5">
+                      <AvatarImage
+                        src={`${urls.pocketbase}/api/files/${log.expand?.user?.collectionId}/${log.expand?.user?.id}/${log.expand?.user?.avatar}`}
+                        alt={
+                          log.expand?.user?.username || log.expand?.user?.email
+                        }
+                      />
+                      <AvatarFallback className="size-5">
+                        {getUserDisplayName(log.expand?.user)}
+                      </AvatarFallback>
+                    </Avatar>
                     <span className="break-words">
                       {getActionDisplayName(
                         log.expand?.action?.name || log.action
@@ -102,23 +113,39 @@ export function MinimalEventView() {
                       )}
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    <div className="text-muted-foreground">
-                      {new Date(log.created).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </div>
-                    <Avatar className="size-5">
-                      <AvatarImage
-                        src={`${urls.pocketbase}/api/files/${log.expand?.user?.collectionId}/${log.expand?.user?.id}/${log.expand?.user?.avatar}`}
-                        alt={
-                          log.expand?.user?.username || log.expand?.user?.email
-                        }
-                      />
-                      <AvatarFallback className="size-5">
-                        {getUserDisplayName(log.expand?.user)}
-                      </AvatarFallback>
-                    </Avatar>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center justify-center w-5 h-5 rounded-full bg-muted/30 text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">
+                        <div className="text-xs">
+                          {new Date(log.created).toLocaleString([], {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <Monitor className="h-3 w-3" />
+                          <span className="text-[10px] max-w-[60px] truncate">
+                            {log.expand?.device.name || "Unknown"}
+                          </span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top">
+                        <div className="text-xs">
+                          {log.expand?.device.name || "Unknown"}
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
                 </motion.div>
               ))}

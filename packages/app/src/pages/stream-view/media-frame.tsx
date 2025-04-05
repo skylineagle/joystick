@@ -49,7 +49,7 @@ export const RoiMediaFrame = ({
               src={overlayPath}
               alt="Stream overlay"
               className={cn(
-                "size-full object-contain",
+                "size-full object-contain rounded-xl",
                 aspectRatio ? `aspect-[${aspectRatio}]` : "aspect-square"
               )}
             />
@@ -130,7 +130,7 @@ export const MediaFrame = ({
               src={overlayPath}
               alt="Stream overlay"
               className={cn(
-                "size-full object-contain",
+                "size-full object-contain rounded-xl",
                 aspectRatio ? `aspect-[${aspectRatio}]` : "aspect-square"
               )}
             />
