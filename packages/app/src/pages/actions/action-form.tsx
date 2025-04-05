@@ -98,9 +98,10 @@ export function ActionForm({
                 <FormField
                   key={name}
                   control={form.control}
+                  defaultValue={schema.default}
                   name={name}
                   render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex flex-col gap-2">
                       <FormLabel className="capitalize">
                         {name.replace(/-/g, " ")}
                       </FormLabel>
@@ -145,7 +146,7 @@ function buildZodSchema(schema: Record<string, any>): z.ZodType {
           properties[key] = z.number().int();
           break;
         case "boolean":
-          properties[key] = z.boolean();
+          properties[key] = z.boolean().default(false);
           break;
         default:
           properties[key] = z.any();

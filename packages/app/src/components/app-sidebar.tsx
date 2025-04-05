@@ -11,9 +11,10 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
+import { useIsParamsSupported } from "@/hooks/use-support-params";
+import { useIsTerminalSupported } from "@/hooks/use-support-terminal";
 import {
   ArrowLeft,
-  History,
   Image,
   Send,
   Settings,
@@ -22,8 +23,6 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { Link, useLocation, useParams } from "react-router";
-import { useIsParamsSupported } from "@/hooks/use-support-params";
-import { useIsTerminalSupported } from "@/hooks/use-support-terminal";
 
 const navItems = [
   {
@@ -55,12 +54,6 @@ const navItems = [
     icon: Image,
     path: "gallery",
     description: "View and manage device events",
-  },
-  {
-    label: "History",
-    icon: History,
-    path: "history",
-    description: "View action history",
   },
 ];
 

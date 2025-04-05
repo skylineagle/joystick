@@ -15,7 +15,6 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { HashLoader } from "react-spinners";
 import { Toaster } from "sonner";
 import { Layout } from "./layout";
-import { HistoryPage } from "@/pages/history/history-page";
 
 // Lazy load components
 const DashboardPage = lazy(() =>
@@ -257,18 +256,6 @@ function AnimatedRoutes() {
               <ErrorBoundary>
                 <PageTransition>
                   <GalleryPage />
-                </PageTransition>
-              </ErrorBoundary>
-            </Suspense>
-          }
-        />
-        <Route
-          path="history"
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <ErrorBoundary>
-                <PageTransition>
-                  <HistoryPage />
                 </PageTransition>
               </ErrorBoundary>
             </Suspense>
