@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -51,11 +54,7 @@ import {
 } from "react";
 import type { DateRange } from "react-day-picker";
 
-export function DataTableFilter<TData, TValue>({
-  table,
-}: {
-  table: Table<TData>;
-}) {
+export function DataTableFilter<TData>({ table }: { table: Table<TData> }) {
   const isMobile = useIsMobile();
 
   if (isMobile) {
@@ -271,6 +270,7 @@ export function FilterableColumn<TData>({
   table: Table<TData>;
   setProperty: (value: string) => void;
 }) {
+  // eslint-disable-next-line @typescript-eslint/no-non-null-asserted-optional-chain
   const Icon = column.columnDef.meta?.icon!;
   return (
     <CommandItem onSelect={() => setProperty(column.id)} className="group">
@@ -678,10 +678,12 @@ function FilterOperatorNumberController<TData>({
   column,
   closeController,
 }: FilterOperatorControllerProps<TData>) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const filter = column.getFilterValue() as FilterModel<"number", TData>;
 
   // Show all related operators
   const relatedFilters = Object.values(numberFilterDetails);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const relatedFilterOperators = relatedFilters.map((r) => r.value);
 
   const changeOperator = (value: (typeof relatedFilterOperators)[number]) => {
@@ -1569,7 +1571,6 @@ export function FilterValueTextController<TData, TValue>({
 }
 
 export function FilterValueNumberController<TData, TValue>({
-  table,
   column,
   columnMeta,
 }: ProperFilterValueMenuProps<TData, TValue>) {

@@ -11,7 +11,9 @@ import {
   SignalLow,
   SignalMedium,
   SignalZero,
+  Clock,
 } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 interface CellularStatusProps {
   deviceId: string;
@@ -23,6 +25,7 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
     isLoading: isCpsiLoading,
     isRefetching: isCpsiRefetching,
     refetch: refetchCpsi,
+    dataUpdatedAt,
   } = useQuery({
     queryKey: ["cpsi", deviceId],
     queryFn: async () => {
@@ -105,6 +108,11 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
     return `${value} ${unit}`;
   };
 
+  // Format the time since last update
+  const timeSinceUpdate = dataUpdatedAt
+    ? formatDistanceToNow(dataUpdatedAt, { addSuffix: true })
+    : "just now";
+
   return (
     <div className="h-[200px] p-4 pt-0 max-w-full overflow-hidden">
       {isCpsiLoading ? (
@@ -145,6 +153,10 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
               />
               <span className="sr-only">Refresh cellular status</span>
             </Button>
+          </div>
+          <div className="flex items-center text-xs text-muted-foreground ml-auto">
+            <Clock className="h-3 w-3 mr-1" />
+            <span>{timeSinceUpdate}</span>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
             <span className="text-xs text-muted-foreground">Cell ID:</span>

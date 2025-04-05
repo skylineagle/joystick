@@ -15,6 +15,7 @@ import { intersection, uniq } from "./array";
 export type ElementType<T> = T extends (infer U)[] ? U : T;
 
 declare module "@tanstack/react-table" {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData extends RowData, TValue> {
     /* The display name of the column. */
     displayName: string;
@@ -63,7 +64,7 @@ export function defineMeta<
   // : never,
   TType extends ColumnDataType
 >(
-  accessor: TAccessor,
+  _accessor: TAccessor,
   meta: Omit<ColumnMeta<TData, TVal>, "type"> & {
     type: TType;
   }
@@ -707,7 +708,7 @@ export function multiOptionFilterFn<TData>(
 
   if (isColumnOptionArray(value)) {
     return __multiOptionFilterFn(
-      value.map((v) => v.value),
+      value.map((v) => v.value.toString()),
       filterValue
     );
   }
@@ -717,7 +718,7 @@ export function multiOptionFilterFn<TData>(
   );
 
   return __multiOptionFilterFn(
-    sanitizedValue.map((v) => v.value),
+    sanitizedValue.map((v) => v.value.toString()),
     filterValue
   );
 }
