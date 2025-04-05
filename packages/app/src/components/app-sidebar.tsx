@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { Link, useLocation, useParams } from "react-router";
+import { useIsParamsSupported } from "@/hooks/use-support-params";
+import { useIsTerminalSupported } from "@/hooks/use-support-terminal";
 
 const navItems = [
   {
@@ -65,6 +67,8 @@ const navItems = [
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { device: deviceId } = useParams();
   const location = useLocation();
+  const isParamsSupported = useIsParamsSupported(deviceId!);
+  const isTerminalSupported = useIsTerminalSupported(deviceId!);
   const isRecentEventPermitted = useIsPermitted("recent-events");
 
   return (
@@ -74,26 +78,36 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu className="my-2 space-y-1 px-1">
-          {navItems.map((item) => {
-            const isActive = location.pathname.endsWith(item.path);
-            return (
-              <SidebarMenuItem key={item.path}>
-                <SidebarMenuButton
-                  asChild
-                  tooltip={item.description}
-                  isActive={isActive}
-                >
-                  <Link
-                    to={`/${deviceId}/${item.path}`}
-                    className="flex items-center gap-2"
+          {navItems
+            .filter((item) => {
+              if (item.path === "params" && !isParamsSupported) {
+                return false;
+              }
+              if (item.path === "terminal" && !isTerminalSupported) {
+                return false;
+              }
+              return true;
+            })
+            .map((item) => {
+              const isActive = location.pathname.endsWith(item.path);
+              return (
+                <SidebarMenuItem key={item.path}>
+                  <SidebarMenuButton
+                    asChild
+                    tooltip={item.description}
+                    isActive={isActive}
                   >
-                    <item.icon className="h-4 w-4" />
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            );
-          })}
+                    <Link
+                      to={`/${deviceId}/${item.path}`}
+                      className="flex items-center gap-2"
+                    >
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>

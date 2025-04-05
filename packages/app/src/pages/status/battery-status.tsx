@@ -117,8 +117,8 @@ export function BatteryStatus({ deviceId }: BatteryStatusProps) {
             </div>
           ) : (
             <div className="flex items-center justify-center gap-4 p-4">
-              <span className="text-sm text-muted-foreground">
-                Battery capacity data is not available
+              <span className="text-sm text-muted-foreground text-center">
+                Battery capacity data is configured for this device.
               </span>
             </div>
           )}
