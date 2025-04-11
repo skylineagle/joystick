@@ -63,14 +63,12 @@ export type DeviceAutomation = {
   on: {
     minutes?: number;
     mode: string;
-    hourOfDay?: number;
-    minuteOfDay?: number;
+    utcDate?: string;
   };
   off: {
     minutes?: number;
     mode: string;
-    hourOfDay?: number;
-    minuteOfDay?: number;
+    utcDate?: string;
   };
 };
 

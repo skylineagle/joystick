@@ -113,10 +113,7 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
       return (on?.minutes || 0) > 0 && (off?.minutes || 0) > 0;
     } else if (automationType === "timeOfDay") {
       return (
-        typeof on?.hourOfDay === "number" &&
-        typeof off?.hourOfDay === "number" &&
-        typeof on?.minuteOfDay === "number" &&
-        typeof off?.minuteOfDay === "number"
+        typeof on?.utcDate === "string" && typeof off?.utcDate === "string"
       );
     }
     return false;

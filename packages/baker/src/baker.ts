@@ -97,10 +97,14 @@ export async function createJob(
       });
     } else if (automation.automationType === "timeOfDay") {
       // Handle time-of-day based automation (unchanged)
-      const onHour = automation?.on?.hourOfDay ?? 0;
-      const onMinute = automation?.on?.minuteOfDay ?? 0;
-      const offHour = automation?.off?.hourOfDay ?? 0;
-      const offMinute = automation?.off?.minuteOfDay ?? 0;
+      const [onHour, onMinute] =
+        automation?.on?.utcDate?.split(":").map(Number) ?? [];
+      const [offHour, offMinute] =
+        automation?.off?.utcDate?.split(":").map(Number) ?? [];
+
+      if (!onHour || !onMinute || !offHour || !offMinute) {
+        throw new Error("Invalid time of day automation");
+      }
 
       // Add job to turn on the device
       baker.add({

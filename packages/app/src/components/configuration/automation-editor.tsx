@@ -4,6 +4,44 @@ import { Label } from "@/components/ui/label";
 import { SelectMode } from "@/components/ui/select-mode";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Clock, Timer } from "lucide-react";
+import { useId } from "react";
+import { withMask } from "use-mask-input";
+
+function convertTimeToUTCHHMM(time: string): string {
+  const [hours, minutes] = time.split(":").map(Number);
+  const now = new Date();
+  const localDate = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    hours,
+    minutes
+  );
+  const utcHours = localDate.getUTCHours().toString().padStart(2, "0");
+  const utcMinutes = localDate.getUTCMinutes().toString().padStart(2, "0");
+  return `${utcHours}:${utcMinutes}`;
+}
+
+function convertUTCToLocalHHMM(utcTime: string): string {
+  const [hours, minutes] = utcTime.split(":").map(Number);
+
+  // Create a UTC date using today's date and the given time
+  const utcDate = new Date(
+    Date.UTC(
+      new Date().getFullYear(),
+      new Date().getMonth(),
+      new Date().getDate(),
+      hours,
+      minutes
+    )
+  );
+
+  // Convert to local time
+  const localHours = utcDate.getHours().toString().padStart(2, "0");
+  const localMinutes = utcDate.getMinutes().toString().padStart(2, "0");
+
+  return `${localHours}:${localMinutes}`;
+}
 
 export interface AutomationEditorProps {
   deviceId: string;
@@ -19,6 +57,9 @@ export const AutomationEditor = ({
   isActionLoading,
   availableModes,
 }: AutomationEditorProps) => {
+  const onId = useId();
+  const offId = useId();
+
   return (
     <Tabs
       defaultValue="duration"
@@ -213,59 +254,34 @@ export const AutomationEditor = ({
             <div className="flex items-center gap-3">
               <Label className="text-sm font-medium">At:</Label>
               <div className="flex-1 flex gap-2 items-center">
-                <div className="w-1/2">
-                  <Input
-                    id="hourOn"
-                    type="number"
-                    placeholder="Hour (0-23)"
-                    value={editingConfig?.automation?.on?.hourOfDay ?? 0}
-                    min={0}
-                    max={23}
-                    onChange={(e) =>
-                      setEditingConfig((prev) => {
-                        if (!prev || !prev.automation || !prev.automation.on)
-                          return null;
-                        return {
-                          ...prev,
-                          automation: {
-                            ...prev.automation,
-                            on: {
-                              ...prev.automation.on,
-                              hourOfDay: parseInt(e.target.value),
-                            },
+                <Input
+                  id={onId}
+                  placeholder="00:00"
+                  type="text"
+                  ref={withMask("99:99", {
+                    placeholder: "-",
+                    showMaskOnHover: false,
+                  })}
+                  defaultValue={convertUTCToLocalHHMM(
+                    editingConfig?.automation?.on?.utcDate ?? ""
+                  )}
+                  onChange={(e) =>
+                    setEditingConfig((prev) => {
+                      if (!prev || !prev.automation || !prev.automation.on)
+                        return null;
+                      return {
+                        ...prev,
+                        automation: {
+                          ...prev.automation,
+                          on: {
+                            ...prev.automation.on,
+                            utcDate: convertTimeToUTCHHMM(e.target.value),
                           },
-                        };
-                      })
-                    }
-                  />
-                </div>
-                <span>:</span>
-                <div className="w-1/2">
-                  <Input
-                    id="minuteOn"
-                    type="number"
-                    placeholder="Minute (0-59)"
-                    value={editingConfig?.automation?.on?.minuteOfDay ?? 0}
-                    min={0}
-                    max={59}
-                    onChange={(e) =>
-                      setEditingConfig((prev) => {
-                        if (!prev || !prev.automation || !prev.automation.on)
-                          return null;
-                        return {
-                          ...prev,
-                          automation: {
-                            ...prev.automation,
-                            on: {
-                              ...prev.automation.on,
-                              minuteOfDay: parseInt(e.target.value),
-                            },
-                          },
-                        };
-                      })
-                    }
-                  />
-                </div>
+                        },
+                      };
+                    })
+                  }
+                />
               </div>
             </div>
           </div>
@@ -310,59 +326,35 @@ export const AutomationEditor = ({
             <div className="flex items-center gap-3">
               <Label className="text-sm font-medium">At:</Label>
               <div className="flex-1 flex gap-2 items-center">
-                <div className="w-1/2">
-                  <Input
-                    id="hourOff"
-                    type="number"
-                    placeholder="Hour (0-23)"
-                    value={editingConfig?.automation?.off?.hourOfDay ?? 0}
-                    min={0}
-                    max={23}
-                    onChange={(e) =>
-                      setEditingConfig((prev) => {
-                        if (!prev || !prev.automation || !prev.automation.off)
-                          return null;
-                        return {
-                          ...prev,
-                          automation: {
-                            ...prev.automation,
-                            off: {
-                              ...prev.automation.off,
-                              hourOfDay: parseInt(e.target.value),
-                            },
+                <Input
+                  id={offId}
+                  placeholder="00:00"
+                  type="text"
+                  ref={withMask("99:99", {
+                    placeholder: "-",
+                    showMaskOnHover: false,
+                  })}
+                  defaultValue={convertUTCToLocalHHMM(
+                    editingConfig?.automation?.off?.utcDate ?? ""
+                  )}
+                  onChange={(e) =>
+                    setEditingConfig((prev) => {
+                      if (!prev || !prev.automation || !prev.automation.off)
+                        return null;
+
+                      return {
+                        ...prev,
+                        automation: {
+                          ...prev.automation,
+                          off: {
+                            ...prev.automation.off,
+                            utcDate: convertTimeToUTCHHMM(e.target.value),
                           },
-                        };
-                      })
-                    }
-                  />
-                </div>
-                <span>:</span>
-                <div className="w-1/2">
-                  <Input
-                    id="minuteOff"
-                    type="number"
-                    placeholder="Minute (0-59)"
-                    value={editingConfig?.automation?.off?.minuteOfDay ?? 0}
-                    min={0}
-                    max={59}
-                    onChange={(e) =>
-                      setEditingConfig((prev) => {
-                        if (!prev || !prev.automation || !prev.automation.off)
-                          return null;
-                        return {
-                          ...prev,
-                          automation: {
-                            ...prev.automation,
-                            off: {
-                              ...prev.automation.off,
-                              minuteOfDay: parseInt(e.target.value),
-                            },
-                          },
-                        };
-                      })
-                    }
-                  />
-                </div>
+                        },
+                      };
+                    })
+                  }
+                />
               </div>
             </div>
           </div>
