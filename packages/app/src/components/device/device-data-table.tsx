@@ -314,7 +314,7 @@ export function DeviceDataTable({ data }: DeviceDataTableProps) {
               </TableHeader>
             </Table>
           </div>
-          <div className="overflow-auto max-h-[calc(100vh-26rem)] scrollbar-thin scrollbar-thumb-secondary scrollbar-track-secondary/20">
+          <div className="overflow-auto max-h-[calc(100vh-27rem)] scrollbar-thin scrollbar-thumb-secondary scrollbar-track-secondary/20">
             <Table className="rounded-b-md">
               <TableBody>
                 {table.getRowModel().rows?.length ? (
@@ -353,6 +353,20 @@ export function DeviceDataTable({ data }: DeviceDataTableProps) {
               </TableBody>
             </Table>
           </div>
+        </div>
+      </div>
+      <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full bg-primary" />
+          <span>Device is online and responding</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full border-amber-500 bg-amber-500/10 bg-amber-700 dark:bg-amber-300 shadow hover:bg-amber-500/20" />
+          <span>Device is offline or not responding</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full bg-muted animate-pulse" />
+          <span>Waiting for device response</span>
         </div>
       </div>
     </div>
