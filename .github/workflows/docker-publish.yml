@@ -90,7 +90,7 @@ jobs:
       - name: Build and push Panel Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./packages/panel
+          # context: ./packages/panel
           file: ./packages/panel/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -131,7 +131,7 @@ jobs:
       - name: Build and push Joystick Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./packages/joystick
+          # context: ./packages/joystick
           file: ./packages/joystick/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -172,7 +172,7 @@ jobs:
       - name: Build and push Studio Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./packages/studio
+          # context: ./packages/studio
           file: ./packages/studio/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -213,7 +213,7 @@ jobs:
       - name: Build and push Baker Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./packages/baker
+          # context: ./packages/baker
           file: ./packages/baker/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -254,7 +254,7 @@ jobs:
       - name: Build and push Switcher Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./packages/switcher
+          # context: ./packages/switcher
           file: ./packages/switcher/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -295,7 +295,7 @@ jobs:
       - name: Build and push Whisper Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./packages/whisper
+          # context: ./packages/whisper
           file: ./packages/whisper/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}

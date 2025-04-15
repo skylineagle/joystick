@@ -1,8 +1,8 @@
 import { pb } from "@/pocketbase";
+import type { DeviceResponse } from "@joystick/core";
 import { ChildProcess, spawn } from "node:child_process";
 import { join } from "node:path";
 import { logger } from "./logger";
-import type { DeviceResponse } from "./types/types";
 
 type WebSocketMessage = {
   type: string;

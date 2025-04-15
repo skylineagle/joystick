@@ -26,7 +26,8 @@
     
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@joystick/core": ["../core/src"]
     }
   }
 }

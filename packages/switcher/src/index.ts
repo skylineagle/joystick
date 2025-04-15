@@ -1,15 +1,14 @@
-import { MEDIAMTX_API } from "@/config";
+import { STREAM_API_URL } from "@joystick/core";
 import { logger } from "@/logger";
 import { pb } from "@/pocketbase";
-import type { DeviceResponse } from "@/types/types";
 import cors from "@elysiajs/cors";
+import type { DeviceResponse } from "@joystick/core";
 import { Elysia } from "elysia";
-import { createJob } from "../../baker/src/baker";
 
 export const TO_REPLACE = ["camera", "action"];
 
 async function addDevice(deviceName: string, configuration: any) {
-  await fetch(`${MEDIAMTX_API}/v3/config/paths/add/${deviceName}`, {
+  await fetch(`${STREAM_API_URL}/v3/config/paths/add/${deviceName}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -19,7 +18,7 @@ async function addDevice(deviceName: string, configuration: any) {
 }
 
 async function deleteDevice(deviceName: string) {
-  await fetch(`${MEDIAMTX_API}/v3/config/paths/delete/${deviceName}`, {
+  await fetch(`${STREAM_API_URL}/v3/config/paths/delete/${deviceName}`, {
     method: "DELETE",
   });
 }

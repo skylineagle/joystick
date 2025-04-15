@@ -1,9 +1,24 @@
-FROM oven/bun:1.2.2
+# --------- Stage 1: Build dependencies ----------
+FROM oven/bun:latest as base
+
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y sshpass curl
-
-COPY package.json ./
-RUN bun install --frozen-lockfile
 COPY . .
-CMD ["bun", "run", "src/index.ts"] 
+
+RUN bun install --filter "@joystick/whisper" --filter "@joystick/core"
+
+
+# --------- Stage 2: Copy only what's needed ----------
+FROM oven/bun:slim as runner
+
+WORKDIR /app/packages/whisper
+
+COPY --from=base /app/packages/whisper /app/packages/whisper
+COPY --from=base /app/packages/core /app/packages/core
+COPY --from=base /app/bun.lock /app/bun.lock
+COPY --from=base /app/node_modules /app/node_modules
+
+ENV NODE_ENV=production
+
+# Run the server
+CMD ["bun", "run", "src/index.ts"]

@@ -1,8 +1,13 @@
 {
   "name": "joystick",
+  "private": true,
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "dev": "npm run dev --workspaces"
+  },
   "module": "index.ts",
   "type": "module",
   "devDependencies": {

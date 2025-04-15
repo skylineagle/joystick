@@ -1,6 +1,6 @@
 import { pb } from "@/pocketbase";
-import type { DeviceResponse } from "@/types/types";
 import { cors } from "@elysiajs/cors";
+import type { DeviceResponse } from "@joystick/core";
 import Client from "android-sms-gateway";
 import { Elysia } from "elysia";
 import { logger } from "./logger";

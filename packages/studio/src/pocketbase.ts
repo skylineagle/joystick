@@ -1,6 +1,9 @@
-import { POCKETBASE_URL, USERNAME, PASSWORD } from "@/config";
-import { logger } from "@/logger";
-import type { TypedPocketBase } from "@/types/db.types";
+import {
+  PASSWORD,
+  POCKETBASE_URL,
+  USERNAME,
+  type TypedPocketBase,
+} from "@joystick/core";
 import PocketBase from "pocketbase";
 
 export const pb = new PocketBase(POCKETBASE_URL) as TypedPocketBase;

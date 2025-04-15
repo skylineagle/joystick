@@ -1,13 +1,16 @@
+import { logger } from "@/logger";
 import { pb } from "@/pocketbase";
-import { type GalleryResponse, type RunResponse } from "@/types/db.types";
-import type { ActionResponse, DeviceResponse } from "@/types/types";
-import { $ } from "bun";
+import type {
+  DeviceResponse,
+  GalleryResponse,
+  RunResponse,
+} from "@joystick/core";
+import { JOYSTICK_API_URL, runCommandOnDevice } from "@joystick/core";
+import { $, ShellError } from "bun";
+import { Baker } from "cronbake";
 import { existsSync, mkdirSync, readFileSync } from "fs";
 import { join } from "path";
-import { logger } from "@/logger";
-import { runCommandOnDevice } from "@/ssh";
-import { Baker } from "cronbake";
-import { JOYSTICK_API_URL } from "@/config";
+
 const GALLERY_BASE_PATH = join(process.cwd(), "data", "gallery");
 
 // Ensure gallery directory exists
@@ -173,7 +176,7 @@ export class GalleryService {
         });
     } catch (error) {
       if (
-        error instanceof _ShellError &&
+        error instanceof ShellError &&
         error.stderr.toString().includes("No such file or directory")
       ) {
         return [];

@@ -1,9 +1,16 @@
-import { STREAM_API_URL, SWITCHER_API_URL } from "@/config";
 import { pb } from "@/pocketbase";
-import { runCommandOnDevice } from "@/ssh";
-import { type ActionsResponse, RunTargetOptions } from "@/types/db.types";
-import type { DeviceResponse, RunResponse } from "@/types/types";
+import { runCommandOnDevice } from "@joystick/core";
 import cors from "@elysiajs/cors";
+import type {
+  ActionsResponse,
+  DeviceResponse,
+  RunResponse,
+} from "@joystick/core";
+import {
+  RunTargetOptions,
+  STREAM_API_URL,
+  SWITCHER_API_URL,
+} from "@joystick/core";
 import { $ } from "bun";
 import { Elysia, t } from "elysia";
 import { validate } from "jsonschema";
@@ -19,7 +26,7 @@ app.get("/", () => "Command Runner API");
 
 app.post(
   "/api/run/:device/:action",
-  async ({ params, body, headers, request, query }) => {
+  async ({ params, body, headers, query }) => {
     try {
       // Start timing the action
       enhancedLogger.startActionTimer();
@@ -91,7 +98,7 @@ app.post(
       const command = Object.entries({ ...body, ...defaultParamters }).reduce(
         (acc, [key, value]) => {
           if (acc.includes(`$${key}`)) {
-            return acc.replaceAll(`$${key}`, value.toString());
+            return acc.replaceAll(`$${key}`, String(value));
           }
           return acc;
         },
@@ -102,11 +109,6 @@ app.post(
         run.target === RunTargetOptions.device
           ? await runCommandOnDevice(device, command)
           : await $`${{ raw: command }}`.text();
-      // run.target === RunTargetOptions.device
-      //   ? device.information?.password
-      //     ? await $`sshpass -p ${device.information?.password} ssh -o StrictHostKeyChecking=no ${device.information?.user}@${device.information?.host} '${command}'`.text()
-      //     : await $`ssh -o StrictHostKeyChecking=no ${device.information?.user}@${device.information?.host} '${command}'`.text()
-      //   : await $`${{ raw: command }}`.text();
 
       const response = {
         success: true,

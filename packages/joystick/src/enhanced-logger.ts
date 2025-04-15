@@ -1,15 +1,15 @@
-import { pb } from "@/pocketbase";
-import { Collections } from "@/types/db.types";
-import type {
-  UsersResponse,
-  DevicesResponse,
-  ActionsResponse,
-} from "@/types/db.types";
-import pino from "pino";
-import { Elysia } from "elysia";
-import { dirname, join } from "path";
-import { mkdirSync, writeFileSync } from "fs";
 import { logger } from "@/logger";
+import { pb } from "@/pocketbase";
+import type {
+  ActionsResponse,
+  DevicesResponse,
+  UsersResponse,
+} from "@joystick/core";
+import { Collections } from "@joystick/core";
+import { Elysia } from "elysia";
+import { mkdirSync, writeFileSync } from "fs";
+import { join } from "path";
+import pino from "pino";
 
 // Base console logger using Pino
 const pinoLogger = pino({

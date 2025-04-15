@@ -6,10 +6,10 @@ import {
   startJob,
   stopJob,
 } from "@/baker";
-import { MEDIAMTX_API, POCKETBASE_URL } from "@/config";
 import { logger } from "@/logger";
-import type { DeviceAutomation } from "@/types/types";
 import cors from "@elysiajs/cors";
+import type { DeviceAutomation } from "@joystick/core";
+import { POCKETBASE_URL, STREAM_API_URL } from "@joystick/core";
 import { Elysia } from "elysia";
 
 const app = new Elysia()
@@ -157,4 +157,4 @@ app.get("/api/health", async () => {
 app.use(cors()).listen(3000);
 logger.info("🦊 Baker API server running at http://localhost:3000");
 logger.debug(`Pocketbase URL: ${POCKETBASE_URL}`);
-logger.debug(`Stream URL: ${MEDIAMTX_API}`);
+logger.debug(`Stream URL: ${STREAM_API_URL}`);

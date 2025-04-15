@@ -3,8 +3,7 @@
   "module": "index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun run --watch ./src/index.ts",
-    "db:generate": "pocketbase-typegen -d ../../pocketbase/pb_data/data.db -o ./src/types/db.types.ts"
+    "dev": "bun run --watch ./src/index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest"
@@ -13,11 +12,12 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@joystick/core": "workspace:*",
     "@elysiajs/cors": "^1.2.0",
     "android-sms-gateway": "^2.0.0",
     "elysia": "^1.2.23",
     "pino": "^9.6.0",
     "pino-pretty": "^13.0.0",
-    "pocketbase": "^0.25.1"
+    "pocketbase": "^0.25.2"
   }
 }

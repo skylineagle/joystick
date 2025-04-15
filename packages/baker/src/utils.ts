@@ -1,7 +1,7 @@
-import { MEDIAMTX_API, JOYSTICK_API_URL } from "@/config";
+import { JOYSTICK_API_URL, STREAM_API_URL } from "@joystick/core";
 import { logger } from "./logger";
 
-export const API_URL = `${MEDIAMTX_API}/v3`;
+export const API_URL = `${STREAM_API_URL}/v3`;
 
 export async function toggleMode(name: string, mode: string) {
   logger.info(`Toggling mode for camera ${name} to ${mode}`);

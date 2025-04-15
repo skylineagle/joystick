@@ -1,6 +1,6 @@
 import { logger } from "@/logger";
 import { pb } from "@/pocketbase";
-import type { DeviceAutomation, DeviceResponse } from "@/types/types";
+import type { DeviceAutomation, DeviceResponse } from "@joystick/core";
 import { Baker, type Status } from "cronbake";
 import { getMediaMTXPaths, toggleMode } from "./utils";
 

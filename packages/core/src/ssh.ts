@@ -1,8 +1,6 @@
-import { logger } from "@/logger";
-import type { DeviceInformation, DeviceResponse } from "@/types/types";
-import { spawn } from "node:child_process";
-import { join } from "node:path";
+import type { DeviceResponse } from "@joystick/core";
 import { $ } from "bun";
+import { join } from "node:path";
 
 const tempKeyFiles = new Map<string, string>(); // Track temporary key files for cleanup
 
