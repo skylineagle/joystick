@@ -1,4 +1,4 @@
-import type { DeviceResponse } from "@joystick/core";
+import type { DeviceResponse } from "@/types";
 import { $ } from "bun";
 import { join } from "node:path";
 
