@@ -21,4 +21,5 @@ export interface EditorConfig {
     host: string;
     phone?: string;
   };
+  overlay?: File;
 }

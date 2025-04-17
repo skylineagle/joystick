@@ -102,8 +102,14 @@ export type DeviceResponse = DevicesResponse<
   { device: ModelResponse }
 >;
 
-export type InsertDevice = Omit<DevicesResponse, "id" | "created" | "updated">;
-export type UpdateDevice = Partial<InsertDevice> & { id: string };
+export type InsertDevice = Omit<
+  DevicesResponse,
+  "id" | "created" | "updated" | "overlay"
+>;
+export type UpdateDevice = Partial<InsertDevice> & {
+  id: string;
+  overlay?: File;
+};
 
 export interface ActionSchema {
   name: string;

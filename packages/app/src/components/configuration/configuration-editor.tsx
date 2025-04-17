@@ -1,5 +1,6 @@
 import { AutomationEditor } from "@/components/configuration/automation-editor";
 import { deviceConfigSchema } from "@/components/configuration/consts";
+import { OverlayUpload } from "@/components/configuration/overlay-upload";
 import { EditorConfig, EditorMarker } from "@/components/configuration/types";
 import {
   CountrySelect,
@@ -21,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAction } from "@/hooks/use-action";
+import { FileWithPreview } from "@/hooks/use-file-upload";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { updateDevice } from "@/lib/device";
 import { cn, getModeOptionsFromSchema } from "@/lib/utils";
@@ -38,6 +40,7 @@ import { Pencil } from "lucide-react";
 import type * as Monaco from "monaco-editor";
 import { useCallback, useRef, useState } from "react";
 import * as RPNInput from "react-phone-number-input";
+import { pb } from "@/lib/pocketbase";
 
 export interface ConfigurationEditorProps {
   device: DeviceResponse;
@@ -132,6 +135,15 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
     );
   }, [currentTab, isJsonValid, isAutomationValid, editingConfig]);
 
+  const handleOverlayChange = useCallback((files: FileWithPreview[]) => {
+    console.log(files);
+    setEditingConfig((prev) => {
+      return prev
+        ? { ...prev, overlay: (files?.[0]?.file as File) ?? "" }
+        : null;
+    });
+  }, []);
+
   const handleSave = useCallback(() => {
     if (!editingConfig) return;
 
@@ -144,6 +156,7 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
         automation: editingConfig.automation,
         name: editingConfig.name,
         information: editingConfig.information,
+        overlay: editingConfig.overlay,
       });
     } catch {
       toast.error({
@@ -216,7 +229,10 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
               </TabsTrigger>
             )}
           </TabsList>
-          <TabsContent value="config" className="py-4">
+          <TabsContent
+            value="config"
+            className="flex flex-col items-center gap-4"
+          >
             <Editor
               height="400px"
               theme={getActualColorMode() === "dark" ? "vs-dark" : "light"}
@@ -241,6 +257,12 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
                 suggestOnTriggerCharacters: true,
               }}
             />
+            {/* <div> */}
+            <OverlayUpload
+              onChange={handleOverlayChange}
+              overlay={pb.files.getURL(device, device?.overlay)}
+            />
+            {/* </div> */}
           </TabsContent>
           <TabsContent value="general" className="py-4">
             <div className="space-y-6">
