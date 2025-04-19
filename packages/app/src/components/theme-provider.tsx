@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 type ColorMode = "dark" | "light" | "system";
-type DesignTheme = "default" | "bubblegum" | "ocean" | "coffee";
+type DesignTheme = "default" | "bubblegum" | "ocean" | "coffee" | "candy";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -78,7 +78,8 @@ export function ThemeProvider({
       "default-theme",
       "bubblegum-theme",
       "ocean-theme",
-      "coffee-theme"
+      "coffee-theme",
+      "candy-theme"
     );
     root.classList.add(`${designTheme}-theme`);
   }, [colorMode, designTheme]);

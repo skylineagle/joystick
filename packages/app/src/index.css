@@ -299,6 +299,58 @@
     --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
   }
 
+  .candy-theme {
+    --background: 200 23.08% 97.45%;
+    --foreground: 0 0% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 20%;
+    --primary: 349.52 100% 87.65%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 197.4 71.43% 72.55%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 50.4 26.88% 81.76%;
+    --muted-foreground: 0 0% 43.14%;
+    --accent: 60 100% 50%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 84.24% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 83.14%;
+    --input: 0 0% 83.14%;
+    --ring: 349.52 100% 87.65%;
+    --chart-1: 349.52 100% 87.65%;
+    --chart-2: 197.4 71.43% 72.55%;
+    --chart-3: 60 100% 50%;
+    --chart-4: 330 100% 80%;
+    --chart-5: 120 60% 50%;
+    --sidebar: 200 23.08% 97.45%;
+    --sidebar-foreground: 0 0% 20%;
+    --sidebar-primary: 349.52 100% 87.65%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 60 100% 50%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 83.14%;
+    --sidebar-ring: 349.52 100% 87.65%;
+    --font-sans: Poppins, sans-serif;
+    --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+    --font-mono: Roboto Mono, monospace;
+    --radius: 0.6rem;
+    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+      0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+      0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+      0 2px 4px -1px hsl(0 0% 0% / 0.1);
+    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+      0 4px 6px -1px hsl(0 0% 0% / 0.1);
+    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+      0 8px 10px -1px hsl(0 0% 0% / 0.1);
+    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+  }
+
   /* Apply dark mode when the user has dark mode enabled at the OS/browser level */
   @media (prefers-color-scheme: dark) {
     :root.system {
@@ -552,6 +604,58 @@
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
       "Liberation Mono", "Courier New", monospace;
     --radius: 0.7rem;
+    --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+    --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+      0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+      0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+      0 2px 4px -1px hsl(0 0% 0% / 0.1);
+    --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+      0 4px 6px -1px hsl(0 0% 0% / 0.1);
+    --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1),
+      0 8px 10px -1px hsl(0 0% 0% / 0.1);
+    --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+  }
+
+  .candy-theme.dark {
+    --background: 220 14.75% 11.96%;
+    --foreground: 0 0% 89.8%;
+    --card: 197.14 6.93% 19.8%;
+    --card-foreground: 0 0% 89.8%;
+    --popover: 197.14 6.93% 19.8%;
+    --popover-foreground: 0 0% 89.8%;
+    --primary: 330 100% 80%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 120 60% 50%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 26.67%;
+    --muted-foreground: 0 0% 63.92%;
+    --accent: 197.4 71.43% 72.55%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 84.24% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 26.67%;
+    --input: 0 0% 26.67%;
+    --ring: 330 100% 80%;
+    --chart-1: 330 100% 80%;
+    --chart-2: 120 60% 50%;
+    --chart-3: 197.4 71.43% 72.55%;
+    --chart-4: 60 100% 50%;
+    --chart-5: 48 100% 50%;
+    --sidebar: 220 14.75% 11.96%;
+    --sidebar-foreground: 0 0% 89.8%;
+    --sidebar-primary: 330 100% 80%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 197.4 71.43% 72.55%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 0 0% 26.67%;
+    --sidebar-ring: 330 100% 80%;
+    --font-sans: Poppins, sans-serif;
+    --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+    --font-mono: Roboto Mono, monospace;
+    --radius: 0.6rem;
     --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
     --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1),

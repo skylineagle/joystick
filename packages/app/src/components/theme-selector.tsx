@@ -29,6 +29,11 @@ const designThemeInfo = {
     color: "hsl(16.67, 21.95%, 32.16%)",
     radius: "0.6rem",
   },
+  candy: {
+    name: "Candy",
+    color: "hsl(349.52, 100%, 87.65%)",
+    radius: "0.6rem",
+  },
 };
 
 export const ThemeSelector = () => {
@@ -54,7 +59,7 @@ export const ThemeSelector = () => {
           value={designTheme}
           onValueChange={(value) =>
             setDesignTheme(
-              value as "default" | "bubblegum" | "ocean" | "coffee"
+              value as "default" | "bubblegum" | "ocean" | "coffee" | "candy"
             )
           }
         >
