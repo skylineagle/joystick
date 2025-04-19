@@ -47,7 +47,7 @@ export function RecentEvents() {
     });
 
     return () => {
-      pb.collection("action_logs").unsubscribe();
+      pb.collection("action_logs")?.unsubscribe("*");
     };
   }, [queryClient]);
 

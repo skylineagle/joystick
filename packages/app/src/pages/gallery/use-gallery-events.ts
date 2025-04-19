@@ -40,7 +40,7 @@ export function useGalleryEvents(deviceId: string) {
     });
 
     return () => {
-      pb.collection("gallery").unsubscribe("*");
+      pb.collection("gallery")?.unsubscribe("*");
     };
   }, [deviceId]);
 

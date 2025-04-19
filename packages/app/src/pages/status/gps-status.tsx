@@ -21,7 +21,7 @@ import { z } from "zod";
 import L from "leaflet";
 
 // Fix icon paths - this avoids TypeScript errors with image imports
-const DefaultIcon = L.icon({
+export const DefaultIcon = L.icon({
   iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png",
   iconRetinaUrl:
     "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png",
@@ -141,7 +141,10 @@ const gpsSchema = z.object({
 });
 
 // Convert decimal coordinates to degrees, minutes, seconds format
-const convertToDMS = (coordinate: number, type: "lat" | "lng"): string => {
+export const convertToDMS = (
+  coordinate: number,
+  type: "lat" | "lng"
+): string => {
   if (coordinate === undefined || !isFinite(coordinate)) return "N/A";
 
   const absolute = Math.abs(coordinate);

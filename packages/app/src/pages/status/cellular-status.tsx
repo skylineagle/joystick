@@ -114,7 +114,7 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
     : "just now";
 
   return (
-    <div className="h-[200px] p-4 pt-0 max-w-full overflow-hidden">
+    <div className="h-full w-full p-4 pt-0 overflow-y-auto">
       {isCpsiLoading ? (
         <div className="space-y-2">
           <Skeleton className="h-6 w-full" />
@@ -122,7 +122,7 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
           <Skeleton className="h-6 w-1/2" />
         </div>
       ) : (
-        <div className="space-y-4 w-full">
+        <div className="space-y-3 w-full">
           <div className="flex items-center justify-between gap-1 flex-wrap w-full">
             <div className="flex items-center gap-1 min-w-0 truncate">
               {getSignalIcon()}
@@ -154,18 +154,18 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
               <span className="sr-only">Refresh cellular status</span>
             </Button>
           </div>
-          <div className="flex items-center text-xs text-muted-foreground ml-auto">
+          <div className="flex items-center text-xs text-muted-foreground">
             <Clock className="h-3 w-3 mr-1" />
             <span>{timeSinceUpdate}</span>
           </div>
-          <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="flex items-center gap-1">
             <span className="text-xs text-muted-foreground">Cell ID:</span>
             <span className="text-xs font-medium truncate">
               {data?.cellId || "N/A"}
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-2 gap-y-2 pt-1 text-xs w-full">
+          <div className="grid grid-cols-2 gap-2 pt-1 text-xs w-full">
             <div className="flex flex-col">
               <span className="text-xs text-muted-foreground">Band</span>
               <span className="truncate">{data?.band || "N/A"}</span>

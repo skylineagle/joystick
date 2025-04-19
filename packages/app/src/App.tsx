@@ -15,11 +15,12 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { HashLoader } from "react-spinners";
 import { Toaster } from "sonner";
 import { Layout } from "./layout";
+import { DashboardPage } from "@/pages/dashboard/dashboard-page";
 
 // Lazy load components
-const DashboardPage = lazy(() =>
-  import("@/pages/dashboard/dashboard-page").then((module) => ({
-    default: module.DashboardPage,
+const HomePage = lazy(() =>
+  import("@/pages/home/home-page").then((module) => ({
+    default: module.HomePage,
   }))
 );
 const ParamsPage = lazy(() =>
@@ -150,7 +151,7 @@ function AnimatedRoutes() {
     }, true);
 
     return () => {
-      unsubscribe();
+      unsubscribe?.();
     };
   }, []);
 
@@ -163,7 +164,7 @@ function AnimatedRoutes() {
             <ErrorBoundary>
               <Suspense fallback={<LoadingFallback />}>
                 <PageTransition>
-                  <DashboardPage />
+                  <HomePage />
                 </PageTransition>
               </Suspense>
             </ErrorBoundary>
@@ -194,6 +195,18 @@ function AnimatedRoutes() {
               </ErrorBoundary>
             </Suspense>
           </ProtectedRoute>
+        }
+      />
+      <Route
+        path="dashboard"
+        element={
+          <Suspense fallback={<LoadingFallback />}>
+            <ErrorBoundary>
+              <PageTransition>
+                <DashboardPage />
+              </PageTransition>
+            </ErrorBoundary>
+          </Suspense>
         }
       />
       <Route
@@ -229,6 +242,7 @@ function AnimatedRoutes() {
             </Suspense>
           }
         />
+
         <Route
           path="actions"
           element={

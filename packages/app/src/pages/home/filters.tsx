@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { cn } from "@/lib/utils";
-import { modeConfig } from "@/pages/dashboard/config";
+import { modeConfig } from "@/pages/home/config";
 import { useDeviceStore } from "@/store/device-store";
 import { Search, X } from "lucide-react";
 import { memo, useCallback } from "react";

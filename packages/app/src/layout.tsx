@@ -37,7 +37,7 @@ export function Layout({ children }: LayoutProps) {
     });
 
     return () => {
-      pb.collection("devices").unsubscribe(deviceId!);
+      pb.collection("devices")?.unsubscribe(deviceId!);
     };
   }, [deviceId, queryClient]);
 
