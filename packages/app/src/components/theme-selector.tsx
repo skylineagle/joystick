@@ -34,6 +34,16 @@ const designThemeInfo = {
     color: "hsl(349.52, 100%, 87.65%)",
     radius: "0.6rem",
   },
+  retro: {
+    name: "Retro",
+    color: "hsl(349.52, 100%, 87.65%)",
+    radius: "0.25rem",
+  },
+  graphite: {
+    name: "Graphite",
+    color: "hsl(0, 0%, 37.65%)",
+    radius: "0.5rem",
+  },
 };
 
 export const ThemeSelector = () => {
