@@ -29,15 +29,28 @@ export function Layout({ children }: LayoutProps) {
   const { device: deviceId } = useParams();
 
   useEffect(() => {
+    let unsubscribe: () => void;
     if (!deviceId) return;
-    pb.collection("devices").subscribe<DeviceResponse>(deviceId!, (e) => {
-      if (e.action === "update") {
-        queryClient.invalidateQueries({ queryKey: ["device", e.record.id] });
-      }
-    });
+    const init = async () => {
+      unsubscribe = await pb
+        .collection("devices")
+        .subscribe<DeviceResponse>(deviceId!, (e) => {
+          if (e.action === "update") {
+            queryClient.invalidateQueries({
+              queryKey: ["device", e.record.id],
+            });
+          }
+        });
+    };
+
+    init();
 
     return () => {
-      pb.collection("devices")?.unsubscribe(deviceId!);
+      try {
+        unsubscribe?.();
+      } catch (error) {
+        console.error("Error unsubscribing from device:", error);
+      }
     };
   }, [deviceId, queryClient]);
 
