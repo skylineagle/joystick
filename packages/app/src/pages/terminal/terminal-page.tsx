@@ -1,4 +1,4 @@
-import { useTheme } from "@/components/theme-provider";
+import { DesignTheme, useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { useDevice } from "@/hooks/use-device";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
@@ -13,14 +13,20 @@ import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import { WebLinksAddon } from "xterm-addon-web-links";
 import {
-  blueDarkTheme,
-  blueLightTheme,
+  bubblegumDarkTheme,
+  bubblegumLightTheme,
+  candyDarkTheme,
+  candyLightTheme,
+  coffeeDarkTheme,
+  coffeeLightTheme,
   defaultDarkTheme,
   defaultLightTheme,
-  greenDarkTheme,
-  greenLightTheme,
-  purpleDarkTheme,
-  purpleLightTheme,
+  graphiteDarkTheme,
+  graphiteLightTheme,
+  oceanDarkTheme,
+  oceanLightTheme,
+  retroDarkTheme,
+  retroLightTheme,
 } from "./terminal-theme";
 
 import "xterm/css/xterm.css";
@@ -60,14 +66,21 @@ const matrixChars =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%\"'#&_(),.;:?!\\|{}<>[]^~";
 
 // Function to get the correct terminal theme based on current theme and color mode
-function getTerminalTheme(mode: string, designTheme: string) {
+function getTerminalTheme(mode: string, designTheme: DesignTheme) {
+  // return mode === "dark" ? shadcnDarkTheme : shadcnLightTheme;
   switch (designTheme) {
-    case "purple":
-      return mode === "dark" ? purpleDarkTheme : purpleLightTheme;
-    case "blue":
-      return mode === "dark" ? blueDarkTheme : blueLightTheme;
-    case "green":
-      return mode === "dark" ? greenDarkTheme : greenLightTheme;
+    case "bubblegum":
+      return mode === "dark" ? bubblegumDarkTheme : bubblegumLightTheme;
+    case "ocean":
+      return mode === "dark" ? oceanDarkTheme : oceanLightTheme;
+    case "coffee":
+      return mode === "dark" ? coffeeDarkTheme : coffeeLightTheme;
+    case "candy":
+      return mode === "dark" ? candyDarkTheme : candyLightTheme;
+    case "retro":
+      return mode === "dark" ? retroDarkTheme : retroLightTheme;
+    case "graphite":
+      return mode === "dark" ? graphiteDarkTheme : graphiteLightTheme;
     default: // "default"
       return mode === "dark" ? defaultDarkTheme : defaultLightTheme;
   }

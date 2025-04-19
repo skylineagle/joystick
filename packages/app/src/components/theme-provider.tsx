@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 type ColorMode = "dark" | "light" | "system";
-type DesignTheme = "default" | "bubblegum" | "ocean" | "coffee" | "candy" | "retro" | "graphite";
+export type DesignTheme = "default" | "bubblegum" | "ocean" | "coffee" | "candy" | "retro" | "graphite";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
