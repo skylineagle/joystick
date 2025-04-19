@@ -1,8 +1,9 @@
-import { BaseCard } from "./base-card";
-import type { StreamViewCardConfig } from "@/types/dashboard-cards";
 import { useDevice } from "@/hooks/use-device";
 import { MediaFrame } from "@/pages/stream-view/media-frame";
 import { WsFrame } from "@/pages/stream-view/ws-frame";
+import type { StreamViewCardConfig } from "@/types/dashboard-cards";
+import { BaseCard } from "./base-card";
+import { pb } from "@/lib/pocketbase";
 
 interface StreamViewCardProps {
   config: StreamViewCardConfig;
@@ -30,6 +31,7 @@ export const StreamViewCard = ({
   }
 
   const isMediaMtx = device.expand?.device.stream === "mediamtx";
+  const overerlayPath = pb.files.getURL(device, device.overlay);
 
   return (
     <BaseCard config={config} isEditing={isEditing} onEdit={onEdit}>
@@ -39,6 +41,7 @@ export const StreamViewCard = ({
             deviceId={device.id}
             deviceName={device.configuration?.name || ""}
             aspectRatio={device.information?.aspectRatio}
+            overlayPath={overerlayPath}
           />
         ) : (
           <WsFrame mode="view" />

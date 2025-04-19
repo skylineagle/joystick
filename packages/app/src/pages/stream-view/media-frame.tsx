@@ -20,7 +20,7 @@ export const RoiMediaFrame = ({
   const { mode } = useMode(deviceId);
   const ref = useTargetRef();
   const [showOverlay] = useQueryState(
-    "overlay",
+    `${deviceId}-overlay`,
     parseAsBoolean.withDefault(true).withOptions({
       shallow: true,
     })
@@ -101,7 +101,7 @@ export const MediaFrame = ({
   const { mode } = useMode(deviceId);
   const ref = useRef<HTMLIFrameElement>(null);
   const [showOverlay] = useQueryState(
-    "overlay",
+    `${deviceId}-overlay`,
     parseAsBoolean.withDefault(true).withOptions({
       shallow: true,
     })

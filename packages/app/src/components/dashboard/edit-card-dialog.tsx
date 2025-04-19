@@ -16,9 +16,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useDevices } from "@/hooks/use-devices";
 import { deviceIdsToOptions, devicesToOptions } from "@/lib/device-utils";
 import { CardType, type CardConfig } from "@/types/dashboard-cards";
+import { useQueryState } from "nuqs";
+import { parseAsBoolean } from "nuqs/server";
 import { useState } from "react";
 
 interface EditCardDialogProps {
@@ -41,6 +44,16 @@ export const EditCardDialog = ({
   );
   const [selectedDeviceOptions, setSelectedDeviceOptions] = useState<Option[]>(
     []
+  );
+  const [showOverlay, setShowOverlay] = useQueryState(
+    `${
+      cardConfig.type === CardType.STREAM_VIEW && "deviceId" in cardConfig
+        ? cardConfig.deviceId
+        : ""
+    }-overlay`,
+    parseAsBoolean.withDefault(true).withOptions({
+      shallow: true,
+    })
   );
   const { data: devices } = useDevices();
 
@@ -137,6 +150,21 @@ export const EditCardDialog = ({
               )}
             </div>
           </div>
+
+          {cardConfig.type === CardType.STREAM_VIEW && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="show-overlay" className="text-right">
+                Show Overlay
+              </Label>
+              <div className="col-span-3">
+                <Switch
+                  id="show-overlay"
+                  checked={showOverlay}
+                  onCheckedChange={setShowOverlay}
+                />
+              </div>
+            </div>
+          )}
         </div>
         <DialogFooter className="flex justify-between">
           <Button

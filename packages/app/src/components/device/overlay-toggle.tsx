@@ -9,7 +9,7 @@ interface OverlayToggleProps {
 
 export function OverlayToggle({ deviceId }: OverlayToggleProps) {
   const [showOverlay, setShowOverlay] = useQueryState(
-    "overlay",
+    `${deviceId}-overlay`,
     parseAsBoolean.withDefault(true).withOptions({
       shallow: true,
     })
