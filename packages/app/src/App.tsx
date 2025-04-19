@@ -198,15 +198,17 @@ function AnimatedRoutes() {
         }
       />
       <Route
-        path="dashboard"
+        path="/dashboard"
         element={
-          <Suspense fallback={<LoadingFallback />}>
-            <ErrorBoundary>
-              <PageTransition>
-                <DashboardPage />
-              </PageTransition>
-            </ErrorBoundary>
-          </Suspense>
+          <ProtectedRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <ErrorBoundary>
+                <PageTransition>
+                  <DashboardPage />
+                </PageTransition>
+              </ErrorBoundary>
+            </Suspense>
+          </ProtectedRoute>
         }
       />
       <Route

@@ -11,7 +11,7 @@ import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { useAuthStore } from "@/lib/auth";
 import { useDeviceStore } from "@/store/device-store";
 import { TooltipProvider } from "@radix-ui/react-tooltip";
-import { Gauge } from "lucide-react";
+import { Gauge, PanelsTopLeft } from "lucide-react";
 import { Link } from "react-router";
 import { Toaster } from "sonner";
 
@@ -45,10 +45,16 @@ export function HomePage() {
                 <Button variant="link" size="sm" asChild>
                   <Link to="/admin">
                     <Gauge className="h-4 w-4" />
-                    Admin Dashboard
+                    Admin Panel
                   </Link>
                 </Button>
               )}
+              <Button variant="link" size="sm" asChild>
+                <Link to="/dashboard">
+                  <PanelsTopLeft className="h-4 w-4" />
+                  Dashboard
+                </Link>
+              </Button>
               <AnimatedThemeToggle />
               <UserProfile />
             </div>

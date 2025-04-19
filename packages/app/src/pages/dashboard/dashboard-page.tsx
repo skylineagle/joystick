@@ -2,12 +2,15 @@ import { AddCardDialog } from "@/components/dashboard/add-card-dialog";
 import { CardFactory } from "@/components/dashboard/cards/card-factory";
 import { EditCardDialog } from "@/components/dashboard/edit-card-dialog";
 import { AnimatedThemeToggle } from "@/components/ui/animated-theme-toggle";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { CardType, type CardConfig } from "@/types/dashboard-cards";
+import { ArrowLeft } from "lucide-react";
 import { parseAsBoolean, useQueryState } from "nuqs";
 import { useCallback, useState } from "react";
+import { Link } from "react-router";
 import {
   Responsive,
   WidthProvider,
@@ -138,6 +141,12 @@ export const DashboardPage = () => {
     <div className="min-h-screen">
       <header className="flex justify-between items-center px-6 py-6">
         <div className="flex items-center space-x-4">
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Home
+            </Link>
+          </Button>
           <h1 className="text-2xl font-semibold">Dashboard</h1>
         </div>
 
