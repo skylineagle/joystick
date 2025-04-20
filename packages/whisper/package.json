@@ -1,5 +1,5 @@
 {
-  "name": "whisper",
+  "name": "@joystick/whisper",
   "module": "index.ts",
   "type": "module",
   "scripts": {

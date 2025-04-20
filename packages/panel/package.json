@@ -1,5 +1,5 @@
 {
-  "name": "panel",
+  "name": "@joystick/panel",
   "module": "index.ts",
   "type": "module",
   "scripts": {
