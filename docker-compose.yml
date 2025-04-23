@@ -5,7 +5,6 @@ services:
     ports:
       - "80:80"
       - "8080:8080"
-      # - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command:
@@ -84,8 +83,6 @@ services:
     image: ghcr.io/skylineagle/joystick/joystick:latest
     restart: unless-stopped
     platform: linux/amd64
-    ports:
-      - "8000:8000"
     environment:
       - STREAM_API_URL=http://mediamtx:9997
       - POCKETBASE_URL=http://pocketbase:8090
@@ -119,8 +116,6 @@ services:
     image: ghcr.io/skylineagle/joystick/panel:latest
     restart: unless-stopped
     platform: linux/amd64
-    # ports:
-    #   - "4000:4000"
     environment:
       - POCKETBASE_URL=http://pocketbase:8090
       - PORT=4000
@@ -151,11 +146,9 @@ services:
     image: ghcr.io/skylineagle/joystick/baker:latest
     restart: unless-stopped
     platform: linux/amd64
-    # ports:
-    #   - "3000:3000"
     environment:
       - PORT=3000
-      - MEDIAMTX_API=http://mediamtx:9997
+      - STREAM_API_URL=http://mediamtx:9997
       - POCKETBASE_URL=http://pocketbase:8090
       - JOYSTICK_API_URL=http://joystick:8000
     depends_on:
@@ -185,10 +178,8 @@ services:
     image: ghcr.io/skylineagle/joystick/switcher:latest
     restart: unless-stopped
     platform: linux/amd64
-    # ports:
-    #   - "8084:8084"
     environment:
-      - MEDIAMTX_API=http://mediamtx:9997
+      - STREAM_API_URL=http://mediamtx:9997
       - POCKETBASE_URL=http://pocketbase:8090
       - JOYSTICK_API_URL=http://joystick:8000
       - PORT=8080
@@ -219,10 +210,8 @@ services:
     image: ghcr.io/skylineagle/joystick/whisper:latest
     restart: unless-stopped
     platform: linux/amd64
-    # ports:
-    #   - "8081:8081"
     environment:
-      - MEDIAMTX_API=http://mediamtx:9997
+      - STREAM_API_URL=http://mediamtx:9997
       - POCKETBASE_URL=http://pocketbase:8090
       - JOYSTICK_API_URL=http://joystick:8000
       - PORT=8081
