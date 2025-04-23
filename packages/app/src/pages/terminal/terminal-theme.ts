@@ -1,72 +1,5 @@
 import { ITheme } from "xterm";
 
-// Function to get HSL value from CSS variable
-const getHSLFromCSSVar = (cssVar: string): string => {
-  const root = document.documentElement;
-  const value = getComputedStyle(root).getPropertyValue(cssVar).trim();
-  // Convert from CSS variable format to HSL string
-  return value.replace(/var\(--([^)]+)\)/, (_, name) => {
-    const hslValue = getComputedStyle(root)
-      .getPropertyValue(`--${name}`)
-      .trim();
-    return hslValue;
-  });
-};
-
-// Function to create a theme that uses CSS variables
-const createShadcnTheme = (isDark: boolean): ITheme => {
-  const background = getHSLFromCSSVar("--background");
-  const foreground = getHSLFromCSSVar("--foreground");
-  const primary = getHSLFromCSSVar("--primary");
-  const card = getHSLFromCSSVar("--card");
-  const destructive = getHSLFromCSSVar("--destructive");
-  const mutedForeground = getHSLFromCSSVar("--muted-foreground");
-  const ring = getHSLFromCSSVar("--ring");
-  const popover = getHSLFromCSSVar("--popover");
-  const accent = getHSLFromCSSVar("--accent");
-
-  // Extract HSL values from the CSS variables
-  const extractHSL = (hslString: string) => {
-    const match = hslString.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
-    if (match) {
-      return {
-        h: parseInt(match[1]),
-        s: parseInt(match[2]),
-        l: parseInt(match[3]),
-      };
-    }
-    return { h: 0, s: 0, l: 0 };
-  };
-
-  const accentHSL = extractHSL(accent);
-
-  return {
-    background,
-    foreground,
-    cursor: primary,
-    cursorAccent: background,
-    selectionBackground: isDark
-      ? `hsla(${accentHSL.h}, ${accentHSL.s}%, ${accentHSL.l}%, 0.4)`
-      : `hsla(${accentHSL.h}, ${accentHSL.s}%, ${accentHSL.l}%, 0.3)`,
-    black: card,
-    red: destructive,
-    green: isDark ? "hsl(140, 70%, 40%)" : "hsl(140, 70%, 35%)",
-    yellow: isDark ? "hsl(42, 87%, 60%)" : "hsl(42, 87%, 55%)",
-    blue: primary,
-    magenta: isDark ? "hsl(300, 60%, 60%)" : "hsl(300, 60%, 55%)",
-    cyan: isDark ? "hsl(180, 70%, 50%)" : "hsl(180, 70%, 45%)",
-    white: foreground,
-    brightBlack: mutedForeground,
-    brightRed: isDark ? "hsl(0, 80%, 60%)" : "hsl(0, 80%, 55%)",
-    brightGreen: isDark ? "hsl(140, 70%, 50%)" : "hsl(140, 70%, 45%)",
-    brightYellow: isDark ? "hsl(42, 87%, 70%)" : "hsl(42, 87%, 65%)",
-    brightBlue: ring,
-    brightMagenta: isDark ? "hsl(300, 60%, 70%)" : "hsl(300, 60%, 65%)",
-    brightCyan: isDark ? "hsl(180, 70%, 60%)" : "hsl(180, 70%, 55%)",
-    brightWhite: isDark ? foreground : popover,
-  };
-};
-
 // Default Light Theme
 export const defaultLightTheme: ITheme = {
   background: "hsl(240, 12%, 95%)", // --background
@@ -270,12 +203,6 @@ export const greenDarkTheme: ITheme = {
 // For backward compatibility
 export const customLightTheme = defaultLightTheme;
 export const customDarkTheme = defaultDarkTheme;
-
-// Shadcn Light Theme
-export const shadcnLightTheme: ITheme = createShadcnTheme(false);
-
-// Shadcn Dark Theme
-export const shadcnDarkTheme: ITheme = createShadcnTheme(true);
 
 // Catppuccin Light Theme
 export const catppuccinLightTheme: ITheme = {
