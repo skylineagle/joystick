@@ -102,7 +102,24 @@ export async function createJob(
       const [offHour, offMinute] =
         automation?.off?.utcDate?.split(":").map(Number) ?? [];
 
-      if (!onHour || !onMinute || !offHour || !offMinute) {
+      if (
+        onHour === undefined ||
+        onMinute === undefined ||
+        offHour === undefined ||
+        offMinute === undefined ||
+        !Number.isInteger(onHour) ||
+        !Number.isInteger(onMinute) ||
+        !Number.isInteger(offHour) ||
+        !Number.isInteger(offMinute) ||
+        onHour < 0 ||
+        onHour > 23 ||
+        onMinute < 0 ||
+        onMinute > 59 ||
+        offHour < 0 ||
+        offHour > 23 ||
+        offMinute < 0 ||
+        offMinute > 59
+      ) {
         throw new Error("Invalid time of day automation");
       }
 
