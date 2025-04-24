@@ -4,16 +4,21 @@
   "workspaces": [
     "packages/*"
   ],
+  "packageManager": "bun@1.2.10",
   "scripts": {
     "build": "npm run build --workspaces",
-    "dev": "npm run dev --workspaces"
+    "dev": "turbo run dev"
   },
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "turbo": "^2.5.1"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "inngest": "^3.35.1"
   }
 }
