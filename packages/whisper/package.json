@@ -9,13 +9,14 @@
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@joystick/core": "workspace:*",
     "@elysiajs/cors": "^1.2.0",
+    "@elysiajs/swagger": "^1.2.2",
+    "@joystick/core": "workspace:*",
     "android-sms-gateway": "^2.0.0",
-    "elysia": "^1.2.23",
+    "elysia": "^1.2.25",
     "pino": "^9.6.0",
     "pino-pretty": "^13.0.0",
     "pocketbase": "^0.25.2"

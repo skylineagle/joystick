@@ -1,12 +1,13 @@
 import { pb } from "@/pocketbase";
-import { runCommandOnDevice } from "@joystick/core";
 import cors from "@elysiajs/cors";
+import { swagger } from "@elysiajs/swagger";
 import type {
   ActionsResponse,
   DeviceResponse,
   RunResponse,
 } from "@joystick/core";
 import {
+  runCommandOnDevice,
   RunTargetOptions,
   STREAM_API_URL,
   SWITCHER_API_URL,
@@ -17,7 +18,16 @@ import { validate } from "jsonschema";
 import { enhancedLogger, setupLoggingMiddleware } from "./enhanced-logger";
 import { generateRandomCPSIResult, updateStatus } from "./utils";
 
-const app = new Elysia();
+const app = new Elysia().use(
+  swagger({
+    documentation: {
+      info: {
+        title: "Joystick API",
+        version: "0.0.0",
+      },
+    },
+  })
+);
 
 // Apply the logging middleware
 setupLoggingMiddleware(app);

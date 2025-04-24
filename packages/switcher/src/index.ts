@@ -4,7 +4,7 @@ import { pb } from "@/pocketbase";
 import cors from "@elysiajs/cors";
 import type { DeviceResponse } from "@joystick/core";
 import { Elysia } from "elysia";
-
+import { swagger } from "@elysiajs/swagger";
 export const TO_REPLACE = ["camera", "action"];
 
 async function addDevice(deviceName: string, configuration: any) {
@@ -49,6 +49,16 @@ async function initializeDevices() {
 }
 
 const app = new Elysia()
+  .use(
+    swagger({
+      documentation: {
+        info: {
+          title: "Switcher API",
+          version: "0.0.0",
+        },
+      },
+    })
+  )
   .onError(({ code, error, request }) => {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";

@@ -1,5 +1,6 @@
 import { pb } from "@/pocketbase";
 import { cors } from "@elysiajs/cors";
+import { swagger } from "@elysiajs/swagger";
 import type { DeviceResponse } from "@joystick/core";
 import Client from "android-sms-gateway";
 import { Elysia } from "elysia";
@@ -52,6 +53,13 @@ const apiClient = new Client(
 
 // Create a Bun server using Elysia
 const app = new Elysia()
+  .use(
+    swagger({
+      documentation: {
+        info: { title: "Whisper API", version: "0.0.0" },
+      },
+    })
+  )
   .onError(({ code, error, request }) => {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";

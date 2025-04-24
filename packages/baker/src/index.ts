@@ -8,6 +8,7 @@ import {
 } from "@/baker";
 import { logger } from "@/logger";
 import cors from "@elysiajs/cors";
+import { swagger } from "@elysiajs/swagger";
 import type { DeviceAutomation } from "@joystick/core";
 import { POCKETBASE_URL, STREAM_API_URL } from "@joystick/core";
 import { Elysia } from "elysia";
@@ -154,6 +155,13 @@ app.get("/api/health", async () => {
   };
 });
 
+app.use(
+  swagger({
+    documentation: {
+      info: { title: "Baker API", version: "0.0.0" },
+    },
+  })
+);
 app.use(cors()).listen(3000);
 logger.info("🦊 Baker API server running at http://localhost:3000");
 logger.debug(`Pocketbase URL: ${POCKETBASE_URL}`);

@@ -1,10 +1,21 @@
 import { logger } from "@/logger";
 import { pb } from "@/pocketbase";
 import cors from "@elysiajs/cors";
+import { swagger } from "@elysiajs/swagger";
 import { Elysia, t } from "elysia";
 import { GalleryService } from "./gallery";
+import packageJson from "../package.json";
 
-const app = new Elysia();
+const app = new Elysia().use(
+  swagger({
+    documentation: {
+      info: {
+        title: "Studio API",
+        version: "0.0.0",
+      },
+    },
+  })
+);
 const galleryService = GalleryService.getInstance();
 
 app.get("/", () => "Command Runner API");
