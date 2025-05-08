@@ -1,14 +1,27 @@
-const PORTS = {
-  joystick: 8000,
-  stream: 8888,
-  stream_api: 9997,
-  pocketbase: 8090,
-  panel: 4000,
-  baker: 3000,
-  studio: 8001,
-  switcher: 8080,
-  whisper: 8081,
-} as const;
+const getPorts = (service: string) => {
+  switch (service) {
+    case "joystick":
+      return 8000;
+    case "stream":
+      return import.meta.env.PROD ? 8889 : 8888;
+    case "stream_api":
+      return 9997;
+    case "pocketbase":
+      return 8090;
+    case "panel":
+      return 4000;
+    case "baker":
+      return 3000;
+    case "studio":
+      return 8001;
+    case "switcher":
+      return 8080;
+    case "whisper":
+      return 8081;
+    default:
+      break;
+  }
+};
 
 const PREFIXES = {
   joystick: "joystick",
@@ -19,13 +32,13 @@ const PREFIXES = {
   whisper: "whisper",
 } as const;
 
-function getServiceUrl(service: keyof typeof PORTS): string {
+function getServiceUrl(service: string): string {
   const hostname = window.location.hostname;
 
   return `http://${hostname}${
     Object.keys(PREFIXES).includes(service) && import.meta.env.PROD
       ? `/${PREFIXES[service as keyof typeof PREFIXES]}`
-      : `:${PORTS[service]}`
+      : `:${getPorts(service)}`
   }`;
 }
 
