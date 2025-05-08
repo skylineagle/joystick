@@ -16,6 +16,7 @@ import { HashLoader } from "react-spinners";
 import { Toaster } from "sonner";
 import { Layout } from "./layout";
 import { DashboardPage } from "@/pages/dashboard/dashboard-page";
+import { RerouteHome } from "@/pages/reroute-home";
 
 // Lazy load components
 const HomePage = lazy(() =>
@@ -219,7 +220,7 @@ function AnimatedRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="stream" replace />} />
+        <Route index element={<RerouteHome />} />
         <Route
           path="stream"
           element={

@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
+import { useIsMediaSupported } from "@/hooks/use-support-media";
 import { useIsParamsSupported } from "@/hooks/use-support-params";
 import { useIsTerminalSupported } from "@/hooks/use-support-terminal";
 import {
@@ -62,6 +63,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const location = useLocation();
   const isParamsSupported = useIsParamsSupported(deviceId!);
   const isTerminalSupported = useIsTerminalSupported(deviceId!);
+  const isMediaSupported = useIsMediaSupported(deviceId!);
   const isRecentEventPermitted = useIsPermitted("recent-events");
 
   return (
@@ -79,6 +81,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               if (item.path === "terminal" && !isTerminalSupported) {
                 return false;
               }
+              if (item.path === "stream" && !isMediaSupported) {
+                return false;
+              }
+
               return true;
             })
             .map((item) => {

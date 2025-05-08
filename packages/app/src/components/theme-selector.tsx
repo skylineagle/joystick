@@ -58,8 +58,8 @@ export const ThemeSelector = () => {
           <div
             className="h-4 w-4 rounded-full border"
             style={{
-              backgroundColor: designThemeInfo[designTheme].color,
-              borderRadius: designThemeInfo[designTheme].radius,
+              backgroundColor: designThemeInfo[designTheme]?.color,
+              borderRadius: designThemeInfo[designTheme]?.radius,
             }}
           />
         </div>
@@ -83,8 +83,8 @@ export const ThemeSelector = () => {
                 <div
                   className="h-4 w-4 mr-2 border"
                   style={{
-                    backgroundColor: info.color,
-                    borderRadius: info.radius,
+                    backgroundColor: info?.color,
+                    borderRadius: info?.radius,
                   }}
                 />
                 <span className="font-medium">{info.name}</span>

@@ -6,6 +6,7 @@ import { useParams } from "react-router";
 import { MediaFrame, RoiMediaFrame } from "./media-frame";
 import { WsFrame } from "./ws-frame";
 import { pb } from "@/lib/pocketbase";
+import { useIsMediaSupported } from "@/hooks/use-support-media";
 
 export const Frame = memo(
   ({
@@ -49,7 +50,9 @@ export function StreamView() {
   const { device: deviceId } = useParams();
   const { data: device } = useDevice(deviceId ?? "");
   const { roiMode } = useRoiMode();
+  const isMediaSupported = useIsMediaSupported(deviceId ?? "");
 
+  if (!isMediaSupported) return <div>Media not supported</div>;
   if (!device) return <div>No device selected</div>;
 
   const isMediaMtx = device.expand?.device.stream === "mediamtx";
