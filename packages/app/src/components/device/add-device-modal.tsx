@@ -103,11 +103,7 @@ export function AddDeviceModal() {
         filter: `name = "source" && model ?~ "${deviceType}"`,
       });
 
-      if (!sourceResult || sourceResult.length !== 1) {
-        throw new Error("Source template must be set in the db.");
-      }
-
-      const sourceTemplate = sourceResult[0];
+      const sourceTemplate = sourceResult?.[0] ?? { value: "" };
       const sourceUrl = sourceTemplate.value
         .replace("<ip>", configuration.ipAddress)
         .replace("<id>", configuration.name);
