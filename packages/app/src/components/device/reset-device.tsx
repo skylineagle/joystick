@@ -13,13 +13,18 @@ import { Button } from "@/components/ui/button";
 import { useAction } from "@/hooks/use-action";
 import { Power } from "lucide-react";
 
-export function ResetDevice({ deviceId }: { deviceId: string }) {
+export interface ResetDeviceProps {
+  deviceId: string;
+  disable?: boolean;
+}
+
+export function ResetDevice({ deviceId, disable }: ResetDeviceProps) {
   const { runAction: runReset } = useAction(deviceId, "reset");
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon">
+        <Button variant="ghost" size="icon" disabled={disable}>
           <Power className="h-4 w-4 text-destructive" />
         </Button>
       </AlertDialogTrigger>

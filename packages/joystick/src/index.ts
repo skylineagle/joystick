@@ -120,6 +120,8 @@ app.post(
           ? await runCommandOnDevice(device, command)
           : await $`${{ raw: command }}`.text();
 
+      enhancedLogger.debug(`${action.name}output: ${output}`);
+
       const response = {
         success: true,
         output,

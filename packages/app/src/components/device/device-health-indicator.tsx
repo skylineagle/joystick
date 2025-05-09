@@ -1,22 +1,23 @@
 import { ConfigurationEditor } from "@/components/configuration/configuration-editor";
 import { ResetDevice } from "@/components/device/reset-device";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useDevice } from "@/hooks/use-device";
-import { useIsSupported } from "@/hooks/use-is-supported";
 import { useApplicationSettings } from "@/hooks/use-application-settings";
+import { useDevice } from "@/hooks/use-device";
+import { useIsPermitted } from "@/hooks/use-is-permitted";
+import { useIsSupported } from "@/hooks/use-is-supported";
 import { runAction } from "@/lib/joystick-api";
-import { useQuery } from "@tanstack/react-query";
-import { RefreshCw, Wifi, WifiOff } from "lucide-react";
-import { useParams } from "react-router";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { formatDistanceToNow } from "date-fns";
+import { RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { useState } from "react";
+import { useParams } from "react-router";
 
 export function DeviceHealthIndicator() {
   const { device: deviceId } = useParams();
@@ -29,7 +30,7 @@ export function DeviceHealthIndicator() {
   );
   const { generalSettings } = useApplicationSettings();
   const [lastCheckTime, setLastCheckTime] = useState<Date | null>(null);
-
+  const isAllowedToEditDevice = useIsPermitted("edit-device");
   const {
     data: isConnected,
     isLoading: isHealthcheckLoading,
@@ -122,12 +123,14 @@ export function DeviceHealthIndicator() {
         </TooltipContent>
       </Tooltip>
 
-      {device && <ConfigurationEditor device={device} />}
+      {device && isAllowedToEditDevice && (
+        <ConfigurationEditor device={device} />
+      )}
 
       {isResetSupported && (
         <Tooltip>
           <TooltipTrigger asChild>
-            <ResetDevice deviceId={deviceId ?? ""} />
+            <ResetDevice deviceId={deviceId ?? ""} disable={!isConnected} />
           </TooltipTrigger>
           <TooltipContent>
             <p>Reset Device</p>

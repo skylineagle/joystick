@@ -42,6 +42,7 @@ export const Controls = () => {
   const isAdvancedStreamControlPermitted = useIsPermitted(
     "advanced-stream-control"
   );
+  const isControlModePermitted = useIsPermitted("control-mode");
 
   return (
     <MotionCard
@@ -61,70 +62,73 @@ export const Controls = () => {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.3 }}
       >
-        {/* Mode Selector Section */}
-        <motion.div
-          className="flex flex-col gap-2 w-full"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.2 }}
-        >
-          <div className="flex items-center justify-between w-full space-x-2 overflow-hidden">
-            {isSetModeLoading || isDeviceLoading ? (
-              <div className="flex items-center justify-between w-full">
-                <Skeleton className="w-36 h-10" />
-                <Skeleton className="w-6 h-6 rounded-full" />
+        {isControlModePermitted && (
+          <>
+            <motion.div
+              className="flex flex-col gap-2 w-full"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.2 }}
+            >
+              <div className="flex items-center justify-between w-full space-x-2 overflow-hidden">
+                {isSetModeLoading || isDeviceLoading ? (
+                  <div className="flex items-center justify-between w-full">
+                    <Skeleton className="w-36 h-10" />
+                    <Skeleton className="w-6 h-6 rounded-full" />
+                  </div>
+                ) : isSetModeSupported ? (
+                  <>
+                    <div className="flex-shrink min-w-0 max-w-[210px]">
+                      {device && <ModeSelector device={device} />}
+                    </div>
+                    <div className="flex-shrink-0">
+                      <StatusIndicator status={device?.status ?? "unknown"} />
+                    </div>
+                  </>
+                ) : null}
               </div>
-            ) : isSetModeSupported ? (
-              <>
-                <div className="flex-shrink min-w-0 max-w-[210px]">
-                  {device && <ModeSelector device={device} />}
-                </div>
-                <div className="flex-shrink-0">
-                  <StatusIndicator status={device?.status ?? "unknown"} />
-                </div>
-              </>
-            ) : null}
-          </div>
-        </motion.div>
-
-        {/* Automation Section */}
-        <motion.div
-          className="flex flex-col gap-2"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.2 }}
-        >
-          {device?.automation ? (
-            <>
-              {isDeviceLoading ? (
-                <div className="mt-2">
-                  <div className="grid grid-cols-2 grid-rows-1 items-center gap-2">
-                    <Skeleton className="h-5 w-20" />
-                    <Skeleton className="h-6 w-12" />
-                  </div>
-                  <Skeleton className="h-6 w-full" />
-                </div>
-              ) : (
+            </motion.div>
+            <motion.div
+              className="flex flex-col gap-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.2 }}
+            >
+              {device?.automation ? (
                 <>
-                  <div className="grid grid-cols-2 grid-rows-1 items-center gap-2 mt-2">
-                    <Label className="text-muted-foreground">Auto mode:</Label>
-                    <AutomateToggle
-                      deviceId={deviceId!}
-                      isAutomated={device?.auto ?? false}
-                    />
-                  </div>
-                  {device?.auto && (
-                    <AutomationIndicator
-                      deviceId={deviceId!}
-                      automation={device?.automation}
-                      status={device?.status}
-                    />
+                  {isDeviceLoading ? (
+                    <div className="mt-2">
+                      <div className="grid grid-cols-2 grid-rows-1 items-center gap-2">
+                        <Skeleton className="h-5 w-20" />
+                        <Skeleton className="h-6 w-12" />
+                      </div>
+                      <Skeleton className="h-6 w-full" />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-2 grid-rows-1 items-center gap-2 mt-2">
+                        <Label className="text-muted-foreground">
+                          Auto mode:
+                        </Label>
+                        <AutomateToggle
+                          deviceId={deviceId!}
+                          isAutomated={device?.auto ?? false}
+                        />
+                      </div>
+                      {device?.auto && (
+                        <AutomationIndicator
+                          deviceId={deviceId!}
+                          automation={device?.automation}
+                          status={device?.status}
+                        />
+                      )}
+                    </>
                   )}
                 </>
-              )}
-            </>
-          ) : null}
-        </motion.div>
+              ) : null}
+            </motion.div>
+          </>
+        )}
 
         {/* Overlay Toggle Section */}
         {device?.overlay && pathname.includes("stream") && (
