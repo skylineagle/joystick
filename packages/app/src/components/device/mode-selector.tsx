@@ -92,7 +92,7 @@ export const ModeSelector = ({ device }: ModeSelectorProps) => {
     );
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 w-full">
       {availableModes.length !== 0 && (
         <Select
           value={mode}
@@ -101,7 +101,7 @@ export const ModeSelector = ({ device }: ModeSelectorProps) => {
         >
           <SelectTrigger
             className={cn(
-              "w-40 transition-all duration-300 ease-in-out border-1",
+              "w-full max-w-full truncate transition-all duration-300 ease-in-out border-1",
               currentMode?.bgColor,
               "border-transparent",
               (isLoading || isAutomated || isSetModePending) &&
@@ -140,7 +140,7 @@ export const ModeSelector = ({ device }: ModeSelectorProps) => {
             )}
           </SelectTrigger>
 
-          <SelectContent className="w-44 border-none bg-popover/95 backdrop-blur-sm shadow-xl">
+          <SelectContent className="min-w-fit w-auto border-none bg-popover/95 backdrop-blur-sm shadow-xl">
             {modeOptions}
           </SelectContent>
         </Select>
