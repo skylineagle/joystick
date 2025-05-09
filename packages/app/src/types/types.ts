@@ -96,6 +96,12 @@ export type DeviceInformation = {
   fps_presets?: {
     [key: string]: number;
   };
+  quality_presets?: {
+    [key: string]: {
+      bitrate: number;
+      fps: number;
+    };
+  };
 };
 
 export type DeviceResponse = DevicesResponse<
