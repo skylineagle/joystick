@@ -18,11 +18,13 @@ export function useQuality(deviceId: string) {
       });
 
       const parsedData = JSON.parse(data ?? "{}");
+      console.log(parsedData);
 
       return parsedData;
     },
     enabled: !!deviceId,
   });
+
   const { mutate: setQuality } = useMutation({
     mutationFn: (quality: number) =>
       runAction({ deviceId, action: "set-quality", params: { quality } }),

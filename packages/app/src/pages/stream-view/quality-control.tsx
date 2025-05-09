@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
@@ -51,6 +50,7 @@ export function QualityControll({ deviceId }: QualityControlProps) {
     );
   }, [device?.information?.quality_presets]);
 
+  console.log(quality, presets);
   const currentLabel = useMemo(() => {
     if (!quality || !presets.length) return "";
     const match = presets.find(
@@ -122,7 +122,7 @@ export function QualityControll({ deviceId }: QualityControlProps) {
               <span className="truncate">
                 {currentLabel === "Custom"
                   ? `Custom (${quality?.bitrate} kbps, ${quality?.fps} fps)`
-                  : `${currentLabel} (${quality?.bitrate} kbps, ${quality?.fps} fps)`}
+                  : currentLabel}
               </span>
             )}
             <ChevronsUpDown className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4 shrink-0 opacity-50" />
@@ -133,15 +133,6 @@ export function QualityControll({ deviceId }: QualityControlProps) {
           align="start"
         >
           <Command shouldFilter={false} className="max-h-[300px]">
-            <CommandInput
-              placeholder="Search quality..."
-              value={search}
-              onValueChange={setSearch}
-              className={cn(
-                "text-xs sm:text-sm",
-                isMobileLandscape ? "h-7" : "h-8 sm:h-10"
-              )}
-            />
             <CommandList>
               <CommandGroup>
                 {filteredPresets.map((preset) => (
@@ -162,9 +153,7 @@ export function QualityControll({ deviceId }: QualityControlProps) {
                           : "opacity-0"
                       )}
                     />
-                    <span className="truncate">
-                      {preset.label} ({preset.bitrate} kbps, {preset.fps} fps)
-                    </span>
+                    <span className="truncate">{preset.label}</span>
                   </CommandItem>
                 ))}
               </CommandGroup>
