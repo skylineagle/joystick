@@ -59,6 +59,46 @@ const navItems = [
   },
 ];
 
+// eslint-disable-next-line react-refresh/only-export-components
+export const getAvailableNavItems = (
+  isParamsSupported: boolean,
+  isTerminalSupported: boolean,
+  isMediaSupported: boolean,
+  isMediaRouteAllowed: boolean,
+  isActionRouteAllowed: boolean,
+  isParamsRouteAllowed: boolean,
+  isGalleryRouteAllowed: boolean,
+  isTerminalRouteAllowed: boolean
+) => {
+  return navItems.filter((item) => {
+    if (
+      item.path === "params" &&
+      (!isParamsSupported || !isParamsRouteAllowed)
+    ) {
+      return false;
+    }
+    if (
+      item.path === "terminal" &&
+      (!isTerminalSupported || !isTerminalRouteAllowed)
+    ) {
+      return false;
+    }
+    if (item.path === "stream" && (!isMediaSupported || !isMediaRouteAllowed)) {
+      return false;
+    }
+    if (item.path === "actions" && !isActionRouteAllowed) {
+      return false;
+    }
+    if (item.path === "parameters" && !isParamsRouteAllowed) {
+      return false;
+    }
+    if (item.path === "gallery" && !isGalleryRouteAllowed) {
+      return false;
+    }
+    return true;
+  });
+};
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { device: deviceId } = useParams();
   const location = useLocation();
@@ -79,58 +119,35 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarMenu className="my-2 space-y-1 px-1">
-          {navItems
-            .filter((item) => {
-              if (
-                item.path === "params" &&
-                (!isParamsSupported || !isParamsRouteAllowed)
-              ) {
-                return false;
-              }
-              if (
-                item.path === "terminal" &&
-                (!isTerminalSupported || !isTerminalRouteAllowed)
-              ) {
-                return false;
-              }
-              if (
-                item.path === "stream" &&
-                (!isMediaSupported || !isMediaRouteAllowed)
-              ) {
-                return false;
-              }
-              if (item.path === "actions" && !isActionRouteAllowed) {
-                return false;
-              }
-              if (item.path === "parameters" && !isParamsRouteAllowed) {
-                return false;
-              }
-              if (item.path === "gallery" && !isGalleryRouteAllowed) {
-                return false;
-              }
-
-              return true;
-            })
-            .map((item) => {
-              const isActive = location.pathname.endsWith(item.path);
-              return (
-                <SidebarMenuItem key={item.path}>
-                  <SidebarMenuButton
-                    asChild
-                    tooltip={item.description}
-                    isActive={isActive}
+          {getAvailableNavItems(
+            !!isParamsSupported,
+            !!isTerminalSupported,
+            !!isMediaSupported,
+            !!isMediaRouteAllowed,
+            !!isActionRouteAllowed,
+            !!isParamsRouteAllowed,
+            !!isGalleryRouteAllowed,
+            !!isTerminalRouteAllowed
+          ).map((item) => {
+            const isActive = location.pathname.endsWith(item.path);
+            return (
+              <SidebarMenuItem key={item.path}>
+                <SidebarMenuButton
+                  asChild
+                  tooltip={item.description}
+                  isActive={isActive}
+                >
+                  <Link
+                    to={`/${deviceId}/${item.path}`}
+                    className="flex items-center gap-2"
                   >
-                    <Link
-                      to={`/${deviceId}/${item.path}`}
-                      className="flex items-center gap-2"
-                    >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.label}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              );
-            })}
+                    <item.icon className="h-4 w-4" />
+                    <span>{item.label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter>

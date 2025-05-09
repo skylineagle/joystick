@@ -1,5 +1,7 @@
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar, getAvailableNavItems } from "@/components/app-sidebar";
 import { AppStatusIndicator } from "@/components/app-status-indicator";
+import { DeviceSwitcher } from "@/components/device-switcher";
+import { DeviceHealthIndicator } from "@/components/device/device-health-indicator";
 import { AnimatedThemeToggle } from "@/components/ui/animated-theme-toggle";
 import {
   SidebarInset,
@@ -8,7 +10,11 @@ import {
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UserProfile } from "@/components/user-profile";
+import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
+import { useIsMediaSupported } from "@/hooks/use-support-media";
+import { useIsParamsSupported } from "@/hooks/use-support-params";
+import { useIsTerminalSupported } from "@/hooks/use-support-terminal";
 import { pb } from "@/lib/pocketbase";
 import { cn } from "@/lib/utils";
 import { Controls } from "@/pages/stream-view/controls";
@@ -17,7 +23,6 @@ import { DeviceResponse } from "@/types/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Outlet, useParams } from "react-router";
-import { DeviceHealthIndicator } from "@/components/device/device-health-indicator";
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -42,9 +47,7 @@ export function Layout({ children }: LayoutProps) {
           }
         });
     };
-
     init();
-
     return () => {
       try {
         unsubscribe?.();
@@ -54,18 +57,44 @@ export function Layout({ children }: LayoutProps) {
     };
   }, [deviceId, queryClient]);
 
+  const isParamsSupported = useIsParamsSupported(deviceId!);
+  const isTerminalSupported = useIsTerminalSupported(deviceId!);
+  const isMediaSupported = useIsMediaSupported(deviceId!);
+  const isMediaRouteAllowed = useIsRouteAllowed("media");
+  const isActionRouteAllowed = useIsRouteAllowed("action");
+  const isParamsRouteAllowed = useIsRouteAllowed("parameters");
+  const isGalleryRouteAllowed = useIsRouteAllowed("gallery");
+  const isTerminalRouteAllowed = useIsRouteAllowed("terminal");
+
+  const availableNavItems = getAvailableNavItems(
+    !!isParamsSupported,
+    !!isTerminalSupported,
+    !!isMediaSupported,
+    !!isMediaRouteAllowed,
+    !!isActionRouteAllowed,
+    !!isParamsRouteAllowed,
+    !!isGalleryRouteAllowed,
+    !!isTerminalRouteAllowed
+  );
+  const showSidebar = availableNavItems.length > 1;
+
   return (
     <TooltipProvider>
       <SidebarProvider>
         <RoiProvider deviceId={deviceId!}>
-          <AppSidebar />
+          {showSidebar && <AppSidebar />}
           <SidebarInset>
-            <header className="flex h-16 shrink-0 items-center justify-between gap-2">
+            <header className="flex h-16 shrink-0 items-center justify-between gap-2 pt-3">
               <div className="flex items-center gap-5 px-4">
-                <SidebarTrigger className="-ml-1" />
-                <DeviceHealthIndicator />
+                <>
+                  {showSidebar ? (
+                    <SidebarTrigger className="-ml-1" />
+                  ) : (
+                    <DeviceSwitcher />
+                  )}
+                  <DeviceHealthIndicator />
+                </>
               </div>
-
               <div className="flex items-center gap-5 p-4">
                 <AppStatusIndicator />
                 <AnimatedThemeToggle />
@@ -82,7 +111,6 @@ export function Layout({ children }: LayoutProps) {
                 <div className="flex-1 min-h-0 relative border-none overflow-auto">
                   {children || <Outlet />}
                 </div>
-
                 <Controls />
               </div>
             </main>
