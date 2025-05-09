@@ -2,52 +2,52 @@ import { ITheme } from "xterm";
 
 // Default Light Theme
 export const defaultLightTheme: ITheme = {
-  background: "hsl(240, 12%, 95%)", // --background
-  foreground: "hsl(240, 10%, 5%)", // --foreground
-  cursor: "hsl(260, 50%, 50%)", // --primary
-  cursorAccent: "hsl(240, 12%, 95%)", // --background
-  selectionBackground: "hsla(230, 30%, 85%, 0.3)", // --secondary with opacity
-  black: "hsl(240, 8%, 93%)", // --card
-  red: "hsl(0, 70%, 45%)", // --destructive
-  green: "hsl(140, 70%, 35%)", // green - adapted from theme
-  yellow: "hsl(42, 87%, 55%)", // yellow - adapted from chart colors
-  blue: "hsl(260, 50%, 50%)", // --primary
-  magenta: "hsl(300, 60%, 55%)", // magenta - adapted from chart colors
-  cyan: "hsl(180, 70%, 45%)", // cyan - adapted from chart colors
-  white: "hsl(240, 10%, 98%)", // light white
-  brightBlack: "hsl(240, 10%, 40%)", // --muted-foreground
-  brightRed: "hsl(0, 80%, 55%)", // brighter --destructive
-  brightGreen: "hsl(140, 70%, 45%)", // brighter green
-  brightYellow: "hsl(42, 87%, 65%)", // brighter yellow
-  brightBlue: "hsl(260, 50%, 60%)", // --ring
-  brightMagenta: "hsl(300, 60%, 65%)", // brighter magenta
-  brightCyan: "hsl(180, 70%, 55%)", // brighter cyan
-  brightWhite: "hsl(240, 12%, 97%)", // --popover
+  background: "hsl(0, 0%, 100%)",
+  foreground: "hsl(0, 0%, 0%)",
+  cursor: "hsl(177.22, 100%, 29.61%)",
+  cursorAccent: "hsl(0, 0%, 100%)",
+  selectionBackground: "hsla(0, 0%, 94.9%, 0.3)",
+  black: "hsl(0, 0%, 100%)",
+  red: "hsl(359.33, 100%, 65.1%)",
+  green: "hsl(177.22, 100%, 29.61%)",
+  yellow: "hsl(177.22, 100%, 29.61%)",
+  blue: "hsl(177.22, 100%, 29.61%)",
+  magenta: "hsl(177.22, 100%, 29.61%)",
+  cyan: "hsl(177.22, 100%, 29.61%)",
+  white: "hsl(0, 0%, 100%)",
+  brightBlack: "hsl(0, 0%, 45.1%)",
+  brightRed: "hsl(359.33, 100%, 65.1%)",
+  brightGreen: "hsl(177.22, 100%, 29.61%)",
+  brightYellow: "hsl(177.22, 100%, 29.61%)",
+  brightBlue: "hsl(177.22, 100%, 29.61%)",
+  brightMagenta: "hsl(177.22, 100%, 29.61%)",
+  brightCyan: "hsl(177.22, 100%, 29.61%)",
+  brightWhite: "hsl(0, 0%, 100%)",
 };
 
 // Default Dark Theme
 export const defaultDarkTheme: ITheme = {
-  background: "hsl(240, 15%, 12%)", // --background
-  foreground: "hsl(240, 10%, 98%)", // --foreground
-  cursor: "hsl(260, 50%, 55%)", // --primary
-  cursorAccent: "hsl(240, 15%, 12%)", // --background
-  selectionBackground: "hsla(260, 25%, 25%, 0.4)", // --accent with opacity
-  black: "hsl(240, 15%, 10%)", // --card
-  red: "hsl(0, 70%, 50%)", // --destructive
-  green: "hsl(140, 70%, 40%)", // green - adapted from theme
-  yellow: "hsl(42, 87%, 60%)", // yellow - adapted from chart colors
-  blue: "hsl(260, 50%, 55%)", // --primary
-  magenta: "hsl(300, 60%, 60%)", // magenta - adapted from chart colors
-  cyan: "hsl(180, 70%, 50%)", // cyan - adapted from chart colors
-  white: "hsl(240, 10%, 98%)", // --foreground
-  brightBlack: "hsl(240, 10%, 70%)", // --muted-foreground
-  brightRed: "hsl(0, 80%, 60%)", // brighter --destructive
-  brightGreen: "hsl(140, 70%, 50%)", // brighter green
-  brightYellow: "hsl(42, 87%, 70%)", // brighter yellow
-  brightBlue: "hsl(260, 50%, 65%)", // --ring
-  brightMagenta: "hsl(300, 60%, 70%)", // brighter magenta
-  brightCyan: "hsl(180, 70%, 60%)", // brighter cyan
-  brightWhite: "hsl(240, 10%, 98%)", // --foreground
+  background: "hsl(0, 0%, 0%)",
+  foreground: "hsl(0, 0%, 100%)",
+  cursor: "hsl(177.22, 100%, 29.61%)",
+  cursorAccent: "hsl(0, 0%, 0%)",
+  selectionBackground: "hsla(0, 0%, 10.2%, 0.3)",
+  black: "hsl(0, 0%, 5.1%)",
+  red: "hsl(359.33, 100%, 65.1%)",
+  green: "hsl(177.22, 100%, 29.61%)",
+  yellow: "hsl(177.22, 100%, 29.61%)",
+  blue: "hsl(177.22, 100%, 29.61%)",
+  magenta: "hsl(177.22, 100%, 29.61%)",
+  cyan: "hsl(177.22, 100%, 29.61%)",
+  white: "hsl(0, 0%, 100%)",
+  brightBlack: "hsl(0, 0%, 45.1%)",
+  brightRed: "hsl(359.33, 100%, 65.1%)",
+  brightGreen: "hsl(177.22, 100%, 29.61%)",
+  brightYellow: "hsl(177.22, 100%, 29.61%)",
+  brightBlue: "hsl(177.22, 100%, 29.61%)",
+  brightMagenta: "hsl(177.22, 100%, 29.61%)",
+  brightCyan: "hsl(177.22, 100%, 29.61%)",
+  brightWhite: "hsl(0, 0%, 100%)",
 };
 
 // Purple Light Theme
@@ -206,52 +206,52 @@ export const customDarkTheme = defaultDarkTheme;
 
 // Catppuccin Light Theme
 export const catppuccinLightTheme: ITheme = {
-  background: "hsl(240, 12%, 95%)",
-  foreground: "hsl(240, 10%, 5%)",
+  background: "hsl(220, 23.08%, 94.9%)",
+  foreground: "hsl(233.79, 16.02%, 35.49%)",
   cursor: "hsl(266.04, 85.05%, 58.04%)",
-  cursorAccent: "hsl(240, 12%, 95%)",
-  selectionBackground: "hsla(230, 30%, 85%, 0.3)",
-  black: "hsl(240, 8%, 93%)",
+  cursorAccent: "hsl(220, 23.08%, 94.9%)",
+  selectionBackground: "hsla(266.04, 85.05%, 58.04%, 0.3)",
+  black: "hsl(220, 20.69%, 88.63%)",
   red: "hsl(347.08, 86.67%, 44.12%)",
-  green: "hsl(140, 70%, 35%)",
-  yellow: "hsl(42, 87%, 55%)",
+  green: "hsl(109.23, 57.64%, 39.8%)",
+  yellow: "hsl(21.98, 99.18%, 51.96%)",
   blue: "hsl(266.04, 85.05%, 58.04%)",
   magenta: "hsl(300, 60%, 55%)",
-  cyan: "hsl(180, 70%, 45%)",
+  cyan: "hsl(197.07, 96.57%, 45.69%)",
   white: "hsl(240, 10%, 98%)",
-  brightBlack: "hsl(240, 10%, 40%)",
-  brightRed: "hsl(0, 80%, 55%)",
-  brightGreen: "hsl(140, 70%, 45%)",
-  brightYellow: "hsl(42, 87%, 65%)",
-  brightBlue: "hsl(266.04, 85.05%, 58.04%)",
+  brightBlack: "hsl(232.8, 10.37%, 47.25%)",
+  brightRed: "hsl(347.08, 86.67%, 54.12%)",
+  brightGreen: "hsl(109.23, 57.64%, 49.8%)",
+  brightYellow: "hsl(21.98, 99.18%, 61.96%)",
+  brightBlue: "hsl(266.04, 85.05%, 68.04%)",
   brightMagenta: "hsl(300, 60%, 65%)",
-  brightCyan: "hsl(180, 70%, 55%)",
-  brightWhite: "hsl(240, 12%, 97%)",
+  brightCyan: "hsl(197.07, 96.57%, 55.69%)",
+  brightWhite: "hsl(220, 23.08%, 94.9%)",
 };
 
 // Catppuccin Dark Theme
 export const catppuccinDarkTheme: ITheme = {
-  background: "hsl(240, 15%, 12%)",
-  foreground: "hsl(240, 10%, 98%)",
-  cursor: "hsl(266.04, 85.05%, 58.04%)",
-  cursorAccent: "hsl(240, 15%, 12%)",
-  selectionBackground: "hsla(260, 25%, 25%, 0.4)",
-  black: "hsl(240, 15%, 10%)",
-  red: "hsl(347.08, 86.67%, 44.12%)",
-  green: "hsl(140, 70%, 40%)",
-  yellow: "hsl(42, 87%, 60%)",
-  blue: "hsl(266.04, 85.05%, 58.04%)",
-  magenta: "hsl(300, 60%, 60%)",
-  cyan: "hsl(180, 70%, 50%)",
-  white: "hsl(240, 10%, 98%)",
-  brightBlack: "hsl(240, 10%, 70%)",
-  brightRed: "hsl(0, 80%, 60%)",
-  brightGreen: "hsl(140, 70%, 50%)",
-  brightYellow: "hsl(42, 87%, 70%)",
-  brightBlue: "hsl(266.04, 85.05%, 58.04%)",
-  brightMagenta: "hsl(300, 60%, 70%)",
-  brightCyan: "hsl(180, 70%, 60%)",
-  brightWhite: "hsl(240, 10%, 98%)",
+  background: "hsl(240, 21.31%, 11.96%)",
+  foreground: "hsl(226.15, 63.93%, 88.04%)",
+  cursor: "hsl(267.41, 83.51%, 80.98%)",
+  cursorAccent: "hsl(240, 21.31%, 11.96%)",
+  selectionBackground: "hsla(267.41, 83.51%, 80.98%, 0.3)",
+  black: "hsl(230.53, 18.81%, 19.8%)",
+  red: "hsl(343.27, 81.25%, 74.9%)",
+  green: "hsl(115.45, 54.1%, 76.08%)",
+  yellow: "hsl(22.96, 92%, 75.49%)",
+  blue: "hsl(267.41, 83.51%, 80.98%)",
+  magenta: "hsl(300, 60%, 70%)",
+  cyan: "hsl(189.18, 71.01%, 72.94%)",
+  white: "hsl(226.15, 63.93%, 88.04%)",
+  brightBlack: "hsl(227.65, 23.61%, 71.76%)",
+  brightRed: "hsl(343.27, 81.25%, 84.9%)",
+  brightGreen: "hsl(115.45, 54.1%, 86.08%)",
+  brightYellow: "hsl(22.96, 92%, 85.49%)",
+  brightBlue: "hsl(267.41, 83.51%, 90.98%)",
+  brightMagenta: "hsl(300, 60%, 80%)",
+  brightCyan: "hsl(189.18, 71.01%, 82.94%)",
+  brightWhite: "hsl(240, 21.31%, 11.96%)",
 };
 
 // Bubblegum Light Theme
@@ -554,6 +554,156 @@ export const graphiteDarkTheme: ITheme = {
   brightWhite: "hsl(0, 0%, 98%)",
 };
 
+// Twitter Terminal Theme (matches .twitter-theme in index.css)
+export const twitterLightTheme: ITheme = {
+  background: "hsl(0, 0%, 100%)",
+  foreground: "hsl(210, 25%, 7.84%)",
+  cursor: "hsl(203.89, 88.28%, 53.14%)",
+  cursorAccent: "hsl(0, 0%, 100%)",
+  selectionBackground: "hsla(203.89, 88.28%, 53.14%, 0.3)",
+  black: "hsl(240, 1.96%, 90%)",
+  red: "hsl(356.3, 90.56%, 54.31%)",
+  green: "hsl(159.78, 100%, 36.08%)",
+  yellow: "hsl(42.03, 92.83%, 56.27%)",
+  blue: "hsl(203.89, 88.28%, 53.14%)",
+  magenta: "hsl(280, 90%, 50%)",
+  cyan: "hsl(211.58, 51.35%, 92.75%)",
+  white: "hsl(0, 0%, 100%)",
+  brightBlack: "hsl(210, 25%, 7.84%)",
+  brightRed: "hsl(356.3, 90.56%, 64.31%)",
+  brightGreen: "hsl(159.78, 100%, 46.08%)",
+  brightYellow: "hsl(42.03, 92.83%, 66.27%)",
+  brightBlue: "hsl(203.89, 88.28%, 63.14%)",
+  brightMagenta: "hsl(280, 90%, 60%)",
+  brightCyan: "hsl(211.58, 51.35%, 97.75%)",
+  brightWhite: "hsl(0, 0%, 100%)",
+};
+
+// Twitter Terminal Theme (matches .twitter-theme in index.css)
+export const twitterDarkTheme: ITheme = {
+  background: "hsl(0, 0%, 0%)",
+  foreground: "hsl(200, 6.67%, 91.18%)",
+  cursor: "hsl(203.77, 87.6%, 52.55%)",
+  cursorAccent: "hsl(0, 0%, 0%)",
+  selectionBackground: "hsla(203.77, 87.6%, 52.55%, 0.3)",
+  black: "hsl(0, 0%, 9.41%)",
+  red: "hsl(356.3, 90.56%, 54.31%)",
+  green: "hsl(159.78, 100%, 36.08%)",
+  yellow: "hsl(42.03, 92.83%, 56.27%)",
+  blue: "hsl(203.77, 87.6%, 52.55%)",
+  magenta: "hsl(280, 90%, 60%)",
+  cyan: "hsl(211.58, 51.35%, 92.75%)",
+  white: "hsl(200, 6.67%, 91.18%)",
+  brightBlack: "hsl(210, 3.39%, 46.27%)",
+  brightRed: "hsl(356.3, 90.56%, 64.31%)",
+  brightGreen: "hsl(159.78, 100%, 46.08%)",
+  brightYellow: "hsl(42.03, 92.83%, 66.27%)",
+  brightBlue: "hsl(203.77, 87.6%, 62.55%)",
+  brightMagenta: "hsl(280, 90%, 70%)",
+  brightCyan: "hsl(211.58, 51.35%, 97.75%)",
+  brightWhite: "hsl(200, 6.67%, 91.18%)",
+};
+
+// Supabase Terminal Theme (matches .supabase-theme in index.css)
+export const supabaseLightTheme: ITheme = {
+  background: "hsl(0, 0%, 98.82%)",
+  foreground: "hsl(0, 0%, 9.02%)",
+  cursor: "hsl(151.33, 66.86%, 66.86%)",
+  cursorAccent: "hsl(0, 0%, 98.82%)",
+  selectionBackground: "hsla(151.33, 66.86%, 66.86%, 0.3)",
+  black: "hsl(0, 0%, 92.94%)",
+  red: "hsl(9.89, 81.98%, 43.53%)",
+  green: "hsl(160.12, 84.08%, 39.41%)",
+  yellow: "hsl(37.69, 92.13%, 50.2%)",
+  blue: "hsl(151.33, 66.86%, 66.86%)",
+  magenta: "hsl(258.31, 89.53%, 66.27%)",
+  cyan: "hsl(217.22, 91.22%, 59.8%)",
+  white: "hsl(0, 0%, 100%)",
+  brightBlack: "hsl(0, 0%, 12.55%)",
+  brightRed: "hsl(9.89, 81.98%, 53.53%)",
+  brightGreen: "hsl(160.12, 84.08%, 49.41%)",
+  brightYellow: "hsl(37.69, 92.13%, 60.2%)",
+  brightBlue: "hsl(151.33, 66.86%, 76.86%)",
+  brightMagenta: "hsl(258.31, 89.53%, 76.27%)",
+  brightCyan: "hsl(217.22, 91.22%, 69.8%)",
+  brightWhite: "hsl(0, 0%, 100%)",
+};
+
+// Supabase Terminal Theme (matches .supabase-theme in index.css)
+export const supabaseDarkTheme: ITheme = {
+  background: "hsl(0, 0%, 7.06%)",
+  foreground: "hsl(214.29, 31.82%, 91.37%)",
+  cursor: "hsl(154.9, 100%, 19.22%)",
+  cursorAccent: "hsl(0, 0%, 7.06%)",
+  selectionBackground: "hsla(154.9, 100%, 19.22%, 0.3)",
+  black: "hsl(0, 0%, 12.16%)",
+  red: "hsl(6.67, 60%, 20.59%)",
+  green: "hsl(172.46, 66.01%, 50.39%)",
+  yellow: "hsl(43.26, 96.41%, 56.27%)",
+  blue: "hsl(154.9, 100%, 19.22%)",
+  magenta: "hsl(255.14, 91.74%, 76.27%)",
+  cyan: "hsl(213.12, 93.9%, 67.84%)",
+  white: "hsl(214.29, 31.82%, 91.37%)",
+  brightBlack: "hsl(0, 0%, 63.53%)",
+  brightRed: "hsl(6.67, 60%, 30.59%)",
+  brightGreen: "hsl(172.46, 66.01%, 60.39%)",
+  brightYellow: "hsl(43.26, 96.41%, 66.27%)",
+  brightBlue: "hsl(154.9, 100%, 29.22%)",
+  brightMagenta: "hsl(255.14, 91.74%, 86.27%)",
+  brightCyan: "hsl(213.12, 93.9%, 77.84%)",
+  brightWhite: "hsl(214.29, 31.82%, 91.37%)",
+};
+
+// Vercel Terminal Theme (matches .vercel-theme in index.css)
+export const vercelLightTheme: ITheme = {
+  background: "hsl(223.81, 0%, 98.68%)",
+  foreground: "hsl(0, 0%, 0%)",
+  cursor: "hsl(0, 0%, 0%)",
+  cursorAccent: "hsl(223.81, 0%, 98.68%)",
+  selectionBackground: "hsla(0, 0%, 0%, 0.3)",
+  black: "hsl(223.81, 0%, 92.15%)",
+  red: "hsl(358.43, 74.91%, 59.75%)",
+  green: "hsl(40.67, 100.24%, 50.92%)",
+  yellow: "hsl(223.81, 0%, 64.47%)",
+  blue: "hsl(0, 0%, 0%)",
+  magenta: "hsl(223.75, 85.99%, 55.81%)",
+  cyan: "hsl(223.81, 0%, 45.61%)",
+  white: "hsl(223.81, 0%, 100%)",
+  brightBlack: "hsl(223.81, 0%, 32.31%)",
+  brightRed: "hsl(358.43, 74.91%, 69.75%)",
+  brightGreen: "hsl(40.67, 100.24%, 60.92%)",
+  brightYellow: "hsl(223.81, 0%, 74.47%)",
+  brightBlue: "hsl(0, 0%, 10%)",
+  brightMagenta: "hsl(223.75, 85.99%, 65.81%)",
+  brightCyan: "hsl(223.81, 0%, 55.61%)",
+  brightWhite: "hsl(223.81, 0%, 100%)",
+};
+
+// Vercel Terminal Theme (matches .vercel-theme in index.css)
+export const vercelDarkTheme: ITheme = {
+  background: "hsl(0, 0%, 0%)",
+  foreground: "hsl(223.81, -172.52%, 100%)",
+  cursor: "hsl(223.81, -172.52%, 100%)",
+  cursorAccent: "hsl(0, 0%, 0%)",
+  selectionBackground: "hsla(223.81, -172.52%, 100%, 0.3)",
+  black: "hsl(223.81, 0%, 6.87%)",
+  red: "hsl(359.91, 100.25%, 67.88%)",
+  green: "hsl(218.16, 90.04%, 55.16%)",
+  yellow: "hsl(223.81, 0%, 64.47%)",
+  blue: "hsl(223.81, -172.52%, 100%)",
+  magenta: "hsl(223.75, 85.99%, 55.81%)",
+  cyan: "hsl(223.81, 0%, 45.61%)",
+  white: "hsl(223.81, -172.52%, 100%)",
+  brightBlack: "hsl(223.81, 0%, 64.47%)",
+  brightRed: "hsl(359.91, 100.25%, 77.88%)",
+  brightGreen: "hsl(218.16, 90.04%, 65.16%)",
+  brightYellow: "hsl(223.81, 0%, 74.47%)",
+  brightBlue: "hsl(223.81, 0%, 16.87%)",
+  brightMagenta: "hsl(223.75, 85.99%, 65.81%)",
+  brightCyan: "hsl(223.81, 0%, 55.61%)",
+  brightWhite: "hsl(223.81, -172.52%, 100%)",
+};
+
 // Function to get the appropriate theme based on design theme and color mode
 export const getTerminalTheme = (
   designTheme: string,
@@ -561,7 +711,15 @@ export const getTerminalTheme = (
 ): ITheme => {
   switch (designTheme) {
     case "default":
+      return isDark ? defaultDarkTheme : defaultLightTheme;
+    case "catppuccin":
       return isDark ? catppuccinDarkTheme : catppuccinLightTheme;
+    case "twitter":
+      return isDark ? twitterDarkTheme : twitterLightTheme;
+    case "supabase":
+      return isDark ? supabaseDarkTheme : supabaseLightTheme;
+    case "vercel":
+      return isDark ? vercelDarkTheme : vercelLightTheme;
     case "bubblegum":
       return isDark ? bubblegumDarkTheme : bubblegumLightTheme;
     case "ocean":

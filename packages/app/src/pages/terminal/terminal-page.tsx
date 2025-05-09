@@ -1,4 +1,4 @@
-import { DesignTheme, useTheme } from "@/components/theme-provider";
+import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { useDevice } from "@/hooks/use-device";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
@@ -12,23 +12,8 @@ import { useParams } from "react-router";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import { WebLinksAddon } from "xterm-addon-web-links";
-import {
-  bubblegumDarkTheme,
-  bubblegumLightTheme,
-  candyDarkTheme,
-  candyLightTheme,
-  coffeeDarkTheme,
-  coffeeLightTheme,
-  defaultDarkTheme,
-  defaultLightTheme,
-  graphiteDarkTheme,
-  graphiteLightTheme,
-  oceanDarkTheme,
-  oceanLightTheme,
-  retroDarkTheme,
-  retroLightTheme,
-} from "./terminal-theme";
-
+import { getTerminalTheme } from "./terminal-theme";
+import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 import "xterm/css/xterm.css";
 
 const joystickAsciiLines = [
@@ -65,27 +50,6 @@ const joystickAsciiLines = [
 const matrixChars =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%\"'#&_(),.;:?!\\|{}<>[]^~";
 
-// Function to get the correct terminal theme based on current theme and color mode
-function getTerminalTheme(mode: string, designTheme: DesignTheme) {
-  // return mode === "dark" ? shadcnDarkTheme : shadcnLightTheme;
-  switch (designTheme) {
-    case "bubblegum":
-      return mode === "dark" ? bubblegumDarkTheme : bubblegumLightTheme;
-    case "ocean":
-      return mode === "dark" ? oceanDarkTheme : oceanLightTheme;
-    case "coffee":
-      return mode === "dark" ? coffeeDarkTheme : coffeeLightTheme;
-    case "candy":
-      return mode === "dark" ? candyDarkTheme : candyLightTheme;
-    case "retro":
-      return mode === "dark" ? retroDarkTheme : retroLightTheme;
-    case "graphite":
-      return mode === "dark" ? graphiteDarkTheme : graphiteLightTheme;
-    default: // "default"
-      return mode === "dark" ? defaultDarkTheme : defaultLightTheme;
-  }
-}
-
 export function TerminalPage() {
   const { getActualColorMode, designTheme } = useTheme();
   const terminalRef = useRef<HTMLDivElement>(null);
@@ -104,6 +68,7 @@ export function TerminalPage() {
   const snakeGameIntervalRef = useRef<number | null>(null);
   const [isTerminalLoading, setIsTerminalLoading] = useState(true);
   const isMountedRef = useRef(true);
+  const isTerminalRouteAllowed = useIsRouteAllowed("terminal");
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Function to initialize the terminal and connection
@@ -138,7 +103,7 @@ export function TerminalPage() {
 
     const terminal = new Terminal({
       cursorBlink: true,
-      theme: getTerminalTheme(getActualColorMode(), designTheme),
+      theme: getTerminalTheme(designTheme, getActualColorMode() === "dark"),
       fontFamily: "JetBrains Mono, monospace",
       fontSize: 14,
       lineHeight: 1.2,
@@ -760,6 +725,9 @@ export function TerminalPage() {
 
   if (!selectedDevice) return <div>Please select a device first</div>;
 
+  if (!isTerminalRouteAllowed) {
+    return <div>You are not allowed to access this page</div>;
+  }
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {activeMiniGame && (
