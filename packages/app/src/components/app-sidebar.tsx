@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
+import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 import { useIsMediaSupported } from "@/hooks/use-support-media";
 import { useIsParamsSupported } from "@/hooks/use-support-params";
 import { useIsTerminalSupported } from "@/hooks/use-support-terminal";
@@ -65,6 +66,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const isTerminalSupported = useIsTerminalSupported(deviceId!);
   const isMediaSupported = useIsMediaSupported(deviceId!);
   const isRecentEventPermitted = useIsPermitted("recent-events");
+  const isMediaRouteAllowed = useIsRouteAllowed("media");
+  const isActionRouteAllowed = useIsRouteAllowed("action");
+  const isParamsRouteAllowed = useIsRouteAllowed("parameters");
+  const isGalleryRouteAllowed = useIsRouteAllowed("gallery");
+  const isTerminalRouteAllowed = useIsRouteAllowed("terminal");
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -75,13 +81,31 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu className="my-2 space-y-1 px-1">
           {navItems
             .filter((item) => {
-              if (item.path === "params" && !isParamsSupported) {
+              if (
+                item.path === "params" &&
+                (!isParamsSupported || !isParamsRouteAllowed)
+              ) {
                 return false;
               }
-              if (item.path === "terminal" && !isTerminalSupported) {
+              if (
+                item.path === "terminal" &&
+                (!isTerminalSupported || !isTerminalRouteAllowed)
+              ) {
                 return false;
               }
-              if (item.path === "stream" && !isMediaSupported) {
+              if (
+                item.path === "stream" &&
+                (!isMediaSupported || !isMediaRouteAllowed)
+              ) {
+                return false;
+              }
+              if (item.path === "actions" && !isActionRouteAllowed) {
+                return false;
+              }
+              if (item.path === "parameters" && !isParamsRouteAllowed) {
+                return false;
+              }
+              if (item.path === "gallery" && !isGalleryRouteAllowed) {
                 return false;
               }
 

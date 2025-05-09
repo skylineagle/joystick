@@ -42,6 +42,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 
 export interface GalleryStats {
   totalEvents: number;
@@ -91,6 +92,7 @@ export default function GalleryPage() {
       return data.status === "running";
     },
   });
+  const isRouteAllowed = useIsRouteAllowed("gallery");
 
   // Start gallery service
   const startMutation = useMutation({
@@ -310,6 +312,10 @@ export default function GalleryPage() {
       return next;
     });
   };
+
+  if (!isRouteAllowed) {
+    return <div>You are not allowed to access this page</div>;
+  }
 
   if (!isSupported) {
     return (

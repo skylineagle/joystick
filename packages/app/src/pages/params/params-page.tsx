@@ -6,12 +6,14 @@ import { ParamTree } from "@/pages/params/param-tree";
 import { ParamPath } from "@/types/params";
 import { useCallback, useState } from "react";
 import { useParams } from "react-router";
+import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 
 export function ParamsPage() {
   const { device: deviceId } = useParams();
   const { data: device } = useDevice(deviceId!);
   const isParamsSupported = useIsParamsSupported(deviceId!);
   const setDeviceId = useParamsStore((state) => state.setDeviceId);
+  const isRouteAllowed = useIsRouteAllowed("parameters");
 
   const [expandedPaths, setExpandedPaths] = useState<Set<string>>(new Set([]));
 
@@ -28,6 +30,10 @@ export function ParamsPage() {
       return next;
     });
   }, []);
+
+  if (!isRouteAllowed) {
+    return <div>You are not allowed to access this page</div>;
+  }
 
   if (!isParamsSupported) {
     return <div className="p-4">Params are not supported</div>;

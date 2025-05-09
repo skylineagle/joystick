@@ -7,6 +7,7 @@ import { MediaFrame, RoiMediaFrame } from "./media-frame";
 import { WsFrame } from "./ws-frame";
 import { pb } from "@/lib/pocketbase";
 import { useIsMediaSupported } from "@/hooks/use-support-media";
+import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 
 export const Frame = memo(
   ({
@@ -51,6 +52,7 @@ export function StreamView() {
   const { data: device } = useDevice(deviceId ?? "");
   const { roiMode } = useRoiMode();
   const isMediaSupported = useIsMediaSupported(deviceId ?? "");
+  const isRouteAllowed = useIsRouteAllowed("media");
 
   if (!isMediaSupported) return <div>Media not supported</div>;
   if (!device) return <div>No device selected</div>;
@@ -59,6 +61,10 @@ export function StreamView() {
   const mode = roiMode === "hide" ? "view" : "edit";
   const overerlayPath = pb.files.getURL(device, device.overlay);
 
+  if (!isRouteAllowed) {
+    return <div>You are not allowed to access this page</div>;
+  }
+  
   return (
     <>
       <Frame

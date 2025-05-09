@@ -17,6 +17,7 @@ import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router";
 import { ActionForm } from "./action-form";
+import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 
 export function ActionsPage() {
   const { device: deviceId } = useParams();
@@ -29,6 +30,11 @@ export function ActionsPage() {
     currentAction,
   } = useActions(deviceId!);
   const [expandedResult, setExpandedResult] = useState(false);
+  const isRouteAllowed = useIsRouteAllowed("action");
+
+  if (!isRouteAllowed) {
+    return <div>You are not allowed to access this page</div>;
+  }
 
   if (isLoading) {
     return (
