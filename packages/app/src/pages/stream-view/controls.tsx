@@ -18,6 +18,7 @@ import { GPSStatus } from "@/pages/status/gps-status";
 import { IMUStatus } from "@/pages/status/imu-status";
 import { ServicesStatus } from "@/pages/status/services-status";
 import { BitrateControll } from "@/pages/stream-view/bitrate-control";
+import { FpsControll } from "@/pages/stream-view/fps-control";
 import { RoiModeControl } from "@/pages/stream-view/roi/roi-mode-control";
 import { AnimatePresence, motion } from "framer-motion";
 import { Battery, Cpu, Map, Navigation, Signal } from "lucide-react";
@@ -39,6 +40,8 @@ export const Controls = () => {
     useIsSupported(deviceId!, ["get-roi"]);
   const { isSupported: isSetBitrateSupported, isLoading: isSetBitrateLoading } =
     useIsSupported(deviceId!, ["set-bitrate", "get-bitrate"]);
+  const { isSupported: isSetFpsSupported, isLoading: isSetFpsLoading } =
+    useIsSupported(deviceId!, ["set-fps", "get-fps"]);
   const { isSupported: isSetModeSupported, isLoading: isSetModeLoading } =
     useIsSupported(deviceId!, "set-mode");
   const {
@@ -191,6 +194,30 @@ export const Controls = () => {
                 </div>
               ) : (
                 <BitrateControll deviceId={deviceId!} />
+              )}
+            </>
+          ) : null}
+        </motion.div>
+
+        {/* Bitrate Control Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.2 }}
+        >
+          {isSetFpsSupported ? (
+            <>
+              <Separator className="my-2" />
+              {isSetFpsLoading ? (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Skeleton className="h-5 w-16" />
+                    <Skeleton className="h-6 w-6 rounded-full" />
+                  </div>
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              ) : (
+                <FpsControll deviceId={deviceId!} />
               )}
             </>
           ) : null}
