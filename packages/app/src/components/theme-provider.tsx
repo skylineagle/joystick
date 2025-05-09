@@ -1,7 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 type ColorMode = "dark" | "light" | "system";
-export type DesignTheme = "default" | "bubblegum" | "ocean" | "coffee" | "candy" | "retro" | "graphite";
+export type DesignTheme =
+  | "default"
+  | "catppuccin"
+  | "twitter"
+  | "supabase"
+  | "vercel";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -76,12 +81,10 @@ export function ThemeProvider({
     // Handle design theme
     root.classList.remove(
       "default-theme",
-      "bubblegum-theme",
-      "ocean-theme",
-      "coffee-theme",
-      "candy-theme",
-      "retro-theme",
-      "graphite-theme",
+      "catppuccin-theme",
+      "twitter-theme",
+      "supabase-theme",
+      "vercel-theme"
     );
     root.classList.add(`${designTheme}-theme`);
   }, [colorMode, designTheme]);
