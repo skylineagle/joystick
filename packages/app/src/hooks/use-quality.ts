@@ -18,7 +18,6 @@ export function useQuality(deviceId: string) {
       });
 
       const parsedData = JSON.parse(data ?? "{}");
-      console.log(parsedData);
 
       return parsedData;
     },

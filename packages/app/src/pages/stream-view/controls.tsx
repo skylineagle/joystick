@@ -20,7 +20,7 @@ import { RoiModeControl } from "@/pages/stream-view/roi/roi-mode-control";
 import { motion } from "framer-motion";
 import { useLocation, useParams } from "react-router";
 
-const MotionCard = motion(Card);
+const MotionCard = motion.create(Card);
 
 export const Controls = () => {
   const { isMobileLandscape } = useMobileLandscape();

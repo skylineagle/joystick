@@ -50,7 +50,6 @@ export function QualityControll({ deviceId }: QualityControlProps) {
     );
   }, [device?.information?.quality_presets]);
 
-  console.log(quality, presets);
   const currentLabel = useMemo(() => {
     if (!quality || !presets.length) return "";
     const match = presets.find(

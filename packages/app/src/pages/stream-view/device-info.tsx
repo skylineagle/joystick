@@ -18,9 +18,9 @@ export interface DeviceInfoProps {
 
 type TabValue = "cell" | "battery" | "imu" | "gps";
 
-const MotionCard = motion(Card);
-const MotionTabsContent = motion(TabsContent);
-const MotionTabsTrigger = motion(TabsTrigger);
+const MotionCard = motion.create(Card);
+const MotionTabsContent = motion.create(TabsContent);
+const MotionTabsTrigger = motion.create(TabsTrigger);
 
 export const DeviceInfo: FC<DeviceInfoProps> = ({ deviceId }) => {
   const {
