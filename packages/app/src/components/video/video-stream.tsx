@@ -44,7 +44,7 @@ export const VideoStream = ({ deviceName }: VideoStreamProps) => {
       streamingClientRef.current = new WHEPClient(
         videoElement,
         urls.stream,
-        "test",
+        deviceName,
         window
       );
     }
