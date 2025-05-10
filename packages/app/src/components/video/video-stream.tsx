@@ -175,7 +175,11 @@ export const VideoStream = ({ deviceName }: VideoStreamProps) => {
           <RefreshCcwIcon className="size-5" />
         </Button>
       </div>
-      {(isLoading || !isPlaying) && <ModernVideoLoading />}
+      {(isLoading || !isPlaying) && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <ModernVideoLoading />
+        </div>
+      )}
       <video
         ref={videoRef}
         autoPlay

@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 const barColors = "from-primary to-primary-foreground";
@@ -8,12 +9,12 @@ const progressStroke = "stroke-primary";
 
 export const ModernVideoLoading = () => (
   <div
-    className="relative flex items-center justify-center w-full h-full"
+    className="flex items-center justify-center size-full"
     role="status"
     aria-live="polite"
   >
     <motion.div
-      className={`flex flex-col items-center justify-center bg-transparent`}
+      className="flex flex-col items-center justify-center bg-transparent"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
@@ -90,7 +91,7 @@ export const ModernVideoLoading = () => (
       </div>
 
       {/* Text with animated dots */}
-      <div className={`flex items-center text-sm font-medium ${textColors}`}>
+      <div className={cn("flex items-center text-sm font-medium", textColors)}>
         <span>Loading video</span>
         <div className="flex ml-1">
           {[0, 1, 2].map((i) => (
