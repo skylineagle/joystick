@@ -6,7 +6,8 @@ export type DesignTheme =
   | "catppuccin"
   | "twitter"
   | "supabase"
-  | "vercel";
+  | "vercel"
+  | "field";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -84,7 +85,8 @@ export function ThemeProvider({
       "catppuccin-theme",
       "twitter-theme",
       "supabase-theme",
-      "vercel-theme"
+      "vercel-theme",
+      "field-theme"
     );
     root.classList.add(`${designTheme}-theme`);
   }, [colorMode, designTheme]);

@@ -29,6 +29,10 @@ const designThemeInfo = {
     name: "Vercel",
     radius: "0.6rem",
   },
+  field: {
+    name: "Field (High Contrast)",
+    radius: "0.7rem",
+  },
 };
 
 export const ThemeSelector = () => {

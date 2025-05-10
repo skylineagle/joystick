@@ -704,6 +704,56 @@ export const vercelDarkTheme: ITheme = {
   brightWhite: "hsl(223.81, -172.52%, 100%)",
 };
 
+// Field Light Theme
+export const fieldLightTheme: ITheme = {
+  background: "hsl(48, 12%, 92%)",
+  foreground: "hsl(220, 15%, 15%)",
+  cursor: "hsl(27, 98%, 54%)",
+  cursorAccent: "hsl(48, 12%, 92%)",
+  selectionBackground: "hsla(27, 98%, 54%, 0.3)",
+  black: "hsl(48, 12%, 97%)",
+  red: "hsl(0, 100%, 50%)",
+  green: "hsl(160, 84%, 39%)",
+  yellow: "hsl(37, 92%, 50%)",
+  blue: "hsl(27, 98%, 54%)",
+  magenta: "hsl(258, 89%, 66%)",
+  cyan: "hsl(217, 91%, 59%)",
+  white: "hsl(48, 12%, 92%)",
+  brightBlack: "hsl(220, 10%, 40%)",
+  brightRed: "hsl(0, 100%, 60%)",
+  brightGreen: "hsl(160, 84%, 49%)",
+  brightYellow: "hsl(37, 92%, 60%)",
+  brightBlue: "hsl(27, 98%, 64%)",
+  brightMagenta: "hsl(258, 89%, 76%)",
+  brightCyan: "hsl(217, 91%, 69%)",
+  brightWhite: "hsl(48, 12%, 97%)",
+};
+
+// Field Dark Theme
+export const fieldDarkTheme: ITheme = {
+  background: "hsl(220, 20%, 15%)",
+  foreground: "hsl(48, 12%, 92%)",
+  cursor: "hsl(27, 98%, 54%)",
+  cursorAccent: "hsl(220, 20%, 15%)",
+  selectionBackground: "hsla(27, 98%, 54%, 0.3)",
+  black: "hsl(220, 20%, 18%)",
+  red: "hsl(0, 100%, 60%)",
+  green: "hsl(172, 66%, 50%)",
+  yellow: "hsl(43, 96%, 56%)",
+  blue: "hsl(27, 98%, 54%)",
+  magenta: "hsl(255, 91%, 76%)",
+  cyan: "hsl(213, 93%, 67%)",
+  white: "hsl(48, 12%, 92%)",
+  brightBlack: "hsl(48, 12%, 70%)",
+  brightRed: "hsl(0, 100%, 70%)",
+  brightGreen: "hsl(172, 66%, 60%)",
+  brightYellow: "hsl(43, 96%, 66%)",
+  brightBlue: "hsl(27, 98%, 64%)",
+  brightMagenta: "hsl(255, 91%, 86%)",
+  brightCyan: "hsl(213, 93%, 77%)",
+  brightWhite: "hsl(48, 12%, 92%)",
+};
+
 // Function to get the appropriate theme based on design theme and color mode
 export const getTerminalTheme = (
   designTheme: string,
@@ -732,6 +782,8 @@ export const getTerminalTheme = (
       return isDark ? retroDarkTheme : retroLightTheme;
     case "graphite":
       return isDark ? graphiteDarkTheme : graphiteLightTheme;
+    case "field":
+      return isDark ? fieldDarkTheme : fieldLightTheme;
     default:
       return isDark ? catppuccinDarkTheme : catppuccinLightTheme;
   }
