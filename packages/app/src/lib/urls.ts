@@ -3,7 +3,7 @@ const getPorts = (service: string) => {
     case "joystick":
       return 8000;
     case "stream":
-      return import.meta.env.PROD ? 8889 : 8888;
+      return 8889;
     case "stream_api":
       return 9997;
     case "pocketbase":
