@@ -19,6 +19,7 @@ export function HomePage() {
   const { user } = useAuthStore();
   const { devices } = useDevicesQuery();
   const { selectedDevices, clearSelection } = useDeviceStore();
+  const isSystemStatusRouteAllowed = useIsPermitted("system-status");
   const isAdmin = useIsPermitted("admin-dashboard") ?? false;
 
   return (
@@ -37,7 +38,7 @@ export function HomePage() {
               <h1 className="text-3xl font-bold">
                 {user?.email.includes("user") ? "HaTomer" : "Joystick"}
               </h1>
-              <AppStatusIndicator />
+              {isSystemStatusRouteAllowed && <AppStatusIndicator />}
             </div>
 
             <div className="flex items-center gap-5">

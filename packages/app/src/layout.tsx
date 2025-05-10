@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { UserProfile } from "@/components/user-profile";
+import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { useIsMediaSupported } from "@/hooks/use-support-media";
@@ -65,7 +66,7 @@ export function Layout({ children }: LayoutProps) {
   const isParamsRouteAllowed = useIsRouteAllowed("parameters");
   const isGalleryRouteAllowed = useIsRouteAllowed("gallery");
   const isTerminalRouteAllowed = useIsRouteAllowed("terminal");
-
+  const isSystemStatusRouteAllowed = useIsPermitted("system-status");
   const availableNavItems = getAvailableNavItems(
     !!isParamsSupported,
     !!isTerminalSupported,
@@ -96,7 +97,7 @@ export function Layout({ children }: LayoutProps) {
                 </>
               </div>
               <div className="flex items-center gap-5 p-4">
-                <AppStatusIndicator />
+                {isSystemStatusRouteAllowed && <AppStatusIndicator />}
                 <AnimatedThemeToggle />
                 <UserProfile />
               </div>
