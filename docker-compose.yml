@@ -16,6 +16,8 @@ services:
       - "--api.dashboard=true"
     networks:
       - app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   pocketbase:
     image: ghcr.io/skylineagle/joystick/pb:latest
@@ -25,7 +27,7 @@ services:
       - "8090:8090"
     environment:
       - BAKER_URL=http://baker:3000
-      - MEDIAMTX_API=http://mediamtx:9997
+      - MEDIAMTX_API=http://host.docker.internal:9997
     volumes:
       - pb_data:/pb_data
       - ./pocketbase/pb_migrations:/pb_migrations
@@ -36,6 +38,8 @@ services:
       retries: 5
     networks:
       - app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     logging:
       driver: "json-file"
       options:
@@ -44,17 +48,16 @@ services:
 
   mediamtx:
     image: bluenviron/mediamtx:1.11.2
+    network_mode: host
     restart: unless-stopped
-    ports:
-      - "9997:9997" # API
-      - "8554:8554" # RTSP
-      - "8888:8888" # API and metrics
-      - "8889:8889" # HLS
-      - "1935:1935" # RTMP
+    # ports:
+    #   - "9997:9997" # API
+    #   - "8554:8554" # RTSP
+    #   - "8888:8888" # API and metrics
+    #   - "8889:8889" # HLS
+    #   - "1935:1935" # RTMP
     volumes:
       - ./mediamtx/mediamtx.yml:/mediamtx.yml
-    networks:
-      - app-network
     logging:
       driver: "json-file"
       options:
@@ -69,6 +72,8 @@ services:
       - pocketbase
     networks:
       - app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     logging:
       driver: "json-file"
       options:
@@ -84,7 +89,7 @@ services:
     restart: unless-stopped
     platform: linux/amd64
     environment:
-      - STREAM_API_URL=http://mediamtx:9997
+      - STREAM_API_URL=http://host.docker.internal:9997
       - POCKETBASE_URL=http://pocketbase:8090
       - SWITCHER_API_URL=http://switcher:8080
       - PORT=8000
@@ -96,6 +101,8 @@ services:
         condition: service_started
     networks:
       - app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     logging:
       driver: "json-file"
       options:
@@ -126,6 +133,8 @@ services:
         condition: service_started
     networks:
       - app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     logging:
       driver: "json-file"
       options:
@@ -148,7 +157,7 @@ services:
     platform: linux/amd64
     environment:
       - PORT=3000
-      - STREAM_API_URL=http://mediamtx:9997
+      - STREAM_API_URL=http://host.docker.internal:9997
       - POCKETBASE_URL=http://pocketbase:8090
       - JOYSTICK_API_URL=http://joystick:8000
     depends_on:
@@ -158,6 +167,8 @@ services:
         condition: service_started
     networks:
       - app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     logging:
       driver: "json-file"
       options:
@@ -179,7 +190,7 @@ services:
     restart: unless-stopped
     platform: linux/amd64
     environment:
-      - STREAM_API_URL=http://mediamtx:9997
+      - STREAM_API_URL=http://host.docker.internal:9997
       - POCKETBASE_URL=http://pocketbase:8090
       - JOYSTICK_API_URL=http://joystick:8000
       - PORT=8080
@@ -190,6 +201,8 @@ services:
         condition: service_started
     networks:
       - app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     logging:
       driver: "json-file"
       options:
@@ -211,7 +224,7 @@ services:
     restart: unless-stopped
     platform: linux/amd64
     environment:
-      - STREAM_API_URL=http://mediamtx:9997
+      - STREAM_API_URL=http://host.docker.internal:9997
       - POCKETBASE_URL=http://pocketbase:8090
       - JOYSTICK_API_URL=http://joystick:8000
       - PORT=8081
@@ -222,6 +235,8 @@ services:
         condition: service_started
     networks:
       - app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     logging:
       driver: "json-file"
       options:
@@ -248,6 +263,8 @@ services:
       - PORT=8001
     networks:
       - app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -275,6 +292,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "8085:8080"
 
