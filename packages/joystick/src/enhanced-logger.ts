@@ -14,13 +14,16 @@ import pino from "pino";
 // Base console logger using Pino
 const pinoLogger = pino({
   level: "debug",
-  transport: {
-    target: "pino-pretty",
-    options: {
-      colorize: true,
-      translateTime: "SYS:standard",
-    },
-  },
+  transport:
+    process.env.LOG_FORMAT !== "json"
+      ? {
+          target: "pino-pretty",
+          options: {
+            colorize: true,
+            translateTime: "SYS:standard",
+          },
+        }
+      : undefined,
 });
 
 // Check if file logging is enabled with directory path
