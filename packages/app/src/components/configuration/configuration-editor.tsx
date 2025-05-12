@@ -25,6 +25,7 @@ import { useAction } from "@/hooks/use-action";
 import { FileWithPreview } from "@/hooks/use-file-upload";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { updateDevice } from "@/lib/device";
+import { pb } from "@/lib/pocketbase";
 import { cn, getModeOptionsFromSchema } from "@/lib/utils";
 import { DevicesStatusOptions } from "@/types/db.types";
 import {
@@ -40,7 +41,6 @@ import { Pencil } from "lucide-react";
 import type * as Monaco from "monaco-editor";
 import { useCallback, useRef, useState } from "react";
 import * as RPNInput from "react-phone-number-input";
-import { pb } from "@/lib/pocketbase";
 
 export interface ConfigurationEditorProps {
   device: DeviceResponse;
@@ -61,17 +61,20 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
     "general" | "config" | "automation"
   >("general");
   const monacoRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
-  const { mutate: updateDeviceMutation } = useMutation({
+  const { mutate: updateDeviceMutation, isPending } = useMutation({
     mutationFn: async (data: UpdateDevice) => {
+      await updateDevice(data);
       if (
         (data.configuration || data.automation) &&
         device.status !== DevicesStatusOptions.off
       ) {
-        throw new Error(
-          "Configuration and automation can only be updated when device is off"
-        );
+        setTimeout(() => {
+          toast.info({
+            message:
+              "Device is ON, some changes may not take effect until turned OFF.",
+          });
+        }, 1000);
       }
-      await updateDevice(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["devices"] });
@@ -126,6 +129,8 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
     if (currentTab === "config") return !isJsonValid;
     if (currentTab === "automation") return !isAutomationValid();
 
+    if (isPending) return true;
+
     // General tab validation
     return (
       !editingConfig?.name ||
@@ -133,7 +138,16 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
       !editingConfig?.information?.password ||
       !editingConfig?.information?.host
     );
-  }, [currentTab, isJsonValid, isAutomationValid, editingConfig]);
+  }, [
+    currentTab,
+    isJsonValid,
+    isAutomationValid,
+    isPending,
+    editingConfig?.name,
+    editingConfig?.information?.user,
+    editingConfig?.information?.password,
+    editingConfig?.information?.host,
+  ]);
 
   const handleOverlayChange = useCallback((files: FileWithPreview[]) => {
     console.log(files);
