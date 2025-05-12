@@ -8,6 +8,7 @@ export function useFps(deviceId: string) {
     data: fps,
     refetch,
     isLoading,
+    isFetching,
   } = useQuery({
     queryKey: ["fps", deviceId],
     queryFn: async () => {
@@ -34,5 +35,10 @@ export function useFps(deviceId: string) {
     },
   });
 
-  return { fps, setFps, refreshFps: refetch, isLoading };
+  return {
+    fps,
+    setFps,
+    refreshFps: refetch,
+    isLoading: isFetching || isLoading,
+  };
 }

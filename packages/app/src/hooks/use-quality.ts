@@ -8,6 +8,7 @@ export function useQuality(deviceId: string) {
     data: quality,
     refetch,
     isLoading,
+    isFetching,
   } = useQuery({
     queryKey: ["quality", deviceId],
     queryFn: async () => {
@@ -38,5 +39,10 @@ export function useQuality(deviceId: string) {
     },
   });
 
-  return { quality, setQuality, refreshQuality: refetch, isLoading };
+  return {
+    quality,
+    setQuality,
+    refreshQuality: refetch,
+    isLoading: isFetching || isLoading,
+  };
 }

@@ -7,6 +7,7 @@ export function useBitrate(deviceId: string) {
   const {
     data: bitrate,
     refetch,
+    isFetching,
     isLoading,
   } = useQuery({
     queryKey: ["bitrate", deviceId],
@@ -34,5 +35,10 @@ export function useBitrate(deviceId: string) {
     },
   });
 
-  return { bitrate, setBitrate, refreshBitrate: refetch, isLoading };
+  return {
+    bitrate,
+    setBitrate,
+    refreshBitrate: refetch,
+    isLoading: isFetching || isLoading,
+  };
 }
