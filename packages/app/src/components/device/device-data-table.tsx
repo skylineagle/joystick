@@ -270,7 +270,7 @@ export function DeviceDataTable({ data }: DeviceDataTableProps) {
   }, [columnFilters, setQueryFilters]);
 
   return (
-    <div className="size-full">
+    <div className="flex flex-col size-full">
       <div className="flex flex-row items-center gap-4 pb-4">
         <div className="flex-1 relative size-full">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -284,10 +284,10 @@ export function DeviceDataTable({ data }: DeviceDataTableProps) {
         <DataTableFilter table={table} />
         <AddDeviceModal />
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border flex-1">
         <div className="relative">
           <div className="sticky top-0 z-10 bg-background border-b shadow-sm">
-            <Table className="rounded-t-md">
+            <Table className="rounded-t-md size-full">
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow
