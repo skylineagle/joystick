@@ -18,14 +18,19 @@ import { Icon } from "@/icons/icon";
 interface ParamValueEditorProps {
   schema: ParamValue;
   path: ParamPath;
+  treeId: string;
 }
 
-export function ParamValueEditor({ schema, path }: ParamValueEditorProps) {
+export function ParamValueEditor({
+  schema,
+  path,
+  treeId,
+}: ParamValueEditorProps) {
   const pathStr = path.join(".");
   const displayTitle = schema.title || path[path.length - 1];
 
   const value =
-    useParamsStore((state) => state.values[pathStr]) ??
+    useParamsStore((state) => state.values[treeId]?.[pathStr]) ??
     ({
       current: null,
       edited: null,
@@ -36,18 +41,18 @@ export function ParamValueEditor({ schema, path }: ParamValueEditorProps) {
 
   const handleChange = (newValue: unknown) => {
     if (schema.type === "boolean") {
-      setEditedValue(path, newValue as boolean);
+      setEditedValue(treeId, path, newValue as boolean);
     } else {
-      setEditedValue(path, newValue);
+      setEditedValue(treeId, path, newValue);
     }
   };
 
   const handleCommit = async () => {
-    await commitValue(path);
+    await commitValue(treeId, path);
   };
 
   const handleRefresh = async () => {
-    await readValue(path, schema.type);
+    await readValue(treeId, path, schema.type);
   };
 
   const renderInput = () => {

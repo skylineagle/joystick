@@ -16,6 +16,7 @@ export enum Collections {
 	Devices = "devices",
 	Gallery = "gallery",
 	Models = "models",
+	ParametersTree = "parameters_tree",
 	Permissions = "permissions",
 	Rules = "rules",
 	Run = "run",
@@ -28,20 +29,15 @@ export type IsoDateString = string
 export type RecordIdString = string
 export type HTMLString = string
 
-type ExpandType<T> = unknown extends T
-	? T extends unknown
-		? { expand?: unknown }
-		: { expand: T }
-	: { expand: T }
-
 // System fields
-export type BaseSystemFields<T = unknown> = {
+export type BaseSystemFields<T = never> = {
 	id: RecordIdString
 	collectionId: string
 	collectionName: Collections
-} & ExpandType<T>
+	expand?: T
+}
 
-export type AuthSystemFields<T = unknown> = {
+export type AuthSystemFields<T = never> = {
 	email: string
 	emailVisibility: boolean
 	username: string
@@ -173,6 +169,17 @@ export type ModelsRecord<Tmode_configs = unknown, Tparams = unknown, Tstream_qua
 	updated?: IsoDateString
 }
 
+export type ParametersTreeRecord<Tschema = unknown> = {
+	created?: IsoDateString
+	id: string
+	model: RecordIdString
+	name: string
+	read: RecordIdString
+	schema: null | Tschema
+	updated?: IsoDateString
+	write: RecordIdString
+}
+
 export type PermissionsRecord = {
 	created?: IsoDateString
 	id: string
@@ -237,6 +244,7 @@ export type ActionsResponse<Texpand = unknown> = Required<ActionsRecord> & BaseS
 export type DevicesResponse<Tautomation = unknown, Tconfiguration = unknown, Tinformation = unknown, Texpand = unknown> = Required<DevicesRecord<Tautomation, Tconfiguration, Tinformation>> & BaseSystemFields<Texpand>
 export type GalleryResponse<Texpand = unknown> = Required<GalleryRecord> & BaseSystemFields<Texpand>
 export type ModelsResponse<Tmode_configs = unknown, Tparams = unknown, Tstream_quality = unknown, Texpand = unknown> = Required<ModelsRecord<Tmode_configs, Tparams, Tstream_quality>> & BaseSystemFields<Texpand>
+export type ParametersTreeResponse<Tschema = unknown, Texpand = unknown> = Required<ParametersTreeRecord<Tschema>> & BaseSystemFields<Texpand>
 export type PermissionsResponse<Texpand = unknown> = Required<PermissionsRecord> & BaseSystemFields<Texpand>
 export type RulesResponse<Texpand = unknown> = Required<RulesRecord> & BaseSystemFields<Texpand>
 export type RunResponse<Tparameters = unknown, Texpand = unknown> = Required<RunRecord<Tparameters>> & BaseSystemFields<Texpand>
@@ -256,6 +264,7 @@ export type CollectionRecords = {
 	devices: DevicesRecord
 	gallery: GalleryRecord
 	models: ModelsRecord
+	parameters_tree: ParametersTreeRecord
 	permissions: PermissionsRecord
 	rules: RulesRecord
 	run: RunRecord
@@ -274,6 +283,7 @@ export type CollectionResponses = {
 	devices: DevicesResponse
 	gallery: GalleryResponse
 	models: ModelsResponse
+	parameters_tree: ParametersTreeResponse
 	permissions: PermissionsResponse
 	rules: RulesResponse
 	run: RunResponse
@@ -295,6 +305,7 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: 'devices'): RecordService<DevicesResponse>
 	collection(idOrName: 'gallery'): RecordService<GalleryResponse>
 	collection(idOrName: 'models'): RecordService<ModelsResponse>
+	collection(idOrName: 'parameters_tree'): RecordService<ParametersTreeResponse>
 	collection(idOrName: 'permissions'): RecordService<PermissionsResponse>
 	collection(idOrName: 'rules'): RecordService<RulesResponse>
 	collection(idOrName: 'run'): RecordService<RunResponse>

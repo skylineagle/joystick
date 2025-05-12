@@ -12,11 +12,11 @@ import { ParamNode, ParamPath, ParamValue } from "@/types/params";
 import { Check, ChevronRight, PencilLine, RotateCw } from "lucide-react";
 
 interface ParamTreeProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  schema: any;
+  schema: Record<string, unknown>;
   path: ParamPath;
   expanded: Set<string>;
   onToggle: (path: ParamPath) => void;
+  treeId: string;
 }
 
 export function ParamTree({
@@ -24,10 +24,12 @@ export function ParamTree({
   path,
   expanded,
   onToggle,
+  treeId,
 }: ParamTreeProps) {
   const pathStr = path.join(".");
   const isExpanded = expanded.has(pathStr);
   const { values, readValue } = useParamsStore();
+  const treeValues = values[treeId] || {};
 
   // Get display title - use schema title, last path segment, or "Root" for empty path
   const displayTitle =
@@ -64,7 +66,7 @@ export function ParamTree({
               paramSchema = paramSchema.properties[segment];
             }
           }
-          return readValue(childPath, paramSchema.type);
+          return readValue(treeId, childPath, paramSchema.type);
         })
       );
     }
@@ -149,6 +151,7 @@ export function ParamTree({
                 path={[...path, key]}
                 expanded={expanded}
                 onToggle={onToggle}
+                treeId={treeId}
               />
             ))}
           </div>
@@ -157,7 +160,7 @@ export function ParamTree({
     );
   }
 
-  const value = values[pathStr];
+  const value = treeValues[pathStr];
   const isEdited = Boolean(value?.edited);
   const isLoading = Boolean(value?.isLoading);
 
@@ -169,7 +172,7 @@ export function ParamTree({
         "relative"
       )}
     >
-      <ParamValueEditor schema={schema} path={path} />
+      <ParamValueEditor schema={schema} path={path} treeId={treeId} />
       <div className="flex items-center gap-1">
         {isEdited ? (
           <ValueIndicator
