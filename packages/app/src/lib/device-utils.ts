@@ -7,7 +7,7 @@ export function devicesToOptions(
   if (!devices) return [];
   return devices.map((device) => ({
     value: device.id,
-    label: device.name || device.id,
+    label: device?.name || device.id,
   }));
 }
 
@@ -22,7 +22,7 @@ export function deviceIdsToOptions(
       if (!device) return null;
       return {
         value: device.id,
-        label: device.name || device.id,
+        label: device?.name || device.id,
       };
     })
     .filter((option): option is Option => option !== null);

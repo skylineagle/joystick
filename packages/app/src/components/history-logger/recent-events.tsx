@@ -168,7 +168,7 @@ export function RecentEvents() {
                           </TooltipTrigger>
                           <TooltipContent side="top">
                             <div className="text-xs">
-                              {log.expand?.device.name || "Unknown"}
+                              {log.expand?.device?.name || "Unknown"}
                             </div>
                           </TooltipContent>
                         </Tooltip>
@@ -254,7 +254,7 @@ export function RecentEvents() {
                                     Device
                                   </div>
                                   <div className="font-medium text-[10px]">
-                                    {log.expand?.device.name || "Unknown"}
+                                    {log.expand?.device?.name || "Unknown"}
                                   </div>
                                 </div>
                               </div>

@@ -39,7 +39,7 @@ export const DeviceRow = memo(
               onCheckedChange={(checked) =>
                 onSelect?.(device.id, checked as boolean)
               }
-              aria-label={`Select ${device.name || device.configuration?.name}`}
+              aria-label={`Select ${device?.name || device.configuration?.name}`}
             />
           </div>
         </TableCell>

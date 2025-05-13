@@ -175,7 +175,7 @@ export const AddCardDialog = ({ onAddCard }: AddCardDialogProps) => {
                   <SelectContent>
                     {devices?.map((device) => (
                       <SelectItem key={device.id} value={device.id}>
-                        {device.name || device.id}
+                        {device?.name || device.id}
                       </SelectItem>
                     ))}
                   </SelectContent>

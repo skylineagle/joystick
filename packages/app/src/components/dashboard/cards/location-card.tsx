@@ -76,7 +76,7 @@ export const LocationCard = ({
   const deviceNames = useMemo(() => {
     if (!devices) return {};
     return devices.reduce((acc, device) => {
-      acc[device.id] = device.name || device.id;
+      acc[device.id] = device?.name || device.id;
       return acc;
     }, {} as Record<string, string>);
   }, [devices]);
