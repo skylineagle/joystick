@@ -62,7 +62,7 @@ export function DeviceHealthIndicator() {
     return null;
   }
 
-  const isLoading = isHealthcheckLoading;
+  const isLoading = isHealthcheckLoading || isRefetchingHealthcheck;
 
   return (
     <div className="flex items-center gap-2">
