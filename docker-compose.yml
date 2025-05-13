@@ -25,8 +25,8 @@ services:
     image: traefik:v2.11
     <<: *default-platform-restart
     ports:
-      - "${TRAEFIK_HTTP_PORT}:80"
-      - "${TRAEFIK_DASHBOARD_PORT}:8080"
+      - "80:80"
+      - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     command:
@@ -43,10 +43,10 @@ services:
     image: ghcr.io/skylineagle/joystick/pb:latest
     <<: *default-platform-restart
     ports:
-      - "${POCKETBASE_PORT}:8090"
+      - "8090:8090"
     environment:
-      - BAKER_URL=${BAKER_URL}
-      - MEDIAMTX_API=${MEDIAMTX_API}
+      - BAKER_URL=http://baker:3000
+      - MEDIAMTX_API=http://host.docker.internal:9997
     volumes:
       - pb_data:/pb_data
       - ./pocketbase/pb_migrations:/pb_migrations
@@ -78,17 +78,17 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.app.rule=Host(${HOST:-localhost})"
-      - "traefik.http.services.app.loadbalancer.server.port=${APP_INTERNAL_PORT}"
+      - "traefik.http.services.app.loadbalancer.server.port=80"
 
   joystick:
     image: ghcr.io/skylineagle/joystick/joystick:latest
     <<: *default-platform-restart
     environment:
-      - STREAM_API_URL=${STREAM_API_URL}
-      - POCKETBASE_URL=${POCKETBASE_URL}
-      - SWITCHER_API_URL=${SWITCHER_API_URL}
-      - PORT=${JOYSTICK_PORT}
-      - HOST=${JOYSTICK_HOST}
+      - STREAM_API_URL=http://host.docker.internal:9997
+      - POCKETBASE_URL=http://pocketbase:8090
+      - SWITCHER_API_URL=http://switcher:8080
+      - PORT=8000
+      - HOST=0.0.0.0
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -106,14 +106,14 @@ services:
       - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=*"
       - "traefik.http.middlewares.cors.headers.addvaryheader=true"
       - "traefik.http.routers.joystick.middlewares=joystick-strip,cors"
-      - "traefik.http.services.joystick.loadbalancer.server.port=${JOYSTICK_PORT}"
+      - "traefik.http.services.joystick.loadbalancer.server.port=8000"
 
   panel:
     image: ghcr.io/skylineagle/joystick/panel:latest
     <<: *default-platform-restart
     environment:
-      - POCKETBASE_URL=${POCKETBASE_URL}
-      - PORT=${PANEL_PORT}
+      - POCKETBASE_URL=http://pocketbase:8090
+      - PORT=4000
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -131,16 +131,16 @@ services:
       - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=*"
       - "traefik.http.middlewares.cors.headers.addvaryheader=true"
       - "traefik.http.routers.panel.middlewares=panel-strip,cors"
-      - "traefik.http.services.panel.loadbalancer.server.port=${PANEL_PORT}"
+      - "traefik.http.services.panel.loadbalancer.server.port=4000"
 
   baker:
     image: ghcr.io/skylineagle/joystick/baker:latest
     <<: *default-platform-restart
     environment:
-      - PORT=${BAKER_PORT}
-      - STREAM_API_URL=${STREAM_API_URL}
-      - POCKETBASE_URL=${POCKETBASE_URL}
-      - JOYSTICK_API_URL=${JOYSTICK_API_URL}
+      - PORT=3000
+      - STREAM_API_URL=http://host.docker.internal:9997
+      - POCKETBASE_URL=http://pocketbase:8090
+      - JOYSTICK_API_URL=http://joystick:8000
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -158,16 +158,16 @@ services:
       - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=*"
       - "traefik.http.middlewares.cors.headers.addvaryheader=true"
       - "traefik.http.routers.baker.middlewares=baker-strip,cors"
-      - "traefik.http.services.baker.loadbalancer.server.port=${BAKER_PORT}"
+      - "traefik.http.services.baker.loadbalancer.server.port=3000"
 
   switcher:
     image: ghcr.io/skylineagle/joystick/switcher:latest
     <<: *default-platform-restart
     environment:
-      - STREAM_API_URL=${STREAM_API_URL}
-      - POCKETBASE_URL=${POCKETBASE_URL}
-      - JOYSTICK_API_URL=${JOYSTICK_API_URL}
-      - PORT=${SWITCHER_PORT}
+      - STREAM_API_URL=http://host.docker.internal:9997
+      - POCKETBASE_URL=http://pocketbase:8090
+      - JOYSTICK_API_URL=http://joystick:8000
+      - PORT=8080
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -185,16 +185,16 @@ services:
       - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=*"
       - "traefik.http.middlewares.cors.headers.addvaryheader=true"
       - "traefik.http.routers.switcher.middlewares=switcher-strip,cors"
-      - "traefik.http.services.switcher.loadbalancer.server.port=${SWITCHER_PORT}"
+      - "traefik.http.services.switcher.loadbalancer.server.port=8080"
 
   whisper:
     image: ghcr.io/skylineagle/joystick/whisper:latest
     <<: *default-platform-restart
     environment:
-      - STREAM_API_URL=${STREAM_API_URL}
-      - POCKETBASE_URL=${POCKETBASE_URL}
-      - JOYSTICK_API_URL=${JOYSTICK_API_URL}
-      - PORT=${WHISPER_PORT}
+      - STREAM_API_URL=http://host.docker.internal:9997
+      - POCKETBASE_URL=http://pocketbase:8090
+      - JOYSTICK_API_URL=http://joystick:8000
+      - PORT=8081
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -212,15 +212,15 @@ services:
       - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=*"
       - "traefik.http.middlewares.cors.headers.addvaryheader=true"
       - "traefik.http.routers.whisper.middlewares=whisper-strip,cors"
-      - "traefik.http.services.whisper.loadbalancer.server.port=${WHISPER_PORT}"
+      - "traefik.http.services.whisper.loadbalancer.server.port=8081"
 
   studio:
     image: ghcr.io/skylineagle/joystick/studio:latest
     <<: *default-platform-restart
     environment:
-      - POCKETBASE_URL=${POCKETBASE_URL}
-      - JOYSTICK_API_URL=${JOYSTICK_API_URL}
-      - PORT=${STUDIO_PORT}
+      - POCKETBASE_URL=http://pocketbase:8090
+      - JOYSTICK_API_URL=http://joystick:8000
+      - PORT=8001
     depends_on:
       pocketbase:
         condition: service_healthy
@@ -238,7 +238,7 @@ services:
       - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=*"
       - "traefik.http.middlewares.cors.headers.addvaryheader=true"
       - "traefik.http.routers.studio.middlewares=studio-strip,cors"
-      - "traefik.http.services.studio.loadbalancer.server.port=${STUDIO_PORT}"
+      - "traefik.http.services.studio.loadbalancer.server.port=8001"
 
   dozzle:
     image: amir20/dozzle:latest
@@ -247,7 +247,7 @@ services:
     networks: *default-networks
     extra_hosts: *default-extra-hosts
     ports:
-      - "${DOZZLE_PORT}:8080"
+      - "8084:8080"
 
 networks:
   app-network:
