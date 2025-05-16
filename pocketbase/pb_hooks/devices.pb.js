@@ -214,6 +214,39 @@ onRecordUpdateRequest((e) => {
   e.next();
 }, "devices");
 
+// Handle HOST change change
+onRecordUpdateRequest((e) => {
+  const current = $app.findRecordById("devices", e.record.id);
+  const information = JSON.parse(e.record.get("information"));
+  const configuration = JSON.parse(e.record.get("configuration"));
+
+  if (information.host !== current.get("information").host) {
+    $app.logger().info("Host changed, syncing camera state");
+    try {
+      // If mode changed to auto, create and start job
+      const sourceTemplate = $app.findRecordsByFilter(
+        "templates",
+        `name = "source" && model ?~ "${e.record.get("device")}"`
+      );
+
+      const sourceUrl = sourceTemplate[0]
+        .get("value")
+        .replace("<ip>", information.host)
+        .replace("<id>", configuration.name);
+
+      e.record.set("configuration", {
+        ...configuration,
+        source: sourceUrl,
+      });
+      $app.save(current);
+    } catch (error) {
+      $app.logger().warn(error);
+    }
+  }
+
+  e.next();
+}, "devices");
+
 // Handle after successful deletion
 onRecordAfterDeleteSuccess((e) => {
   const { stopDeviceJob, deleteDeviceJob } = require(`${__hooks}/baker.utils`);
