@@ -1,7 +1,6 @@
 import { AppStatusIndicator } from "@/components/app-status-indicator";
 import { ConfettiEasterEgg } from "@/components/confetti-easter-egg";
 import { BatchOperations } from "@/components/device/batch-operations";
-import { DeviceDataTable } from "@/components/device/device-data-table";
 import { AnimatedThemeToggle } from "@/components/ui/animated-theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -14,6 +13,14 @@ import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { Gauge, PanelsTopLeft } from "lucide-react";
 import { Link } from "react-router";
 import { Toaster } from "sonner";
+import { Suspense, lazy } from "react";
+
+// Lazy load DeviceDataTable
+const DeviceDataTable = lazy(() =>
+  import("@/components/device/device-data-table").then((module) => ({
+    default: module.DeviceDataTable,
+  }))
+);
 
 export function HomePage() {
   const { user } = useAuthStore();
@@ -33,6 +40,9 @@ export function HomePage() {
                   src="/logo.png"
                   alt="Joystick Logo"
                   className="h-16 w-16 cursor-pointer"
+                  width="64"
+                  height="64"
+                  loading="lazy"
                 />
               </ConfettiEasterEgg>
               <h1 className="text-3xl font-bold">
@@ -71,7 +81,15 @@ export function HomePage() {
               </CardHeader>
               <CardContent>
                 <div className="h-[calc(100vh-20rem)]">
-                  <DeviceDataTable data={devices || []} />
+                  <Suspense
+                    fallback={
+                      <div className="flex items-center justify-center h-full">
+                        Loading device data...
+                      </div>
+                    }
+                  >
+                    <DeviceDataTable data={devices || []} />
+                  </Suspense>
                 </div>
               </CardContent>
             </Card>

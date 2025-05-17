@@ -6,6 +6,7 @@ import { PageTransition } from "@/components/page-transition";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ApiError } from "@/lib/api-client";
 import { pb } from "@/lib/pocketbase";
+import { RerouteHome } from "@/pages/reroute-home";
 import { TerminalPage } from "@/pages/terminal/terminal-page";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { motion } from "motion/react";
@@ -15,8 +16,6 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { HashLoader } from "react-spinners";
 import { Toaster } from "sonner";
 import { Layout } from "./layout";
-import { DashboardPage } from "@/pages/dashboard/dashboard-page";
-import { RerouteHome } from "@/pages/reroute-home";
 
 // Lazy load components
 const HomePage = lazy(() =>
@@ -52,6 +51,13 @@ const SettingsPage = lazy(() =>
 const GalleryPage = lazy(() =>
   import("@/pages/gallery/gallery-page").then((module) => ({
     default: module.default,
+  }))
+);
+
+// Add DashboardPage to lazy loaded components
+const DashboardPage = lazy(() =>
+  import("@/pages/dashboard/dashboard-page").then((module) => ({
+    default: module.DashboardPage,
   }))
 );
 

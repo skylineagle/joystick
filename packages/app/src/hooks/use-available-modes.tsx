@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export function useAvailableModes(modelIds: string[]) {
   const { data: modes, isLoading } = useQuery({
-    queryKey: ["device-action", modelIds],
+    queryKey: ["device-action", ...modelIds],
     queryFn: async () => {
       const actions = await Promise.all(
         modelIds.map(async (id) => {
