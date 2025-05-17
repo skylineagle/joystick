@@ -6,8 +6,8 @@ import {
   ModelsResponse,
   RulesResponse,
   UsersResponse,
+  ParametersTreeResponse,
 } from "@/types/db.types";
-import { ParametersTreeResponse } from "@joystick/coretypes/db.types";
 
 export type ModelStreamQulity = {
   [key: string]: {
