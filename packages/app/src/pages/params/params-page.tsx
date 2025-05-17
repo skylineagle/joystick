@@ -8,7 +8,7 @@ import { useParams } from "react-router";
 import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 import { pb } from "@/lib/pocketbase";
 import { useDevice } from "@/hooks/use-device";
-import { ParametersTree } from "@joystick/core";
+import { ParametersTree } from "@/types/types";
 
 const fetchParameterTrees = async (
   modelId: string
