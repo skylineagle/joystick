@@ -4,16 +4,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { runAction } from "@/lib/joystick-api";
 import { cn, parseCPSIResult } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import { formatDistanceToNow } from "date-fns";
 import {
+  Clock,
   RefreshCw,
   Signal,
   SignalHigh,
   SignalLow,
   SignalMedium,
   SignalZero,
-  Clock,
 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 
 interface CellularStatusProps {
   deviceId: string;
@@ -89,16 +89,51 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
         "bg-indigo-100 dark:bg-indigo-900/20 text-indigo-800 dark:text-indigo-300",
     };
 
+    const getGenerationLabel = () => {
+      return technology === "LTE" ? "4G" : technology === "GSM" ? "2G" : "3G";
+    };
+
+    const generationLabel = getGenerationLabel();
+
+    const getGenerationBadgeColor = (label: string) => {
+      const genColors = {
+        "4G+":
+          "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300",
+        "4G": "bg-emerald-100 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-300",
+        "3G+":
+          "bg-teal-100 dark:bg-teal-900/20 text-teal-800 dark:text-teal-300",
+        "3G": "bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300",
+        "2.5G":
+          "bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-300",
+        "2G": "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300",
+      };
+
+      return (
+        genColors[label as keyof typeof genColors] ||
+        "bg-gray-100 dark:bg-gray-900/20"
+      );
+    };
+
     return (
-      <Badge
-        variant="outline"
-        className={
-          colors[technology as keyof typeof colors] ||
-          "bg-gray-100 dark:bg-gray-900/20"
-        }
-      >
-        {technology}
-      </Badge>
+      <div className="flex items-center gap-1">
+        <Badge
+          variant="outline"
+          className={
+            colors[technology as keyof typeof colors] ||
+            "bg-gray-100 dark:bg-gray-900/20"
+          }
+        >
+          {technology}
+        </Badge>
+        {generationLabel && (
+          <Badge
+            variant="outline"
+            className={getGenerationBadgeColor(generationLabel)}
+          >
+            {generationLabel}
+          </Badge>
+        )}
+      </div>
     );
   };
 
@@ -123,30 +158,22 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
         </div>
       ) : (
         <div className="space-y-3 w-full">
-          <div className="flex items-center justify-between gap-1 flex-wrap w-full">
-            <div className="flex items-center gap-1 min-w-0 truncate">
-              {getSignalIcon()}
-              {getNetworkTypeBadge(data?.technology)}
-              <Badge
-                variant="connected"
-                className="max-w-[8em] truncate"
-                title={data?.operator || "Unknown"}
-              >
-                {data?.operator?.length > 12
-                  ? `${data.operator.substring(0, 10)}...`
-                  : data?.operator || "Unknown"}
-              </Badge>
+          {/* Metadata row with timestamp and refresh button */}
+          <div className="flex items-center justify-between w-full mb-1">
+            <div className="flex items-center text-[10px] text-muted-foreground opacity-70">
+              <Clock className="h-2.5 w-2.5 mr-1" />
+              <span>{timeSinceUpdate}</span>
             </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={() => refetchCpsi()}
               disabled={isCpsiLoading || isCpsiRefetching}
-              className="h-7 w-7 flex-shrink-0"
+              className="h-5 w-5 flex-shrink-0"
             >
               <RefreshCw
                 className={cn(
-                  "h-3 w-3",
+                  "h-2.5 w-2.5",
                   isCpsiLoading && "animate-spin",
                   isCpsiRefetching && "animate-spin"
                 )}
@@ -154,10 +181,22 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
               <span className="sr-only">Refresh cellular status</span>
             </Button>
           </div>
-          <div className="flex items-center text-xs text-muted-foreground">
-            <Clock className="h-3 w-3 mr-1" />
-            <span>{timeSinceUpdate}</span>
+
+          {/* Cellular data content */}
+          <div className="flex items-center justify-between gap-1 flex-wrap w-full">
+            <div className="flex items-center gap-1 min-w-0 truncate">
+              {getSignalIcon()}
+              {getNetworkTypeBadge(data?.technology)}
+            </div>
           </div>
+
+          <div className="flex items-center gap-1">
+            <span className="text-xs text-muted-foreground">Provider:</span>
+            <span className="text-xs font-medium truncate">
+              {data?.operator || "Unknown"}
+            </span>
+          </div>
+
           <div className="flex items-center gap-1">
             <span className="text-xs text-muted-foreground">Cell ID:</span>
             <span className="text-xs font-medium truncate">
