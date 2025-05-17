@@ -41,7 +41,11 @@ export function useDevicesQuery(options?: GetDevicesOptions) {
     });
 
     return () => {
-      pb.collection("devices")?.unsubscribe("*");
+      try {
+        pb.collection("devices")?.unsubscribe("*");
+      } catch {
+        // Do nothing
+      }
     };
   }, [addDevice, deleteDevice, options, queryClient, setDevices, updateDevice]);
 

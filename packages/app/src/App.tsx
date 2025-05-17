@@ -152,7 +152,11 @@ function AnimatedRoutes() {
     }, true);
 
     return () => {
-      unsubscribe?.();
+      try {
+        unsubscribe?.();
+      } catch {
+        // Do nothing
+      }
     };
   }, []);
 

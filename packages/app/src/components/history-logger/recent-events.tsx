@@ -47,7 +47,11 @@ export function RecentEvents() {
     });
 
     return () => {
-      pb.collection("action_logs")?.unsubscribe("*");
+      try {
+        pb.collection("action_logs")?.unsubscribe("*");
+      } catch {
+        // Do nothing
+      }
     };
   }, [queryClient]);
 
