@@ -2,29 +2,24 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useIsParamsSupported } from "@/hooks/use-support-params";
 import { useParamsStore } from "@/lib/params.store";
 import { ParamTree } from "@/pages/params/param-tree";
-import { ParamPath } from "@/types/params";
+import { ParamNode, ParamPath } from "@/types/params";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 import { pb } from "@/lib/pocketbase";
 import { useDevice } from "@/hooks/use-device";
-
-type ParameterTree = {
-  id: string;
-  name: string;
-  schema: Record<string, unknown>;
-  readAction: string;
-  writeAction: string;
-};
+import { ParametersTree } from "@joystick/core";
 
 const fetchParameterTrees = async (
   modelId: string
-): Promise<ParameterTree[]> => {
+): Promise<ParametersTree[]> => {
   const result = await pb
     .collection("parameters_tree")
-    .getFullList<ParameterTree>({
+    .getFullList<ParametersTree>({
       filter: `model = "${modelId}"`,
+      expand: "read,write",
     });
+
   return result;
 };
 
@@ -34,7 +29,7 @@ export function ParamsPage() {
   const setDeviceId = useParamsStore((state) => state.setDeviceId);
   const isRouteAllowed = useIsRouteAllowed("parameters");
   const { data: device } = useDevice(deviceId!);
-  const [parameterTrees, setParameterTrees] = useState<ParameterTree[]>([]);
+  const [parameterTrees, setParameterTrees] = useState<ParametersTree[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [expandedPaths, setExpandedPaths] = useState<
@@ -42,29 +37,38 @@ export function ParamsPage() {
   >({});
 
   useEffect(() => {
-    if (!deviceId) return;
-    setDeviceId(deviceId);
-    setLoading(true);
-    setError("");
-    if (!device?.device) return;
-    fetchParameterTrees(device.device)
-      .then((trees) => {
+    const loadParameterTrees = async () => {
+      if (!deviceId) return;
+      setDeviceId(deviceId);
+      setLoading(true);
+      setError("");
+      if (!device?.device) return;
+
+      try {
+        const trees = await fetchParameterTrees(device.device);
         setParameterTrees(trees);
+
         const initialExpanded: Record<string, Set<string>> = {};
         trees.forEach((tree) => {
           initialExpanded[tree.id] = new Set([]);
           useParamsStore
             .getState()
-            .setTreeActions(tree.id, tree.readAction, tree.writeAction);
+            .setTreeActions(
+              tree.id,
+              tree.expand.read.name,
+              tree.expand.write.name
+            );
         });
+
         setExpandedPaths(initialExpanded);
         setLoading(false);
-      })
-      .catch((error) => {
-        console.error(error);
+      } catch {
         setError("Failed to load parameter trees");
         setLoading(false);
-      });
+      }
+    };
+
+    loadParameterTrees();
   }, [device?.device, deviceId, setDeviceId]);
 
   const handleToggle = useCallback((treeId: string, path: ParamPath) => {
@@ -106,7 +110,7 @@ export function ParamsPage() {
           {parameterTrees.map((tree) => (
             <ParamTree
               key={tree.id}
-              schema={tree.schema}
+              schema={tree.schema as ParamNode}
               path={[]}
               expanded={expandedPaths[tree.id] || new Set([])}
               onToggle={(path) => handleToggle(tree.id, path)}

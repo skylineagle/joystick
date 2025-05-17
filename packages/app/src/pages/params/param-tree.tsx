@@ -12,7 +12,7 @@ import { ParamNode, ParamPath, ParamValue } from "@/types/params";
 import { Check, ChevronRight, PencilLine, RotateCw } from "lucide-react";
 
 interface ParamTreeProps {
-  schema: Record<string, unknown>;
+  schema: ParamNode | ParamValue;
   path: ParamPath;
   expanded: Set<string>;
   onToggle: (path: ParamPath) => void;
@@ -61,12 +61,17 @@ export function ParamTree({
           for (const segment of childPath) {
             if (
               paramSchema.type === "object" &&
-              paramSchema.properties[segment]
+              typeof paramSchema.properties === "object" &&
+              paramSchema.properties !== null &&
+              Object.prototype.hasOwnProperty.call(
+                paramSchema.properties,
+                segment
+              )
             ) {
-              paramSchema = paramSchema.properties[segment];
+              paramSchema = paramSchema.properties[segment] as ParamNode;
             }
           }
-          return readValue(treeId, childPath, paramSchema.type);
+          return readValue(treeId, childPath, paramSchema.type as string);
         })
       );
     }

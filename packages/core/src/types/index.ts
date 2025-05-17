@@ -6,6 +6,7 @@ import type {
   ModelsResponse,
   RulesResponse,
   UsersResponse,
+  ParametersTreeResponse,
 } from "@/types/db.types";
 
 export * from "./db.types";
@@ -141,3 +142,10 @@ export type ActionLogsResponse = BaseActionLogsResponse<
     user: UsersResponse;
   }
 >;
+
+export type ParametersTree = ParametersTreeResponse & {
+  expand: {
+    read: ActionsResponse;
+    write: ActionsResponse;
+  };
+};
