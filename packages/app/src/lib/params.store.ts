@@ -1,90 +1,121 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { DeviceValue, ParamPath, ParamValue } from "@/types/params";
-import { readParams, writeParams } from "@/lib/joystick-api";
+import { runAction } from "@/lib/joystick-api";
 import { toast } from "@/utils/toast";
 import { parseParamValue } from "@/lib/utils";
 
 interface ParamsState {
-  values: Record<string, DeviceValue>;
+  values: Record<string, Record<string, DeviceValue>>;
   deviceId: string | null;
   schema: Record<string, ParamValue>;
+  actions: Record<string, { readAction: string; writeAction: string }>;
   setDeviceId: (deviceId: string) => void;
-  setEditedValue: (path: ParamPath, value: unknown) => void;
-  commitValue: (path: ParamPath) => Promise<void>;
-  readValue: (path: ParamPath, expectedType?: string) => Promise<void>;
-  readAllValues: () => Promise<void>;
+  setTreeActions: (
+    treeId: string,
+    readAction: string,
+    writeAction: string
+  ) => void;
+  setEditedValue: (treeId: string, path: ParamPath, value: unknown) => void;
+  commitValue: (treeId: string, path: ParamPath) => Promise<void>;
+  readValue: (
+    treeId: string,
+    path: ParamPath,
+    expectedType?: string
+  ) => Promise<void>;
+  readAllValues: (treeId: string) => Promise<void>;
 }
 
 export const useParamsStore = create<ParamsState>()(
   devtools((set, get) => ({
     values: {},
     deviceId: null,
+    schema: {},
+    actions: {},
 
     setDeviceId: (deviceId: string) => {
       set({ deviceId });
     },
 
-    setEditedValue: (path: ParamPath, value: unknown) => {
+    setTreeActions: (
+      treeId: string,
+      readAction: string,
+      writeAction: string
+    ) => {
+      set((state) => ({
+        actions: {
+          ...state.actions,
+          [treeId]: { readAction, writeAction },
+        },
+      }));
+    },
+
+    setEditedValue: (treeId: string, path: ParamPath, value: unknown) => {
       const pathStr = path.join(".");
-      const currentValue = get().values[pathStr];
-
-      // Only mark as edited if the value is different from current
+      const treeValues = get().values[treeId] || {};
+      const currentValue = treeValues[pathStr];
       const shouldSetEdited = currentValue?.current !== value;
-
       set((state) => ({
         values: {
           ...state.values,
-          [pathStr]: {
-            ...currentValue,
-            edited: shouldSetEdited ? value : null,
-            error: undefined,
+          [treeId]: {
+            ...treeValues,
+            [pathStr]: {
+              ...currentValue,
+              edited: shouldSetEdited ? value : null,
+              error: undefined,
+            },
           },
         },
       }));
     },
 
-    commitValue: async (path: ParamPath) => {
+    commitValue: async (treeId: string, path: ParamPath) => {
       const pathStr = path.join(".");
-      const value = get().values[pathStr];
+      const treeValues = get().values[treeId] || {};
+      const value = treeValues[pathStr];
       const deviceId = get().deviceId;
-
-      // Only commit if there's an edited value that's different from current
-      if (!value || value.edited === null || !deviceId) return;
-
+      const action = get().actions[treeId]?.writeAction;
+      if (!value || value.edited === null || !deviceId || !action) return;
       set((state) => ({
         values: {
           ...state.values,
-          [pathStr]: {
-            ...value,
-            pending: value.edited,
-            isLoading: true,
-            error: undefined,
+          [treeId]: {
+            ...treeValues,
+            [pathStr]: {
+              ...value,
+              pending: value.edited,
+              isLoading: true,
+              error: undefined,
+            },
           },
         },
       }));
-
       try {
-        const response = await writeParams({
+        const response = await runAction({
           deviceId,
-          path,
-          value: value.edited,
+          action,
+          params: {
+            path,
+            value: value.edited,
+          },
         });
-
-        if (!response.success) {
-          throw new Error(response.error || "Failed to write value");
+        if (!response) {
+          throw new Error("Failed to write value");
         }
-
         set((state) => ({
           values: {
             ...state.values,
-            [pathStr]: {
-              ...value,
-              current: value.edited,
-              pending: null,
-              edited: null,
-              isLoading: false,
-              error: undefined,
+            [treeId]: {
+              ...treeValues,
+              [pathStr]: {
+                ...value,
+                current: value.edited,
+                pending: null,
+                edited: null,
+                isLoading: false,
+                error: undefined,
+              },
             },
           },
         }));
@@ -92,66 +123,74 @@ export const useParamsStore = create<ParamsState>()(
         set((state) => ({
           values: {
             ...state.values,
-            [pathStr]: {
-              ...value,
-              pending: null,
-              isLoading: false,
-              error:
-                error instanceof Error
-                  ? error.message
-                  : "Failed to write value",
+            [treeId]: {
+              ...treeValues,
+              [pathStr]: {
+                ...value,
+                pending: null,
+                isLoading: false,
+                error:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to write value",
+              },
             },
           },
         }));
       }
     },
 
-    readValue: async (path: ParamPath, expectedType?: string) => {
+    readValue: async (
+      treeId: string,
+      path: ParamPath,
+      expectedType?: string
+    ) => {
       const pathStr = path.join(".");
-      const value = get().values[pathStr];
+      const treeValues = get().values[treeId] || {};
+      const value = treeValues[pathStr];
       const deviceId = get().deviceId;
-
-      if (!deviceId) return;
-
+      const action = get().actions[treeId]?.readAction;
+      if (!deviceId || !action) return;
       set((state) => ({
         values: {
           ...state.values,
-          [pathStr]: {
-            ...value,
-            isLoading: true,
-            error: undefined,
+          [treeId]: {
+            ...treeValues,
+            [pathStr]: {
+              ...value,
+              isLoading: true,
+              error: undefined,
+            },
           },
         },
       }));
-
       try {
-        const response = await readParams<string>({
+        const output = await runAction({
           deviceId,
-          path,
+          action,
+          params: {
+            path,
+          },
         });
-
-        if (!response.success) {
-          toast.error({ message: response.error || "Failed to read value" });
-          throw new Error(response.error || "Failed to read value");
-        }
-
-        if (!response.output) {
+        if (!output) {
           toast.error({ message: "Failed to read value" });
+          throw new Error("Failed to read value");
         }
-
         const parsedOutput = expectedType
-          ? parseParamValue(response.output!, expectedType)
-          : response.output;
-
+          ? parseParamValue(output, expectedType)
+          : output;
         set((state) => ({
           values: {
             ...state.values,
-            [pathStr]: {
-              current: parsedOutput,
-              pending: null,
-              edited: null,
-              isLoading: false,
-              error: undefined,
+            [treeId]: {
+              ...treeValues,
+              [pathStr]: {
+                current: parsedOutput,
+                pending: null,
+                edited: null,
+                isLoading: false,
+                error: undefined,
+              },
             },
           },
         }));
@@ -160,25 +199,30 @@ export const useParamsStore = create<ParamsState>()(
         set((state) => ({
           values: {
             ...state.values,
-            [pathStr]: {
-              current: null,
-              pending: null,
-              edited: null,
-              isLoading: false,
-              error:
-                error instanceof Error ? error.message : "Failed to read value",
+            [treeId]: {
+              ...treeValues,
+              [pathStr]: {
+                current: null,
+                pending: null,
+                edited: null,
+                isLoading: false,
+                error:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to read value",
+              },
             },
           },
         }));
       }
     },
 
-    readAllValues: async () => {
+    readAllValues: async (treeId: string) => {
       const deviceId = get().deviceId;
       if (!deviceId) return;
-
-      const paths = Object.keys(get().values).map((path) => path.split("."));
-      await Promise.all(paths.map((path) => get().readValue(path)));
+      const treeValues = get().values[treeId] || {};
+      const paths = Object.keys(treeValues).map((path) => path.split("."));
+      await Promise.all(paths.map((path) => get().readValue(treeId, path)));
     },
   }))
 );
