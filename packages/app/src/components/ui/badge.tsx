@@ -20,7 +20,7 @@ const badgeVariants = cva(
         disconnected:
           "border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-300 shadow hover:bg-amber-500/20",
         loading:
-          "border-gray-400 bg-gray-400/10 text-gray-700 dark:text-gray-300 shadow hover:bg-gray-400/20 animate-pulse",
+          "relative border-transparent bg-gray-400/10 text-gray-700 dark:text-gray-300 shadow hover:bg-gray-400/20 before:absolute before:inset-0 before:rounded-md before:p-[2px] before:bg-[conic-gradient(from_var(--border-angle),transparent,white,transparent)] before:animate-border before:content-[''] after:absolute after:inset-[2px] after:rounded-[calc(0.375rem-2px)] after:bg-background after:content-['']",
       },
     },
     defaultVariants: {
@@ -35,7 +35,13 @@ export interface BadgeProps
 
 function Badge({ className, variant, ...props }: BadgeProps) {
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+    <div className={cn(badgeVariants({ variant }), className)} {...props}>
+      {variant === "loading" || variant === "disconnected" ? (
+        <span className="relative z-10">{props.children}</span>
+      ) : (
+        props.children
+      )}
+    </div>
   );
 }
 

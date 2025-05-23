@@ -15,6 +15,5 @@ export const createNameColumn = () =>
         configurationName={row.original.configuration?.name ?? ""}
       />
     ),
-
     enableColumnFilter: false,
   });
