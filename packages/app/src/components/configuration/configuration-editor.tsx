@@ -9,6 +9,7 @@ import {
 } from "@/components/phone-input";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -28,12 +29,8 @@ import { updateDevice } from "@/lib/device";
 import { pb } from "@/lib/pocketbase";
 import { cn, getModeOptionsFromSchema } from "@/lib/utils";
 import { DevicesStatusOptions } from "@/types/db.types";
-import {
-  DeviceAutomation,
-  DeviceInformation,
-  DeviceResponse,
-  UpdateDevice,
-} from "@/types/types";
+import { DeviceAutomation, DeviceResponse, UpdateDevice } from "@/types/types";
+import { getActiveDeviceConnection } from "@/utils/device";
 import { toast } from "@/utils/toast";
 import Editor, { type OnMount } from "@monaco-editor/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -41,6 +38,7 @@ import { Pencil } from "lucide-react";
 import type * as Monaco from "monaco-editor";
 import { useCallback, useRef, useState } from "react";
 import * as RPNInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 export interface ConfigurationEditorProps {
   device: DeviceResponse;
@@ -61,6 +59,7 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
     "general" | "config" | "automation"
   >("general");
   const monacoRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
+  const [showSecondSlotFields, setShowSecondSlotFields] = useState(false);
   const { mutate: updateDeviceMutation, isPending } = useMutation({
     mutationFn: async (data: UpdateDevice) => {
       await updateDevice(data);
@@ -78,6 +77,7 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["devices"] });
+      queryClient.invalidateQueries({ queryKey: ["device", device.id] });
       toast.success({
         message: "Device updated successfully",
       });
@@ -132,22 +132,17 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
     if (isPending) return true;
 
     // General tab validation
+    const { host: activeHostToCheck } = editingConfig?.information
+      ? getActiveDeviceConnection(editingConfig.information)
+      : { host: undefined };
+
     return (
       !editingConfig?.name ||
       !editingConfig?.information?.user ||
       !editingConfig?.information?.password ||
-      !editingConfig?.information?.host
+      !activeHostToCheck
     );
-  }, [
-    currentTab,
-    isJsonValid,
-    isAutomationValid,
-    isPending,
-    editingConfig?.name,
-    editingConfig?.information?.user,
-    editingConfig?.information?.password,
-    editingConfig?.information?.host,
-  ]);
+  }, [currentTab, isJsonValid, isAutomationValid, isPending, editingConfig]);
 
   const handleOverlayChange = useCallback((files: FileWithPreview[]) => {
     console.log(files);
@@ -190,6 +185,12 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
             on: { minutes: 0, mode: availableModes[0] || "auto" },
             off: { minutes: 0, mode: availableModes[0] || "auto" },
           };
+          const hasSecondSlotData = !!(
+            device.information?.secondSlotHost ||
+            device.information?.secondSlotPhone ||
+            device.information?.activeSlot === "secondary"
+          );
+          setShowSecondSlotFields(hasSecondSlotData);
 
           setEditingConfig({
             id: device.id,
@@ -278,124 +279,156 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
             />
             {/* </div> */}
           </TabsContent>
-          <TabsContent value="general" className="py-4">
-            <div className="space-y-6">
-              <div className="grid gap-4 grid-cols-2">
-                <div className="grid gap-2">
-                  <Label htmlFor="name" className="text-sm font-medium">
-                    Name
-                  </Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    value={editingConfig?.name ?? ""}
-                    onChange={(e) =>
-                      setEditingConfig((prev) =>
-                        prev ? { ...prev, name: e.target.value } : null
-                      )
-                    }
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="deviceId" className="text-sm font-medium">
-                    Device ID
-                  </Label>
-                  <Input
-                    id="deviceId"
-                    type="text"
-                    value={(() => {
-                      if (!editingConfig?.config) return "";
-                      try {
-                        const config = JSON.parse(editingConfig.config);
-                        return config.name || "";
-                      } catch {
-                        return "";
-                      }
-                    })()}
-                    onChange={(e) => {
-                      if (!editingConfig) return;
-                      try {
-                        const config = JSON.parse(editingConfig.config);
-                        config.name = e.target.value;
-                        setEditingConfig({
-                          ...editingConfig,
-                          config: JSON.stringify(config, null, 2),
-                        });
-                      } catch {
-                        toast.error({
-                          message: "Invalid JSON configuration",
-                        });
-                      }
-                    }}
-                  />
-                </div>
-              </div>
+          <TabsContent value="general" className="space-y-6 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">Device Name</Label>
+              <Input
+                id="name"
+                value={editingConfig?.name ?? ""}
+                onChange={(e) =>
+                  setEditingConfig((prev) =>
+                    prev ? { ...prev, name: e.target.value } : null
+                  )
+                }
+              />
+            </div>
 
-              <div className="grid gap-4 grid-cols-2 pt-8">
-                <div className="grid gap-2">
-                  <Label htmlFor="user" className="text-sm font-medium">
-                    Username
-                  </Label>
-                  <Input
-                    id="user"
-                    type="text"
-                    value={editingConfig?.information?.user ?? ""}
-                    onChange={(e) =>
-                      setEditingConfig((prev) =>
-                        prev
-                          ? {
-                              ...prev,
-                              information: {
-                                ...(prev.information as DeviceInformation),
-                                user: e.target.value,
-                              },
-                            }
-                          : null
-                      )
-                    }
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="password" className="text-sm font-medium">
-                    Password
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={editingConfig?.information?.password ?? ""}
-                    onChange={(e) =>
-                      setEditingConfig((prev) =>
-                        prev
-                          ? {
-                              ...prev,
-                              information: {
-                                ...(prev.information as DeviceInformation),
-                                password: e.target.value,
-                              },
-                            }
-                          : null
-                      )
-                    }
-                  />
-                </div>
+            <div className="grid gap-4 grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="user">User</Label>
+                <Input
+                  id="user"
+                  value={editingConfig?.information?.user ?? ""}
+                  onChange={(e) =>
+                    setEditingConfig((prev) =>
+                      prev && prev.information
+                        ? {
+                            ...prev,
+                            information: {
+                              ...prev.information,
+                              user: e.target.value,
+                            },
+                          }
+                        : null
+                    )
+                  }
+                />
               </div>
-              <div className="grid gap-4 grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={editingConfig?.information?.password ?? ""}
+                  onChange={(e) =>
+                    setEditingConfig((prev) =>
+                      prev && prev.information
+                        ? {
+                            ...prev,
+                            information: {
+                              ...prev.information,
+                              password: e.target.value,
+                            },
+                          }
+                        : null
+                    )
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="host">Host IP (Primary)</Label>
+              <Input
+                id="host"
+                value={editingConfig?.information?.host ?? ""}
+                onChange={(e) =>
+                  setEditingConfig((prev) =>
+                    prev && prev.information
+                      ? {
+                          ...prev,
+                          information: {
+                            ...prev.information,
+                            host: e.target.value,
+                          },
+                        }
+                      : null
+                  )
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="phone">Phone Number (Primary)</Label>
+              <RPNInput.default
+                className="flex rounded-md shadow-xs"
+                international
+                flagComponent={FlagComponent}
+                countrySelectComponent={CountrySelect}
+                inputComponent={PhoneInput}
+                id="phone"
+                placeholder="Enter phone number"
+                value={editingConfig?.information?.phone ?? ""}
+                onChange={(value) =>
+                  setEditingConfig((prev) =>
+                    prev && prev.information
+                      ? {
+                          ...prev,
+                          information: {
+                            ...prev.information,
+                            phone: value ?? "",
+                          },
+                        }
+                      : null
+                  )
+                }
+              />
+            </div>
+
+            <div className="flex items-center space-x-2 mt-4">
+              <Checkbox
+                id="show-second-slot"
+                checked={showSecondSlotFields}
+                onCheckedChange={(checked) => {
+                  setShowSecondSlotFields(Boolean(checked));
+                  setEditingConfig((prev) => {
+                    if (!prev || !prev.information) return prev;
+                    // If unchecking and active slot was secondary, revert to primary
+                    if (
+                      !checked &&
+                      prev.information.activeSlot === "secondary"
+                    ) {
+                      return {
+                        ...prev,
+                        information: {
+                          ...prev.information,
+                          activeSlot: "primary",
+                        },
+                      };
+                    }
+                    return prev;
+                  });
+                }}
+              />
+              <Label htmlFor="show-second-slot">
+                Configure Secondary Connection Slot
+              </Label>
+            </div>
+
+            {showSecondSlotFields && (
+              <div className="space-y-4 pl-6 border-l-2 border-muted ml-2 pt-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="host" className="text-sm font-medium">
-                    IP Address
-                  </Label>
+                  <Label htmlFor="secondSlotHost">Host IP (Secondary)</Label>
                   <Input
-                    id="host"
-                    type="text"
-                    value={editingConfig?.information?.host ?? ""}
+                    id="secondSlotHost"
+                    value={editingConfig?.information?.secondSlotHost ?? ""}
                     onChange={(e) =>
                       setEditingConfig((prev) =>
-                        prev
+                        prev && prev.information
                           ? {
                               ...prev,
                               information: {
-                                ...(prev.information as DeviceInformation),
-                                host: e.target.value,
+                                ...prev.information,
+                                secondSlotHost: e.target.value,
                               },
                             }
                           : null
@@ -404,8 +437,8 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="phone" className="text-sm font-medium">
-                    Phone Number
+                  <Label htmlFor="secondSlotPhone">
+                    Phone Number (Secondary)
                   </Label>
                   <RPNInput.default
                     className="flex rounded-md shadow-xs"
@@ -413,17 +446,17 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
                     flagComponent={FlagComponent}
                     countrySelectComponent={CountrySelect}
                     inputComponent={PhoneInput}
-                    id="phone"
+                    id="secondSlotPhone"
                     placeholder="Enter phone number"
-                    value={editingConfig?.information?.phone ?? ""}
+                    value={editingConfig?.information?.secondSlotPhone ?? ""}
                     onChange={(value) =>
                       setEditingConfig((prev) =>
-                        prev
+                        prev && prev.information
                           ? {
                               ...prev,
                               information: {
-                                ...(prev.information as DeviceInformation),
-                                phone: value ?? "",
+                                ...prev.information,
+                                secondSlotPhone: value ?? "",
                               },
                             }
                           : null
@@ -431,8 +464,33 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
                     }
                   />
                 </div>
+                <div className="flex items-center space-x-2 mt-2">
+                  <Checkbox
+                    id="activeSlotSecondary"
+                    checked={
+                      editingConfig?.information?.activeSlot === "secondary"
+                    }
+                    onCheckedChange={(checked) =>
+                      setEditingConfig((prev) =>
+                        prev && prev.information
+                          ? {
+                              ...prev,
+                              information: {
+                                ...prev.information,
+                                activeSlot: checked ? "secondary" : "primary",
+                              },
+                            }
+                          : null
+                      )
+                    }
+                    aria-label="Set secondary slot as active"
+                  />
+                  <Label htmlFor="activeSlotSecondary">
+                    Set as active slot
+                  </Label>
+                </div>
               </div>
-            </div>
+            )}
           </TabsContent>
           <TabsContent value="automation" className="py-4">
             <div className="grid gap-6">

@@ -1,5 +1,5 @@
 import * as Monaco from "monaco-editor";
-import { DeviceAutomation } from "@/types/types";
+import { DeviceAutomation, DeviceInformation } from "@/types/types";
 
 export interface EditorMarker {
   severity: Monaco.MarkerSeverity;
@@ -15,11 +15,6 @@ export interface EditorConfig {
   config: string;
   automation: DeviceAutomation | null;
   name: string;
-  information?: {
-    user: string;
-    password: string;
-    host: string;
-    phone?: string;
-  };
+  information?: DeviceInformation;
   overlay?: File;
 }

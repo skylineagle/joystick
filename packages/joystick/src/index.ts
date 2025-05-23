@@ -7,6 +7,7 @@ import type {
   RunResponse,
 } from "@joystick/core";
 import {
+  getActiveDeviceConnection,
   runCommandOnDevice,
   RunTargetOptions,
   STREAM_API_URL,
@@ -298,16 +299,26 @@ app.get("/api/ping/:device", async ({ params, query }) => {
       .collection("devices")
       .getOne<DeviceResponse>(params.device);
 
-    if (!device) {
+    if (!device || !device.information) {
       return {
         success: false,
         available: false,
-        error: "Device not found",
+        error: "Device not found or device information missing",
+      };
+    }
+
+    const { host: activeHost } = getActiveDeviceConnection(device.information);
+
+    if (!activeHost) {
+      return {
+        success: false,
+        available: false,
+        error: "Active host not found for device",
       };
     }
 
     const expectedResult = query?.["result"] ?? "1 packets received";
-    const result = await $`ping -c 1 ${device?.information?.host}`.text();
+    const result = await $`ping -c 1 ${activeHost}`.text();
     const isOnline = result.includes(expectedResult);
 
     return isOnline;

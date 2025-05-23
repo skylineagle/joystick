@@ -2,6 +2,7 @@ import { pb } from "@/pocketbase";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import type { DeviceResponse } from "@joystick/core";
+import { getActiveDeviceConnection } from "@joystick/core";
 import Client from "android-sms-gateway";
 import { Elysia } from "elysia";
 import { logger } from "./logger";
@@ -90,11 +91,15 @@ app.post(
       };
     }
 
-    if (!device.information?.phone) {
+    const { phone: activePhone } = getActiveDeviceConnection(
+      device.information
+    );
+
+    if (!activePhone) {
       set.status = 400;
       return {
         success: false,
-        error: "Device does not have a phone number",
+        error: "Device does not have an active phone number",
       };
     }
 
@@ -106,7 +111,7 @@ app.post(
     try {
       // Send the SMS
       const result = await apiClient.send({
-        phoneNumbers: [device.information.phone],
+        phoneNumbers: [activePhone],
         message,
       });
       if (result.state === "Failed") {
@@ -117,7 +122,7 @@ app.post(
         return;
       }
 
-      const phoneKey = device.information.phone;
+      const phoneKey = activePhone;
 
       const responsePromise = new Promise<SmsResponse[]>((resolve, reject) => {
         const createTimeout = (isInitial = false) => {

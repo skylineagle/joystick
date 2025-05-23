@@ -5,8 +5,12 @@ import type {
   GalleryResponse,
   RunResponse,
 } from "@joystick/core";
-import { JOYSTICK_API_URL, runCommandOnDevice } from "@joystick/core";
-import { $, ShellError } from "bun";
+import {
+  getActiveDeviceConnection,
+  JOYSTICK_API_URL,
+  runCommandOnDevice,
+} from "@joystick/core";
+import { $ } from "bun";
 import { Baker } from "cronbake";
 import { existsSync, mkdirSync, readFileSync } from "fs";
 import { join } from "path";
@@ -174,9 +178,10 @@ export class GalleryService {
             thumbnail: path,
           };
         });
-    } catch (error) {
+    } catch (error: any) {
       if (
-        error instanceof ShellError &&
+        error?.stderr &&
+        typeof error.stderr.toString === "function" &&
         error.stderr.toString().includes("No such file or directory")
       ) {
         return [];
@@ -209,10 +214,18 @@ export class GalleryService {
 
     const thumbnailPath = join(deviceDir, `${event.id}.jpg`);
 
+    if (!device.information) {
+      throw new Error(`Device information not found for device ${device.id}`);
+    }
+    const { host: activeHost } = getActiveDeviceConnection(device.information);
+    if (!activeHost) {
+      throw new Error(`Active host not found for device ${device.id}`);
+    }
+
     // Download the thumbnail file from the device to local storage
-    const command = device.information?.password
-      ? `sshpass -p ${device.information.password} scp -o StrictHostKeyChecking=no ${device.information?.user}@${device.information?.host}:${event.thumbnail} ${thumbnailPath}`
-      : `scp -o StrictHostKeyChecking=no ${device.information?.user}@${device.information?.host}:${event.thumbnail} ${thumbnailPath}`;
+    const command = device.information.password
+      ? `sshpass -p ${device.information.password} scp -o StrictHostKeyChecking=no ${device.information.user}@${activeHost}:${event.thumbnail} ${thumbnailPath}`
+      : `scp -o StrictHostKeyChecking=no ${device.information.user}@${activeHost}:${event.thumbnail} ${thumbnailPath}`;
     await $`${{ raw: command }}`.text();
 
     // Read the file content and return it as a Buffer
@@ -261,34 +274,40 @@ export class GalleryService {
       throw new Error(`Device ${deviceId} not found`);
     }
 
-    const galleryEvent = await this.getExistingEvent(deviceId, eventId);
-    if (!galleryEvent) {
-      logger.error(`Gallery event ${eventId} not found`);
-      throw new Error(`Gallery event ${eventId} not found`);
+    const event = await this.getExistingEvent(deviceId, eventId);
+    if (!event) {
+      throw new Error(`Event ${eventId} not found for device ${deviceId}`);
     }
 
-    const eventFilePath = galleryEvent.name.replace(".jpg", ".mp4");
+    if (!device.information) {
+      throw new Error(`Device information not found for device ${device.id}`);
+    }
+    const { host: activeHost } = getActiveDeviceConnection(device.information);
+    if (!activeHost) {
+      throw new Error(`Active host not found for device ${device.id}`);
+    }
+
     const deviceDir = join(GALLERY_BASE_PATH, device.id);
-    const videoPath = join(deviceDir, `${galleryEvent.event_id}.mp4`);
+    const videoPath = join(deviceDir, `${event.event_id}.mp4`);
+    const eventFilePath = event.name.replace(".jpg", ".mp4");
 
-    // Use sshpass if password is available, otherwise use regular scp
-    const command = device.information?.password
-      ? `sshpass -p ${device.information.password} scp -o StrictHostKeyChecking=no ${device.information?.user}@${device.information?.host}:${eventFilePath} ${videoPath}`
-      : `scp -o StrictHostKeyChecking=no ${device.information?.user}@${device.information?.host}:${eventFilePath} ${videoPath}`;
+    // Download the video file from the device to local storage
+    const command = device.information.password
+      ? `sshpass -p ${device.information.password} scp -o StrictHostKeyChecking=no ${device.information.user}@${activeHost}:${eventFilePath} ${videoPath}`
+      : `scp -o StrictHostKeyChecking=no ${device.information.user}@${activeHost}:${eventFilePath} ${videoPath}`;
+    await $`${{ raw: command }}`.text();
 
-    const output = await $`${{ raw: command }}`.text();
-    logger.debug(`output: ${output}`);
-
+    // Update gallery record with video path
     logger.info(`Successfully pulled video from device`);
     // Read the video file content
     const videoContent = readFileSync(videoPath);
 
-    await pb.collection("gallery").update(galleryEvent.id, {
-      event: new File([videoContent], `${galleryEvent.event_id}.mp4`),
+    await pb.collection("gallery").update(event.id, {
+      event: new File([videoContent], `${event.event_id}.mp4`),
     });
 
     try {
-      await this.removeEventFromDevice(device, galleryEvent);
+      await this.removeEventFromDevice(device, event);
       logger.info(`Successfully deleted event files from device: ${eventId}`);
     } catch (error) {
       logger.error(`Failed to delete event files from device: ${error}`);

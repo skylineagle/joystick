@@ -1,11 +1,5 @@
 import { DataTableFilter } from "@/components/data-table-filter";
-import { AutomateToggle } from "@/components/device/automate-toggle";
-import { AutomationIndicator } from "@/components/device/automation-indicator";
-import { DeviceActions } from "@/components/device/device-actions";
-import { DeviceName } from "@/components/device/device-name";
-import { ModeSelector } from "@/components/device/mode-selector";
-import { StatusIndicator } from "@/components/device/status-indicator";
-import { Checkbox } from "@/components/ui/checkbox";
+import { AddDeviceModal } from "@/components/device/add-device-modal";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -15,12 +9,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { defineMeta, filterFn } from "@/lib/filters";
+import { useAvailableModes } from "@/hooks/use-available-modes";
+import { useIsPermitted } from "@/hooks/use-is-permitted";
+import { useDeviceStore } from "@/store/device-store";
 import { DeviceResponse } from "@/types/types";
 import {
   ColumnDef,
   ColumnFiltersState,
-  createColumnHelper,
   flexRender,
   getCoreRowModel,
   getFacetedMinMaxValues,
@@ -32,14 +27,19 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { Clock, Power, Search, Settings } from "lucide-react";
+import { Search } from "lucide-react";
 import { parseAsJson, useQueryState } from "nuqs";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
-import { useDeviceStore } from "@/store/device-store";
-import { useAvailableModes } from "@/hooks/use-available-modes";
-import { modeConfig } from "@/components/device/consts";
-import { AddDeviceModal } from "@/components/device/add-device-modal";
+
+import { createActionsColumn } from "./columns/actions-column";
+import { createAutoColumn } from "./columns/auto-column";
+import { createAutomationColumn } from "./columns/automation-column";
+import { createConnectionColumn } from "./columns/connection-column";
+import { createModeColumn } from "./columns/mode-column";
+import { createNameColumn } from "./columns/name-column";
+import { createSelectColumn } from "./columns/select-column";
+import { createStatusColumn } from "./columns/status-column";
 
 interface DeviceDataTableProps {
   data: DeviceResponse[];
@@ -64,8 +64,6 @@ function initializeFiltersFromQuery<TData, TValue>(
 ) {
   return filters && filters.length > 0
     ? filters.map((f) => {
-        console.log(columns);
-
         const columnMeta = columns.find((c) => c.id === f.id)!.meta!;
 
         const values =
@@ -85,17 +83,16 @@ function initializeFiltersFromQuery<TData, TValue>(
     : [];
 }
 
-const columnHelper = createColumnHelper<DeviceResponse>();
-
 // Define column widths consistently
 const columnWidths = {
   select: "w-[3%]",
-  name: "w-[15%]",
+  name: "w-[12%]",
   mode: "w-[15%]",
-  auto: "w-[10%]",
+  auto: "w-[8%]",
   status: "w-[10%]",
-  automation: "w-[35%]",
-  actions: "w-[12%]",
+  automation: "w-[20%]",
+  connection: "w-[15%]",
+  actions: "w-[17%]",
 };
 
 export function DeviceDataTable({ data }: DeviceDataTableProps) {
@@ -107,125 +104,19 @@ export function DeviceDataTable({ data }: DeviceDataTableProps) {
   const { data: availableModes } = useAvailableModes(
     Array.from(new Set(data.map((d) => d.device)))
   );
+  const isAllowedToViewConnection = useIsPermitted("toggle-slot");
   const columns = useMemo(
     () => [
-      columnHelper.display({
-        id: "select",
-        header: ({ table }) => (
-          <Checkbox
-            checked={table.getIsAllPageRowsSelected()}
-            onCheckedChange={(value) =>
-              table.toggleAllPageRowsSelected(!!value)
-            }
-            aria-label="Select all"
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-          />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-        enableColumnFilter: false,
-      }),
-      columnHelper.accessor("name", {
-        id: "name",
-        header: "Name",
-        cell: ({ row }) => (
-          <DeviceName
-            deviceId={row.original.id}
-            name={row.original.name}
-            configurationName={row.original.configuration?.name ?? ""}
-          />
-        ),
-        enableColumnFilter: false,
-      }),
-      columnHelper.accessor("mode", {
-        id: "mode",
-        header: "Mode",
-        cell: ({ row }) => <ModeSelector device={row.original} />,
-        filterFn: filterFn("option"),
-        meta: defineMeta((row) => row.mode, {
-          displayName: "Mode",
-          type: "option",
-          icon: Settings,
-          options: availableModes?.map((m) => ({
-            label: modeConfig?.[m as keyof typeof modeConfig]?.label ?? m,
-            value: m,
-          })),
-        }),
-      }),
-      columnHelper.accessor("auto", {
-        id: "auto",
-        header: "Auto",
-        cell: ({ row }) => (
-          <AutomateToggle
-            deviceId={row.original.id}
-            isAutomated={row.original.auto ?? false}
-          />
-        ),
-        filterFn: filterFn("option"),
-        meta: defineMeta((row) => row.auto, {
-          displayName: "Auto",
-          type: "option",
-          icon: Clock,
-          options: [
-            { label: "Yes", value: "true" },
-            { label: "No", value: "false" },
-          ],
-        }),
-      }),
-      columnHelper.accessor("status", {
-        id: "status",
-        header: "Status",
-        cell: ({ row }) => (
-          <StatusIndicator status={row.original.status ?? "off"} />
-        ),
-        filterFn: filterFn("option"),
-        meta: defineMeta((row) => row.status, {
-          displayName: "Status",
-          type: "option",
-          icon: Power,
-          options: [
-            { label: "Live", value: "on" },
-            { label: "Waiting", value: "waiting" },
-            { label: "Offline", value: "off" },
-          ],
-        }),
-      }),
-      columnHelper.display({
-        id: "automation",
-        header: "Automation",
-        cell: ({ row }) =>
-          row.original.automation &&
-          row.original.auto && (
-            <AutomationIndicator
-              deviceId={row.original.id}
-              automation={row.original.automation}
-              status={row.original.status ?? "off"}
-            />
-          ),
-        enableSorting: false,
-        enableHiding: false,
-        enableColumnFilter: false,
-      }),
-      columnHelper.display({
-        id: "actions",
-        header: "Actions",
-        cell: ({ row }) => {
-          const device = row.original;
-
-          return <DeviceActions device={device} />;
-        },
-        enableSorting: false,
-        enableHiding: false,
-        enableColumnFilter: false,
-      }),
+      createSelectColumn(),
+      createNameColumn(),
+      createModeColumn(availableModes),
+      createAutoColumn(),
+      createStatusColumn(),
+      createAutomationColumn(),
+      ...(isAllowedToViewConnection ? [createConnectionColumn()] : []),
+      createActionsColumn(),
     ],
-    [availableModes]
+    [availableModes, isAllowedToViewConnection]
   );
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(() =>
     initializeFiltersFromQuery(

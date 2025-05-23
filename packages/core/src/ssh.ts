@@ -1,6 +1,7 @@
 import type { DeviceResponse } from "@/types";
 import { $ } from "bun";
 import { join } from "node:path";
+import { getActiveDeviceConnection } from "./device";
 
 const tempKeyFiles = new Map<string, string>(); // Track temporary key files for cleanup
 
@@ -8,7 +9,12 @@ export async function runCommandOnDevice(
   device: DeviceResponse,
   command: string
 ) {
-  const { host, user, password, key } = device.information ?? {};
+  if (!device.information) {
+    throw new Error("Device information not found, cant run action on device");
+  }
+
+  const { host } = getActiveDeviceConnection(device.information);
+  const { user, password, key } = device.information;
 
   // Use SSH key authentication
   // Create a temporary file to store the SSH key

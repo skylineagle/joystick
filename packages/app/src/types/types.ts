@@ -81,9 +81,12 @@ export type DeviceConfiguration = {
 export type DeviceInformation = {
   user: string;
   password: string;
-  key: string;
+  key?: string;
   host: string;
   phone?: string;
+  secondSlotHost?: string;
+  secondSlotPhone?: string;
+  activeSlot?: "primary" | "secondary";
   battery_capacity?: number;
   aspectRatio?: string;
   imuResetValues?: {

@@ -1,5 +1,5 @@
 import { pb } from "@/pocketbase";
-import type { DeviceResponse } from "@joystick/core";
+import { getActiveDeviceConnection, type DeviceResponse } from "@joystick/core";
 import { ChildProcess, spawn } from "node:child_process";
 import { join } from "node:path";
 import { logger } from "./logger";
@@ -78,7 +78,8 @@ Bun.serve({
           }
 
           // Use safe destructuring with default values to avoid TypeScript errors
-          const { host, user, password } = device.information;
+          const { user, password } = device.information;
+          const { host } = getActiveDeviceConnection(device.information);
           const sshKey = device.information.key as string | undefined;
 
           let sshProcess: ChildProcess;

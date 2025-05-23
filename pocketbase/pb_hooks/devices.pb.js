@@ -114,12 +114,9 @@ onRecordAfterCreateSuccess((e) => {
 onRecordUpdateRequest((e) => {
   const { createDeviceJob } = require(`${__hooks}/baker.utils`);
   const current = $app.findRecordById("devices", e.record.id);
-  const automation = e.record.get("automation");
+  const automation = JSON.parse(e.record.get("automation"));
 
-  if (
-    automation &&
-    JSON.stringify(automation) !== JSON.stringify(current.get("automation"))
-  ) {
+  if (automation && JSON.stringify(automation) !== automation) {
     $app.logger().info("Automation settings changed, syncing baker job");
     try {
       createDeviceJob(e.record.id, automation);
@@ -129,20 +126,16 @@ onRecordUpdateRequest((e) => {
         "name",
         "automation_change"
       );
-      const newMode = automation.get("automationType");
+      const newMode = automation.automationType;
       const parameters =
         newMode === "duration"
           ? {
-              on: automation.get("on").minutes,
-              off: automation.get("off").minutes,
+              on: automation.on.minutes,
+              off: automation.off.minutes,
             }
           : {
-              on: `${automation.get("on").hourOfDay}:${
-                automation.get("on").minute
-              }`,
-              off: `${automation.get("off").hourOfDay}:${
-                automation.get("off").minute
-              }`,
+              on: `${automation.on.hourOfDay}:${automation.on.minute}`,
+              off: `${automation.off.hourOfDay}:${automation.off.minute}`,
             };
 
       const collection = $app.findCollectionByNameOrId("action_logs");
@@ -216,11 +209,29 @@ onRecordUpdateRequest((e) => {
 
 // Handle HOST change change
 onRecordUpdateRequest((e) => {
+  const { getActiveDeviceConnection } = require(`${__hooks}/utils`);
   const current = $app.findRecordById("devices", e.record.id);
   const information = JSON.parse(e.record.get("information"));
   const configuration = JSON.parse(e.record.get("configuration"));
+  const { host: activeHost } = getActiveDeviceConnection(information);
 
-  if (information.host !== current.get("information").host) {
+  let currentInformation = current.get("information");
+  if (typeof currentInformation === "string") {
+    try {
+      currentInformation = JSON.parse(currentInformation);
+    } catch (parseError) {
+      $app
+        .logger()
+        .error("Failed to parse current device information", parseError);
+      e.next();
+      return;
+    }
+  }
+
+  const { host: currentActiveHost } =
+    getActiveDeviceConnection(currentInformation);
+
+  if (activeHost !== currentActiveHost) {
     $app.logger().info("Host changed, syncing camera state");
     try {
       // If mode changed to auto, create and start job
@@ -229,16 +240,25 @@ onRecordUpdateRequest((e) => {
         `name = "source" && model ?~ "${e.record.get("device")}"`
       );
 
-      const sourceUrl = sourceTemplate[0]
-        .get("value")
-        .replace("<ip>", information.host)
+      const sourceUrl = sourceTemplate[0].value
+        .replace("<ip>", activeHost)
         .replace("<id>", configuration.name);
 
       e.record.set("configuration", {
         ...configuration,
         source: sourceUrl,
       });
-      $app.save(current);
+
+      try {
+        $http.get(
+          `http://mediamtx:8888/v3/config/paths/patch/${e.record.get("id")}`,
+          {
+            source: `rtspx://${information.user}:${information.password}@${activeHost}:554?timeout=10s`,
+          }
+        );
+      } catch (err) {
+        console.error(err);
+      }
     } catch (error) {
       $app.logger().warn(error);
     }

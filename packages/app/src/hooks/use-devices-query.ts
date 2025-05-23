@@ -53,12 +53,13 @@ export function useDevicesQuery(options?: GetDevicesOptions) {
     let result = devices;
 
     // Apply search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
+    if (searchQuery?.trim()) {
+      const query = searchQuery?.toLowerCase();
       result = result?.filter((device) => {
         const matches =
           device.name?.toLowerCase().includes(query) ||
-          device.configuration?.name.toLowerCase().includes(query);
+          device.configuration?.name?.toLowerCase().includes(query);
+
         return isReversed ? !matches : matches;
       });
     }

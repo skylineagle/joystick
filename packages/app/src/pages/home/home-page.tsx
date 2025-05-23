@@ -80,7 +80,7 @@ export function HomePage() {
                 />
               </CardHeader>
               <CardContent>
-                <div className="h-[calc(100vh-20rem)]">
+                <div className="h-[calc(100vh-16rem)]">
                   <Suspense
                     fallback={
                       <div className="flex items-center justify-center h-full">
