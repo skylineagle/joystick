@@ -114,9 +114,12 @@ onRecordAfterCreateSuccess((e) => {
 onRecordUpdateRequest((e) => {
   const { createDeviceJob } = require(`${__hooks}/baker.utils`);
   const current = $app.findRecordById("devices", e.record.id);
-  const automation = JSON.parse(e.record.get("automation"));
+  const automation = e.record.get("automation");
 
-  if (automation && JSON.stringify(automation) !== automation) {
+  if (
+    automation &&
+    JSON.stringify(automation) !== JSON.stringify(current.get("automation"))
+  ) {
     $app.logger().info("Automation settings changed, syncing baker job");
     try {
       createDeviceJob(e.record.id, automation);
@@ -126,16 +129,20 @@ onRecordUpdateRequest((e) => {
         "name",
         "automation_change"
       );
-      const newMode = automation.automationType;
+      const newMode = automation.get("automationType");
       const parameters =
         newMode === "duration"
           ? {
-              on: automation.on.minutes,
-              off: automation.off.minutes,
+              on: automation.get("on").minutes,
+              off: automation.get("off").minutes,
             }
           : {
-              on: `${automation.on.hourOfDay}:${automation.on.minute}`,
-              off: `${automation.off.hourOfDay}:${automation.off.minute}`,
+              on: `${automation.get("on").hourOfDay}:${
+                automation.get("on").minute
+              }`,
+              off: `${automation.get("off").hourOfDay}:${
+                automation.get("off").minute
+              }`,
             };
 
       const collection = $app.findCollectionByNameOrId("action_logs");
