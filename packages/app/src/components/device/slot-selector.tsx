@@ -80,7 +80,7 @@ export const SlotSelector = ({ device }: SlotSelectorProps) => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.15 }}
           >
-            Slot 1
+            #1
           </motion.span>
         </Button>
         <div className="w-px h-4 bg-border" />
@@ -105,7 +105,7 @@ export const SlotSelector = ({ device }: SlotSelectorProps) => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.15 }}
           >
-            Slot 2
+            #2
           </motion.span>
         </Button>
       </motion.div>

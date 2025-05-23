@@ -110,11 +110,11 @@ const globalFilterFn = (
 // Define column widths consistently
 const columnWidths = {
   select: "w-[3%]",
-  name: "w-[12%]",
+  name: "w-[10%]",
   mode: "w-[15%]",
-  auto: "w-[8%]",
+  auto: "w-[6%]",
   status: "w-[10%]",
-  automation: "w-[20%]",
+  automation: "w-[24%]",
   connection: "w-[15%]",
   actions: "w-[17%]",
 };
