@@ -23,6 +23,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  Row,
   SortingState,
   useReactTable,
   VisibilityState,
@@ -82,6 +83,29 @@ function initializeFiltersFromQuery<TData, TValue>(
       })
     : [];
 }
+
+const globalFilterFn = (
+  row: Row<DeviceResponse>,
+  _columnId: string,
+  value: string
+) => {
+  const device = row.original;
+  const searchValue = value.toLowerCase();
+
+  const searchableFields = [
+    device.name,
+    device.mode,
+    device.status,
+    device.configuration?.name,
+    device.expand?.device?.name,
+    device.description,
+    device.client,
+  ];
+
+  return searchableFields.some((field) =>
+    field?.toString().toLowerCase().includes(searchValue)
+  );
+};
 
 // Define column widths consistently
 const columnWidths = {
@@ -148,6 +172,7 @@ export function DeviceDataTable({ data }: DeviceDataTableProps) {
       columnVisibility,
       rowSelection,
     },
+    globalFilterFn,
   });
 
   useEffect(() => {
