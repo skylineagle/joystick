@@ -129,13 +129,15 @@
         "@elysiajs/swagger": "^1.3.0",
         "@joystick/core": "workspace:*",
         "cronbake": "^0.1.2",
-        "elysia": "^1.3.1",
+        "elysia": "1.3.1",
         "pino": "^9.7.0",
         "pino-pretty": "^13.0.0",
         "pocketbase": "^0.25.2",
       },
       "devDependencies": {
         "@types/bun": "latest",
+      },
+      "peerDependencies": {
         "typescript": "^5.8.3",
       },
     },
@@ -143,8 +145,8 @@
       "name": "@joystick/core",
       "version": "1.0.0",
       "devDependencies": {
-        "pocketbase-typegen": "^1.3.0",
-        "typescript": "^5.0.0",
+        "pocketbase-typegen": "^1.3.1",
+        "typescript": "^5.8.3",
       },
       "peerDependencies": {
         "pocketbase": "^0.25.2",
