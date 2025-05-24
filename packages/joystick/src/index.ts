@@ -27,6 +27,7 @@ const app = new Elysia().use(
         version: "0.0.0",
       },
     },
+    path: "/joystick/swagger",
   })
 );
 
