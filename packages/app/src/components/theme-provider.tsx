@@ -5,9 +5,13 @@ export type DesignTheme =
   | "default"
   | "catppuccin"
   | "twitter"
-  | "supabase"
-  | "vercel"
-  | "field";
+  | "field"
+  | "amethyst-haze"
+  | "claymorphism"
+  | "doom-64"
+  | "mono"
+  | "notebook"
+  | "retro-arcade";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -84,9 +88,13 @@ export function ThemeProvider({
       "default-theme",
       "catppuccin-theme",
       "twitter-theme",
-      "supabase-theme",
-      "vercel-theme",
-      "field-theme"
+      "field-theme",
+      "amethyst-haze-theme",
+      "claymorphism-theme",
+      "doom-64-theme",
+      "mono-theme",
+      "notebook-theme",
+      "retro-arcade-theme"
     );
     root.classList.add(`${designTheme}-theme`);
   }, [colorMode, designTheme]);

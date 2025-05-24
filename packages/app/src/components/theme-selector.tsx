@@ -21,17 +21,31 @@ const designThemeInfo = {
     name: "Twitter",
     radius: "0.6rem",
   },
-  supabase: {
-    name: "Supabase",
-    radius: "0.6rem",
-  },
-  vercel: {
-    name: "Vercel",
-    radius: "0.6rem",
-  },
   field: {
     name: "Field (High Contrast)",
     radius: "0.7rem",
+  },
+  "amethyst-haze": {
+    name: "Amethyst Haze",
+    radius: "0.6rem",
+  },
+  claymorphism: {
+    name: "Claymorphism",
+    radius: "0.6rem",
+  },
+  "doom-64": {
+    name: "Doom 64",
+    radius: "0.6rem",
+  },
+  mono: {
+    name: "Mono",
+  },
+  notebook: {
+    name: "Notebook",
+    radius: "0.6rem",
+  },
+  "retro-arcade": {
+    name: "Retro Arcade",
   },
 };
 
