@@ -32,7 +32,7 @@ export function ConnectionStatus({ data }: ConnectionStatusProps) {
       return (
         <Badge
           variant="outline"
-          className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300"
+          className="bg-chart-2/10 text-chart-2 border-chart-2/20"
         >
           {status}
         </Badge>
@@ -42,7 +42,7 @@ export function ConnectionStatus({ data }: ConnectionStatusProps) {
     return (
       <Badge
         variant="outline"
-        className="bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300"
+        className="bg-destructive/10 text-destructive border-destructive/20"
       >
         {status}
       </Badge>
@@ -54,9 +54,9 @@ export function ConnectionStatus({ data }: ConnectionStatusProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {isConnected ? (
-            <Wifi className="h-5 w-5 text-green-500" />
+            <Wifi className="h-5 w-5 text-chart-2" />
           ) : (
-            <WifiOff className="h-5 w-5 text-red-500" />
+            <WifiOff className="h-5 w-5 text-destructive" />
           )}
           <span className="font-medium">Connection Status</span>
         </div>

@@ -46,15 +46,15 @@ export function ActionExecutionTimeChart({
     executionTime: {
       label: "Execution Time (ms)",
       theme: {
-        light: "hsl(221.2 83.2% 53.3%)", // Blue-600
-        dark: "hsl(217.2 91.2% 59.8%)", // Blue-500
+        light: "hsl(var(--chart-1))",
+        dark: "hsl(var(--chart-1))",
       },
     },
     average: {
       label: "Average",
       theme: {
-        light: "hsl(0 72.2% 50.6%)", // Red-600
-        dark: "hsl(0 72.2% 50.6%)", // Red-600
+        light: "hsl(var(--destructive))",
+        dark: "hsl(var(--destructive))",
       },
     },
   };
@@ -112,7 +112,7 @@ export function ActionExecutionTimeChart({
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between gap-8">
                           <div className="flex items-center">
-                            <div className="mr-2 h-3 w-3 rounded-sm bg-[hsl(221.2_83.2%_53.3%)]" />
+                            <div className="mr-2 h-3 w-3 rounded-sm bg-[hsl(var(--chart-1))]" />
                             <span className="text-sm">Execution Time</span>
                           </div>
                           <span className="font-medium tabular-nums">

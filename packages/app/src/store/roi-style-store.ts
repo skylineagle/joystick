@@ -50,18 +50,18 @@ interface RoiStyleState {
 }
 
 const DEFAULT_ROI_STYLE: RoiStyle = {
-  borderColor: "#ffffff",
+  borderColor: "hsl(var(--foreground))",
   borderStyle: "solid",
   borderWidth: 2,
-  fillColor: "#000000",
+  fillColor: "hsl(var(--background))",
   fillOpacity: 0.2,
 };
 
 const DEFAULT_SELECTED_ROI_STYLE: SelectedRoiStyle = {
   ...DEFAULT_ROI_STYLE,
-  borderColor: "#3b82f6",
+  borderColor: "hsl(var(--primary))",
   borderWidth: 3,
-  highlightColor: "rgba(255, 255, 255, 0.5)",
+  highlightColor: "hsl(var(--accent) / 0.5)",
 };
 
 export const useRoiStyleStore = create<RoiStyleState>()(

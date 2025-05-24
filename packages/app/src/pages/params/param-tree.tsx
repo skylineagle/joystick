@@ -231,11 +231,11 @@ function ValueIndicator({
               !isLoading &&
                 isActive &&
                 status === "edited" &&
-                "bg-blue-500/10 text-blue-600 hover:bg-blue-500/20",
+                "bg-chart-1/10 text-chart-1 hover:bg-chart-1/20",
               !isLoading &&
                 isActive &&
                 status === "current" &&
-                "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20"
+                "bg-chart-2/10 text-chart-2 hover:bg-chart-2/20"
             )}
           >
             <StatusIcon className="h-3.5 w-3.5" />

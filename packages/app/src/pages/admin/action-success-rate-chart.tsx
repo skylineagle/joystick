@@ -43,18 +43,18 @@ export function ActionSuccessRateChart({
 
   // Generate config for chart colors using CSS variables
   const chartConfig = {
-    success: {
-      label: "Success",
+    successful: {
+      label: "Successful",
       theme: {
-        light: "hsl(142.1 76.2% 36.3%)", // Green-600
-        dark: "hsl(142.1 70.6% 45.3%)", // Green-500
+        light: "hsl(var(--chart-2))",
+        dark: "hsl(var(--chart-2))",
       },
     },
-    failure: {
-      label: "Failure",
+    failed: {
+      label: "Failed",
       theme: {
-        light: "hsl(346.8 77.2% 49.8%)", // Red-500
-        dark: "hsl(346.8 77.2% 49.8%)", // Red-500
+        light: "hsl(var(--destructive))",
+        dark: "hsl(var(--destructive))",
       },
     },
   };
@@ -104,7 +104,7 @@ export function ActionSuccessRateChart({
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between gap-8">
                           <div className="flex items-center">
-                            <div className="mr-2 h-3 w-3 rounded-sm bg-[hsl(142.1_76.2%_36.3%)]" />
+                            <div className="mr-2 h-3 w-3 rounded-sm bg-[hsl(var(--chart-2))]" />
                             <span className="text-sm">Success</span>
                           </div>
                           <span className="font-medium tabular-nums">
@@ -113,7 +113,7 @@ export function ActionSuccessRateChart({
                         </div>
                         <div className="flex items-center justify-between gap-8">
                           <div className="flex items-center">
-                            <div className="mr-2 h-3 w-3 rounded-sm bg-[hsl(346.8_77.2%_49.8%)]" />
+                            <div className="mr-2 h-3 w-3 rounded-sm bg-[hsl(var(--destructive))]" />
                             <span className="text-sm">Failure</span>
                           </div>
                           <span className="font-medium tabular-nums">

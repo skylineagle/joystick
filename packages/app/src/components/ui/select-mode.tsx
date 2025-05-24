@@ -96,28 +96,29 @@ export const SelectMode = ({
                     isSelected ? color : "text-muted-foreground",
                     !isSelected &&
                       actionName === "offline" &&
-                      "group-hover:text-slate-500",
+                      "group-hover:text-muted-foreground",
                     !isSelected &&
                       actionName === "auto" &&
-                      "group-hover:text-blue-500",
+                      "group-hover:text-primary",
                     !isSelected &&
                       actionName === "live" &&
-                      "group-hover:text-green-500",
+                      "group-hover:text-chart-2",
                     !isSelected &&
                       actionName !== "offline" &&
                       actionName !== "auto" &&
                       actionName !== "live" &&
-                      "group-hover:text-purple-500"
+                      "group-hover:text-chart-3"
                   )}
                 />
                 <Label
                   className={cn(
                     "font-medium transition-colors",
                     isSelected && color,
-                    !isSelected && "group-hover:text-purple-500",
-                    actionName === "offline" && "group-hover:text-slate-500",
-                    actionName === "auto" && "group-hover:text-blue-500",
-                    actionName === "live" && "group-hover:text-green-500"
+                    !isSelected && "group-hover:text-chart-3",
+                    actionName === "offline" &&
+                      "group-hover:text-muted-foreground",
+                    actionName === "auto" && "group-hover:text-primary",
+                    actionName === "live" && "group-hover:text-chart-2"
                   )}
                 >
                   {label}

@@ -60,9 +60,9 @@ export function ParamValueEditor({
       disabled: value.isLoading,
       className: cn(
         "w-full",
-        value.edited !== null && "border-blue-500",
-        value.pending !== null && "border-yellow-500",
-        value.error && "border-red-500"
+        value.edited !== null && "border-chart-1",
+        value.pending !== null && "border-chart-4",
+        value.error && "border-destructive"
       ),
     };
 
@@ -74,9 +74,9 @@ export function ParamValueEditor({
           <div
             className={cn(
               "flex h-9 items-center rounded-md px-3",
-              value.edited !== null && "bg-blue-500/10",
-              value.pending !== null && "bg-yellow-500/10",
-              value.error && "bg-red-500/10"
+              value.edited !== null && "bg-chart-1/10",
+              value.pending !== null && "bg-chart-4/10",
+              value.error && "bg-destructive/10"
             )}
           >
             <Switch
@@ -148,7 +148,7 @@ export function ParamValueEditor({
         {renderInput()}
         {value.error && (
           <p
-            className="mt-1 sm:mt-1.5 text-xs sm:text-sm text-red-500 truncate"
+            className="mt-1 sm:mt-1.5 text-xs sm:text-sm text-destructive truncate"
             title={value.error}
           >
             {value.error}

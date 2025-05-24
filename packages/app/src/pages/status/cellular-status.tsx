@@ -56,26 +56,26 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
     // For LTE, use RSRP as the signal quality indicator
     if (data.technology === "LTE" && data.rsrp !== undefined) {
       // RSRP ranges typically from -140 dBm (poor) to -80 dBm (excellent)
-      if (data.rsrp >= -75) return <Signal className="size-7 text-green-500" />;
+      if (data.rsrp >= -75) return <Signal className="size-7 text-chart-2" />;
       if (data.rsrp >= -85)
-        return <SignalHigh className="size-7 text-green-500" />;
+        return <SignalHigh className="size-7 text-chart-2" />;
       if (data.rsrp >= -100)
-        return <SignalMedium className="size-7 text-yellow-500" />;
+        return <SignalMedium className="size-7 text-chart-4" />;
       if (data.rsrp >= -110)
-        return <SignalLow className="size-7 text-yellow-500" />;
-      return <SignalZero className="size-7 text-red-500" />;
+        return <SignalLow className="size-7 text-chart-4" />;
+      return <SignalZero className="size-7 text-destructive" />;
     }
 
     // For GSM and WCDMA, use RSSI as the signal quality indicator
     if (data.rssi !== undefined) {
       // RSSI ranges typically from -110 dBm (poor) to -70 dBm (excellent)
       if (data.rssi >= -70)
-        return <SignalHigh className="h-5 w-5 text-green-500" />;
+        return <SignalHigh className="h-5 w-5 text-chart-2" />;
       if (data.rssi >= -85)
-        return <SignalMedium className="h-5 w-5 text-green-400" />;
+        return <SignalMedium className="h-5 w-5 text-chart-2" />;
       if (data.rssi >= -100)
-        return <SignalLow className="h-5 w-5 text-yellow-500" />;
-      return <SignalZero className="h-5 w-5 text-red-500" />;
+        return <SignalLow className="h-5 w-5 text-chart-4" />;
+      return <SignalZero className="h-5 w-5 text-destructive" />;
     }
 
     return <Signal className="h-5 w-5 text-muted-foreground" />;
@@ -83,10 +83,9 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
 
   const getNetworkTypeBadge = (technology: string) => {
     const colors = {
-      LTE: "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300",
-      GSM: "bg-purple-100 dark:bg-purple-900/20 text-purple-800 dark:text-purple-300",
-      WCDMA:
-        "bg-indigo-100 dark:bg-indigo-900/20 text-indigo-800 dark:text-indigo-300",
+      LTE: "bg-chart-1/10 text-chart-1 border-chart-1/20",
+      GSM: "bg-chart-3/10 text-chart-3 border-chart-3/20",
+      WCDMA: "bg-chart-5/10 text-chart-5 border-chart-5/20",
     };
 
     const getGenerationLabel = () => {
@@ -97,20 +96,17 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
 
     const getGenerationBadgeColor = (label: string) => {
       const genColors = {
-        "4G+":
-          "bg-blue-100 dark:bg-blue-900/20 text-blue-800 dark:text-blue-300",
-        "4G": "bg-emerald-100 dark:bg-emerald-900/20 text-emerald-800 dark:text-emerald-300",
-        "3G+":
-          "bg-teal-100 dark:bg-teal-900/20 text-teal-800 dark:text-teal-300",
-        "3G": "bg-amber-100 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300",
-        "2.5G":
-          "bg-orange-100 dark:bg-orange-900/20 text-orange-800 dark:text-orange-300",
-        "2G": "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300",
+        "4G+": "bg-chart-1/10 text-chart-1 border-chart-1/20",
+        "4G": "bg-chart-2/10 text-chart-2 border-chart-2/20",
+        "3G+": "bg-chart-3/10 text-chart-3 border-chart-3/20",
+        "3G": "bg-chart-4/10 text-chart-4 border-chart-4/20",
+        "2.5G": "bg-chart-5/10 text-chart-5 border-chart-5/20",
+        "2G": "bg-destructive/10 text-destructive border-destructive/20",
       };
 
       return (
         genColors[label as keyof typeof genColors] ||
-        "bg-gray-100 dark:bg-gray-900/20"
+        "bg-muted/10 text-muted-foreground border-muted/20"
       );
     };
 
@@ -120,7 +116,7 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
           variant="outline"
           className={
             colors[technology as keyof typeof colors] ||
-            "bg-gray-100 dark:bg-gray-900/20"
+            "bg-muted/10 text-muted-foreground border-muted/20"
           }
         >
           {technology}

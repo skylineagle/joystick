@@ -268,7 +268,7 @@ export function RoiStyleSettings({ deviceId }: RoiStyleSettingsProps) {
                     type="color"
                     value={
                       selectedStyle.highlightColor.startsWith("rgba")
-                        ? "#ffffff"
+                        ? "hsl(var(--foreground))"
                         : selectedStyle.highlightColor
                     }
                     onChange={(e) => {

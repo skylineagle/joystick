@@ -81,7 +81,7 @@ const LoadingFallback = () => (
         ease: "easeInOut",
       }}
     >
-      <HashLoader color="#000" size={150} />
+      <HashLoader color="hsl(var(--primary))" size={150} />
     </motion.div>
   </motion.div>
 );

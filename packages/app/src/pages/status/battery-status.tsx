@@ -61,12 +61,12 @@ export function BatteryStatus({ deviceId }: BatteryStatusProps) {
   };
 
   const getBatteryColor = () => {
-    if (!data) return "text-gray-400";
+    if (!data) return "text-muted-foreground";
 
     const percentage = calculatePercentage();
-    if (percentage >= 50) return "text-green-500";
-    if (percentage >= 20) return "text-yellow-500";
-    return "text-red-500";
+    if (percentage >= 50) return "text-chart-2";
+    if (percentage >= 20) return "text-chart-4";
+    return "text-destructive";
   };
 
   return (

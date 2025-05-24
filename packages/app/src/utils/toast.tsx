@@ -26,7 +26,7 @@ function loading(options: ToastOptions) {
       <div className="flex gap-2">
         <div className="flex grow gap-3">
           <Loader2Icon
-            className="mt-0.5 shrink-0 text-blue-500 animate-spin"
+            className="mt-0.5 shrink-0 text-primary animate-spin"
             size={16}
             aria-hidden="true"
           />
@@ -85,13 +85,13 @@ function finish(options: ToastOptions & { success: boolean }) {
         <div className="flex grow gap-3">
           {options.success ? (
             <CircleCheckIcon
-              className="mt-0.5 shrink-0 text-emerald-500"
+              className="mt-0.5 shrink-0 text-chart-2"
               size={16}
               aria-hidden="true"
             />
           ) : (
             <AlertCircleIcon
-              className="mt-0.5 shrink-0 text-red-500"
+              className="mt-0.5 shrink-0 text-destructive"
               size={16}
               aria-hidden="true"
             />
@@ -158,7 +158,7 @@ function info(options: ToastOptions) {
       <div className="flex gap-2">
         <div className="flex grow gap-3">
           <InfoIcon
-            className="mt-0.5 shrink-0 text-blue-500"
+            className="mt-0.5 shrink-0 text-primary"
             size={16}
             aria-hidden="true"
           />

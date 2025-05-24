@@ -143,7 +143,7 @@ export const AutomationIndicator = memo(
             <span>Going</span>
             <div
               className={`font-medium ${
-                data.until === "on" ? "text-emerald-500" : "text-destructive"
+                data.until === "on" ? "text-chart-2" : "text-destructive"
               }`}
             >
               <NextModeIndication

@@ -12,17 +12,17 @@ export const modeConfig = {
   live: {
     icon: Video,
     label: "Live",
-    color: "text-green-500",
+    color: "text-chart-2",
   },
   auto: {
     icon: Clock,
     label: "Auto",
-    color: "text-blue-500",
+    color: "text-chart-1",
   },
   offline: {
     icon: Ban,
     label: "Offline",
-    color: "text-gray-500",
+    color: "text-muted-foreground",
   },
   all: {
     icon: Filter,
@@ -35,17 +35,17 @@ export const statusConfig = {
   on: {
     icon: PlayCircle,
     label: "On",
-    color: "text-green-500",
+    color: "text-chart-2",
   },
   off: {
     icon: PauseCircle,
     label: "Off",
-    color: "text-gray-500",
+    color: "text-muted-foreground",
   },
   waiting: {
     icon: Loader2,
     label: "Waiting",
-    color: "text-yellow-500",
+    color: "text-chart-4",
   },
   all: {
     icon: Filter,
