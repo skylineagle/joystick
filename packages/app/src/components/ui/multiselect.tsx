@@ -403,7 +403,7 @@ const MultipleSelector = ({
 
     if (creatable) {
       return (value: string, search: string) => {
-        return value.toLowerCase().includes(search.toLowerCase()) ? 1 : -1
+        return value?.toLowerCase().includes(search?.toLowerCase()) ? 1 : -1
       }
     }
     // Using default filter in `cmdk`. We don&lsquo;t have to provide it.

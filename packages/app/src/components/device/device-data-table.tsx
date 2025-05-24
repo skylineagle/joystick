@@ -90,7 +90,7 @@ const globalFilterFn = (
   value: string
 ) => {
   const device = row.original;
-  const searchValue = value.toLowerCase();
+  const searchValue = value?.toLowerCase();
 
   const searchableFields = [
     device.name,
@@ -103,7 +103,7 @@ const globalFilterFn = (
   ];
 
   return searchableFields.some((field) =>
-    field?.toString().toLowerCase().includes(searchValue)
+    field?.toString()?.toLowerCase().includes(searchValue)
   );
 };
 

@@ -890,7 +890,7 @@ export function FilterValueOptionDisplay<TData, TValue>({
       </span>
     );
   }
-  const name = columnMeta.displayName.toLowerCase();
+  const name = columnMeta.displayName?.toLowerCase();
   const pluralName = name.endsWith("s") ? `${name}es` : `${name}s`;
 
   const hasOptionIcons = !options?.some((o) => !o.icon);
@@ -973,7 +973,7 @@ export function FilterValueMultiOptionDisplay<TData, TValue>({
     );
   }
 
-  const name = columnMeta.displayName.toLowerCase();
+  const name = columnMeta.displayName?.toLowerCase();
 
   const hasOptionIcons = !columnMeta.options?.some((o) => !o.icon);
 

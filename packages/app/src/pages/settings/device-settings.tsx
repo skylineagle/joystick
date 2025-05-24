@@ -129,11 +129,11 @@ export function DeviceSettings() {
   };
 
   const filteredDevices = devices?.filter((device) => {
-    const searchLower = searchQuery.toLowerCase();
+    const searchLower = searchQuery?.toLowerCase();
     return (
-      device.name?.toLowerCase().includes(searchLower) ||
-      device.expand?.device?.name.toLowerCase().includes(searchLower) ||
-      device.description?.toLowerCase().includes(searchLower)
+      device.name?.toLowerCase()?.includes(searchLower) ||
+      device.expand?.device?.name?.toLowerCase()?.includes(searchLower) ||
+      device.description?.toLowerCase()?.includes(searchLower)
     );
   });
 
