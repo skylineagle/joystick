@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "./dist/index.js",
   "devDependencies": {
-    "pocketbase-typegen": "^1.3.0",
-    "typescript": "^5.0.0"
+    "pocketbase-typegen": "^1.3.1",
+    "typescript": "^5.8.3"
   },
   "peerDependencies": {
     "pocketbase": "^0.25.2"
