@@ -1,26 +1,23 @@
 {
   "name": "joystick",
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "module": "index.ts",
+  "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@types/bun": "latest",
+    "turbo": "^2.5.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.8.3"
+  },
   "packageManager": "bun@1.2.10",
+  "private": true,
   "scripts": {
     "build": "npm run build --workspaces",
     "dev": "turbo run dev",
     "db:generate": "turbo run db:generate"
   },
-  "module": "index.ts",
   "type": "module",
-  "devDependencies": {
-    "@playwright/test": "^1.52.0",
-    "@types/bun": "latest",
-    "turbo": "^2.5.1"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "inngest": "^3.35.1"
-  }
+  "workspaces": [
+    "packages/*"
+  ]
 }
