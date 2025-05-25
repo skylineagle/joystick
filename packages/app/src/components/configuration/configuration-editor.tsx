@@ -139,7 +139,6 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
     return (
       !editingConfig?.name ||
       !editingConfig?.information?.user ||
-      !editingConfig?.information?.password ||
       !activeHostToCheck
     );
   }, [currentTab, isJsonValid, isAutomationValid, isPending, editingConfig]);
