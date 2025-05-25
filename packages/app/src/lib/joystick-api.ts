@@ -105,6 +105,7 @@ export async function runAction({
       params ?? {},
       {
         headers: {
+          "x-user-name": pb.authStore.record?.name ?? "unknown",
           "x-user-id": pb.authStore.record?.id ?? "unknown",
         },
       },

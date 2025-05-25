@@ -29,7 +29,6 @@ const app = new Elysia().use(
     },
   })
 );
-
 // Apply the logging middleware
 setupLoggingMiddleware(app);
 
@@ -37,18 +36,20 @@ app.get("/", () => "Command Runner API");
 
 app.post(
   "/api/run/:device/:action",
-  async ({ params, body, headers, query }) => {
+  async ({ params, body, headers, query, request }) => {
     try {
       // Start timing the action
       enhancedLogger.startActionTimer();
       enhancedLogger.info(
         {
+          requestId: headers["x-request-id"],
           device: params.device,
           action: params.action,
           parameters: body || {},
         },
         "Running command"
       );
+      enhancedLogger.debug(headers);
 
       // Get the device from PocketBase
       const result = await pb
@@ -129,7 +130,6 @@ app.post(
       };
 
       if (params.action === "set-mode") {
-        enhancedLogger.info("set-mode");
         await pb.collection("devices").update(params.device, {
           mode: body?.mode,
         });
@@ -137,7 +137,7 @@ app.post(
       }
 
       const userId = headers["x-user-id"] ?? "system";
-
+      const userName = headers["x-user-name"] ?? "system";
       if (action.name !== "healthcheck") {
         await enhancedLogger.logCommandAction({
           userId,
@@ -151,8 +151,12 @@ app.post(
 
       enhancedLogger.info(
         {
-          device: params.device,
-          action: params.action,
+          user: { name: userName, id: userId },
+          device,
+          action,
+          response,
+          parameters: body || {},
+          success: true,
           executionTime: enhancedLogger.getExecutionTime(),
         },
         "Command executed successfully"
@@ -169,7 +173,7 @@ app.post(
 
       enhancedLogger.error(
         {
-          error: errorMessage,
+          error,
         },
         "Error executing command"
       );
@@ -183,8 +187,6 @@ app.post(
           .getFullList<ActionsResponse>(1, {
             filter: `name="${params.action}"`,
           });
-
-        enhancedLogger.info(`log: ${query.log}`);
 
         if (actionResult.length === 1 && query.log !== "false") {
           await enhancedLogger.logCommandAction({
