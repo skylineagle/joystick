@@ -80,7 +80,7 @@ export function DeviceHealthIndicator() {
             ) : isConnected ? (
               <Badge
                 variant="outline"
-                className="h-8 px-2 flex items-center gap-1 text-chart-2"
+                className="h-8 px-2 flex items-center gap-1 text-emerald-500 dark:text-green-300"
               >
                 <Wifi className="h-3 w-3" />
                 <span className="text-xs">Connected</span>
@@ -88,7 +88,7 @@ export function DeviceHealthIndicator() {
             ) : (
               <Badge
                 variant="outline"
-                className="h-8 px-2 flex items-center gap-1 text-destructive"
+                className="h-8 px-2 flex items-center gap-1 text-rose-600 dark:text-red-300"
               >
                 <WifiOff className="h-3 w-3" />
                 <span className="text-xs">Disconnected</span>

@@ -28,27 +28,27 @@ type ConnectionStatus =
 type ConnectionQuality = "excellent" | "good" | "fair" | "poor";
 
 const qualityConfig = {
-  excellent: { label: "Excellent", color: "bg-chart-2", width: "w-full" },
-  good: { label: "Good", color: "bg-chart-2", width: "w-3/4" },
-  fair: { label: "Fair", color: "bg-chart-4", width: "w-1/2" },
-  poor: { label: "Poor", color: "bg-destructive", width: "w-1/4" },
+  excellent: { label: "Excellent", color: "bg-green-500", width: "w-full" },
+  good: { label: "Good", color: "bg-green-400", width: "w-3/4" },
+  fair: { label: "Fair", color: "bg-yellow-400", width: "w-1/2" },
+  poor: { label: "Poor", color: "bg-red-500", width: "w-1/4" },
 };
 
 const statusConfig = {
   initializing: {
-    icon: <Activity className="h-4 w-4 text-primary" />,
+    icon: <Activity className="h-4 w-4 text-blue-500" />,
     label: "Initializing",
   },
   connected: {
-    icon: <CheckCircle className="h-4 w-4 text-chart-2" />,
+    icon: <CheckCircle className="h-4 w-4 text-green-500" />,
     label: "Connected",
   },
   degraded: {
-    icon: <Activity className="h-4 w-4 text-chart-4" />,
+    icon: <Activity className="h-4 w-4 text-yellow-500" />,
     label: "Degraded",
   },
   disconnected: {
-    icon: <MegaphoneOff className="h-4 w-4 text-destructive" />,
+    icon: <MegaphoneOff className="h-4 w-4 text-red-500" />,
     label: "No stream",
   },
 };
@@ -227,7 +227,7 @@ export function MediaMtxMonitor({ deviceId }: MediaMtxMonitorProps) {
             <span>Stream quality</span>
             <span className="text-xs">{qualityLabel}</span>
           </div>
-          <div className="h-1.5 bg-muted rounded-full w-full overflow-hidden mb-4">
+          <div className="h-1.5 bg-gray-700 rounded-full w-full overflow-hidden mb-4">
             <div
               className={cn(
                 "h-full rounded-full transition-all duration-500",

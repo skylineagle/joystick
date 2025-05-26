@@ -28,13 +28,13 @@ interface BatchOperationResult {
 
 const modeConfig = {
   live: {
-    color: "text-chart-2",
+    color: "text-green-500",
   },
   offline: {
-    color: "text-muted-foreground",
+    color: "text-slate-500",
   },
   auto: {
-    color: "text-primary",
+    color: "text-blue-500",
   },
 } as const;
 
