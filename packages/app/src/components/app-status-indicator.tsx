@@ -55,13 +55,13 @@ interface HealthResponse {
 const getStatusIcon = (status: ServiceStatus) => {
   switch (status) {
     case "healthy":
-      return <CheckCircle2 className="h-4 w-4 text-chart-2" />;
+      return <CheckCircle2 className="h-4 w-4 text-green-500" />;
     case "degraded":
-      return <AlertCircle className="h-4 w-4 text-chart-4" />;
+      return <AlertCircle className="h-4 w-4 text-yellow-500" />;
     case "offline":
-      return <ServerCrash className="h-4 w-4 text-destructive" />;
+      return <ServerCrash className="h-4 w-4 text-red-500" />;
     default:
-      return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
+      return <AlertCircle className="h-4 w-4 text-gray-400" />;
   }
 };
 
@@ -81,29 +81,14 @@ const getStatusLabel = (status: ServiceStatus) => {
 const getStatusColor = (status: ServiceStatus) => {
   switch (status) {
     case "healthy":
-      return "bg-chart-2";
+      return "bg-green-500";
     case "degraded":
-      return "bg-chart-4";
+      return "bg-yellow-500";
     case "offline":
-      return "bg-destructive";
+      return "bg-red-500";
     default:
-      return "bg-muted";
+      return "bg-gray-400";
   }
-};
-
-const getStatusBadgeClasses = (
-  status: ServiceStatus | "online" | "offline"
-) => {
-  if (status === "online" || status === "healthy") {
-    return "bg-chart-2/10 text-chart-2 border-chart-2/20";
-  }
-  if (status === "degraded") {
-    return "bg-chart-4/10 text-chart-4 border-chart-4/20";
-  }
-  if (status === "offline") {
-    return "bg-destructive/10 text-destructive border-destructive/20";
-  }
-  return "bg-muted/10 text-muted-foreground border-muted/20";
 };
 
 export function AppStatusIndicator() {
@@ -437,17 +422,19 @@ export function AppStatusIndicator() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {systemStatus.networkStatus === "online" ? (
-                  <Wifi className="h-4 w-4 text-chart-2" />
+                  <Wifi className="h-4 w-4 text-green-500" />
                 ) : (
-                  <WifiOff className="h-4 w-4 text-destructive" />
+                  <WifiOff className="h-4 w-4 text-red-500" />
                 )}
                 <span>Network Connectivity</span>
               </div>
               <div>
                 <span
                   className={cn(
-                    "px-2 py-1 text-xs rounded-full border",
-                    getStatusBadgeClasses(systemStatus.networkStatus)
+                    "px-2 py-1 text-xs rounded-full",
+                    systemStatus.networkStatus === "online"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                      : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
                   )}
                 >
                   {systemStatus.networkStatus === "online"
@@ -466,8 +453,12 @@ export function AppStatusIndicator() {
               <div>
                 <span
                   className={cn(
-                    "px-2 py-1 text-xs rounded-full border",
-                    getStatusBadgeClasses(systemStatus.joystickApiStatus)
+                    "px-2 py-1 text-xs rounded-full",
+                    systemStatus.joystickApiStatus === "healthy"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                      : systemStatus.joystickApiStatus === "degraded"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                      : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
                   )}
                 >
                   {getStatusLabel(systemStatus.joystickApiStatus)}
@@ -484,8 +475,12 @@ export function AppStatusIndicator() {
               <div>
                 <span
                   className={cn(
-                    "px-2 py-1 text-xs rounded-full border",
-                    getStatusBadgeClasses(systemStatus.switcherStatus)
+                    "px-2 py-1 text-xs rounded-full",
+                    systemStatus.switcherStatus === "healthy"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                      : systemStatus.switcherStatus === "degraded"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                      : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
                   )}
                 >
                   {getStatusLabel(systemStatus.switcherStatus)}
@@ -502,8 +497,12 @@ export function AppStatusIndicator() {
               <div>
                 <span
                   className={cn(
-                    "px-2 py-1 text-xs rounded-full border",
-                    getStatusBadgeClasses(systemStatus.bakerStatus)
+                    "px-2 py-1 text-xs rounded-full",
+                    systemStatus.bakerStatus === "healthy"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                      : systemStatus.bakerStatus === "degraded"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                      : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
                   )}
                 >
                   {getStatusLabel(systemStatus.bakerStatus)}
@@ -520,8 +519,12 @@ export function AppStatusIndicator() {
               <div>
                 <span
                   className={cn(
-                    "px-2 py-1 text-xs rounded-full border",
-                    getStatusBadgeClasses(systemStatus.panelStatus)
+                    "px-2 py-1 text-xs rounded-full",
+                    systemStatus.panelStatus === "healthy"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                      : systemStatus.panelStatus === "degraded"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                      : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
                   )}
                 >
                   {getStatusLabel(systemStatus.panelStatus)}
@@ -538,8 +541,12 @@ export function AppStatusIndicator() {
               <div>
                 <span
                   className={cn(
-                    "px-2 py-1 text-xs rounded-full border",
-                    getStatusBadgeClasses(systemStatus.studioStatus)
+                    "px-2 py-1 text-xs rounded-full",
+                    systemStatus.studioStatus === "healthy"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                      : systemStatus.studioStatus === "degraded"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                      : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
                   )}
                 >
                   {getStatusLabel(systemStatus.studioStatus)}
@@ -556,8 +563,12 @@ export function AppStatusIndicator() {
               <div>
                 <span
                   className={cn(
-                    "px-2 py-1 text-xs rounded-full border",
-                    getStatusBadgeClasses(systemStatus.whisperStatus)
+                    "px-2 py-1 text-xs rounded-full",
+                    systemStatus.whisperStatus === "healthy"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                      : systemStatus.whisperStatus === "degraded"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                      : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
                   )}
                 >
                   {getStatusLabel(systemStatus.whisperStatus)}
@@ -574,8 +585,12 @@ export function AppStatusIndicator() {
               <div>
                 <span
                   className={cn(
-                    "px-2 py-1 text-xs rounded-full border",
-                    getStatusBadgeClasses(systemStatus.smsServerStatus)
+                    "px-2 py-1 text-xs rounded-full",
+                    systemStatus.smsServerStatus === "healthy"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                      : systemStatus.smsServerStatus === "degraded"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                      : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
                   )}
                 >
                   {getStatusLabel(systemStatus.smsServerStatus)}
@@ -592,8 +607,12 @@ export function AppStatusIndicator() {
               <div>
                 <span
                   className={cn(
-                    "px-2 py-1 text-xs rounded-full border",
-                    getStatusBadgeClasses(systemStatus.streamApiStatus)
+                    "px-2 py-1 text-xs rounded-full",
+                    systemStatus.streamApiStatus === "healthy"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                      : systemStatus.streamApiStatus === "degraded"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                      : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
                   )}
                 >
                   {getStatusLabel(systemStatus.streamApiStatus)}
@@ -608,10 +627,10 @@ export function AppStatusIndicator() {
                   className={cn(
                     "h-4 w-4",
                     systemStatus.pocketbaseStatus === "healthy"
-                      ? "text-chart-2"
+                      ? "text-green-500"
                       : systemStatus.pocketbaseStatus === "degraded"
-                      ? "text-chart-4"
-                      : "text-destructive"
+                      ? "text-yellow-500"
+                      : "text-red-500"
                   )}
                 />
                 <span>Database</span>
@@ -619,8 +638,12 @@ export function AppStatusIndicator() {
               <div>
                 <span
                   className={cn(
-                    "px-2 py-1 text-xs rounded-full border",
-                    getStatusBadgeClasses(systemStatus.pocketbaseStatus)
+                    "px-2 py-1 text-xs rounded-full",
+                    systemStatus.pocketbaseStatus === "healthy"
+                      ? "bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300"
+                      : systemStatus.pocketbaseStatus === "degraded"
+                      ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300"
+                      : "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300"
                   )}
                 >
                   {getStatusLabel(systemStatus.pocketbaseStatus)}
