@@ -138,15 +138,23 @@ app.post(
 
       const userId = headers["x-user-id"] ?? "system";
       const userName = headers["x-user-name"] ?? "system";
-      if (action.name !== "healthcheck") {
-        await enhancedLogger.logCommandAction({
-          userId,
-          deviceId: params.device,
-          actionId: action.id,
-          parameters: body || {},
-          result: response,
-          success: true,
-        });
+
+      try {
+        if (action.name !== "healthcheck") {
+          await enhancedLogger.logCommandAction({
+            userId,
+            deviceId: params.device,
+            actionId: action.id,
+            parameters: body || {},
+            result: response,
+            success: true,
+          });
+        }
+      } catch (error) {
+        enhancedLogger.error(
+          { error },
+          "Failed to persist notification to database"
+        );
       }
 
       enhancedLogger.info(
