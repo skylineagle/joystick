@@ -45,7 +45,7 @@ const formSchema = z.object({
   }),
   information: z.object({
     user: z.string().min(1, "User is required"),
-    password: z.string().min(1, "Password is required"),
+    password: z.string().optional(),
     phone: z.string().optional(),
   }),
 });
@@ -66,8 +66,6 @@ export function AddDeviceModal() {
       },
       information: {
         user: "",
-        password: "",
-        phone: "",
       },
     },
   });
@@ -262,7 +260,7 @@ export function AddDeviceModal() {
                   )}
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Password (optional)</Label>
                   <Input
                     id="password"
                     type="password"
