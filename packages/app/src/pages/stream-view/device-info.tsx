@@ -7,8 +7,9 @@ import { BatteryStatus } from "@/pages/status/battery-status";
 import { CellularStatus } from "@/pages/status/cellular-status";
 import { GPSStatus } from "@/pages/status/gps-status";
 import { IMUStatus } from "@/pages/status/imu-status";
+import { TerminalPingControl } from "@/pages/stream-view/terminal-ping-control";
 import { AnimatePresence, motion } from "framer-motion";
-import { Battery, Map, Navigation, Signal } from "lucide-react";
+import { Battery, Map, Navigation, Signal, Terminal } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { FC } from "react";
 
@@ -16,7 +17,7 @@ export interface DeviceInfoProps {
   deviceId: string;
 }
 
-type TabValue = "cell" | "battery" | "imu" | "gps";
+type TabValue = "cell" | "battery" | "imu" | "gps" | "ping";
 
 const MotionCard = motion.create(Card);
 const MotionTabsContent = motion.create(TabsContent);
@@ -42,10 +43,11 @@ export const DeviceInfo: FC<DeviceInfoProps> = ({ deviceId }) => {
   const isImu = isImuPermitted && isGetImuSupported;
   const isBattery = isBatteryPermitted && isGetBatterySupported;
   const isCpsi = isCpsiPermitted && isGetCpsiStatusSupported;
+  const isPing = true;
 
   const [activeTab, setActiveTab] = useQueryState(
     "activeTab",
-    parseAsStringEnum(["cell", "battery", "imu", "gps"])
+    parseAsStringEnum(["cell", "battery", "imu", "gps", "ping"])
       .withDefault(
         isGetCpsiStatusSupported
           ? "cell"
@@ -55,15 +57,19 @@ export const DeviceInfo: FC<DeviceInfoProps> = ({ deviceId }) => {
           ? "imu"
           : isGetGpsSupported
           ? "gps"
-          : "cell"
+          : "ping"
       )
       .withOptions({
         shallow: true,
       })
   );
 
+  const availableTabs = [isCpsi, isBattery, isImu, isGps, isPing].filter(
+    Boolean
+  ).length;
+
   return (
-    (isGps || isImu || isBattery || isCpsi) && (
+    (isGps || isImu || isBattery || isCpsi || isPing) && (
       <Tabs
         defaultValue="device"
         value={activeTab ?? "device"}
@@ -123,18 +129,30 @@ export const DeviceInfo: FC<DeviceInfoProps> = ({ deviceId }) => {
               <GPSStatus deviceId={deviceId!} />
             </MotionTabsContent>
           )}
+
+          {isPing && (
+            <MotionTabsContent
+              value="ping"
+              className="m-0 pt-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              <TerminalPingControl
+                deviceId={deviceId!}
+                tabActive={activeTab === "ping"}
+              />
+            </MotionTabsContent>
+          )}
         </MotionCard>
         {/* Tab Triggers */}
         <TabsList
           className={cn("shadow-xl mt-2 h-7 grid", {
-            "grid-cols-4":
-              [isCpsi, isBattery, isImu, isGps].filter(Boolean).length === 4,
-            "grid-cols-3":
-              [isCpsi, isBattery, isImu, isGps].filter(Boolean).length === 3,
-            "grid-cols-2":
-              [isCpsi, isBattery, isImu, isGps].filter(Boolean).length === 2,
-            "grid-cols-1":
-              [isCpsi, isBattery, isImu, isGps].filter(Boolean).length === 1,
+            "grid-cols-5": availableTabs === 5,
+            "grid-cols-4": availableTabs === 4,
+            "grid-cols-3": availableTabs === 3,
+            "grid-cols-2": availableTabs === 2,
+            "grid-cols-1": availableTabs === 1,
           })}
         >
           {isCpsi && !isGetCpsiStatusLoading && (
@@ -254,6 +272,36 @@ export const DeviceInfo: FC<DeviceInfoProps> = ({ deviceId }) => {
                     transition={{ duration: 0.2 }}
                   >
                     GPS
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </MotionTabsTrigger>
+          )}
+          {isPing && (
+            <MotionTabsTrigger
+              value="ping"
+              className="text-xs py-0.5 px-1"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={activeTab !== "ping" ? { opacity: 0.7 } : { opacity: 1 }}
+              animate={
+                activeTab === "ping"
+                  ? { opacity: 1, scale: 1 }
+                  : { opacity: 0.7, scale: 1 }
+              }
+              transition={{ duration: 0.2 }}
+            >
+              <Terminal className="h-3 w-3 mr-1" />
+              <AnimatePresence mode="wait">
+                {activeTab === "ping" && (
+                  <motion.span
+                    key="ping-text"
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    Ping
                   </motion.span>
                 )}
               </AnimatePresence>
