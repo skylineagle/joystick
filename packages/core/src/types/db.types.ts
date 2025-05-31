@@ -16,6 +16,7 @@ export enum Collections {
 	Devices = "devices",
 	Gallery = "gallery",
 	Models = "models",
+	Notifications = "notifications",
 	ParametersTree = "parameters_tree",
 	Permissions = "permissions",
 	Rules = "rules",
@@ -29,15 +30,20 @@ export type IsoDateString = string
 export type RecordIdString = string
 export type HTMLString = string
 
+type ExpandType<T> = unknown extends T
+	? T extends unknown
+		? { expand?: unknown }
+		: { expand: T }
+	: { expand: T }
+
 // System fields
-export type BaseSystemFields<T = never> = {
+export type BaseSystemFields<T = unknown> = {
 	id: RecordIdString
 	collectionId: string
 	collectionName: Collections
-	expand?: T
-}
+} & ExpandType<T>
 
-export type AuthSystemFields<T = never> = {
+export type AuthSystemFields<T = unknown> = {
 	email: string
 	emailVisibility: boolean
 	username: string
@@ -169,6 +175,26 @@ export type ModelsRecord<Tmode_configs = unknown, Tparams = unknown, Tstream_qua
 	updated?: IsoDateString
 }
 
+export enum NotificationsTypeOptions {
+	"info" = "info",
+	"success" = "success",
+	"error" = "error",
+	"warning" = "warning",
+	"emergency" = "emergency",
+}
+export type NotificationsRecord<Tmetadata = unknown> = {
+	created?: IsoDateString
+	device?: RecordIdString
+	dismissed?: RecordIdString[]
+	id: string
+	message?: string
+	metadata?: null | Tmetadata
+	seen?: RecordIdString[]
+	title: string
+	type: NotificationsTypeOptions
+	updated?: IsoDateString
+}
+
 export type ParametersTreeRecord<Tschema = unknown> = {
 	created?: IsoDateString
 	id: string
@@ -244,6 +270,7 @@ export type ActionsResponse<Texpand = unknown> = Required<ActionsRecord> & BaseS
 export type DevicesResponse<Tautomation = unknown, Tconfiguration = unknown, Tinformation = unknown, Texpand = unknown> = Required<DevicesRecord<Tautomation, Tconfiguration, Tinformation>> & BaseSystemFields<Texpand>
 export type GalleryResponse<Texpand = unknown> = Required<GalleryRecord> & BaseSystemFields<Texpand>
 export type ModelsResponse<Tmode_configs = unknown, Tparams = unknown, Tstream_quality = unknown, Texpand = unknown> = Required<ModelsRecord<Tmode_configs, Tparams, Tstream_quality>> & BaseSystemFields<Texpand>
+export type NotificationsResponse<Tmetadata = unknown, Texpand = unknown> = Required<NotificationsRecord<Tmetadata>> & BaseSystemFields<Texpand>
 export type ParametersTreeResponse<Tschema = unknown, Texpand = unknown> = Required<ParametersTreeRecord<Tschema>> & BaseSystemFields<Texpand>
 export type PermissionsResponse<Texpand = unknown> = Required<PermissionsRecord> & BaseSystemFields<Texpand>
 export type RulesResponse<Texpand = unknown> = Required<RulesRecord> & BaseSystemFields<Texpand>
@@ -264,6 +291,7 @@ export type CollectionRecords = {
 	devices: DevicesRecord
 	gallery: GalleryRecord
 	models: ModelsRecord
+	notifications: NotificationsRecord
 	parameters_tree: ParametersTreeRecord
 	permissions: PermissionsRecord
 	rules: RulesRecord
@@ -283,6 +311,7 @@ export type CollectionResponses = {
 	devices: DevicesResponse
 	gallery: GalleryResponse
 	models: ModelsResponse
+	notifications: NotificationsResponse
 	parameters_tree: ParametersTreeResponse
 	permissions: PermissionsResponse
 	rules: RulesResponse
@@ -305,6 +334,7 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: 'devices'): RecordService<DevicesResponse>
 	collection(idOrName: 'gallery'): RecordService<GalleryResponse>
 	collection(idOrName: 'models'): RecordService<ModelsResponse>
+	collection(idOrName: 'notifications'): RecordService<NotificationsResponse>
 	collection(idOrName: 'parameters_tree'): RecordService<ParametersTreeResponse>
 	collection(idOrName: 'permissions'): RecordService<PermissionsResponse>
 	collection(idOrName: 'rules'): RecordService<RulesResponse>

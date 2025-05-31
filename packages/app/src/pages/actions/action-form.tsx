@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { RippleButton } from "@/components/animate-ui/buttons/ripple";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -74,9 +75,9 @@ export function ActionForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button onClick={() => onSubmit({})} disabled={isSubmitting}>
+          <RippleButton onClick={() => onSubmit({})} disabled={isSubmitting}>
             {isSubmitting ? "Executing..." : "Execute Action"}
-          </Button>
+          </RippleButton>
         </CardContent>
       </Card>
     );

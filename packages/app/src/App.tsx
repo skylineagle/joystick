@@ -4,17 +4,18 @@ import { EasterEggs } from "@/components/easter-eggs";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { PageTransition } from "@/components/page-transition";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 import { ApiError } from "@/lib/api-client";
 import { pb } from "@/lib/pocketbase";
 import { RerouteHome } from "@/pages/reroute-home";
 import { TerminalPage } from "@/pages/terminal/terminal-page";
+import { NotificationProvider } from "@/providers/notification-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
 import { Suspense, lazy, useEffect, useState } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 import { HashLoader } from "react-spinners";
-import { Toaster } from "sonner";
 import { Layout } from "./layout";
 
 // Lazy load components
@@ -51,6 +52,11 @@ const SettingsPage = lazy(() =>
 const GalleryPage = lazy(() =>
   import("@/pages/gallery/gallery-page").then((module) => ({
     default: module.default,
+  }))
+);
+const NotificationsHistoryPage = lazy(() =>
+  import("@/pages/notifications/notifications-history-page").then((module) => ({
+    default: module.NotificationsHistoryPage,
   }))
 );
 
@@ -303,6 +309,20 @@ function AnimatedRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/notifications/history"
+        element={
+          <ProtectedRoute>
+            <Suspense fallback={<LoadingFallback />}>
+              <ErrorBoundary>
+                <PageTransition>
+                  <NotificationsHistoryPage />
+                </PageTransition>
+              </ErrorBoundary>
+            </Suspense>
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }
@@ -316,12 +336,28 @@ function App() {
           defaultDesignTheme="default"
           storageKeyPrefix="vite-ui-theme"
         >
-          <BrowserRouter>
-            <AnimatedRoutes />
-          </BrowserRouter>
-          <Toaster position="top-center" richColors visibleToasts={3} />
+          <NotificationProvider>
+            <BrowserRouter>
+              <AnimatedRoutes />
+            </BrowserRouter>
+            <Toaster
+              position="bottom-left"
+              richColors
+              visibleToasts={5}
+              toastOptions={{
+                style: {
+                  background: "transparent",
+                  border: "none",
+                  boxShadow: "none",
+                },
+                className: "group toast",
+              }}
+              gap={8}
+              offset={16}
+            />
 
-          <EasterEggs />
+            <EasterEggs />
+          </NotificationProvider>
         </ThemeProvider>
       </NuqsAdapter>
     </QueryClientProvider>

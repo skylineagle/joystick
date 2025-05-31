@@ -4,7 +4,6 @@ import { runAction } from "@/lib/joystick-api";
 import { toast } from "@/utils/toast";
 import { useMutation } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { toast as baseToast } from "sonner";
 
 export function useActions(deviceId: string) {
   const toastRef = useRef<string | number>(null);
@@ -34,7 +33,7 @@ export function useActions(deviceId: string) {
     },
     retry: false,
     onSuccess: (data) => {
-      if (toastRef.current) baseToast.dismiss(toastRef.current);
+      if (toastRef.current) toast.dismiss(toastRef.current);
 
       toast.success({
         message: `Sent ${currentAction} to ${device?.name}`,
@@ -42,7 +41,7 @@ export function useActions(deviceId: string) {
       setActionResult(data ?? null);
     },
     onError: (error) => {
-      if (toastRef.current) baseToast.dismiss(toastRef.current);
+      if (toastRef.current) toast.dismiss(toastRef.current);
 
       toast.error({
         message:

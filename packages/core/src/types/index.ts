@@ -7,6 +7,7 @@ import type {
   RulesResponse,
   UsersResponse,
   ParametersTreeResponse,
+  NotificationsResponse,
 } from "@/types/db.types";
 
 export * from "./db.types";
@@ -152,3 +153,7 @@ export type ParametersTree = ParametersTreeResponse & {
     write: ActionsResponse;
   };
 };
+
+export type Notification = NotificationsResponse<
+  Record<string, unknown>
+>;

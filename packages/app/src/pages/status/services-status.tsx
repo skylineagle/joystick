@@ -60,12 +60,12 @@ export function ServicesStatus({ deviceId }: ServicesTableProps) {
     switch (status.toLowerCase()) {
       case "running":
       case "online":
-        return <CheckCircle2 className="h-4 w-4 text-chart-2" />;
+        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
       case "stopped":
       case "offline":
-        return <XCircle className="h-4 w-4 text-destructive" />;
+        return <XCircle className="h-4 w-4 text-red-500" />;
       default:
-        return <AlertCircle className="h-4 w-4 text-chart-4" />;
+        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
     }
   };
 
@@ -76,7 +76,7 @@ export function ServicesStatus({ deviceId }: ServicesTableProps) {
         return (
           <Badge
             variant="outline"
-            className="bg-chart-2/10 text-chart-2 border-chart-2/20"
+            className="bg-green-100 dark:bg-green-900/20 text-green-800 dark:text-green-300"
           >
             {status}
           </Badge>
@@ -86,7 +86,7 @@ export function ServicesStatus({ deviceId }: ServicesTableProps) {
         return (
           <Badge
             variant="outline"
-            className="bg-destructive/10 text-destructive border-destructive/20"
+            className="bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-300"
           >
             {status}
           </Badge>
@@ -95,7 +95,7 @@ export function ServicesStatus({ deviceId }: ServicesTableProps) {
         return (
           <Badge
             variant="outline"
-            className="bg-chart-4/10 text-chart-4 border-chart-4/20"
+            className="bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300"
           >
             {status}
           </Badge>

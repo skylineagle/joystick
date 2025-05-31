@@ -1,6 +1,7 @@
 import { DeviceSwitcher } from "@/components/device-switcher";
 import { DeviceHealthIndicator } from "@/components/device/device-health-indicator";
 import { AnimatedThemeToggle } from "@/components/ui/animated-theme-toggle";
+import { NotificationPanel } from "@/components/ui/notification-panel";
 import {
   SidebarInset,
   SidebarProvider,
@@ -121,6 +122,7 @@ export function Layout({ children }: LayoutProps) {
                     <AppStatusIndicator />
                   </Suspense>
                 )}
+                <NotificationPanel />
                 <AnimatedThemeToggle />
                 <Suspense fallback={null}>
                   <UserProfile />
