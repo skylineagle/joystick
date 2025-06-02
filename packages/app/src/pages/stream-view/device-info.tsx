@@ -38,12 +38,13 @@ export const DeviceInfo: FC<DeviceInfoProps> = ({ deviceId }) => {
   const isImuPermitted = useIsPermitted("device-imu");
   const isBatteryPermitted = useIsPermitted("device-battery");
   const isCpsiPermitted = useIsPermitted("device-cpsi");
+  const isPingPermitted = useIsPermitted("device-ping");
 
   const isGps = isGpsPermitted && isGetGpsSupported;
   const isImu = isImuPermitted && isGetImuSupported;
   const isBattery = isBatteryPermitted && isGetBatterySupported;
   const isCpsi = isCpsiPermitted && isGetCpsiStatusSupported;
-  const isPing = true;
+  const isPing = isPingPermitted;
 
   const [activeTab, setActiveTab] = useQueryState(
     "activeTab",
