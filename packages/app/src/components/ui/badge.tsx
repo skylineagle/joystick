@@ -20,7 +20,7 @@ const badgeVariants = cva(
         disconnected:
           "border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-300 shadow hover:bg-amber-500/20",
         loading:
-          "relative border-transparent bg-gray-400/10 text-gray-700 dark:text-gray-300 shadow hover:bg-gray-400/20 before:absolute before:inset-0 before:rounded-md before:p-[2px] before:bg-[conic-gradient(from_var(--border-angle),transparent,white,transparent)] before:animate-border before:content-[''] after:absolute after:inset-[2px] after:rounded-[calc(0.375rem-2px)] after:bg-background after:content-['']",
+          "relative border-transparent bg-muted/20 text-foreground shadow hover:bg-muted/30 before:absolute before:inset-0 before:rounded-md before:p-[1px] before:bg-[conic-gradient(from_var(--border-angle),transparent_10%,hsl(var(--ring)/0.6)_30%,hsl(var(--ring))_50%,hsl(var(--ring)/0.6)_70%,transparent_90%)] before:animate-border before:content-[''] after:absolute after:inset-[1px] after:rounded-[calc(0.375rem-1px)] after:bg-background after:content-['']",
       },
     },
     defaultVariants: {
