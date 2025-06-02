@@ -89,7 +89,13 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
     };
 
     const getGenerationLabel = () => {
-      return technology === "LTE" ? "4G" : technology === "GSM" ? "2G" : "3G";
+      return !technology
+        ? "Unknown"
+        : technology === "LTE"
+        ? "4G"
+        : technology === "GSM"
+        ? "2G"
+        : "3G";
     };
 
     const generationLabel = getGenerationLabel();
