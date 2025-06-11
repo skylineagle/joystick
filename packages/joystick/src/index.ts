@@ -18,25 +18,12 @@ import { Elysia, t } from "elysia";
 import { validate } from "jsonschema";
 import { enhancedLogger, setupLoggingMiddleware } from "./enhanced-logger";
 import { generateRandomCPSIResult, updateStatus } from "./utils";
-import { type Notification } from "@joystick/core";
-
-interface NotificationPayload {
-  id: string;
-  type: "info" | "success" | "warning" | "error" | "emergency";
-  title: string;
-  message: string;
-  timestamp: number;
-  userId?: string;
-  deviceId?: string;
-  dismissible?: boolean;
-}
-
-interface WebSocketNotificationMessage {
-  type: "notification";
-  payload: NotificationPayload;
-}
-
-const notificationClients = new Set<any>();
+import {
+  addNotificationClient,
+  removeNotificationClient,
+  sendNotification,
+  type SendNotificationRequest,
+} from "./notifications";
 
 const app = new Elysia()
   .use(
@@ -51,12 +38,10 @@ const app = new Elysia()
   )
   .ws("/notifications", {
     open(ws) {
-      notificationClients.add(ws);
-      enhancedLogger.info("Notification client connected");
+      addNotificationClient(ws);
     },
     close(ws) {
-      notificationClients.delete(ws);
-      enhancedLogger.info("Notification client disconnected");
+      removeNotificationClient(ws);
     },
     message(ws, message) {
       enhancedLogger.debug(
@@ -65,23 +50,6 @@ const app = new Elysia()
       );
     },
   });
-
-const broadcastNotification = (notification: NotificationPayload) => {
-  const message: WebSocketNotificationMessage = {
-    type: "notification",
-    payload: notification,
-  };
-
-  const messageStr = JSON.stringify(message);
-  notificationClients.forEach((client) => {
-    try {
-      client.send(messageStr);
-    } catch (error) {
-      enhancedLogger.error({ error }, "Failed to send notification to client");
-      notificationClients.delete(client);
-    }
-  });
-};
 
 // Apply the logging middleware
 setupLoggingMiddleware(app);
@@ -395,67 +363,16 @@ app.post(
     const userId = headers["x-user-id"] ?? "system";
     const userName = headers["x-user-name"] ?? "system";
 
-    const notification: Omit<NotificationPayload, "id"> = {
+    const request: SendNotificationRequest = {
       type: body.type || "info",
       title: body.title,
       message: body.message,
-      timestamp: Date.now(),
       userId: body.userId || userId,
       deviceId: body.deviceId,
       dismissible: body.dismissible !== false,
     };
 
-    enhancedLogger.info(
-      {
-        user: { name: userName, id: userId },
-        notification,
-      },
-      "notification"
-    );
-
-    // Persist notification to PocketBase
-    try {
-      const notificationData: Notification = {
-        type: notification.type,
-        title: notification.title,
-        message: notification.message,
-        seen: [],
-      };
-
-      // Only set device if deviceId is provided and valid
-      if (notification.deviceId) {
-        try {
-          await pb.collection("devices").getOne(notification.deviceId);
-          notificationData.device = notification.deviceId;
-        } catch (error) {
-          enhancedLogger.warn(
-            { deviceId: notification.deviceId },
-            "Device not found, notification will be saved without device relation"
-          );
-        }
-      }
-
-      const { id } = await pb
-        .collection("notifications")
-        .create(notificationData);
-      enhancedLogger.debug("Notification persisted to database");
-
-      broadcastNotification({ ...notification, id });
-      console.log(id);
-
-      return {
-        success: true,
-        notificationId: id,
-        clientsNotified: notificationClients.size,
-      };
-    } catch (error) {
-      console.error(error);
-      enhancedLogger.error({ error }, "Failed to send notification");
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      };
-    }
+    return await sendNotification(request, userId, userName);
   },
   {
     body: t.Object({

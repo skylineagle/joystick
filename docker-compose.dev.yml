@@ -6,6 +6,7 @@ services:
       - "8090:8090"
     environment:
       - MEDIAMTX_API=http://mediamtx:9997
+      - JOYSTICK_API_URL=http://host.docker.internal:8000
     volumes:
       - ./pocketbase/pb_data:/pb_data
       - ./pocketbase/pb_public:/pb_public
@@ -18,6 +19,8 @@ services:
       retries: 5
     networks:
       - app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     logging:
       driver: "json-file"
       options:

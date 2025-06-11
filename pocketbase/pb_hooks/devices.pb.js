@@ -292,6 +292,42 @@ onRecordAfterDeleteSuccess((e) => {
   e.next();
 }, "devices");
 
+// Handle status change notifications
+onRecordUpdateRequest((e) => {
+  const { sendNotification } = require(`${__hooks}/utils`);
+  const current = $app.findRecordById("devices", e.record.id);
+  const newStatus = e.record.get("status");
+  const currentStatus = current.get("status");
+
+  if (newStatus !== currentStatus) {
+    $app
+      .logger()
+      .info(
+        `Status changed for device ${e.record.id} from ${currentStatus} to ${newStatus}`
+      );
+
+    if (newStatus !== "off") {
+      const configuration = JSON.parse(e.record.get("configuration"));
+      const deviceName = configuration?.name || e.record.id;
+
+      sendNotification({
+        type: newStatus === "on" ? "success" : "info",
+        title: "Stream Status Updated",
+        message:
+          newStatus === "on"
+            ? `Camera ${deviceName} is now streaming`
+            : newStatus === "waiting" && currentStatus === "on"
+            ? `Camera ${deviceName} stream has been lost`
+            : `Waiting for ${deviceName} stream`,
+        deviceId: e.record.id,
+        dismissible: true,
+      });
+    }
+  }
+
+  e.next();
+}, "devices");
+
 // Cron job to clean up action_row table every 5 days
 cronAdd("cleanup_action_rows", "0 0 */10 * *", () => {
   try {
