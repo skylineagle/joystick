@@ -2,7 +2,6 @@ import { Switch } from "@/components/ui/switch";
 import { updateDevice } from "@/lib/device";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { memo } from "react";
-import { toast } from "@/utils/toast";
 import { cn } from "@/lib/utils";
 
 interface AutomateToggleProps {
@@ -25,12 +24,6 @@ export const AutomateToggle = memo(
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["device", deviceId] });
         queryClient.invalidateQueries({ queryKey: ["devices"] });
-        toast.success({ message: "Automation setting updated" });
-      },
-      onError: (error) => {
-        toast.error({
-          message: `Failed to update automation: ${error.message}`,
-        });
       },
     });
 

@@ -176,6 +176,9 @@ onRecordUpdateRequest((e) => {
     $app.logger().info("Mode changed, syncing camera state");
 
     try {
+      const previousMode = current.get("auto") ? "auto" : "manual";
+      const newMode = auto ? "auto" : "manual";
+
       // If mode changed to auto, create and start job
       if (auto) {
         startDeviceJob(e.record.id);
@@ -196,14 +199,12 @@ onRecordUpdateRequest((e) => {
       actionLog.set("user", e.auth.id);
       actionLog.set("action", mode_change_action.id);
       actionLog.set("parameters", {
-        previous_mode: current.get("auto") ? "auto" : "manual",
-        new_mode: auto ? "auto" : "manual",
+        previous_mode: previousMode,
+        new_mode: newMode,
       });
       actionLog.set("result", {
         success: true,
-        output: `Device mode changed from ${
-          current.get("auto") ? "auto" : "manual"
-        } to ${auto ? "auto" : "manual"}`,
+        output: `Device mode changed from ${previousMode} to ${newMode}`,
       });
       $app.save(actionLog);
     } catch (error) {
@@ -292,10 +293,14 @@ onRecordAfterDeleteSuccess((e) => {
   e.next();
 }, "devices");
 
-// Handle status change notifications
+// Handle all device notifications
 onRecordUpdateRequest((e) => {
   const { sendNotification } = require(`${__hooks}/utils`);
   const current = $app.findRecordById("devices", e.record.id);
+  const configuration = JSON.parse(e.record.get("configuration"));
+  const deviceName = configuration?.name || e.record.id;
+
+  // Handle status change notifications
   const newStatus = e.record.get("status");
   const currentStatus = current.get("status");
 
@@ -307,9 +312,6 @@ onRecordUpdateRequest((e) => {
       );
 
     if (newStatus !== "off") {
-      const configuration = JSON.parse(e.record.get("configuration"));
-      const deviceName = configuration?.name || e.record.id;
-
       sendNotification({
         type: newStatus === "on" ? "success" : "info",
         title: "Stream Status Updated",
@@ -323,6 +325,32 @@ onRecordUpdateRequest((e) => {
         dismissible: true,
       });
     }
+  }
+
+  // Handle auto toggle notifications
+  const auto = e.record.get("auto");
+  if (auto !== current.get("auto")) {
+    const newMode = auto ? "auto" : "manual";
+    sendNotification({
+      type: "info",
+      title: `${deviceName} automation is now ${auto ? "enabled" : "disabled"}`,
+      message: `Camera ${deviceName} is now in ${newMode} mode`,
+      deviceId: e.record.id,
+      dismissible: true,
+    });
+  }
+
+  // Handle mode change notifications
+  const mode = e.record.get("mode");
+  const currentMode = current.get("mode");
+  if (mode !== currentMode) {
+    sendNotification({
+      type: "info",
+      title: `${deviceName} mode changed`,
+      message: `Camera ${deviceName} switched from ${currentMode} to ${mode} mode`,
+      deviceId: e.record.id,
+      dismissible: true,
+    });
   }
 
   e.next();

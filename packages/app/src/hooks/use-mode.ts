@@ -1,7 +1,6 @@
 import { useAction } from "@/hooks/use-action";
 import { useDevice } from "@/hooks/use-device";
 import { runAction } from "@/lib/joystick-api";
-import { toast } from "@/utils/toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useMode(deviceId: string) {
@@ -20,15 +19,7 @@ export function useMode(deviceId: string) {
         params: { mode },
       });
     },
-    onError: (error) => {
-      toast.error({
-        message: error.message,
-      });
-    },
     onSuccess: () => {
-      toast.success({
-        message: "Mode set successfully",
-      });
       queryClient.invalidateQueries({ queryKey: ["device", deviceId] });
     },
   });
