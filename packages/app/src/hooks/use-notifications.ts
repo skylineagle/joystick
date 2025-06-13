@@ -19,7 +19,7 @@ export const useNotifications = () => {
     queryFn: async (): Promise<NotificationHistoryItem[]> => {
       if (!user?.id) return [];
 
-      const result = await pb.collection("notifications").getList(1, 50, {
+      const result = await pb.collection("notifications").getList(1, 20, {
         sort: "-created",
         expand: "device",
         filter: `dismissed = "" || dismissed !~ "${user.id}"`,
