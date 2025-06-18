@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { NotificationList } from "@/components/ui/notification-list";
-import { NotificationPanelFooter } from "@/components/ui/notification-panel-footer";
-import { NotificationPanelHeader } from "@/components/ui/notification-panel-header";
+import { NotificationList } from "@/components/ui/notifications/notification-list";
+import { NotificationPanelFooter } from "@/components/ui/notifications/notification-panel-footer";
+import { NotificationPanelHeader } from "@/components/ui/notifications/notification-panel-header";
 import {
   Popover,
   PopoverContent,

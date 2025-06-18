@@ -1,7 +1,7 @@
 import { DeviceSwitcher } from "@/components/device-switcher";
 import { DeviceHealthIndicator } from "@/components/device/device-health-indicator";
 import { AnimatedThemeToggle } from "@/components/ui/animated-theme-toggle";
-import { NotificationPanel } from "@/components/ui/notification-panel";
+import { NotificationPanel } from "@/components/ui/notifications/notification-panel";
 import {
   SidebarInset,
   SidebarProvider,

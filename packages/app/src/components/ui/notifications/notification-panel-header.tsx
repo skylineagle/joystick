@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { NotificationHelp } from "@/components/ui/notification-help";
+import { NotificationHelp } from "@/components/ui/notifications/notification-help";
 import type { NotificationHistoryItem } from "@/lib/notification-db";
 import { cn } from "@/lib/utils";
 import { CheckCheck, Filter, FilterX, Trash } from "lucide-react";

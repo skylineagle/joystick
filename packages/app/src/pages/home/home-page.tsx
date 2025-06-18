@@ -1,10 +1,10 @@
 import { AppStatusIndicator } from "@/components/app-status-indicator";
-import { ConfettiEasterEgg } from "@/components/confetti-easter-egg";
 import { BatchOperations } from "@/components/device/batch-operations";
+import { ConfettiEasterEgg } from "@/components/easter-eggs/confetti-easter-egg";
 import { AnimatedThemeToggle } from "@/components/ui/animated-theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { NotificationPanel } from "@/components/ui/notification-panel";
+import { NotificationPanel } from "@/components/ui/notifications/notification-panel";
 import { UserProfile } from "@/components/user-profile";
 import { useDevicesQuery } from "@/hooks/use-devices-query";
 import { useIsPermitted } from "@/hooks/use-is-permitted";

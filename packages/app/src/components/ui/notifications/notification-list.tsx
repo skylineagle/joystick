@@ -2,7 +2,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Bell } from "lucide-react";
 import type { NotificationHistoryItem } from "@/lib/notification-db";
 import type { FC } from "react";
-import { NotificationCard } from "@/components/ui/notification-card";
+import { NotificationCard } from "@/components/ui/notifications/notification-card";
 
 type NotificationListProps = {
   sortedNotifications: NotificationHistoryItem[];
