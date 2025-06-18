@@ -1,5 +1,9 @@
 import { pb } from "@/lib/pocketbase";
-import { DevicesResponse, NotificationsResponse } from "@/types/db.types";
+import {
+  DevicesResponse,
+  NotificationsResponse,
+  UsersResponse,
+} from "@/types/db.types";
 import { RecordSubscription } from "pocketbase";
 
 export interface NotificationHistoryItem
@@ -7,6 +11,7 @@ export interface NotificationHistoryItem
   read: boolean;
   expand?: {
     device?: DevicesResponse;
+    user?: UsersResponse;
   };
 }
 
@@ -109,13 +114,13 @@ export const fetchNotificationHistory = async (
   const result = await pb.collection("notifications").getList(page, perPage, {
     filter,
     sort: "-created",
-    expand: "device",
+    expand: "device,user",
   });
 
   const notifications: NotificationHistoryItem[] = result.items.map((item) => {
     const typedItem = item as NotificationsResponse<
       unknown,
-      { device?: DevicesResponse }
+      { device?: DevicesResponse; user?: UsersResponse }
     >;
     return {
       ...typedItem,
@@ -125,6 +130,7 @@ export const fetchNotificationHistory = async (
       expand: typedItem.expand
         ? {
             device: typedItem.expand.device,
+            user: typedItem.expand.user,
           }
         : undefined,
     };

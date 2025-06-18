@@ -45,23 +45,11 @@ export const NotificationProvider = ({
 
   const { lastMessage, readyState } = useWebSocket(wsUrl, {
     shouldReconnect: (closeEvent) => {
-      console.log(
-        "WebSocket shouldReconnect:",
-        closeEvent.code,
-        closeEvent.reason
-      );
       return closeEvent.code !== 1000;
     },
     reconnectAttempts: 3,
     reconnectInterval: (attemptNumber) => {
-      console.log("WebSocket reconnect attempt:", attemptNumber);
       return Math.min(Math.pow(2, attemptNumber) * 1000, 5000);
-    },
-    onOpen: () => {
-      console.log("WebSocket connected successfully to:", wsUrl);
-    },
-    onClose: (event) => {
-      console.log("WebSocket closed:", event.code, event.reason);
     },
     onError: (error) => {
       console.error("WebSocket error:", error);
@@ -145,12 +133,6 @@ export const NotificationProvider = ({
 
   useEffect(() => {
     const isConnected = readyState === ReadyState.OPEN;
-    console.log(
-      "WebSocket readyState:",
-      readyState,
-      "isConnected:",
-      isConnected
-    );
     setIsWebSocketConnected(isConnected);
   }, [readyState]);
 

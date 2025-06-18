@@ -1,3 +1,4 @@
+import { enhancedLogger } from "@/enhanced-logger";
 import { logger } from "@/logger";
 import { pb } from "@/pocketbase";
 import type { DeviceResponse } from "@joystick/core";
@@ -110,5 +111,17 @@ export async function updateStatus(deviceId: string) {
     });
   } catch (error) {
     logger.error(error);
+  }
+}
+
+export function tryImpersonate(userId: string) {
+  try {
+    return pb.collection("users").impersonate(userId, 0);
+  } catch (error) {
+    enhancedLogger.error(
+      { error, userId },
+      "Failed to impersonate user, continuing with superuser"
+    );
+    return pb;
   }
 }

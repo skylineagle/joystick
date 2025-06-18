@@ -6,7 +6,11 @@ import {
   type NotificationHistoryItem,
 } from "@/lib/notification-db";
 import { pb } from "@/lib/pocketbase";
-import type { DevicesResponse, NotificationsResponse } from "@/types/db.types";
+import type {
+  DevicesResponse,
+  NotificationsResponse,
+  UsersResponse,
+} from "@/types/db.types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect } from "react";
 
@@ -21,14 +25,14 @@ export const useNotifications = () => {
 
       const result = await pb.collection("notifications").getList(1, 20, {
         sort: "-created",
-        expand: "device",
+        expand: "device,user",
         filter: `dismissed = "" || dismissed !~ "${user.id}"`,
       });
 
       return result.items.map((item) => {
         const typedItem = item as NotificationsResponse<
           unknown,
-          { device?: DevicesResponse }
+          { device?: DevicesResponse; user?: UsersResponse }
         >;
         return {
           ...typedItem,
@@ -36,6 +40,7 @@ export const useNotifications = () => {
           expand: typedItem.expand
             ? {
                 device: typedItem.expand.device,
+                user: typedItem.expand.user,
               }
             : undefined,
         };

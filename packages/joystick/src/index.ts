@@ -24,6 +24,7 @@ import {
   sendNotification,
   type SendNotificationRequest,
 } from "./notifications";
+import { tryImpersonate } from "@/utils";
 
 const app = new Elysia()
   .use(
@@ -71,10 +72,14 @@ app.post(
         },
         "Running command"
       );
-      enhancedLogger.debug(headers);
+
+      const userId = headers["x-user-id"] ?? "system";
+      const userName = headers["x-user-name"] ?? "system";
+
+      const userPb = await tryImpersonate(userId);
 
       // Get the device from PocketBase
-      const result = await pb
+      const result = await userPb
         .collection("devices")
         .getFullList<DeviceResponse>(1, {
           filter: `id = "${params.device}"`,
@@ -87,7 +92,7 @@ app.post(
       const device = result[0];
 
       // Get the action from PocketBase
-      const actionResult = await pb
+      const actionResult = await userPb
         .collection("actions")
         .getFullList<ActionsResponse>(1, {
           filter: `name="${params.action}"`,
@@ -99,9 +104,11 @@ app.post(
       const action = actionResult[0];
 
       // Get the action from PocketBase
-      const runResult = await pb.collection("run").getFullList<RunResponse>(1, {
-        filter: `action = "${action.id}" && device = "${device.expand?.device.id}"`,
-      });
+      const runResult = await userPb
+        .collection("run")
+        .getFullList<RunResponse>(1, {
+          filter: `action = "${action.id}" && device = "${device.expand?.device.id}"`,
+        });
 
       if (runResult.length === 0)
         throw new Error(
@@ -150,14 +157,11 @@ app.post(
       };
 
       if (params.action === "set-mode") {
-        await pb.collection("devices").update(params.device, {
+        await userPb.collection("devices").update(params.device, {
           mode: body?.mode,
         });
         await updateStatus(params.device);
       }
-
-      const userId = headers["x-user-id"] ?? "system";
-      const userName = headers["x-user-name"] ?? "system";
 
       try {
         if (action.name !== "healthcheck") {

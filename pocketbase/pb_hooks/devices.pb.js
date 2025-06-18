@@ -323,6 +323,7 @@ onRecordUpdateRequest((e) => {
             : `Waiting for ${deviceName} stream`,
         deviceId: e.record.id,
         dismissible: true,
+        userId: e.auth.id,
       });
     }
   }
@@ -337,6 +338,7 @@ onRecordUpdateRequest((e) => {
       message: `Camera ${deviceName} is now in ${newMode} mode`,
       deviceId: e.record.id,
       dismissible: true,
+      userId: e.auth.id,
     });
   }
 
@@ -350,6 +352,7 @@ onRecordUpdateRequest((e) => {
       message: `Camera ${deviceName} switched from ${currentMode} to ${mode} mode`,
       deviceId: e.record.id,
       dismissible: true,
+      userId: e.auth.id,
     });
   }
 

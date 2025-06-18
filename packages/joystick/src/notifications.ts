@@ -65,22 +65,25 @@ export const broadcastNotification = (notification: NotificationPayload) => {
 
 export const sendNotification = async (
   request: SendNotificationRequest,
-  userId: string = "system",
-  userName: string = "system"
+  userId?: string,
+  userName?: string
 ): Promise<SendNotificationResponse> => {
+  const resolvedUserId = request.userId || userId || "system";
+  const resolvedUserName = userName || "system";
+
   const notification: Omit<NotificationPayload, "id"> = {
     type: request.type || "info",
     title: request.title,
     message: request.message,
     timestamp: Date.now(),
-    userId: request.userId || userId,
+    userId: resolvedUserId,
     deviceId: request.deviceId,
     dismissible: request.dismissible !== false,
   };
 
   enhancedLogger.info(
     {
-      user: { name: userName, id: userId },
+      user: { name: resolvedUserName, id: resolvedUserId },
       notification,
     },
     "notification"
@@ -104,6 +107,10 @@ export const sendNotification = async (
           "Device not found, notification will be saved without device relation"
         );
       }
+    }
+
+    if (notification.userId && notification.userId !== "system") {
+      notificationData.user = notification.userId;
     }
 
     const { id } = await pb

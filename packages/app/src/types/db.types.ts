@@ -193,6 +193,7 @@ export type NotificationsRecord<Tmetadata = unknown> = {
 	title: string
 	type: NotificationsTypeOptions
 	updated?: IsoDateString
+	user?: RecordIdString
 }
 
 export type ParametersTreeRecord<Tschema = unknown> = {
