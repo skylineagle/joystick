@@ -1,18 +1,17 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Check,
-  X,
-  Clock,
-  AlertTriangleIcon,
-  AlertCircleIcon,
-  CircleCheckIcon,
-  InfoIcon,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { urls } from "@/lib/urls";
 import type { NotificationHistoryItem } from "@/lib/notification-db";
+import { urls } from "@/lib/urls";
+import {
+  AlertCircleIcon,
+  AlertTriangleIcon,
+  Check,
+  CircleCheckIcon,
+  Clock,
+  InfoIcon,
+  X,
+} from "lucide-react";
 import type { FC } from "react";
 
 type NotificationCardProps = {
