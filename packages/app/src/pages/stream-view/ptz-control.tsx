@@ -6,7 +6,7 @@ import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { usePtz } from "@/hooks/use-ptz";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Move, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface PtzControlProps {
@@ -36,8 +36,7 @@ export function PtzControl({ deviceId }: PtzControlProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [localX, setLocalX] = useState(0);
   const [localY, setLocalY] = useState(0);
-  const joystickRef = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const touchpadRef = useRef<HTMLDivElement>(null);
 
   const isLoading = isXLoading || isYLoading;
 
@@ -53,51 +52,47 @@ export function PtzControl({ deviceId }: PtzControlProps) {
     await Promise.all([refreshPtzX(), refreshPtzY()]);
   };
 
-  const handleJoystickMove = useCallback(
+  const handleCenter = () => {
+    const centerX = Math.round((xMin + xMax) / 2);
+    const centerY = Math.round((yMin + yMax) / 2);
+    setLocalX(centerX);
+    setLocalY(centerY);
+    setPtzX(centerX);
+    setPtzY(centerY);
+  };
+
+  const handleTouchpadMove = useCallback(
     (clientX: number, clientY: number) => {
-      if (!containerRef.current) return;
+      if (!touchpadRef.current) return;
 
-      const rect = containerRef.current.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      const radius = Math.min(rect.width, rect.height) / 2 - 20;
+      const rect = touchpadRef.current.getBoundingClientRect();
+      const relativeX = (clientX - rect.left) / rect.width;
+      const relativeY = (clientY - rect.top) / rect.height;
 
-      const deltaX = clientX - centerX;
-      const deltaY = clientY - centerY;
-      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      const clampedX = Math.max(0, Math.min(1, relativeX));
+      const clampedY = Math.max(0, Math.min(1, relativeY));
 
-      let normalizedX = deltaX / radius;
-      let normalizedY = -deltaY / radius;
+      const newX = Math.round(xMin + clampedX * (xMax - xMin));
+      const newY = Math.round(yMax - clampedY * (yMax - yMin));
 
-      if (distance > radius) {
-        normalizedX = (deltaX / distance) * (radius / radius);
-        normalizedY = -(deltaY / distance) * (radius / radius);
-      }
-
-      normalizedX = Math.max(-1, Math.min(1, normalizedX));
-      normalizedY = Math.max(-1, Math.min(1, normalizedY));
-
-      const newX = xMin + ((normalizedX + 1) / 2) * (xMax - xMin);
-      const newY = yMin + ((normalizedY + 1) / 2) * (yMax - yMin);
-
-      setLocalX(Math.round(newX));
-      setLocalY(Math.round(newY));
+      setLocalX(newX);
+      setLocalY(newY);
     },
     [xMax, xMin, yMax, yMin]
   );
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
-    handleJoystickMove(e.clientX, e.clientY);
+    handleTouchpadMove(e.clientX, e.clientY);
   };
 
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (isDragging) {
-        handleJoystickMove(e.clientX, e.clientY);
+        handleTouchpadMove(e.clientX, e.clientY);
       }
     },
-    [isDragging, handleJoystickMove]
+    [isDragging, handleTouchpadMove]
   );
 
   const handleMouseUp = useCallback(() => {
@@ -119,23 +114,50 @@ export function PtzControl({ deviceId }: PtzControlProps) {
     }
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
-  const getJoystickPosition = () => {
-    const normalizedX = ((localX - xMin) / (xMax - xMin)) * 2 - 1;
-    const normalizedY = ((localY - yMin) / (yMax - yMin)) * 2 - 1;
+  const getCrosshairPosition = () => {
+    if (xMax === xMin || yMax === yMin) {
+      return { x: 50, y: 50 };
+    }
 
-    const x = normalizedX * 40;
-    const y = -normalizedY * 40;
+    const normalizedX = (localX - xMin) / (xMax - xMin);
+    const normalizedY = (localY - yMin) / (yMax - yMin);
 
+    const crosshairRadius = 12;
+    const containerWidth = isMobileLandscape ? 128 : 160;
+    const containerHeight = isMobileLandscape ? 96 : 128;
+
+    const marginXPercent = (crosshairRadius / containerWidth) * 100;
+    const marginYPercent = (crosshairRadius / containerHeight) * 100;
+
+    const x = marginXPercent + normalizedX * (100 - 2 * marginXPercent);
+    const y = marginYPercent + (1 - normalizedY) * (100 - 2 * marginYPercent);
+    console.log(x, y);
     return { x, y };
   };
 
-  const joystickPosition = getJoystickPosition();
+  const crosshairPosition = getCrosshairPosition();
 
   return (
     <div className="w-full space-y-4">
       <div className="flex items-center justify-between">
         <Label className="text-xs sm:text-sm">PTZ Control</Label>
         <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleCenter}
+            disabled={isLoading}
+            className={cn("h-6 w-6", isMobileLandscape ? "h-5 w-5" : "h-6 w-6")}
+            title="Center camera"
+          >
+            <RotateCcw
+              className={cn(
+                "h-3 w-3",
+                isMobileLandscape ? "h-2.5 w-2.5" : "h-3 w-3"
+              )}
+            />
+            <span className="sr-only">Center position</span>
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -157,37 +179,41 @@ export function PtzControl({ deviceId }: PtzControlProps) {
 
       <div className="flex justify-center">
         <div
-          ref={containerRef}
+          ref={touchpadRef}
           className={cn(
-            "relative bg-muted/50 rounded-full border-2 border-border cursor-crosshair select-none",
-            isMobileLandscape ? "w-20 h-20" : "w-24 h-24"
+            "relative bg-gradient-to-br from-muted/30 to-muted/60 rounded-lg border-2 border-border cursor-crosshair select-none overflow-hidden",
+            "transition-all duration-200 hover:border-primary/50 hover:shadow-md",
+            isDragging && "border-primary shadow-lg scale-[1.02]",
+            isMobileLandscape ? "w-32 h-24" : "w-40 h-32"
           )}
           onMouseDown={handleMouseDown}
         >
-          <div className="absolute inset-2 rounded-full border border-muted-foreground/20" />
+          <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 opacity-10">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <div key={i} className="border border-muted-foreground/20" />
+            ))}
+          </div>
 
-          <motion.div
-            ref={joystickRef}
-            className="absolute w-4 h-4 bg-primary rounded-full shadow-lg cursor-grab active:cursor-grabbing"
+          <div
+            className="absolute pointer-events-none transform -translate-x-1/2 -translate-y-1/2"
             style={{
-              left: "50%",
-              top: "50%",
-              marginLeft: "-8px",
-              marginTop: "-8px",
+              left: `${crosshairPosition.x}%`,
+              top: `${crosshairPosition.y}%`,
             }}
-            animate={{
-              x: joystickPosition.x,
-              y: joystickPosition.y,
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 30,
-            }}
-          />
-
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-1 h-1 bg-muted-foreground/40 rounded-full" />
+          >
+            <div className="relative">
+              <motion.div
+                className="w-6 h-6 rounded-full bg-primary shadow-lg border-2 border-background"
+                animate={{
+                  boxShadow: isDragging
+                    ? "0 8px 25px -5px rgba(var(--primary), 0.4)"
+                    : "0 4px 15px -3px rgba(var(--primary), 0.2)",
+                }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Move className="w-3 h-3 text-primary-foreground" />
+              </div>
+            </div>
           </div>
         </div>
       </div>

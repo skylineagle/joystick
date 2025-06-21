@@ -13,8 +13,6 @@ export function usePtz(deviceId: string, axis: PtzAxis) {
     `set-${axis}`
   );
 
-  console.log(setActionParameters);
-
   const {
     data: ptzValue,
     refetch,
