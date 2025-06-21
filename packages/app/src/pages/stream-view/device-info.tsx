@@ -7,9 +7,10 @@ import { BatteryStatus } from "@/pages/status/battery-status";
 import { CellularStatus } from "@/pages/status/cellular-status";
 import { GPSStatus } from "@/pages/status/gps-status";
 import { IMUStatus } from "@/pages/status/imu-status";
+import { PtzControl } from "@/pages/stream-view/ptz-control";
 import { TerminalPingControl } from "@/pages/stream-view/terminal-ping-control";
 import { AnimatePresence, motion } from "framer-motion";
-import { Battery, Map, Navigation, Signal, Terminal } from "lucide-react";
+import { Battery, Map, Move, Navigation, Signal, Terminal } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { FC } from "react";
 
@@ -17,7 +18,7 @@ export interface DeviceInfoProps {
   deviceId: string;
 }
 
-type TabValue = "cell" | "battery" | "imu" | "gps" | "ping";
+type TabValue = "cell" | "battery" | "imu" | "gps" | "ping" | "ptz";
 
 const MotionCard = motion.create(Card);
 const MotionTabsContent = motion.create(TabsContent);
@@ -34,21 +35,25 @@ export const DeviceInfo: FC<DeviceInfoProps> = ({ deviceId }) => {
     useIsSupported(deviceId!, ["get-imu"]);
   const { isSupported: isGetGpsSupported, isLoading: isGetGpsLoading } =
     useIsSupported(deviceId!, ["get-gps"]);
+  const { isSupported: isPtzSupported, isLoading: isPtzLoading } =
+    useIsSupported(deviceId!, ["set-x", "set-y", "get-x", "get-y"]);
   const isGpsPermitted = useIsPermitted("device-gps");
   const isImuPermitted = useIsPermitted("device-imu");
   const isBatteryPermitted = useIsPermitted("device-battery");
   const isCpsiPermitted = useIsPermitted("device-cpsi");
   const isPingPermitted = useIsPermitted("device-ping");
+  const isPtzPermitted = useIsPermitted("control-ptz");
 
   const isGps = isGpsPermitted && isGetGpsSupported;
   const isImu = isImuPermitted && isGetImuSupported;
   const isBattery = isBatteryPermitted && isGetBatterySupported;
   const isCpsi = isCpsiPermitted && isGetCpsiStatusSupported;
   const isPing = isPingPermitted;
+  const isPtz = isPtzPermitted && isPtzSupported;
 
   const [activeTab, setActiveTab] = useQueryState(
     "activeTab",
-    parseAsStringEnum(["cell", "battery", "imu", "gps", "ping"])
+    parseAsStringEnum(["cell", "battery", "imu", "gps", "ping", "ptz"])
       .withDefault(
         isGetCpsiStatusSupported
           ? "cell"
@@ -58,19 +63,23 @@ export const DeviceInfo: FC<DeviceInfoProps> = ({ deviceId }) => {
           ? "imu"
           : isGetGpsSupported
           ? "gps"
-          : "ping"
+          : isPtzSupported
+          ? "ptz"
+          : isPingPermitted
+          ? "ping"
+          : "cell"
       )
       .withOptions({
         shallow: true,
       })
   );
 
-  const availableTabs = [isCpsi, isBattery, isImu, isGps, isPing].filter(
+  const availableTabs = [isCpsi, isBattery, isImu, isGps, isPtz, isPing].filter(
     Boolean
   ).length;
 
   return (
-    (isGps || isImu || isBattery || isCpsi || isPing) && (
+    (isGps || isImu || isBattery || isCpsi || isPtz || isPing) && (
       <Tabs
         defaultValue="device"
         value={activeTab ?? "device"}
@@ -131,6 +140,18 @@ export const DeviceInfo: FC<DeviceInfoProps> = ({ deviceId }) => {
             </MotionTabsContent>
           )}
 
+          {isPtz && !isPtzLoading && (
+            <MotionTabsContent
+              value="ptz"
+              className="m-0 pt-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              <PtzControl deviceId={deviceId!} />
+            </MotionTabsContent>
+          )}
+
           {isPing && (
             <MotionTabsContent
               value="ping"
@@ -149,6 +170,7 @@ export const DeviceInfo: FC<DeviceInfoProps> = ({ deviceId }) => {
         {/* Tab Triggers */}
         <TabsList
           className={cn("shadow-xl mt-2 h-7 grid", {
+            "grid-cols-6": availableTabs === 6,
             "grid-cols-5": availableTabs === 5,
             "grid-cols-4": availableTabs === 4,
             "grid-cols-3": availableTabs === 3,
@@ -273,6 +295,36 @@ export const DeviceInfo: FC<DeviceInfoProps> = ({ deviceId }) => {
                     transition={{ duration: 0.2 }}
                   >
                     GPS
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </MotionTabsTrigger>
+          )}
+          {isPtz && !isPtzLoading && (
+            <MotionTabsTrigger
+              value="ptz"
+              className="text-xs py-0.5 px-1"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={activeTab !== "ptz" ? { opacity: 0.7 } : { opacity: 1 }}
+              animate={
+                activeTab === "ptz"
+                  ? { opacity: 1, scale: 1 }
+                  : { opacity: 0.7, scale: 1 }
+              }
+              transition={{ duration: 0.2 }}
+            >
+              <Move className="h-3 w-3 mr-1" />
+              <AnimatePresence mode="wait">
+                {activeTab === "ptz" && (
+                  <motion.span
+                    key="ptz-text"
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: "auto" }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    PTZ
                   </motion.span>
                 )}
               </AnimatePresence>
