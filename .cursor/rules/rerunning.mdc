@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+When working on the app, im always running all services and the frontend in the background and there is no no need to run any type check or dev envs.
