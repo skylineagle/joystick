@@ -1,5 +1,4 @@
-import { urls } from "@/lib/urls";
-import { createUrl, joystickApi } from "@/lib/api-client";
+import { runAction } from "@/lib/joystick-api";
 import { useQuery } from "@tanstack/react-query";
 
 interface PingResult {
@@ -19,12 +18,16 @@ export function usePing(
     queryFn: async (): Promise<PingResult> => {
       const startTime = Date.now();
       try {
-        const url = createUrl(urls.joystick, `/api/ping/${deviceId}`);
-        const result = await joystickApi.get<boolean>(url);
+        const result = await runAction({
+          deviceId,
+          action: "healthcheck",
+          params: {},
+          log: false,
+        });
         const endTime = Date.now();
 
         return {
-          success: result,
+          success: result === "true",
           timestamp: endTime,
           responseTime: endTime - startTime,
         };
