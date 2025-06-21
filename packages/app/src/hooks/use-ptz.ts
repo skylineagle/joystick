@@ -1,4 +1,5 @@
 import { useActionParameters } from "@/hooks/use-action-parameters";
+import { useIsSupported } from "@/hooks/use-is-supported";
 import { runAction } from "@/lib/joystick-api";
 import { toast } from "@/utils/toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -8,6 +9,11 @@ type PtzAxis = "x" | "y";
 
 export function usePtz(deviceId: string, axis: PtzAxis) {
   const queryClient = useQueryClient();
+  const { isSupported } = useIsSupported(deviceId, [
+    `get-${axis}`,
+    `set-${axis}`,
+  ]);
+
   const { parameters: setActionParameters } = useActionParameters<JSONSchema7>(
     deviceId,
     `set-${axis}`
@@ -28,7 +34,7 @@ export function usePtz(deviceId: string, axis: PtzAxis) {
       });
       return data;
     },
-    enabled: !!deviceId,
+    enabled: !!deviceId && isSupported,
   });
 
   const { mutate: setPtzValue } = useMutation({
@@ -56,5 +62,6 @@ export function usePtz(deviceId: string, axis: PtzAxis) {
     max: (setActionParameters?.properties?.pos as JSONSchema7)?.maximum ?? 0,
     refreshPtzValue: refetch,
     isLoading: isFetching || isLoading,
+    isSupported,
   };
 }

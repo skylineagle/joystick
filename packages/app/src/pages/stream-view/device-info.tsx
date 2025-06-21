@@ -35,8 +35,12 @@ export const DeviceInfo: FC<DeviceInfoProps> = ({ deviceId }) => {
     useIsSupported(deviceId!, ["get-imu"]);
   const { isSupported: isGetGpsSupported, isLoading: isGetGpsLoading } =
     useIsSupported(deviceId!, ["get-gps"]);
-  const { isSupported: isPtzSupported, isLoading: isPtzLoading } =
-    useIsSupported(deviceId!, ["set-x", "set-y", "get-x", "get-y"]);
+  const { isSupported: isPtzXSupported, isLoading: isPtzXLoading } =
+    useIsSupported(deviceId!, ["set-x", "get-x"]);
+  const { isSupported: isPtzYSupported, isLoading: isPtzYLoading } =
+    useIsSupported(deviceId!, ["set-y", "get-y"]);
+  const isPtzSupported = isPtzXSupported || isPtzYSupported;
+  const isPtzLoading = isPtzXLoading || isPtzYLoading;
   const isGpsPermitted = useIsPermitted("device-gps");
   const isImuPermitted = useIsPermitted("device-imu");
   const isBatteryPermitted = useIsPermitted("device-battery");
