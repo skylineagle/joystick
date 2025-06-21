@@ -23,7 +23,7 @@ export const NotificationsHistoryPage = () => {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
 
-  const { data: isNotificationsHistoryPermitted } = useIsPermitted(
+  const isNotificationsHistoryPermitted = useIsPermitted(
     "notifications-history"
   );
 

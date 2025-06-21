@@ -128,7 +128,7 @@ export function DeviceDataTable({ data }: DeviceDataTableProps) {
   const { data: availableModes } = useAvailableModes(
     Array.from(new Set(data.map((d) => d.device)))
   );
-  const { data: isAllowedToViewConnection } = useIsPermitted("toggle-slot");
+  const isAllowedToViewConnection = useIsPermitted("toggle-slot");
   const columns = useMemo(
     () => [
       createSelectColumn(),
