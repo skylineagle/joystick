@@ -12,10 +12,10 @@ import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { useIsSupported } from "@/hooks/use-is-supported";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { cn } from "@/lib/utils";
-import { BitrateControll } from "@/pages/stream-view/bitrate-control";
+import { BitrateControll } from "@/pages/stream-view/controls/bitrate-control";
 import { DeviceInfo } from "@/pages/stream-view/device-info";
-import { FpsControll } from "@/pages/stream-view/fps-control";
-import { QualityControll } from "@/pages/stream-view/quality-control";
+import { FpsControll } from "@/pages/stream-view/controls/fps-control";
+import { QualityControll } from "@/pages/stream-view/controls/quality-control";
 import { RoiModeControl } from "@/pages/stream-view/roi/roi-mode-control";
 import { motion } from "framer-motion";
 import { useLocation, useParams } from "react-router";
@@ -29,7 +29,6 @@ export const Controls = () => {
   const { data: device, isLoading: isDeviceLoading } = useDevice(deviceId!);
   const { isSupported: isRoiSupported, isLoading: isRoiLoading } =
     useIsSupported(deviceId!, ["get-roi"]);
-  const isControlRoiPermitted = useIsPermitted("control-roi");
   const { isSupported: isSetBitrateSupported, isLoading: isSetBitrateLoading } =
     useIsSupported(deviceId!, ["set-bitrate", "get-bitrate"]);
   const { isSupported: isSetFpsSupported, isLoading: isSetFpsLoading } =
@@ -39,10 +38,16 @@ export const Controls = () => {
   const { isSupported: isSetModeSupported, isLoading: isSetModeLoading } =
     useIsSupported(deviceId!, "set-mode");
 
-  const isAdvancedStreamControlPermitted = useIsPermitted(
-    "advanced-stream-control"
-  );
-  const isControlModePermitted = useIsPermitted("control-mode");
+  const permissions = useIsPermitted([
+    "control-roi",
+    "advanced-stream-control",
+    "control-mode",
+  ] as const);
+
+  const isControlRoiPermitted = permissions?.["control-roi"] ?? false;
+  const isAdvancedStreamControlPermitted =
+    permissions?.["advanced-stream-control"] ?? false;
+  const isControlModePermitted = permissions?.["control-mode"] ?? false;
 
   return (
     <MotionCard

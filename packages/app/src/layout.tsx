@@ -1,3 +1,4 @@
+import { getAvailableNavItems } from "@/components/app-sidebar";
 import { DeviceSwitcher } from "@/components/device-switcher";
 import { DeviceHealthIndicator } from "@/components/device/device-health-indicator";
 import { AnimatedThemeToggle } from "@/components/ui/animated-theme-toggle";
@@ -22,7 +23,6 @@ import { DeviceResponse } from "@/types/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { Suspense, lazy, useEffect } from "react";
 import { Outlet, useParams } from "react-router";
-import { getAvailableNavItems } from "@/components/app-sidebar";
 
 // Lazy load components
 const AppSidebar = lazy(() =>

@@ -13,12 +13,20 @@ interface DeviceActionsProps {
   device: DeviceResponse;
 }
 export function DeviceActions({ device }: DeviceActionsProps) {
-  const isAllowedToControlDevice = useIsPermitted("control-device") ?? false;
-  const isAllowedToDeleteDevice = useIsPermitted("delete-device") ?? false;
-  const isAllowedToEditDevice = useIsPermitted("edit-device") ?? false;
+  const permissions = useIsPermitted([
+    "control-device",
+    "delete-device",
+    "edit-device",
+    "download-client",
+    "toggle-slot",
+  ] as const);
+
+  const isAllowedToControlDevice = permissions?.["control-device"] ?? false;
+  const isAllowedToDeleteDevice = permissions?.["delete-device"] ?? false;
+  const isAllowedToEditDevice = permissions?.["edit-device"] ?? false;
   const isAllowedToDownloadClientFile =
-    useIsPermitted("download-client") ?? false;
-  const isAllowedToToggleSlot = useIsPermitted("toggle-slot") ?? false;
+    permissions?.["download-client"] ?? false;
+  const isAllowedToToggleSlot = permissions?.["toggle-slot"] ?? false;
 
   if (!device) return null;
 

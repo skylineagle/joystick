@@ -23,7 +23,7 @@ type BadgeVariant = VariantProps<typeof badgeVariants>["variant"];
 
 export const DeviceName = memo(
   ({ deviceId, configurationName, name }: DeviceNameProps) => {
-    const isAllowedToViewStream = useIsPermitted("view-stream");
+    const { data: isAllowedToViewStream } = useIsPermitted("view-stream");
     const { isSupported: isHealthcheckSupported } = useIsSupported(
       deviceId ?? "",
       "healthcheck"

@@ -1,10 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { usePtz } from "@/hooks/use-ptz";
 import { cn } from "@/lib/utils";
+import { AxisControl } from "@/pages/stream-view/controls/ptz/axis-control";
 import { motion } from "framer-motion";
 import {
   ArrowLeftRight,
@@ -301,77 +300,27 @@ export function PtzControl({ deviceId }: PtzControlProps) {
 
       <div className="space-y-3">
         {isXSupported && (
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs text-muted-foreground">
-                X Position
-              </Label>
-              <Input
-                type="number"
-                value={localX}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  if (value >= xMin && value <= xMax) {
-                    setLocalX(value);
-                    setPtzX(value);
-                  }
-                }}
-                min={xMin}
-                max={xMax}
-                className="w-16 h-6 text-xs"
-                disabled={isLoading}
-              />
-            </div>
-            <Slider
-              value={[localX]}
-              onValueChange={([value]) => {
-                setLocalX(value);
-                setPtzX(value);
-              }}
-              min={xMin}
-              max={xMax}
-              step={1}
-              className="w-full"
-              disabled={isLoading}
-            />
-          </div>
+          <AxisControl
+            value={localX}
+            min={xMin}
+            max={xMax}
+            step={1}
+            onChange={setLocalX}
+            isLoading={isLoading}
+            label="X Position"
+          />
         )}
 
         {isYSupported && (
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <Label className="text-xs text-muted-foreground">
-                Y Position
-              </Label>
-              <Input
-                type="number"
-                value={localY}
-                onChange={(e) => {
-                  const value = Number(e.target.value);
-                  if (value >= yMin && value <= yMax) {
-                    setLocalY(value);
-                    setPtzY(value);
-                  }
-                }}
-                min={yMin}
-                max={yMax}
-                className="w-16 h-6 text-xs"
-                disabled={isLoading}
-              />
-            </div>
-            <Slider
-              value={[localY]}
-              onValueChange={([value]) => {
-                setLocalY(value);
-                setPtzY(value);
-              }}
-              min={yMin}
-              max={yMax}
-              step={1}
-              className="w-full"
-              disabled={isLoading}
-            />
-          </div>
+          <AxisControl
+            value={localY}
+            min={yMin}
+            max={yMax}
+            step={1}
+            onChange={setLocalY}
+            isLoading={isLoading}
+            label="Y Position"
+          />
         )}
       </div>
     </div>

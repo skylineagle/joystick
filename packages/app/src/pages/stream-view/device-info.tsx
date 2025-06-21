@@ -7,8 +7,8 @@ import { BatteryStatus } from "@/pages/status/battery-status";
 import { CellularStatus } from "@/pages/status/cellular-status";
 import { GPSStatus } from "@/pages/status/gps-status";
 import { IMUStatus } from "@/pages/status/imu-status";
-import { PtzControl } from "@/pages/stream-view/ptz-control";
-import { TerminalPingControl } from "@/pages/stream-view/terminal-ping-control";
+import { PtzControl } from "@/pages/stream-view/controls/ptz/ptz-control";
+import { TerminalPingControl } from "@/pages/stream-view/controls/terminal-ping-control";
 import { AnimatePresence, motion } from "framer-motion";
 import { Battery, Map, Move, Navigation, Signal, Terminal } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
@@ -41,35 +41,37 @@ export const DeviceInfo: FC<DeviceInfoProps> = ({ deviceId }) => {
     useIsSupported(deviceId!, ["set-y", "get-y"]);
   const isPtzSupported = isPtzXSupported || isPtzYSupported;
   const isPtzLoading = isPtzXLoading || isPtzYLoading;
-  const isGpsPermitted = useIsPermitted("device-gps");
-  const isImuPermitted = useIsPermitted("device-imu");
-  const isBatteryPermitted = useIsPermitted("device-battery");
-  const isCpsiPermitted = useIsPermitted("device-cpsi");
-  const isPingPermitted = useIsPermitted("device-ping");
-  const isPtzPermitted = useIsPermitted("control-ptz");
+  const permissions = useIsPermitted([
+    "device-gps",
+    "device-imu",
+    "device-battery",
+    "device-cpsi",
+    "device-ping",
+    "control-ptz",
+  ] as const);
 
-  const isGps = isGpsPermitted && isGetGpsSupported;
-  const isImu = isImuPermitted && isGetImuSupported;
-  const isBattery = isBatteryPermitted && isGetBatterySupported;
-  const isCpsi = isCpsiPermitted && isGetCpsiStatusSupported;
-  const isPing = isPingPermitted;
-  const isPtz = isPtzPermitted && isPtzSupported;
+  const isGps = permissions?.["device-gps"] && isGetGpsSupported;
+  const isImu = permissions?.["device-imu"] && isGetImuSupported;
+  const isBattery = permissions?.["device-battery"] && isGetBatterySupported;
+  const isCpsi = permissions?.["device-cpsi"] && isGetCpsiStatusSupported;
+  const isPing = permissions?.["device-ping"];
+  const isPtz = permissions?.["control-ptz"] && isPtzSupported;
 
   const [activeTab, setActiveTab] = useQueryState(
     "activeTab",
     parseAsStringEnum(["cell", "battery", "imu", "gps", "ping", "ptz"])
       .withDefault(
-        isGetCpsiStatusSupported
+        isCpsi
           ? "cell"
-          : isGetBatterySupported
+          : isBattery
           ? "battery"
-          : isGetImuSupported
+          : isImu
           ? "imu"
-          : isGetGpsSupported
+          : isGps
           ? "gps"
-          : isPtzSupported
+          : isPtz
           ? "ptz"
-          : isPingPermitted
+          : isPing
           ? "ping"
           : "cell"
       )
