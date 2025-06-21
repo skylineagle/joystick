@@ -23,7 +23,7 @@ export function usePtz(deviceId: string, axis: PtzAxis) {
     data: ptzValue,
     refetch,
     isFetching,
-    isLoading,
+    isLoading: isQueryLoading,
   } = useQuery({
     queryKey: [`ptz-${axis}`, deviceId],
     queryFn: async () => {
@@ -32,12 +32,12 @@ export function usePtz(deviceId: string, axis: PtzAxis) {
         action: `get-${axis}`,
         log: false,
       });
-      return data;
+      return Number.parseInt(data ?? "0");
     },
     enabled: !!deviceId && isSupported,
   });
 
-  const { mutate: setPtzValue } = useMutation({
+  const { mutate: setPtzValue, isPending: isMutationLoading } = useMutation({
     mutationFn: (value: number) =>
       runAction({
         deviceId,
@@ -61,7 +61,8 @@ export function usePtz(deviceId: string, axis: PtzAxis) {
     min: (setActionParameters?.properties?.pos as JSONSchema7)?.minimum ?? 0,
     max: (setActionParameters?.properties?.pos as JSONSchema7)?.maximum ?? 0,
     refreshPtzValue: refetch,
-    isLoading: isFetching || isLoading,
+    isLoading: isFetching || isQueryLoading || isMutationLoading,
+    isMutationLoading,
     isSupported,
   };
 }
