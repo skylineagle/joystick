@@ -7,6 +7,7 @@ import {
   stopJob,
 } from "@/baker";
 import { logger } from "@/logger";
+import { pb } from "@/pocketbase";
 import cors from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import type { DeviceAutomation } from "@joystick/core";
@@ -16,9 +17,6 @@ import {
   STREAM_API_URL,
 } from "@joystick/core";
 import { Elysia } from "elysia";
-import PocketBase from "pocketbase";
-
-const pb = new PocketBase(POCKETBASE_URL);
 
 new Elysia()
   .use(

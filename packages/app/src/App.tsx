@@ -6,10 +6,12 @@ import { PageTransition } from "@/components/page-transition";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { ApiError } from "@/lib/api-client";
+import { useAuthStore } from "@/lib/auth";
 import { pb } from "@/lib/pocketbase";
 import { RerouteHome } from "@/pages/reroute-home";
 import { TerminalPage } from "@/pages/terminal/terminal-page";
 import { NotificationProvider } from "@/providers/notification-provider";
+import { UsersResponse } from "@/types/db.types";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v7";
@@ -157,10 +159,34 @@ const queryClient = new QueryClient({
 // AnimatedRoutes component to handle route transitions
 function AnimatedRoutes() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const setAuthStoreAuthenticated = useAuthStore(
+    (state) => state.setIsAuthenticated
+  );
+  const setUser = useAuthStore((state) => state.setUser);
+  const setToken = useAuthStore((state) => state.setToken);
 
   useEffect(() => {
+    // Sync auth store with PocketBase auth store on initialization
+    if (pb.authStore.isValid && pb.authStore.token && pb.authStore.record) {
+      setAuthStoreAuthenticated(true);
+      setToken(pb.authStore.token);
+      setUser(pb.authStore.record as UsersResponse);
+      setIsAuthenticated(true);
+    }
+
     const unsubscribe = pb.authStore.onChange(() => {
-      setIsAuthenticated(pb.authStore.isValid);
+      const isValid = pb.authStore.isValid;
+      setIsAuthenticated(isValid);
+
+      if (isValid && pb.authStore.token && pb.authStore.record) {
+        setAuthStoreAuthenticated(true);
+        setToken(pb.authStore.token);
+        setUser(pb.authStore.record as UsersResponse);
+      } else {
+        setAuthStoreAuthenticated(false);
+        setToken(null);
+        setUser(null);
+      }
     }, true);
 
     return () => {
@@ -170,7 +196,7 @@ function AnimatedRoutes() {
         // Do nothing
       }
     };
-  }, []);
+  }, [setAuthStoreAuthenticated, setUser, setToken]);
 
   return (
     <Routes>

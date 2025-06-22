@@ -10,3 +10,5 @@ export const USERNAME = process.env.USERNAME || "system@joystick.io";
 export const SUPERUSER_USERNAME =
   process.env.SUPERUSER_USERNAME || "admin@joystick.io";
 export const PASSWORD = process.env.PASSWORD || "Aa123456";
+export const DEFAULT_API_KEY =
+  process.env.JOYSTICK_API_KEY || "dev-api-key-12345";

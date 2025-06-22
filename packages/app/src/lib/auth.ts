@@ -9,6 +9,7 @@ export interface AuthState {
   token: string | null;
   setUser: (user: UsersResponse | null) => void;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
+  setToken: (token: string | null) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -21,6 +22,7 @@ export const useAuthStore = create<AuthState>()(
         return set({ user });
       },
       setIsAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
+      setToken: (token) => set({ token }),
     }),
     {
       name: "auth-storage",
@@ -52,5 +54,6 @@ export async function logout() {
   useAuthStore.setState({
     isAuthenticated: false,
     user: null,
+    token: null,
   });
 }

@@ -1,4 +1,8 @@
-import { JOYSTICK_API_URL, STREAM_API_URL } from "@joystick/core";
+import {
+  JOYSTICK_API_URL,
+  STREAM_API_URL,
+  DEFAULT_API_KEY,
+} from "@joystick/core";
 import { logger } from "./logger";
 import { pb } from "@/pocketbase";
 
@@ -11,6 +15,7 @@ export async function toggleMode(name: string, mode: string) {
     headers: {
       "Content-Type": "application/json",
       "x-user-id": pb.authStore.record?.id ?? "unknown",
+      "X-API-Key": DEFAULT_API_KEY,
     },
     body: JSON.stringify({ mode }),
   });

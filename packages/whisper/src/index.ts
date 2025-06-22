@@ -223,7 +223,6 @@ const app = new Elysia()
     set.status = 200;
     return { success: true };
   })
-
   // Standard health check endpoint
   .get("/api/health", async () => {
     return {
@@ -235,7 +234,6 @@ const app = new Elysia()
       version: process.env.npm_package_version || "unknown",
     };
   })
-
   // SMS server health check proxy endpoint
   .get("/api/health/sms", async () => {
     try {
@@ -279,6 +277,8 @@ const app = new Elysia()
   })
   .listen(Bun.env.PORT || 8081, () =>
     console.log(
-      `🚀 SMS Server is running at ${app.server?.hostname}:${app.server?.port}`
+      `🚀 SMS Server is running at ${Bun.env.HOST || "localhost"}:${
+        Bun.env.PORT || 8081
+      }`
     )
   );

@@ -1,3 +1,4 @@
+import { DEFAULT_API_KEY, POCKETBASE_URL } from "@/config";
 import { bearer } from "@elysiajs/bearer";
 import { jwt } from "@elysiajs/jwt";
 import { Elysia } from "elysia";
@@ -9,7 +10,6 @@ export interface AuthContext {
   permissions: string[];
   isApiKey: boolean;
   isInternal: boolean;
-  running: boolean;
 }
 
 export interface AuthOptions {
@@ -19,8 +19,6 @@ export interface AuthOptions {
   deviceId?: string;
 }
 
-const DEFAULT_API_KEY = process.env.JOYSTICK_API_KEY || "dev-api-key-12345";
-
 const isInternalRequest = (
   headers: Record<string, string | undefined>
 ): boolean => {
@@ -29,7 +27,14 @@ const isInternalRequest = (
   const remoteAddr = headers["x-remote-addr"];
   console.log(remoteAddr, realIp);
 
-  const internalIps = ["127.0.0.1", "::1", "localhost"];
+  const internalIps = [
+    "127.0.0.1",
+    "::1",
+    "localhost",
+    "172.16.0.0/12",
+    "192.168.0.0/16",
+    "10.0.0.0/8",
+  ];
 
   const clientIp = forwardedFor || realIp || remoteAddr;
   if (clientIp && internalIps.some((ip) => clientIp.includes(ip))) {
@@ -63,42 +68,25 @@ export const createAuthPlugin = (
     )
     .derive(
       { as: "global" },
-      async ({ headers, query, bearer: bearerToken, jwt: jwtHandler }) => {
-        console.log("=== AUTH PLUGIN DERIVE START ===");
-        console.log("Headers keys:", Object.keys(headers));
-
+      async ({ headers, query, bearer: bearerToken }) => {
         let authContext: AuthContext = {
           user: null,
           userId: null,
           permissions: [],
           isApiKey: false,
           isInternal: false,
-          running: true,
         };
-
-        // return { auth: authContext };
-
-        console.log(
-          "Created authContext:",
-          JSON.stringify(authContext, null, 2)
-        );
-        console.log("=== AUTH PLUGIN DERIVE END ===");
 
         const apiKeyHeader = headers["x-api-key"] || headers["X-API-Key"];
         const tokenQuery = query.token as string;
-
-        console.log("Auth Debug:", {
-          headers: Object.keys(headers),
-          apiKeyHeader,
-          expectedApiKey: DEFAULT_API_KEY,
-          isInternal: isInternalRequest(headers),
-          userAgent: headers["user-agent"],
-        });
+        const { id: systemUserId } = await pb
+          .collection("users")
+          .getFirstListItem(`email = "system@joystick.io"`);
 
         if (isInternalRequest(headers)) {
           authContext.isInternal = true;
           authContext.permissions = ["*"];
-          authContext.userId = "system-internal";
+          authContext.userId = systemUserId;
           console.log("Using internal auth");
           return { auth: authContext };
         }
@@ -106,35 +94,40 @@ export const createAuthPlugin = (
         if (apiKeyHeader === DEFAULT_API_KEY) {
           authContext.isApiKey = true;
           authContext.permissions = ["*"];
-          authContext.userId = "system-api-key";
+          authContext.userId = systemUserId;
           console.log("Using API key auth");
           return { auth: authContext };
         }
 
-        // const token = bearerToken || tokenQuery;
-        // if (token) {
-        //   try {
-        //     const payload = await jwtHandler.verify(token);
-        //     if (payload && typeof payload === "object" && "sub" in payload) {
-        //       const user = await pb
-        //         .collection("users")
-        //         .getOne(payload.sub as string);
-        //       authContext.user = user;
-        //       authContext.userId = user.id;
+        const token = bearerToken || tokenQuery;
 
-        //       const permissions = await pb
-        //         .collection("permissions")
-        //         .getFullList({
-        //           filter: `users ~ "${user.id}"`,
-        //         });
-        //       authContext.permissions = permissions.map((p: any) => p.name);
-        //     }
-        //   } catch (error) {
-        //     console.error("JWT verification failed:", error);
-        //   } finally {
-        //     return { auth: authContext };
-        //   }
-        // }
+        if (token) {
+          console.log("Using JWT auth - validating with PocketBase");
+          try {
+            // Instead of verifying the JWT ourselves, validate it with PocketBase
+            // by trying to get the authenticated user
+            const tempPb = new PocketBase(POCKETBASE_URL);
+            tempPb.authStore.save(token, null);
+
+            // Try to refresh the auth to validate the token
+            const authData = await tempPb.collection("users").authRefresh();
+
+            if (authData && authData.record) {
+              console.log("PocketBase token validation successful");
+              authContext.user = authData.record;
+              authContext.userId = authData.record.id;
+
+              const permissions = await pb
+                .collection("permissions")
+                .getFullList({
+                  filter: `users ~ "${authData.record.id}"`,
+                });
+              authContext.permissions = permissions.map((p: any) => p.name);
+            }
+          } catch (error) {
+            console.error("PocketBase token validation failed:", error);
+          }
+        }
 
         return { auth: authContext };
       }

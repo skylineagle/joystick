@@ -10,21 +10,36 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const navigate = useNavigate();
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { isAuthenticated, token, setIsAuthenticated, setUser, setToken } =
+    useAuthStore();
 
   useEffect(() => {
-    if (!isAuthenticated || !pb.authStore.isValid) {
+    if (!isAuthenticated || !token || !pb.authStore.isValid) {
       navigate("/login");
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, token, navigate]);
 
   useInterval(() => {
-    if (isAuthenticated) {
-      pb.collection("users").authRefresh();
+    if (isAuthenticated && token) {
+      pb.collection("users")
+        .authRefresh()
+        .then((authData) => {
+          if (authData.token !== token) {
+            setToken(authData.token);
+          }
+          setUser(authData.record);
+        })
+        .catch((error) => {
+          console.error("Token refresh failed:", error);
+          setIsAuthenticated(false);
+          setUser(null);
+          setToken(null);
+          navigate("/login");
+        });
     }
   }, 1000 * 60 * 2);
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated || !token) return null;
 
   return <>{children}</>;
 }

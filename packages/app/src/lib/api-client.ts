@@ -1,4 +1,5 @@
 import { urls } from "./urls";
+import { useAuthStore } from "./auth";
 
 // Custom error class for API errors
 export class ApiError extends Error {
@@ -55,24 +56,28 @@ export class ApiClient {
     options: RequestInit = {},
     timeout?: number
   ): Promise<T> {
-    // Create a new AbortController for each request
     this.controller = new AbortController();
 
-    // Apply default headers
     const headers = new Headers(options.headers || {});
 
-    // Add default content-type if not present and method is not GET
     if (!headers.has("Content-Type") && options.method !== "GET") {
       headers.set("Content-Type", "application/json");
     }
 
-    // Set up timeout
+    const authState = useAuthStore.getState();
+    if (
+      authState.token &&
+      authState.isAuthenticated &&
+      !url.includes("login")
+    ) {
+      headers.set("Authorization", `Bearer ${authState.token}`);
+    }
+
     const timeoutId = setTimeout(() => {
       this.controller.abort();
     }, timeout || this.options.timeout || 15000);
 
     try {
-      // Check for network connectivity
       if (!navigator.onLine) {
         throw new ApiError("Network connection is unavailable", {
           isNetworkError: true,
@@ -85,11 +90,19 @@ export class ApiClient {
         signal: this.controller.signal,
       });
 
-      // Clear timeout since request completed
       clearTimeout(timeoutId);
 
-      // Handle HTTP error status codes
       if (!response.ok) {
+        if (response.status === 401) {
+          useAuthStore.getState().setIsAuthenticated(false);
+          useAuthStore.getState().setUser(null);
+          useAuthStore.getState().setToken(null);
+          window.location.href = "/login";
+          throw new ApiError("Authentication required", {
+            status: response.status,
+          });
+        }
+
         const errorData = await response.json().catch(() => ({}));
         const errorMessage =
           errorData.error ||
@@ -101,17 +114,14 @@ export class ApiClient {
         });
       }
 
-      // Parse JSON response if it has content
       if (response.status !== 204) {
         return await response.json();
       }
 
       return {} as T;
     } catch (error) {
-      // Clear timeout in case of error
       clearTimeout(timeoutId);
 
-      // Format error consistently
       if (error instanceof ApiError) {
         throw error;
       } else if (error instanceof DOMException && error.name === "AbortError") {

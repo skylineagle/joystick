@@ -74,16 +74,6 @@ const app = new Elysia()
   .post(
     "/api/run/:device/:action",
     async ({ params, body, set, auth }) => {
-      console.log(auth);
-
-      console.log("Handler called with auth:", {
-        userId: auth?.userId,
-        isInternal: auth?.isInternal,
-        isApiKey: auth?.isApiKey,
-        permissions: auth?.permissions,
-        running: auth?.running,
-      });
-
       try {
         enhancedLogger.startActionTimer();
         enhancedLogger.info(

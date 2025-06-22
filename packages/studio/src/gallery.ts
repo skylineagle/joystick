@@ -9,6 +9,7 @@ import {
   getActiveDeviceConnection,
   JOYSTICK_API_URL,
   runCommandOnDevice,
+  DEFAULT_API_KEY,
 } from "@joystick/core";
 import { $ } from "bun";
 import { Baker } from "cronbake";
@@ -255,6 +256,7 @@ export class GalleryService {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-API-Key": DEFAULT_API_KEY,
         },
         body: JSON.stringify({ event: event.event_id }),
       }
