@@ -1,5 +1,12 @@
 import { pb } from "@/pocketbase";
-import { getActiveDeviceConnection, type DeviceResponse } from "@joystick/core";
+import { cors } from "@elysiajs/cors";
+import { swagger } from "@elysiajs/swagger";
+import {
+  createAuthPlugin,
+  getActiveDeviceConnection,
+  type DeviceResponse,
+} from "@joystick/core";
+import { Elysia } from "elysia";
 import { ChildProcess, spawn } from "node:child_process";
 import { join } from "node:path";
 import { logger } from "./logger";
@@ -11,53 +18,60 @@ type WebSocketMessage = {
 };
 
 const connections = new Map<string, ChildProcess>();
-const tempKeyFiles = new Map<string, string>(); // Track temporary key files for cleanup
+const tempKeyFiles = new Map<string, string>();
 
-Bun.serve({
-  port: Number(Bun.env.PORT) || 4000,
-  fetch(req, server) {
-    const url = new URL(req.url);
-    if (url.pathname === "/terminal") {
-      const success = server.upgrade(req);
-      if (!success) {
-        const response = new Response("WebSocket upgrade failed", {
-          status: 400,
-        });
-        response.headers.set("Access-Control-Allow-Origin", "*");
-        response.headers.set(
-          "Access-Control-Allow-Methods",
-          "GET, POST, PUT, DELETE, OPTIONS"
-        );
-        return response;
-      }
-      return undefined;
-    }
-    // Standard health check endpoint
-    else if (url.pathname === "/api/health") {
-      const response = new Response(
-        JSON.stringify({
-          status: "healthy",
-          service: "panel",
-          uptime: process.uptime(),
-          timestamp: new Date().toISOString(),
-          memory: process.memoryUsage(),
-          version: process.env.npm_package_version || "unknown",
-        }),
-        { status: 200 }
-      );
-      response.headers.set("Access-Control-Allow-Origin", "*");
-      response.headers.set(
-        "Access-Control-Allow-Methods",
-        "GET, POST, PUT, DELETE, OPTIONS"
-      );
-      return response;
-    }
-  },
-  websocket: {
-    async message(ws, rawMessage) {
+const app = new Elysia()
+  .use(cors())
+  .use(
+    swagger({
+      documentation: {
+        info: {
+          title: "Panel API",
+          version: "0.0.0",
+        },
+        components: {
+          securitySchemes: {
+            bearerAuth: {
+              type: "http",
+              scheme: "bearer",
+              bearerFormat: "JWT",
+            },
+            apiKey: {
+              type: "apiKey",
+              in: "header",
+              name: "X-API-Key",
+            },
+          },
+        },
+        security: [{ bearerAuth: [] }, { apiKey: [] }],
+      },
+    })
+  )
+  .use(createAuthPlugin(pb, Bun.env.JWT_SECRET))
+  .onError(({ code, error, request }) => {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    logger.error({ code, error, path: request.url }, "Request error occurred");
+    return { success: false, error: errorMessage };
+  })
+  .onRequest(({ request }) => {
+    logger.info(
+      { method: request.method, path: request.url },
+      "Incoming request"
+    );
+  })
+  .get("/", () => "Panel API")
+  .get("/api/health", () => ({
+    status: "healthy",
+    service: "panel",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    memory: process.memoryUsage(),
+    version: process.env.npm_package_version || "unknown",
+  }))
+  .ws("/terminal", {
+    async message(ws, message: WebSocketMessage) {
       try {
-        const message = JSON.parse(rawMessage.toString()) as WebSocketMessage;
-
         if (message.type === "connect" && message.device) {
           const result = await pb
             .collection("devices")
@@ -77,7 +91,6 @@ Bun.serve({
             return;
           }
 
-          // Use safe destructuring with default values to avoid TypeScript errors
           const { user, password } = device.information;
           const { host } = getActiveDeviceConnection(device.information);
           const sshKey = device.information.key as string | undefined;
@@ -86,8 +99,6 @@ Bun.serve({
 
           if (sshKey) {
             logger.debug("using ssh key for ssh session");
-            // Use SSH key authentication
-            // Create a temporary file to store the SSH key
             const tmpDir = Bun.env.TMPDIR || "/tmp";
             const keyFileName = join(
               tmpDir,
@@ -95,12 +106,9 @@ Bun.serve({
             );
 
             try {
-              // Write the SSH key to the temporary file with correct permissions using Bun's file utilities
               await Bun.write(keyFileName, sshKey);
-              // Set correct permissions (Bun.write doesn't support permissions directly)
               Bun.spawn(["chmod", "600", keyFileName]);
 
-              // Store the key file path for cleanup
               tempKeyFiles.set(message.device, keyFileName);
 
               const sshArgs = [
@@ -126,7 +134,6 @@ Bun.serve({
               return;
             }
           } else {
-            // Use password authentication as fallback
             const sshArgs = [
               "-o",
               "StrictHostKeyChecking=no",
@@ -154,7 +161,6 @@ Bun.serve({
           });
 
           sshProcess.on("close", () => {
-            // Clean up the temporary key file if it exists
             const keyFile = tempKeyFiles.get(message.device ?? "");
             if (keyFile) {
               try {
@@ -181,12 +187,10 @@ Bun.serve({
       }
     },
     close() {
-      // Clean up any active connections and temporary key files
       for (const [deviceId, sshProcess] of connections.entries()) {
         sshProcess.kill();
         connections.delete(deviceId);
 
-        // Clean up any temporary key files
         const keyFile = tempKeyFiles.get(deviceId);
         if (keyFile) {
           try {
@@ -198,5 +202,7 @@ Bun.serve({
         }
       }
     },
-  },
-});
+  })
+  .listen(Number(Bun.env.PORT) || 4000);
+
+logger.info(`Panel service listening on port ${Number(Bun.env.PORT) || 4000}`);
