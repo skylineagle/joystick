@@ -434,8 +434,8 @@ class EnhancedLogger {
 export const enhancedLogger = new EnhancedLogger();
 
 // Middleware for Elysia to extract request context
-export function setupLoggingMiddleware(app: Elysia): Elysia {
-  return app
+export function setupLoggingMiddleware(): Elysia {
+  return new Elysia({ name: "logging" })
     .onRequest(({ request }) => {
       enhancedLogger.setContext({
         ipAddress: request.headers.get("x-forwarded-for") || "unknown",
