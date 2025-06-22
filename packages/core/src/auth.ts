@@ -66,7 +66,7 @@ export const createAuthPlugin = (
     )
     .derive(
       { as: "global" },
-      async ({ headers, query, bearer: bearerToken }) => {
+      async ({ headers, query, bearer: bearerToken, status }) => {
         let authContext: AuthContext = {
           user: null,
           userId: null,
@@ -117,7 +117,7 @@ export const createAuthPlugin = (
           }
         }
 
-        return { auth: authContext };
+        return status(401, "Unauthorized");
       }
     );
 };
