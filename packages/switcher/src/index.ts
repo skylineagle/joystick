@@ -1,10 +1,10 @@
-import { STREAM_API_URL } from "@joystick/core";
 import { logger } from "@/logger";
 import { pb } from "@/pocketbase";
 import cors from "@elysiajs/cors";
-import type { DeviceResponse } from "@joystick/core";
-import { Elysia } from "elysia";
 import { swagger } from "@elysiajs/swagger";
+import type { DeviceResponse } from "@joystick/core";
+import { createAuthPlugin, STREAM_API_URL } from "@joystick/core";
+import { Elysia } from "elysia";
 export const TO_REPLACE = ["camera", "action"];
 
 async function addDevice(deviceName: string, configuration: any) {
@@ -56,9 +56,26 @@ const app = new Elysia()
           title: "Switcher API",
           version: "0.0.0",
         },
+        components: {
+          securitySchemes: {
+            bearerAuth: {
+              type: "http",
+              scheme: "bearer",
+              bearerFormat: "JWT",
+            },
+            apiKey: {
+              type: "apiKey",
+              in: "header",
+              name: "X-API-Key",
+            },
+          },
+        },
+        security: [{ bearerAuth: [] }, { apiKey: [] }],
       },
     })
   )
+  .use(cors())
+  .use(createAuthPlugin(pb, Bun.env.JWT_SECRET))
   .onError(({ code, error, request }) => {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
@@ -70,55 +87,62 @@ const app = new Elysia()
       { method: request.method, path: request.url },
       "Incoming request"
     );
-  });
+  })
+  .post("/api/mode/:device/:mode", async ({ params, set }) => {
+    try {
+      const { device: deviceId, mode } = params;
 
-app.post("/api/mode/:device/:mode", async ({ params, body }) => {
-  const { device: deviceId, mode } = params;
+      const deviceResult = await pb
+        .collection("devices")
+        .getFullList<DeviceResponse>(1, {
+          filter: `id = "${deviceId}"`,
+        });
 
-  const deviceResult = await pb
-    .collection("devices")
-    .getFullList<DeviceResponse>(1, {
-      filter: `id = "${deviceId}"`,
-    });
+      if (deviceResult.length !== 1) {
+        throw new Error(`Device ${deviceId} not found`);
+      }
 
-  if (deviceResult.length !== 1) {
-    throw new Error(`Device ${deviceId} not found`);
-  }
+      const device = deviceResult[0];
 
-  const device = deviceResult[0];
+      if (!device.configuration?.name) {
+        throw new Error("Device name not found");
+      }
 
-  if (!device.configuration?.name) {
-    throw new Error("Device name not found");
-  }
+      switch (mode) {
+        case "live":
+          addDevice(device.configuration?.name, device.configuration);
+          break;
+        case "off":
+          deleteDevice(device.configuration?.name);
+          break;
+        case "auto":
+          deleteDevice(device.configuration?.name);
+          break;
+        default:
+          throw new Error("Invalid mode");
+      }
 
-  switch (mode) {
-    case "live":
-      addDevice(device.configuration?.name, device.configuration);
-      break;
-    case "off":
-      deleteDevice(device.configuration?.name);
-      break;
-    case "auto":
-      deleteDevice(device.configuration?.name);
-      break;
-    default:
-      throw new Error("Invalid mode");
-  }
-});
+      return { success: true };
+    } catch (error) {
+      set.status = 401;
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  }) // Standard health check endpoint
+  .get("/api/health", async () => {
+    return {
+      status: "healthy",
+      service: "switcher",
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+      memory: process.memoryUsage(),
+      version: process.env.npm_package_version || "unknown",
+    };
+  })
+  .listen(Bun.env.PORT || 8080);
 
-// Standard health check endpoint
-app.get("/api/health", async () => {
-  return {
-    status: "healthy",
-    service: "switcher",
-    uptime: process.uptime(),
-    timestamp: new Date().toISOString(),
-    memory: process.memoryUsage(),
-    version: process.env.npm_package_version || "unknown",
-  };
-});
-
-app.use(cors()).listen(Bun.env.PORT || 8080);
 logger.info(
   `🦊 Switcher API server running at ${Bun.env.HOST}:${Bun.env.PORT || 8080}`
 );
