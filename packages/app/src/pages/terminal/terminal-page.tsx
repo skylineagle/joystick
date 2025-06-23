@@ -2,7 +2,9 @@ import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { useDevice } from "@/hooks/use-device";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
+import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
+import { useAuthStore } from "@/lib/auth";
 import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 import { toast } from "@/utils/toast";
@@ -13,7 +15,7 @@ import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import { WebLinksAddon } from "xterm-addon-web-links";
 import { getTerminalTheme } from "./terminal-theme";
-import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
+
 import "xterm/css/xterm.css";
 
 const joystickAsciiLines = [
@@ -70,7 +72,7 @@ export function TerminalPage() {
   const isMountedRef = useRef(true);
   const isTerminalRouteAllowed = useIsRouteAllowed("terminal");
   const [isRefreshing, setIsRefreshing] = useState(false);
-
+  const { token } = useAuthStore();
   // Function to initialize the terminal and connection
   const initializeTerminal = useCallback(() => {
     if (!terminalRef.current || !selectedDevice?.configuration) {
@@ -127,7 +129,7 @@ export function TerminalPage() {
     terminalInstance.current = terminal;
     fitAddonRef.current = fitAddon;
 
-    const ws = new WebSocket(`${urls.panel}/terminal`);
+    const ws = new WebSocket(`${urls.panel}/terminal?token=${token}`);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -661,6 +663,7 @@ export function TerminalPage() {
     isEasterEggsPermitted,
     selectedDevice?.configuration,
     selectedDevice?.id,
+    token,
   ]);
 
   // Function to handle refresh button click
