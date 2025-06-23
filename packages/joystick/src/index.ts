@@ -287,10 +287,6 @@ const app = new Elysia()
       const result = await $`ping -c 1 ${activeHost}`.text();
       const isOnline = result.includes(expectedResult);
 
-      enhancedLogger.warn(expectedResult);
-      enhancedLogger.warn(result);
-      enhancedLogger.warn(`${isOnline}`);
-
       return isOnline;
     } catch (error) {
       console.log(error);
