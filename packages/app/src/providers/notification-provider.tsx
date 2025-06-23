@@ -44,7 +44,7 @@ export const NotificationProvider = ({
 
   const wsUrl = urls.joystick.replace(/^http/, "ws") + "/notifications";
 
-  const { lastMessage, readyState } = useWebSocket(wsUrl, {
+  const { lastMessage, readyState } = useWebSocket(token ? wsUrl : null, {
     queryParams: {
       token: token || "",
     },

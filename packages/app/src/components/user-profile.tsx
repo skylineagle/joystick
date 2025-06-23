@@ -28,7 +28,7 @@ const colorModeIcons = {
 
 export function UserProfile() {
   const { user, isAuthenticated } = useAuthStore();
-  const isAdmin = user?.email.startsWith("admin");
+  const isAdmin = user?.email?.startsWith("admin");
   const { colorMode, setColorMode } = useTheme();
 
   if (!isAuthenticated || !user) return null;
@@ -39,12 +39,16 @@ export function UserProfile() {
         .map((n) => n[0])
         .join("")
         .toUpperCase()
-    : user.email[0].toUpperCase();
+    : user?.email?.[0]?.toUpperCase() || "";
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+        <Button
+          variant="ghost"
+          className="relative h-10 w-10 rounded-full"
+          data-testid="user-profile-button"
+        >
           <div
             style={{
               transition: "all 0.3s ease",
@@ -130,7 +134,7 @@ export function UserProfile() {
             </Link>
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem onClick={() => logout()}>
+        <DropdownMenuItem onClick={() => logout()} data-testid="logout-button">
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

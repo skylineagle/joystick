@@ -1,17 +1,17 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { scan } from "react-scan";
+// import { scan } from "react-scan";
 import { v4 as uuidv4 } from "uuid";
 import App from "./App.tsx";
 
 import "./index.css";
 
-if (import.meta.env.NODE_ENV !== "production") {
-  scan({
-    enabled: import.meta.env.NODE_ENV !== "production",
-    trackUnnecessaryRenders: true,
-  });
-}
+// if (import.meta.env.NODE_ENV !== "production") {
+//   scan({
+//     enabled: import.meta.env.NODE_ENV !== "production",
+//     trackUnnecessaryRenders: true,
+//   });
+// }
 
 if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "undefined") {
   crypto.randomUUID = function () {

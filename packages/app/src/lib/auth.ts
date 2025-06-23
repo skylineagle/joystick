@@ -35,6 +35,11 @@ export async function login(email: string, password: string) {
     const authData = await pb
       .collection("users")
       .authWithPassword(email, password);
+
+    if (!authData.token) {
+      throw new Error("Failed to authenticate, check app status");
+    }
+
     useAuthStore.setState({
       isAuthenticated: true,
       token: authData.token,

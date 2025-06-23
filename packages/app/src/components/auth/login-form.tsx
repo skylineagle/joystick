@@ -55,6 +55,7 @@ export function LoginForm() {
               <Input
                 id="email"
                 type="email"
+                data-testid="email-input"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -66,13 +67,19 @@ export function LoginForm() {
               <Input
                 id="password"
                 type="password"
+                data-testid="password-input"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              data-testid="login-button"
+              className="w-full"
+              disabled={isLoading}
+            >
               {isLoading ? "Logging in..." : "Login"}
             </Button>
           </form>
