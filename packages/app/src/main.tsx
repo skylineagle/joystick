@@ -1,19 +1,12 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { scan } from "react-scan";
-import { tryLoadAndStartRecorder } from "@alwaysmeticulous/recorder-loader";
 import { v4 as uuidv4 } from "uuid";
 import App from "./App.tsx";
 
 import "./index.css";
 
 if (import.meta.env.NODE_ENV !== "production") {
-  await tryLoadAndStartRecorder({
-    recordingToken: "JCdtD4mxCPMI3Hq0nZhauj6yVRp1Y3s7uQ67Ku95",
-    isProduction: false,
-    forceRecording: true,
-  });
-
   scan({
     enabled: import.meta.env.NODE_ENV !== "production",
     trackUnnecessaryRenders: true,
