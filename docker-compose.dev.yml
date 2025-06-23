@@ -7,6 +7,7 @@ services:
     environment:
       - MEDIAMTX_API=http://mediamtx:9997
       - JOYSTICK_API_URL=http://host.docker.internal:8000
+      - JOYSTICK_API_KEY=dev-api-key-12345
     volumes:
       - ./pocketbase/pb_data:/pb_data
       - ./pocketbase/pb_public:/pb_public

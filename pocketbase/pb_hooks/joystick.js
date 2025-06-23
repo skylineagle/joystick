@@ -9,6 +9,7 @@ function toggleMode(deviceId, mode) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "x-api-key": process.env.JOYSTICK_API_KEY,
     },
     url: `${JOYSTICK_URL}/api/run/${deviceId}/set-mode`,
     body: {

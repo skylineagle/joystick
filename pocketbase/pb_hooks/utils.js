@@ -5,6 +5,7 @@ const getActiveDeviceConnection = (deviceInfo) => {
       phone: deviceInfo.secondSlotPhone,
     };
   }
+
   return {
     host: deviceInfo.host,
     phone: deviceInfo.phone,
@@ -18,10 +19,13 @@ const sendNotification = (payload) => {
     process.env.JOYSTICK_API_URL || "http://localhost:8000";
 
   try {
-    $http.send({
+    const res = $http.send({
       url: `${joystickApiUrl}/api/notifications/send`,
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.JOYSTICK_API_KEY,
+      },
       body: JSON.stringify({
         type,
         title,
@@ -31,8 +35,12 @@ const sendNotification = (payload) => {
         dismissible,
       }),
     });
+
+    $app.logger().info("Notification sent successfully");
+    return res;
   } catch (error) {
-    console.error("Failed to send notification:", error);
+    $app.logger().error("Failed to send notification:", error);
+    throw error;
   }
 };
 

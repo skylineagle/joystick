@@ -83,21 +83,18 @@ export const createAuthPlugin = (
         if (isInternalRequest(headers)) {
           authContext.isInternal = true;
           authContext.userId = systemUserId;
-          console.log("Using internal auth");
           return { auth: authContext };
         }
 
         if (apiKeyHeader === DEFAULT_API_KEY) {
           authContext.isApiKey = true;
           authContext.userId = systemUserId;
-          console.log("Using API key auth");
           return { auth: authContext };
         }
 
         const token = bearerToken || tokenQuery;
 
         if (token) {
-          console.log("Using JWT auth - validating with PocketBase");
           try {
             // Instead of verifying the JWT ourselves, validate it with PocketBase
             // by trying to get the authenticated user
@@ -108,7 +105,6 @@ export const createAuthPlugin = (
             const authData = await tempPb.collection("users").authRefresh();
 
             if (authData && authData.record) {
-              console.log("PocketBase token validation successful");
               authContext.user = authData.record;
               authContext.userId = authData.record.id;
             }

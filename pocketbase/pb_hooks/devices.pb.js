@@ -222,20 +222,7 @@ onRecordUpdateRequest((e) => {
   const information = JSON.parse(e.record.get("information"));
   const configuration = JSON.parse(e.record.get("configuration"));
   const { host: activeHost } = getActiveDeviceConnection(information);
-
-  let currentInformation = current.get("information");
-  if (typeof currentInformation === "string") {
-    try {
-      currentInformation = JSON.parse(currentInformation);
-    } catch (parseError) {
-      $app
-        .logger()
-        .error("Failed to parse current device information", parseError);
-      e.next();
-      return;
-    }
-  }
-
+  const currentInformation = JSON.parse(current.get("information"));
   const { host: currentActiveHost } =
     getActiveDeviceConnection(currentInformation);
 
@@ -265,7 +252,7 @@ onRecordUpdateRequest((e) => {
           }
         );
       } catch (err) {
-        console.error(err);
+        $app.logger().error(err);
       }
     } catch (error) {
       $app.logger().warn(error);
