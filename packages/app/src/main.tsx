@@ -8,11 +8,14 @@ import App from "./App.tsx";
 import "./index.css";
 
 if (import.meta.env.NODE_ENV !== "production") {
-  tryLoadAndStartRecorder({
-    recordingToken: import.meta.env.VITE_METICULOUS_RECORDING_TOKEN || "",
-    isProduction: false,
-    forceRecording: true,
-  });
+  const recordingToken = import.meta.env.VITE_METICULOUS_RECORDING_TOKEN;
+  if (recordingToken) {
+    tryLoadAndStartRecorder({
+      recordingToken,
+      isProduction: false,
+      forceRecording: true,
+    });
+  }
 
   scan({
     enabled: import.meta.env.NODE_ENV !== "production",
