@@ -56,10 +56,6 @@ jobs:
       - name: Build frontend app
         run: |
           cd packages/app && bun run build
-          if [ $? -ne 0 ]; then
-            echo "Build command failed"
-            exit 1
-          fi
           if [ ! -d "dist" ] || [ -z "$(ls -A dist)" ]; then
             echo "Build failed: dist directory is missing or empty"
             exit 1
