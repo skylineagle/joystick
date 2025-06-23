@@ -112,6 +112,8 @@ export const createAuthPlugin = (
               authContext.user = authData.record;
               authContext.userId = authData.record.id;
             }
+
+            return { auth: authContext };
           } catch (error) {
             console.error("PocketBase token validation failed:", error);
           }
