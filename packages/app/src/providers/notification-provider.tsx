@@ -1,5 +1,6 @@
 import { EmergencyNotificationDialog } from "@/components/ui/emergency-notification-dialog";
 import { useNotifications } from "@/hooks/use-notifications";
+import { useAuthStore } from "@/lib/auth";
 import type { NotificationHistoryItem } from "@/lib/notification-db";
 import { urls } from "@/lib/urls";
 import type { WebSocketNotificationMessage } from "@/types/notification";
@@ -38,12 +39,15 @@ export const NotificationProvider = ({
   const [isWebSocketConnected, setIsWebSocketConnected] = useState(false);
   const processedNotifications = useRef(new Set<string>());
   const toastRefs = useRef(new Map<string, string | number>());
-
+  const { token } = useAuthStore();
   const { markAsRead } = useNotifications();
 
   const wsUrl = urls.joystick.replace(/^http/, "ws") + "/notifications";
 
   const { lastMessage, readyState } = useWebSocket(wsUrl, {
+    queryParams: {
+      token: token || "",
+    },
     shouldReconnect: (closeEvent) => {
       return closeEvent.code !== 1000;
     },
