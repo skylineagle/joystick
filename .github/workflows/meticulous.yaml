@@ -57,6 +57,13 @@ jobs:
         run: |
           cd packages/app && bun run build
 
+      - name: Validate Meticulous API token
+        run: |
+          if [ -z "${{ secrets.METICULOUS_API_TOKEN }}" ]; then
+            echo "Error: METICULOUS_API_TOKEN secret is not set"
+            exit 1
+          fi
+
       - name: Run Meticulous tests
         uses: alwaysmeticulous/report-diffs-action/upload-assets@v1
         with:
