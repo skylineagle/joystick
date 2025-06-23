@@ -10,18 +10,52 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: oven-sh/setup-bun@v1
         with:
           bun-version: latest
-      - name: Install dependencies
+
+      - name: Install root dependencies
+        run: bun install
+
+      - name: Install app dependencies
         working-directory: ./packages/app
         run: bun install
+
+      - name: Start services with Docker Compose
+        run: docker-compose -f docker-compose.dev.yml up -d
+
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for PocketBase to be ready..."
+          timeout 60 bash -c 'until curl -f http://localhost:8090/api/health; do sleep 2; done'
+          echo "Waiting for MediaMTX to be ready..."
+          timeout 60 bash -c 'until curl -f http://localhost:9997/v3/config/global/get; do sleep 2; done'
+          echo "Services are ready!"
+
+      - name: Start application services
+        run: bun run dev &
+
+      - name: Wait for application to be ready
+        run: |
+          echo "Waiting for application to be ready..."
+          timeout 60 bash -c 'until curl -f http://localhost:5173; do sleep 2; done'
+          echo "Application is ready!"
+
       - name: Install Playwright Browsers
         working-directory: ./packages/app
         run: bunx playwright install --with-deps
+
       - name: Run Playwright tests
         working-directory: ./packages/app
         run: bunx playwright test
+
+      - name: Stop services
+        if: always()
+        run: |
+          docker-compose -f docker-compose.dev.yml down
+          pkill -f "bun run dev" || true
+
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
