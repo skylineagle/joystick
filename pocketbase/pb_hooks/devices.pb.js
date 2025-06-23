@@ -222,20 +222,7 @@ onRecordUpdateRequest((e) => {
   const information = JSON.parse(e.record.get("information"));
   const configuration = JSON.parse(e.record.get("configuration"));
   const { host: activeHost } = getActiveDeviceConnection(information);
-
-  let currentInformation = current.get("information");
-  if (typeof currentInformation === "string") {
-    try {
-      currentInformation = JSON.parse(currentInformation);
-    } catch (parseError) {
-      $app
-        .logger()
-        .error("Failed to parse current device information", parseError);
-      e.next();
-      return;
-    }
-  }
-
+  const currentInformation = JSON.parse(current.get("information"));
   const { host: currentActiveHost } =
     getActiveDeviceConnection(currentInformation);
 
@@ -265,7 +252,7 @@ onRecordUpdateRequest((e) => {
           }
         );
       } catch (err) {
-        console.error(err);
+        $app.logger().error(err);
       }
     } catch (error) {
       $app.logger().warn(error);
@@ -370,5 +357,36 @@ cronAdd("cleanup_action_rows", "0 0 */10 * *", () => {
   } catch (error) {
     $app.logger().error(error);
     $app.logger().error("Failed to clean up action_row table", error);
+  }
+});
+
+routerAdd("POST", "/demo/notification", (e) => {
+  const { sendNotification } = require(`${__hooks}/utils`);
+  try {
+    const data = e.request.body;
+
+    const payload = {
+      type: data.type || "info",
+      title: data.title || "Demo Notification",
+      message: data.message || "This is a demo notification",
+      userId: data.userId,
+      deviceId: data.deviceId,
+      dismissible: data.dismissible !== false,
+    };
+
+    const res = sendNotification(payload);
+    console.log(JSON.stringify(res));
+
+    return e.json(200, {
+      success: true,
+      message: "Demo notification sent successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    $app.logger().error("Failed to send demo notification:", error);
+    return c.json(500, {
+      success: false,
+      error: error.message || "Failed to send demo notification",
+    });
   }
 });

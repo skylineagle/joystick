@@ -8,6 +8,7 @@ function createDeviceJob(deviceId, automation) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "x-api-key": process.env.JOYSTICK_API_KEY,
     },
     url: `${BAKER_URL}/jobs/${deviceId}`,
     body: automation,
@@ -19,6 +20,9 @@ function deleteDeviceJob(deviceId) {
   $http.send({
     method: "DELETE",
     url: `${BAKER_URL}/jobs/${deviceId}`,
+    headers: {
+      "x-api-key": process.env.JOYSTICK_API_KEY,
+    },
   });
 }
 
@@ -27,6 +31,9 @@ function startDeviceJob(deviceId) {
   $http.send({
     method: "POST",
     url: `${BAKER_URL}/jobs/${deviceId}/start`,
+    headers: {
+      "x-api-key": process.env.JOYSTICK_API_KEY,
+    },
   });
 }
 
@@ -35,6 +42,9 @@ function stopDeviceJob(deviceId) {
   $http.send({
     method: "POST",
     url: `${BAKER_URL}/jobs/${deviceId}/stop`,
+    headers: {
+      "x-api-key": process.env.JOYSTICK_API_KEY,
+    },
   });
 }
 
@@ -43,6 +53,9 @@ function getJobStatus(deviceId) {
   $http.send({
     method: "GET",
     url: `${BAKER_URL}/jobs/${deviceId}`,
+    headers: {
+      "x-api-key": process.env.JOYSTICK_API_KEY,
+    },
   });
 }
 
