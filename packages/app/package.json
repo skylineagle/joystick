@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "db:generate": "pocketbase-typegen -d ../../pocketbase/pb_data/data.db -o ./src/types/db.types.ts",
     "lint": "eslint .",
+    "test": "playwright test",
     "preview": "vite preview"
   },
   "dependencies": {
