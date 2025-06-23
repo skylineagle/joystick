@@ -8,7 +8,7 @@ import App from "./App.tsx";
 import "./index.css";
 
 if (import.meta.env.NODE_ENV !== "production") {
-  await tryLoadAndStartRecorder({
+  tryLoadAndStartRecorder({
     recordingToken: import.meta.env.VITE_METICULOUS_RECORDING_TOKEN,
     isProduction: false,
     forceRecording: true,
