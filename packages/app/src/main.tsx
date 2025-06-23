@@ -9,7 +9,7 @@ import "./index.css";
 
 if (import.meta.env.NODE_ENV !== "production") {
   tryLoadAndStartRecorder({
-    recordingToken: import.meta.env.VITE_METICULOUS_RECORDING_TOKEN,
+    recordingToken: import.meta.env.VITE_METICULOUS_RECORDING_TOKEN || "",
     isProduction: false,
     forceRecording: true,
   });
