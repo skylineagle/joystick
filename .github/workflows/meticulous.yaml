@@ -78,3 +78,4 @@ jobs:
           api-token: ${{ secrets.METICULOUS_API_TOKEN }}
           # Frontend app build output directory
           app-directory: "packages/app/dist"
+          app-url: "http://localhost:5173"
