@@ -54,7 +54,7 @@ const app = new Elysia()
       },
     })
   )
-  .use(createAuthPlugin(pb, Bun.env.JWT_SECRET || "joystick-secret"))
+  .use(createAuthPlugin(pb))
   .use(setupLoggingMiddleware())
   .ws("/notifications", {
     open(ws: any) {
