@@ -359,34 +359,3 @@ cronAdd("cleanup_action_rows", "0 0 */10 * *", () => {
     $app.logger().error("Failed to clean up action_row table", error);
   }
 });
-
-routerAdd("POST", "/demo/notification", (e) => {
-  const { sendNotification } = require(`${__hooks}/utils`);
-  try {
-    const data = e.request.body;
-
-    const payload = {
-      type: data.type || "info",
-      title: data.title || "Demo Notification",
-      message: data.message || "This is a demo notification",
-      userId: data.userId,
-      deviceId: data.deviceId,
-      dismissible: data.dismissible !== false,
-    };
-
-    const res = sendNotification(payload);
-    console.log(JSON.stringify(res));
-
-    return e.json(200, {
-      success: true,
-      message: "Demo notification sent successfully",
-    });
-  } catch (error) {
-    console.log(error);
-    $app.logger().error("Failed to send demo notification:", error);
-    return c.json(500, {
-      success: false,
-      error: error.message || "Failed to send demo notification",
-    });
-  }
-});
