@@ -13,5 +13,5 @@ await pb
   .authWithPassword(SUPERUSER_USERNAME, PASSWORD);
 
 setInterval(() => {
-  pb.collection("users").authRefresh();
+  pb.collection("_superusers").authRefresh();
 }, 1000 * 60 * 2);
