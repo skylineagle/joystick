@@ -23,7 +23,7 @@ jobs:
         run: bun install
 
       - name: Start services with Docker Compose
-        run: docker-compose -f docker-compose.dev.yml up -d
+        run: docker compose -f docker-compose.dev.yml up -d
 
       - name: Wait for services to be ready
         run: |
@@ -53,7 +53,7 @@ jobs:
       - name: Stop services
         if: always()
         run: |
-          docker-compose -f docker-compose.dev.yml down
+          docker compose -f docker-compose.dev.yml down
           pkill -f "bun run dev" || true
 
       - uses: actions/upload-artifact@v4
