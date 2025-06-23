@@ -101,6 +101,7 @@
         "zustand": "^5.0.5",
       },
       "devDependencies": {
+        "@alwaysmeticulous/recorder-loader": "^2.221.2",
         "@eslint/js": "^9.27.0",
         "@tailwindcss/typography": "^0.5.16",
         "@types/bun": "latest",
@@ -263,6 +264,12 @@
   },
   "packages": {
     "@alloc/quick-lru": ["@alloc/quick-lru@5.2.0", "", {}, "sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw=="],
+
+    "@alwaysmeticulous/api": ["@alwaysmeticulous/api@2.221.2", "", {}, "sha512-dV3xhPfonyrUPMeRtqufWCBXpRk4L98C7wpfcvYAnt/nRv/RQJ/Uy2O2/rPPe5paVl2M3f6iITTEOoC0vZmL/Q=="],
+
+    "@alwaysmeticulous/recorder-loader": ["@alwaysmeticulous/recorder-loader@2.221.2", "", { "dependencies": { "@alwaysmeticulous/sdk-bundles-api": "^2.221.2" } }, "sha512-uRJMu032EzlUEbBaBLIdvoBj5zjscwKpjynXyoFcR1QG34HVXHIeCb2diw+lR22hnulfPb7OJ0rI7j1pM3j4cQ=="],
+
+    "@alwaysmeticulous/sdk-bundles-api": ["@alwaysmeticulous/sdk-bundles-api@2.221.2", "", { "dependencies": { "@alwaysmeticulous/api": "^2.221.2" } }, "sha512-Fjzb3XhQP2aCnqUXHbn9fR7JgxdROJQxj0LEG5LAZphaimSv5szK0z06HJizP2rlQzzCl2pchDOPvXx/ZwJbMw=="],
 
     "@ampproject/remapping": ["@ampproject/remapping@2.3.0", "", { "dependencies": { "@jridgewell/gen-mapping": "^0.3.5", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw=="],
 
