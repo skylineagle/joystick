@@ -69,7 +69,7 @@ async function runSlotCheckAction(
     return typeof result.result === "boolean"
       ? result.result
       : typeof result.result === "string"
-      ? result.result.includes("true")
+      ? result.result.toLowerCase() === "true"
       : false;
   } catch (error) {
     logger.debug(`Health check failed for ${host}: ${error}`);
