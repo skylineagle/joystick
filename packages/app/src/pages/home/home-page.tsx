@@ -53,7 +53,7 @@ export function HomePage() {
             <div className="flex items-center gap-5">
               {isAdmin && (
                 <Button variant="link" size="sm" asChild>
-                  <Link to="/admin">
+                  <Link to="/admin" data-testid="admin-panel-link">
                     <Gauge className="h-4 w-4" />
                     Admin Panel
                   </Link>

@@ -35,7 +35,7 @@ export function LoginForm() {
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between px-12 py-4">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Switcher Logo" className="h-16 w-16" />
+            <img src="/logo.png" alt="Joystick Logo" className="h-16 w-16" />
             {/* <h1 className="text-3xl font-bold">HaTomer</h1> */}
           </div>
 
