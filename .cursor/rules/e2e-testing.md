@@ -21,88 +21,6 @@ This document outlines the comprehensive end-to-end testing strategy for the Joy
 - No mocking - full E2E integration testing
 - Test data seeded in PocketBase database
 
-### Test Data Requirements
-
-#### User Accounts
-
-```javascript
-// Admin user with full permissions
-{
-  email: "admin@joystick.io",
-  password: "admin123",
-  permissions: ["*"] // All permissions
-}
-
-// Regular user with standard permissions
-{
-  email: "user@joystick.io",
-  password: "user123",
-  permissions: ["control-device", "media-route", "action-route"]
-}
-
-// Limited user for permission testing
-{
-  email: "limited@joystick.io",
-  password: "limited123",
-  permissions: ["media-route"] // Only streaming access
-}
-```
-
-#### Test Devices
-
-```javascript
-// Device with full capabilities
-{
-  name: "Test Device Full",
-  device: "test-device-001",
-  status: "online",
-  capabilities: ["stream", "params", "actions", "terminal"],
-  information: {
-    host: "192.168.1.100",
-    activeSlot: "primary",
-    secondSlotHost: "192.168.1.101"
-  }
-}
-
-// Device with limited capabilities
-{
-  name: "Test Device Limited",
-  device: "test-device-002",
-  status: "online",
-  capabilities: ["stream", "actions"]
-}
-
-// Offline device for testing
-{
-  name: "Test Device Offline",
-  device: "test-device-003",
-  status: "offline",
-  capabilities: ["stream", "params", "actions"]
-}
-```
-
-#### Sample Actions
-
-```javascript
-// Basic action without parameters
-{
-  name: "ping",
-  device: "test-device-001",
-  parameters: {}
-}
-
-// Action with parameters
-{
-  name: "set-mode",
-  device: "test-device-001",
-  parameters: {
-    properties: {
-      mode: { type: "string", enum: ["auto", "manual"] }
-    }
-  }
-}
-```
-
 ## Test Plan Implementation Priority
 
 ### Phase 1: Core Functionality (High Priority)
@@ -130,15 +48,14 @@ This document outlines the comprehensive end-to-end testing strategy for the Joy
   - Breadcrumb navigation
   - Mobile responsive behavior
 
-#### 3. Device Management Core
+#### 3. Home page device dashboard
 
 - **Priority:** Critical
 - **Description:** Basic device operations and display
 - **Tests:**
   - Device table rendering with all columns
   - Device search and filtering
-  - Device status indicators
-  - Device selection and basic operations
+  - Device status indicators in the home page
   - Permission-based device visibility
 
 #### 4. Stream View Basics

@@ -7,7 +7,6 @@ import {
   type ModelModeConfigs,
   type ModelsResponse,
   type ModelStreamQulity,
-  type PermissionsResponse,
   type RunResponse,
   type UsersResponse,
 } from "@joystick/core";
@@ -462,28 +461,35 @@ export const TEST_RUN: Record<
   },
 };
 
-export const TEST_PERMISSIONS: Record<
-  "test-control-device" | "test-media-route" | "test-action-route",
-  Omit<
-    PermissionsResponse,
-    "collectionId" | "collectionName" | "created" | "updated"
-  >
-> = {
-  "test-control-device": {
-    id: "testpermission1",
-    name: "test-control-device",
-    users: [TEST_USERS.admin.id!, TEST_USERS.user.id!, TEST_USERS.limited.id!],
-  },
-  "test-media-route": {
-    id: "testpermission2",
-    name: "test-media-route",
-    users: [TEST_USERS.admin.id!, TEST_USERS.user.id!, TEST_USERS.limited.id!],
-  },
-  "test-action-route": {
-    id: "testpermission3",
-    name: "test-action-route",
-    users: [TEST_USERS.admin.id!, TEST_USERS.user.id!],
-  },
-};
+export const TEST_PERMISSIONS = [
+  "create-device",
+  "notifications-history",
+  "system-status",
+  "admin-dashboard",
+  "control-roi",
+  "advanced-stream-control",
+  "control-mode",
+  "device-gps",
+  "device-imu",
+  "device-battery",
+  "device-cpsi",
+  "device-ping",
+  "control-ptz",
+  "easter-eggs",
+  "edit-configuration",
+  "edit-device",
+  "view-stream",
+  "toggle-slot",
+  "recent-events",
+  "notifications",
+  "control-device",
+  "delete-device",
+  "download-client",
+  "media-route",
+  "action-route",
+  "parameters-route",
+  "gallery-route",
+  "terminal-route",
+] as const;
 
 export type UserType = keyof typeof TEST_USERS;

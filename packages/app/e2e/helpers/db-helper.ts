@@ -15,7 +15,7 @@ interface TestDataIds {
   devices: string[];
   actions: string[];
   runs: string[];
-  permissions: string[];
+  modifiedPermissions: string[];
 }
 
 export class TestDatabaseHelper {
@@ -27,7 +27,7 @@ export class TestDatabaseHelper {
     devices: [],
     actions: [],
     runs: [],
-    permissions: [],
+    modifiedPermissions: [],
   };
 
   constructor() {
@@ -79,7 +79,6 @@ export class TestDatabaseHelper {
                 .getFirstListItem(`email="${userData.email}"`);
               this.testDataIds.users.push(existingUser.id);
             } catch (error) {
-              // Ignore if we can't find existing user
               console.log(error);
               throw error;
             }
@@ -89,6 +88,63 @@ export class TestDatabaseHelper {
               error instanceof Error ? error.message : "Unknown error"
             );
             throw error;
+          }
+        }
+      }
+
+      console.log("🔐 Adding test users to existing permissions...");
+      for (const permissionName of TEST_PERMISSIONS) {
+        try {
+          const existingPermission = await this.pb
+            .collection("permissions")
+            .getFirstListItem(`name="${permissionName}"`);
+
+          const currentUsers = existingPermission.users || [];
+
+          let usersToAdd: string[] = [];
+
+          if (
+            permissionName === "system-status" ||
+            permissionName === "admin-dashboard" ||
+            permissionName === "delete-device"
+          ) {
+            usersToAdd = [TEST_USERS.admin.id!];
+          } else if (
+            permissionName === "view-stream" ||
+            permissionName === "control-device" ||
+            permissionName === "media-route"
+          ) {
+            usersToAdd = [
+              TEST_USERS.admin.id!,
+              TEST_USERS.user.id!,
+              TEST_USERS.limited.id!,
+            ];
+          } else {
+            usersToAdd = [TEST_USERS.admin.id!, TEST_USERS.user.id!];
+          }
+
+          const updatedUsers = [...new Set([...currentUsers, ...usersToAdd])];
+
+          await this.pb
+            .collection("permissions")
+            .update(existingPermission.id, {
+              users: updatedUsers,
+            });
+
+          this.testDataIds.modifiedPermissions.push(existingPermission.id);
+          console.log(
+            `   ✅ Added test users to permission: ${permissionName}`
+          );
+        } catch (error: unknown) {
+          if (error instanceof Error && error.message.includes("not found")) {
+            console.log(
+              `   ⚠️  Permission ${permissionName} not found, skipping`
+            );
+          } else {
+            console.log(
+              `   ❌ Failed to update permission ${permissionName}:`,
+              error instanceof Error ? error.message : "Unknown error"
+            );
           }
         }
       }
@@ -219,40 +275,6 @@ export class TestDatabaseHelper {
         }
       }
 
-      console.log("🔐 Creating test permissions...");
-      for (const permissionData of Object.values(TEST_PERMISSIONS)) {
-        try {
-          const permission = await this.pb
-            .collection("permissions")
-            .create(permissionData);
-          this.testDataIds.permissions.push(permission.id);
-          console.log(`   ✅ Created permission: ${permissionData.name}`);
-        } catch (error) {
-          if (
-            error instanceof Error &&
-            error.message.includes("already exists")
-          ) {
-            console.log(
-              `   ⚠️  Permission ${permissionData.name} already exists, skipping`
-            );
-            try {
-              const existingPermission = await this.pb
-                .collection("permissions")
-                .getFirstListItem(`name="${permissionData.name}"`);
-              this.testDataIds.permissions.push(existingPermission.id);
-            } catch {
-              // Ignore if we can't find existing permission
-            }
-          } else {
-            console.log(
-              `   ❌ Failed to create permission ${permissionData.name}:`,
-              error instanceof Error ? error.message : "Unknown error"
-            );
-            throw error;
-          }
-        }
-      }
-
       console.log("🎉 Test data seeding completed successfully!");
       return this.testDataIds;
     } catch (error) {
@@ -265,14 +287,23 @@ export class TestDatabaseHelper {
     console.log("🧹 Cleaning up test data...");
     console.log(this.testDataIds);
     try {
-      for (const id of this.testDataIds.permissions) {
+      for (const id of this.testDataIds.modifiedPermissions) {
         try {
-          await this.pb.collection("permissions").delete(id);
-          console.log(`   ✅ Deleted permission: ${id}`);
+          const permission = await this.pb.collection("permissions").getOne(id);
+          const currentUsers = permission.users || [];
+          const testUserIds = this.testDataIds.users;
+          const cleanedUsers = currentUsers.filter(
+            (userId: string) => !testUserIds.includes(userId)
+          );
+
+          await this.pb.collection("permissions").update(id, {
+            users: cleanedUsers,
+          });
+          console.log(`   ✅ Removed test users from permission: ${id}`);
         } catch (error: unknown) {
           if (error instanceof Error && error.message.includes("not found")) {
             console.log(
-              `   ⚠️  Could not delete permission ${id}:`,
+              `   ⚠️  Could not clean permission ${id}:`,
               error?.message
             );
           }
@@ -357,7 +388,7 @@ export class TestDatabaseHelper {
         devices: [],
         actions: [],
         runs: [],
-        permissions: [],
+        modifiedPermissions: [],
       };
     } catch (error) {
       console.error("❌ Failed to cleanup test data:", error);
