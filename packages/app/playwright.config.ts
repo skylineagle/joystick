@@ -26,7 +26,7 @@ export default defineConfig({
   /* Retry on CI only */
   retries: isCI ? 1 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: isCI ? 8 : 2,
+  workers: isCI ? 4 : 2,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: isCI ? [["github"], ["html"]] : "html",
   /* Global setup and teardown for database seeding */
@@ -51,12 +51,39 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        launchOptions: isCI
+          ? {
+              args: [
+                "--no-sandbox",
+                "--disable-setuid-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-background-timer-throttling",
+                "--disable-backgrounding-occluded-windows",
+                "--disable-renderer-backgrounding",
+                "--disable-features=TranslateUI",
+                "--disable-component-extensions-with-background-pages",
+              ],
+            }
+          : {},
+      },
     },
 
     {
       name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
+      use: {
+        ...devices["Desktop Firefox"],
+        launchOptions: isCI
+          ? {
+              firefoxUserPrefs: {
+                "media.navigator.streams.fake": true,
+                "media.navigator.permission.disabled": true,
+                "dom.webnotifications.enabled": false,
+              },
+            }
+          : {},
+      },
     },
 
     {
