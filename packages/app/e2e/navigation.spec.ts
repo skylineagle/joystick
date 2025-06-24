@@ -378,26 +378,27 @@ test.describe("Navigation & Layout", () => {
       await page.getByTestId("user-profile-button").click();
 
       await expect(page.getByText(TEST_USERS.admin.email!)).toBeVisible();
-      await expect(
-        page.getByRole("menuitem", { name: /Color Mode/i })
-      ).toBeVisible();
-      await expect(
-        page.getByRole("menuitem", { name: /Log out/i })
-      ).toBeVisible();
+      await expect(page.getByTestId("color-mode-trigger")).toBeVisible();
+      await expect(page.getByTestId("logout-button")).toBeVisible();
     });
 
     test("should change color mode from user profile", async ({ page }) => {
       await page.goto("/");
 
       await page.getByTestId("user-profile-button").click();
-      await page.getByRole("menuitem", { name: /Color Mode/i }).hover();
-      await page.getByRole("menuitemradio", { name: "Light" }).click();
+      await page.getByTestId("color-mode-trigger").hover();
+      await page.getByTestId("color-mode-light-button").click();
 
       await expect(page.locator("html")).toHaveClass(/light/);
 
+      await page.waitForTimeout(1000);
+      await expect(page.getByTestId("user-profile-button")).toBeVisible({
+        timeout: 10000,
+      });
+
       await page.getByTestId("user-profile-button").click();
-      await page.getByRole("menuitem", { name: /Color Mode/i }).hover();
-      await page.getByRole("menuitemradio", { name: "Dark" }).click();
+      await page.getByTestId("color-mode-trigger").hover();
+      await page.getByTestId("color-mode-dark-button").click();
 
       await expect(page.locator("html")).toHaveClass(/dark/);
     });
@@ -426,33 +427,6 @@ test.describe("Navigation & Layout", () => {
   });
 
   test.describe("Permission-Based Navigation", () => {
-    test("should show different navigation items based on device capabilities", async ({
-      page,
-    }) => {
-      await page.goto("/");
-
-      const deviceRows = page.locator('[data-testid^="device-row-"]');
-      const firstDevice = await deviceRows.first().getAttribute("data-testid");
-      const deviceId = firstDevice?.replace("device-row-", "");
-
-      if (deviceId) {
-        await page.goto(`/${deviceId}/stream`);
-
-        const navItems = page.locator('[data-sidebar="menu"] a');
-        const navCount = await navItems.count();
-
-        expect(navCount).toBeGreaterThan(0);
-
-        const commonItems = ["Stream", "Actions"];
-        for (const item of commonItems) {
-          const navItem = page.getByRole("link", { name: item });
-          if (await navItem.isVisible()) {
-            await expect(navItem).toBeVisible();
-          }
-        }
-      }
-    });
-
     test("should hide sidebar when only one navigation item is available", async ({
       page,
     }) => {

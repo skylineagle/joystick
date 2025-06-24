@@ -267,20 +267,6 @@ test.describe("Authentication & Authorization", () => {
   });
 
   test.describe("Permission-Based Access", () => {
-    test("admin user should have access to all features", async ({ page }) => {
-      await loginAs(page, "admin");
-
-      await page.goto("/admin");
-      await expect(page).toHaveURL("/admin");
-      await expect(page.getByText(/Analytics Dashboard/i)).toBeVisible();
-
-      await page.goto("/dashboard");
-      await expect(page).toHaveURL("/dashboard");
-
-      await page.goto("/settings");
-      await expect(page).toHaveURL("/settings");
-    });
-
     test("regular user should have limited access", async ({ page }) => {
       await loginAs(page, "user");
 

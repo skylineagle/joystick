@@ -9,7 +9,7 @@
     "db:generate": "pocketbase-typegen -d ../../pocketbase/pb_data/data.db -o ./src/types/db.types.ts",
     "lint": "eslint .",
     "test": "playwright test",
-    "test:fast": "PLAYWRIGHT_DEV=true playwright test --project=dev-chrome",
+    "test:fast": "playwright test --project=chromium",
     "test:auth": "playwright test auth.spec.ts",
     "test:db": "playwright test database.spec.ts",
     "test:nav": "playwright test navigation.spec.ts",
