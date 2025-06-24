@@ -90,6 +90,7 @@ export type DeviceInformation = {
   secondSlotHost?: string;
   secondSlotPhone?: string;
   activeSlot?: "primary" | "secondary";
+  autoSlotSwitch?: boolean;
   battery_capacity?: number;
   aspectRatio?: string;
   imuResetValues?: {
@@ -154,6 +155,4 @@ export type ParametersTree = ParametersTreeResponse & {
   };
 };
 
-export type Notification = NotificationsResponse<
-  Record<string, unknown>
->;
+export type Notification = NotificationsResponse<Record<string, unknown>>;

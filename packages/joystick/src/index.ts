@@ -142,7 +142,12 @@ const app = new Elysia()
           switcher: SWITCHER_API_URL,
           ...device.information,
         };
-
+        enhancedLogger.info(
+          {
+            defaultParameters,
+          },
+          "Default parameters"
+        );
         const command = Object.entries({
           ...body,
           ...defaultParameters,
@@ -304,7 +309,7 @@ const app = new Elysia()
           type: body.type || "info",
           title: body.title,
           message: body.message,
-          userId: !auth.isSuperuser && userId ? userId : null,
+          userId: !auth.isSuperuser && userId ? userId : undefined,
           deviceId: body.deviceId,
           dismissible: body.dismissible !== false,
         };

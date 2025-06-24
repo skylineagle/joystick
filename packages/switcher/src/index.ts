@@ -1,11 +1,16 @@
 import { logger } from "@/logger";
 import { pb } from "@/pocketbase";
 import cors from "@elysiajs/cors";
+import { cron } from "@elysiajs/cron";
 import { swagger } from "@elysiajs/swagger";
 import type { DeviceResponse } from "@joystick/core";
 import { createAuthPlugin, STREAM_API_URL } from "@joystick/core";
 import { Elysia } from "elysia";
 export const TO_REPLACE = ["camera", "action"];
+
+const SLOT_HEALTH_CHECK_INTERVAL = parseInt(
+  Bun.env.SLOT_HEALTH_CHECK_INTERVAL || "30"
+);
 
 async function addDevice(deviceName: string, configuration: any) {
   await fetch(`${STREAM_API_URL}/v3/config/paths/add/${deviceName}`, {
@@ -21,6 +26,132 @@ async function deleteDevice(deviceName: string) {
   await fetch(`${STREAM_API_URL}/v3/config/paths/delete/${deviceName}`, {
     method: "DELETE",
   });
+}
+
+async function runSlotCheckAction(
+  device: DeviceResponse,
+  host: string
+): Promise<boolean> {
+  try {
+    logger.debug(`Running slot check action for device ${device.id}`);
+    const joystickApiUrl = Bun.env.JOYSTICK_API_URL || "http://localhost:8000";
+
+    const response = await fetch(
+      `${joystickApiUrl}/api/run/${device.id}/slot-check`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-API-Key": Bun.env.JOYSTICK_API_KEY || "dev-api-key-12345",
+        },
+        body: JSON.stringify({
+          host,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      logger.error(
+        `Failed to run slot check action for device ${device.id}: ${response.statusText}`
+      );
+      return false;
+    }
+
+    const result = await response.json();
+
+    if (!result.success) {
+      logger.error(
+        `Failed to run slot check action for device ${device.id}: ${result.error}`
+      );
+      return false;
+    }
+
+    return typeof result.result === "boolean"
+      ? result.result
+      : typeof result.result === "string"
+      ? result.result.includes("true")
+      : false;
+  } catch (error) {
+    logger.debug(`Health check failed for ${host}: ${error}`);
+    return false;
+  }
+}
+
+async function checkDeviceHealth(device: DeviceResponse): Promise<void> {
+  if (!device.information?.autoSlotSwitch) {
+    return;
+  }
+
+  const hasSecondSlot = device.information.secondSlotHost;
+  if (!hasSecondSlot) {
+    logger.warn(
+      `Device ${device.id} has no second slot host but auto slot switch is enabled`
+    );
+    return;
+  }
+
+  const currentSlot = device.information.activeSlot || "primary";
+  const currentSlotHealthy = await runSlotCheckAction(
+    device,
+    currentSlot === "primary"
+      ? device.information.host
+      : device.information.secondSlotHost!
+  );
+
+  if (currentSlotHealthy) {
+    logger.info(`Device ${device.id} active slot is healthy`);
+    return;
+  }
+
+  const alternateSlot = currentSlot === "primary" ? "secondary" : "primary";
+  const alternateSlotHealthy = await runSlotCheckAction(
+    device,
+    alternateSlot === "primary"
+      ? device.information.host
+      : device.information.secondSlotHost!
+  );
+
+  if (alternateSlotHealthy) {
+    logger.info(
+      `Switching device ${device.id} from ${currentSlot} to ${alternateSlot} slot due to health check failure`
+    );
+
+    try {
+      await pb.collection("devices").update(device.id, {
+        information: {
+          ...device.information,
+          activeSlot: alternateSlot,
+        },
+      });
+
+      logger.info(
+        `Successfully switched device ${device.id} to ${alternateSlot} slot`
+      );
+    } catch (error) {
+      logger.error(`Failed to switch device ${device.id} slot: ${error}`);
+    }
+  }
+}
+
+async function performHealthChecks(): Promise<void> {
+  try {
+    const devices = await pb.collection("devices").getFullList<DeviceResponse>({
+      filter:
+        'information.autoSlotSwitch = true && information.secondSlotHost != ""',
+    });
+
+    logger.debug(
+      `Performing health checks on ${devices.length} devices with auto slot switching enabled`
+    );
+
+    const healthCheckPromises = devices.map((device) =>
+      checkDeviceHealth(device)
+    );
+    await Promise.allSettled(healthCheckPromises);
+    logger.debug("Health checks completed");
+  } catch (error) {
+    logger.error("Error during health checks:", error);
+  }
 }
 
 async function initializeDevices() {
@@ -88,6 +219,15 @@ const app = new Elysia()
       "Incoming request"
     );
   })
+  .use(
+    cron({
+      pattern: `*/${SLOT_HEALTH_CHECK_INTERVAL} * * * * *`,
+      name: "slot-health-check",
+      run: async () => {
+        await performHealthChecks();
+      },
+    })
+  )
   .post("/api/mode/:device/:mode", async ({ params, set }) => {
     try {
       const { device: deviceId, mode } = params;
@@ -130,7 +270,80 @@ const app = new Elysia()
         error: error instanceof Error ? error.message : "Unknown error",
       };
     }
-  }) // Standard health check endpoint
+  })
+  .post("/api/slot/:device/:slot", async ({ params, set }) => {
+    try {
+      const { device: deviceId, slot } = params;
+
+      if (slot !== "primary" && slot !== "secondary") {
+        set.status = 400;
+        return {
+          success: false,
+          error: "Invalid slot. Must be 'primary' or 'secondary'",
+        };
+      }
+
+      const deviceResult = await pb
+        .collection("devices")
+        .getFullList<DeviceResponse>(1, {
+          filter: `id = "${deviceId}"`,
+        });
+
+      if (deviceResult.length !== 1) {
+        set.status = 404;
+        return {
+          success: false,
+          error: `Device ${deviceId} not found`,
+        };
+      }
+
+      const device = deviceResult[0];
+
+      if (!device.information) {
+        set.status = 400;
+        return {
+          success: false,
+          error: "Device information not found",
+        };
+      }
+
+      if (slot === "secondary" && !device.information.secondSlotHost) {
+        set.status = 400;
+        return {
+          success: false,
+          error: "Secondary slot not configured for this device",
+        };
+      }
+
+      await pb.collection("devices").update(device.id, {
+        information: {
+          ...device.information,
+          activeSlot: slot,
+        },
+      });
+
+      logger.info(`Manually switched device ${deviceId} to ${slot} slot`);
+
+      return { success: true, activeSlot: slot };
+    } catch (error) {
+      set.status = 500;
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  })
+  .post("/api/health/check", async () => {
+    try {
+      await performHealthChecks();
+      return { success: true, message: "Health checks completed" };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      };
+    }
+  })
   .get("/api/health", async () => {
     return {
       status: "healthy",
@@ -141,6 +354,7 @@ const app = new Elysia()
       version: process.env.npm_package_version || "unknown",
     };
   })
+
   .listen(Bun.env.PORT || 8080);
 
 logger.info(
