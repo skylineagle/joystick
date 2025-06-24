@@ -48,7 +48,12 @@ export function DeviceActions({ device }: DeviceActionsProps) {
         {isAllowedToEditDevice && <ConfigurationEditor device={device} />}
         {isAllowedToControlDevice && (
           <Link to={`/${device.id}`} className="self-center">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              data-testid={`joystick-button-${device.id}`}
+            >
               <Joystick className="h-4 w-4" />
             </Button>
           </Link>

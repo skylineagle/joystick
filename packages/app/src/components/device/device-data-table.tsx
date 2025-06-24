@@ -237,6 +237,7 @@ export function DeviceDataTable({ data }: DeviceDataTableProps) {
                   table.getRowModel().rows.map((row) => (
                     <TableRow
                       key={row.id}
+                      data-testid={`device-row-${row.original.id}`}
                       data-state={row.getIsSelected() && "selected"}
                     >
                       {row.getVisibleCells().map((cell) => {

@@ -31,6 +31,7 @@ export function AnimatedThemeToggle() {
       aria-label={`Switch to ${
         getActualColorMode() === "light" ? "dark" : "light"
       } mode`}
+      data-testid="theme-toggle"
       whileTap={{ scale: 0.95 }}
     >
       <motion.div

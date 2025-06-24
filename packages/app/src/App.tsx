@@ -1,7 +1,9 @@
 import { LoginForm } from "@/components/auth/login-form";
 import { ProtectedRoute } from "@/components/auth/protected-route";
+import { DeviceRouteGuard } from "@/components/device-route-guard";
 import { EasterEggs } from "@/components/easter-eggs";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { NotFound } from "@/components/not-found";
 import { PageTransition } from "@/components/page-transition";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -258,66 +260,83 @@ function AnimatedRoutes() {
         path="/:device"
         element={
           <ProtectedRoute>
-            <Layout />
+            <DeviceRouteGuard />
           </ProtectedRoute>
         }
       >
-        <Route index element={<RerouteHome />} />
+        <Route
+          index
+          element={
+            <Layout>
+              <RerouteHome />
+            </Layout>
+          }
+        />
         <Route
           path="stream"
           element={
-            <Suspense fallback={<LoadingFallback />}>
-              <ErrorBoundary>
-                <PageTransition>
-                  <StreamView />
-                </PageTransition>
-              </ErrorBoundary>
-            </Suspense>
+            <Layout>
+              <Suspense fallback={<LoadingFallback />}>
+                <ErrorBoundary>
+                  <PageTransition>
+                    <StreamView />
+                  </PageTransition>
+                </ErrorBoundary>
+              </Suspense>
+            </Layout>
           }
         />
         <Route
           path="params"
           element={
-            <Suspense fallback={<LoadingFallback />}>
-              <ErrorBoundary>
-                <PageTransition>
-                  <ParamsPage />
-                </PageTransition>
-              </ErrorBoundary>
-            </Suspense>
+            <Layout>
+              <Suspense fallback={<LoadingFallback />}>
+                <ErrorBoundary>
+                  <PageTransition>
+                    <ParamsPage />
+                  </PageTransition>
+                </ErrorBoundary>
+              </Suspense>
+            </Layout>
           }
         />
 
         <Route
           path="actions"
           element={
-            <Suspense fallback={<LoadingFallback />}>
-              <ErrorBoundary>
-                <PageTransition>
-                  <ActionsPage />
-                </PageTransition>
-              </ErrorBoundary>
-            </Suspense>
+            <Layout>
+              <Suspense fallback={<LoadingFallback />}>
+                <ErrorBoundary>
+                  <PageTransition>
+                    <ActionsPage />
+                  </PageTransition>
+                </ErrorBoundary>
+              </Suspense>
+            </Layout>
           }
         />
         <Route
           path="terminal"
           element={
-            <Suspense fallback={<LoadingFallback />}>
-              <TerminalPage />
-            </Suspense>
+            <Layout>
+              <Suspense fallback={<LoadingFallback />}>
+                <TerminalPage />
+              </Suspense>
+            </Layout>
           }
         />
         <Route
           path="gallery"
           element={
-            <Suspense fallback={<LoadingFallback />}>
-              <ErrorBoundary>
-                <PageTransition>
-                  <GalleryPage />
-                </PageTransition>
-              </ErrorBoundary>
-            </Suspense>
+            <Layout>
+              <Suspense fallback={<LoadingFallback />}>
+                <ErrorBoundary>
+                  <PageTransition>
+                    <GalleryPage />
+                  </PageTransition>
+                </ErrorBoundary>
+              </Suspense>
+            </Layout>
           }
         />
       </Route>
@@ -347,6 +366,28 @@ function AnimatedRoutes() {
               </ErrorBoundary>
             </Suspense>
           </ProtectedRoute>
+        }
+      />
+      <Route
+        path="*"
+        element={
+          <ProtectedRoute>
+            <ErrorBoundary>
+              <PageTransition>
+                <NotFound />
+              </PageTransition>
+            </ErrorBoundary>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/not-found"
+        element={
+          <ErrorBoundary>
+            <PageTransition>
+              <NotFound />
+            </PageTransition>
+          </ErrorBoundary>
         }
       />
     </Routes>

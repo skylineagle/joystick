@@ -1,0 +1,73 @@
+name: Full Playwright Tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, firefox, webkit]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+            packages/app/node_modules
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock', '**/package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
+      - name: Install dependencies
+        run: |
+          bun install
+          cd packages/app && bun install
+
+      - name: Start services
+        run: docker compose -f docker-compose.dev.yml up -d
+
+      - name: Wait for services
+        run: |
+          echo "Waiting for services..."
+          timeout 30 bash -c 'until curl -sf http://localhost:8090/api/health; do sleep 1; done'
+          timeout 30 bash -c 'until curl -sf http://localhost:9997/v3/config/global/get; do sleep 1; done'
+          echo "✅ Services ready"
+
+      - name: Install Playwright
+        working-directory: ./packages/app
+        run: bunx playwright install ${{ matrix.project }} --with-deps
+
+      - name: Run tests
+        working-directory: ./packages/app
+        run: bunx playwright test --project=${{ matrix.project }}
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose -f docker-compose.dev.yml down -v --remove-orphans
+          docker system prune -f
+
+      - name: Upload results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.project }}-${{ github.run_number }}
+          path: packages/app/playwright-report/
+          retention-days: 7

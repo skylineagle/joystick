@@ -72,6 +72,7 @@ export function DeviceSwitcher() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
+              data-testid="device-switcher-button"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-muted font-medium">
@@ -110,6 +111,7 @@ export function DeviceSwitcher() {
               devices?.map((device, index) => (
                 <DropdownMenuItem
                   key={device.id}
+                  data-testid={`device-switcher-${device.id}`}
                   onClick={() => {
                     navigate(`/${device.id}/${currentPage}${search}`);
                     setOpen(false);

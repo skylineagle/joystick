@@ -35,7 +35,7 @@ export function LoginForm() {
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between px-12 py-4">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Switcher Logo" className="h-16 w-16" />
+            <img src="/logo.png" alt="Joystick Logo" className="h-16 w-16" />
             {/* <h1 className="text-3xl font-bold">HaTomer</h1> */}
           </div>
 
@@ -55,6 +55,7 @@ export function LoginForm() {
               <Input
                 id="email"
                 type="email"
+                data-testid="email-input"
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -66,13 +67,19 @@ export function LoginForm() {
               <Input
                 id="password"
                 type="password"
+                data-testid="password-input"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              data-testid="login-button"
+              className="w-full"
+              disabled={isLoading}
+            >
               {isLoading ? "Logging in..." : "Login"}
             </Button>
           </form>
