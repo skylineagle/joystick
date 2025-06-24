@@ -56,7 +56,7 @@ jobs:
 
       - name: Run tests
         working-directory: ./packages/app
-        run: bunx playwright test --project=${{ matrix.project }} --workers=2
+        run: bunx playwright test --project=${{ matrix.project }}
 
       - name: Cleanup
         if: always()
