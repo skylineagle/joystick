@@ -116,6 +116,7 @@ services:
       - MEDIAMTX_API=http://mediamtx:9997
       - POCKETBASE_URL=http://pocketbase:8090
       - JOYSTICK_API_URL=http://joystick:8000
+      - JOYSTICK_API_KEY=dev-api-key-12345
       - PORT=8080
     depends_on:
       pocketbase:

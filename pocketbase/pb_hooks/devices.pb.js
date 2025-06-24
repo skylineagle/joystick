@@ -245,12 +245,19 @@ onRecordUpdateRequest((e) => {
       });
 
       try {
-        $http.get(
-          `http://mediamtx:8888/v3/config/paths/patch/${e.record.get("id")}`,
-          {
-            source: `rtspx://${information.user}:${information.password}@${activeHost}:554?timeout=10s`,
-          }
-        );
+        $http.send({
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": $os.getenv("JOYSTICK_API_KEY"),
+          },
+          url: `http://mediamtx:8888/v3/config/paths/patch/${e.record.get(
+            "id"
+          )}`,
+          body: {
+            source: sourceUrl,
+          },
+        });
       } catch (err) {
         $app.logger().error(err);
       }
