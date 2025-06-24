@@ -115,9 +115,11 @@ export const createAuthPlugin = (
                 const authData = await tempPb
                   .collection("_superusers")
                   .authRefresh();
-                authContext.isSuperuser = !!authData.record.isSuperuser;
-                authContext.user = authData.record;
-                authContext.userId = authData.record.id;
+                if (authData && authData.record) {
+                  authContext.isSuperuser = !!authData.record.isSuperuser;
+                  authContext.user = authData.record;
+                  authContext.userId = authData.record.id;
+                }
               } catch (error) {
                 authContext.isSuperuser = false;
               }
