@@ -122,91 +122,99 @@ export const NotificationsHistoryPage = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Notification History</h1>
-          <p className="text-muted-foreground">
-            View and manage all system notifications
-          </p>
+    <div className="h-screen flex flex-col overflow-hidden">
+      <div className="flex-shrink-0 container mx-auto p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">Notification History</h1>
+            <p className="text-muted-foreground">
+              View and manage all system notifications
+            </p>
+          </div>
+          <Button variant="outline" asChild>
+            <Link to="/">
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Back to Dashboard
+            </Link>
+          </Button>
         </div>
-        <Button variant="outline" asChild>
-          <Link to="/">
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Link>
-        </Button>
+
+        <NotificationFilters
+          search={search}
+          onSearchChange={setSearch}
+          selectedDevices={selectedDevices}
+          onDevicesChange={setSelectedDevices}
+          selectedTypes={selectedTypes}
+          onTypesChange={setSelectedTypes}
+          showUnreadOnly={showUnreadOnly}
+          onShowUnreadOnlyChange={setShowUnreadOnly}
+          deviceOptions={deviceOptions}
+        />
       </div>
 
-      <NotificationFilters
-        search={search}
-        onSearchChange={setSearch}
-        selectedDevices={selectedDevices}
-        onDevicesChange={setSelectedDevices}
-        selectedTypes={selectedTypes}
-        onTypesChange={setSelectedTypes}
-        showUnreadOnly={showUnreadOnly}
-        onShowUnreadOnlyChange={setShowUnreadOnly}
-        deviceOptions={deviceOptions}
-      />
+      <div className="flex-1 container mx-auto px-6 pb-6 min-h-0">
+        <Card className="h-full flex flex-col">
+          <CardHeader className="flex-shrink-0">
+            <CardTitle className="flex items-center justify-between">
+              <span>Notifications ({allNotifications.length})</span>
+              {data?.pages[0]?.totalItems && (
+                <span className="text-sm font-normal text-muted-foreground">
+                  Total: {data.pages[0].totalItems}
+                </span>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex-1 min-h-0 overflow-hidden">
+            {isLoading ? (
+              <div className="flex justify-center items-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            ) : allNotifications.length === 0 ? (
+              <div className="flex justify-center items-center h-full">
+                <div className="text-center">
+                  <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-medium mb-2">
+                    No notifications found
+                  </h3>
+                  <p className="text-muted-foreground">
+                    {search ||
+                    selectedDevices.length > 0 ||
+                    selectedTypes.length > 0 ||
+                    showUnreadOnly
+                      ? "Try adjusting your filters"
+                      : "No notifications have been sent yet"}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="h-full overflow-y-auto">
+                <div className="space-y-4">
+                  <NotificationTable
+                    notifications={allNotifications}
+                    onMarkAsRead={handleMarkAsRead}
+                  />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Notifications ({allNotifications.length})</span>
-            {data?.pages[0]?.totalItems && (
-              <span className="text-sm font-normal text-muted-foreground">
-                Total: {data.pages[0].totalItems}
-              </span>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center items-center h-40">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : allNotifications.length === 0 ? (
-            <div className="text-center py-8">
-              <Bell className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-lg font-medium mb-2">
-                No notifications found
-              </h3>
-              <p className="text-muted-foreground">
-                {search ||
-                selectedDevices.length > 0 ||
-                selectedTypes.length > 0 ||
-                showUnreadOnly
-                  ? "Try adjusting your filters"
-                  : "No notifications have been sent yet"}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <NotificationTable
-                notifications={allNotifications}
-                onMarkAsRead={handleMarkAsRead}
-              />
-
-              {hasNextPage && (
-                <div ref={loadMoreRef} className="flex justify-center py-4">
-                  {isFetchingNextPage ? (
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  ) : (
-                    <Button
-                      variant="outline"
-                      onClick={() => fetchNextPage()}
-                      disabled={isFetchingNextPage}
-                    >
-                      Load More
-                    </Button>
+                  {hasNextPage && (
+                    <div ref={loadMoreRef} className="flex justify-center py-4">
+                      {isFetchingNextPage ? (
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                      ) : (
+                        <Button
+                          variant="outline"
+                          onClick={() => fetchNextPage()}
+                          disabled={isFetchingNextPage}
+                        >
+                          Load More
+                        </Button>
+                      )}
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

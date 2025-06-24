@@ -82,7 +82,7 @@ export function UserProfile() {
 
         {/* Color Mode Selection */}
         <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
+          <DropdownMenuSubTrigger data-testid="color-mode-trigger">
             <Sun className="mr-2 h-4 w-4" />
             <span>Color Mode</span>
             <div className="ml-auto flex h-4 w-4 items-center justify-center">
@@ -98,6 +98,7 @@ export function UserProfile() {
             >
               <DropdownMenuRadioItem
                 value="light"
+                data-testid="color-mode-light-button"
                 className="flex items-center gap-2"
               >
                 {colorModeIcons.light}
@@ -105,6 +106,7 @@ export function UserProfile() {
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
                 value="dark"
+                data-testid="color-mode-dark-button"
                 className="flex items-center gap-2"
               >
                 {colorModeIcons.dark}
@@ -112,6 +114,7 @@ export function UserProfile() {
               </DropdownMenuRadioItem>
               <DropdownMenuRadioItem
                 value="system"
+                data-testid="color-mode-system-button"
                 className="flex items-center gap-2"
               >
                 {colorModeIcons.system}

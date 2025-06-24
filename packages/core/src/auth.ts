@@ -9,6 +9,7 @@ export interface AuthContext {
   userId: string | null;
   isApiKey: boolean;
   isInternal: boolean;
+  isSuperuser: boolean;
 }
 
 export interface AuthOptions {
@@ -72,6 +73,7 @@ export const createAuthPlugin = (
           userId: null,
           isApiKey: false,
           isInternal: false,
+          isSuperuser: false,
         };
 
         const apiKeyHeader = headers["x-api-key"] || headers["X-API-Key"];
@@ -107,8 +109,21 @@ export const createAuthPlugin = (
             if (authData && authData.record) {
               authContext.user = authData.record;
               authContext.userId = authData.record.id;
+            } else {
+              try {
+                tempPb.authStore.save(token, null);
+                const authData = await tempPb
+                  .collection("_superusers")
+                  .authRefresh();
+                if (authData && authData.record) {
+                  authContext.isSuperuser = !!authData.record.isSuperuser;
+                  authContext.user = authData.record;
+                  authContext.userId = authData.record.id;
+                }
+              } catch (error) {
+                authContext.isSuperuser = false;
+              }
             }
-
             return { auth: authContext };
           } catch (error) {
             console.error("PocketBase token validation failed:", error);

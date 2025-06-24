@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { joystickApi } from "@/lib/api-client";
 import { pb } from "@/lib/pocketbase";
 import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
@@ -56,14 +57,10 @@ export const GalleryEvent = ({
 
   const pullMutation = useMutation({
     mutationFn: async (eventId: string) => {
-      const response = await fetch(
+      return await joystickApi.post(
         `${urls.studio}/api/gallery/${event.device}/pull/${eventId}`,
-        {
-          method: "POST",
-        }
+        {}
       );
-      if (!response.ok) throw new Error("Failed to pull event");
-      return response.json();
     },
     onSuccess: () => {
       toast.success({
