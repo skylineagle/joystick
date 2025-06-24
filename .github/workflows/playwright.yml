@@ -2,6 +2,8 @@ name: Full Playwright Tests
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -52,7 +54,7 @@ jobs:
 
       - name: Run tests
         working-directory: ./packages/app
-        run: bunx playwright test --project=${{ matrix.project }}
+        run: bunx playwright test --project=${{ matrix.project }} --workers=2
 
       - name: Cleanup
         if: always()
