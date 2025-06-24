@@ -44,7 +44,11 @@ export const NotificationProvider = ({
 
   const wsUrl = urls.joystick.replace(/^http/, "ws") + "/notifications";
 
-  const { lastMessage, readyState } = useWebSocket(token ? wsUrl : null, {
+  const { lastMessage, readyState, sendMessage } = useWebSocket(token ? wsUrl : null, {
+    onError: (error) => console.error('WebSocket error:', error),
+    shouldReconnect: () => !!token,
+    reconnectAttempts: 3,
+    reconnectInterval: 3000,
     queryParams: {
       token: token || "",
     },
