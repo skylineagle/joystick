@@ -297,14 +297,14 @@ const app = new Elysia()
     "/api/notifications/send",
     async ({ body, auth, set }) => {
       try {
-        const userId = auth.userId || "system";
+        const userId = auth.userId ?? "";
         const userName = auth.user?.name || auth.user?.email || "system";
 
         const request: SendNotificationRequest = {
           type: body.type || "info",
           title: body.title,
           message: body.message,
-          userId: body.userId || userId,
+          userId: !auth.isSuperuser && userId ? userId : null,
           deviceId: body.deviceId,
           dismissible: body.dismissible !== false,
         };

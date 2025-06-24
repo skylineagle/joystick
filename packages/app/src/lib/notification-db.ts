@@ -87,10 +87,6 @@ export const fetchNotificationHistory = async (
   const { deviceId, search, types, showUnreadOnly } = filters;
   const filterParts: string[] = [];
 
-  if (currentUserId) {
-    filterParts.push(`(dismissed = "" || dismissed !~ "${currentUserId}")`);
-  }
-
   if (deviceId) {
     filterParts.push(`device = "${deviceId}"`);
   }

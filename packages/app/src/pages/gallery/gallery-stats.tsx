@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { FC } from "react";
 import { GalleryStats as GalleryStatsType } from "./gallery-page";
+import { joystickApi } from "@/lib/api-client";
 
 interface GalleryStatsProperties {
   deviceId: string;
@@ -18,12 +19,10 @@ export const GalleryStats: FC<GalleryStatsProperties> = ({ deviceId }) => {
   const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ["gallery", "stats", deviceId],
     queryFn: async () => {
-      const response = await fetch(
+      const data = await joystickApi.get<GalleryStatsType>(
         `${urls.studio}/api/gallery/${deviceId}/stats`
       );
-      if (!response.ok) throw new Error("Failed to fetch gallery stats");
-      const data = await response.json();
-      return data.stats as GalleryStatsType;
+      return data;
     },
     enabled: !!deviceId,
   });

@@ -17,6 +17,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useIsSupported } from "@/hooks/use-is-supported";
+import { joystickApi } from "@/lib/api-client";
 import { pb } from "@/lib/pocketbase";
 import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
@@ -83,12 +84,9 @@ export default function GalleryPage() {
   const { data: isRunning, isLoading: isLoadingStatus } = useQuery({
     queryKey: ["gallery", deviceId, "status"],
     queryFn: async () => {
-      const response = await fetch(
+      const data = await joystickApi.get<{ status: "running" | "stopped" }>(
         `${urls.studio}/api/gallery/${deviceId}/status`
       );
-      if (!response.ok) throw new Error("Failed to fetch gallery status");
-      const data = await response.json();
-      if (!data.success) throw new Error(data.error);
       return data.status === "running";
     },
   });
@@ -97,18 +95,11 @@ export default function GalleryPage() {
   // Start gallery service
   const startMutation = useMutation({
     mutationFn: async (config: GalleryConfig) => {
-      const response = await fetch(
+      const data = await joystickApi.post(
         `${urls.studio}/api/gallery/${deviceId}/start`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(config),
-        }
+        config
       );
-      if (!response.ok) throw new Error("Failed to start gallery service");
-      return response.json();
+      return data;
     },
     onSuccess: () => {
       toast.success({
@@ -129,14 +120,11 @@ export default function GalleryPage() {
   // Stop gallery service
   const stopMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(
+      const data = await joystickApi.post(
         `${urls.studio}/api/gallery/${deviceId}/stop`,
-        {
-          method: "POST",
-        }
+        {}
       );
-      if (!response.ok) throw new Error("Failed to stop gallery service");
-      return response.json();
+      return data;
     },
     onSuccess: () => {
       toast.success({

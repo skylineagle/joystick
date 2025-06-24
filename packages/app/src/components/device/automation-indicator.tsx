@@ -1,4 +1,5 @@
 import { NextModeIndication } from "@/components/device/next-mode-indication";
+import { joystickApi } from "@/lib/api-client";
 import { urls } from "@/lib/urls";
 import { DeviceAutomation, DeviceResponse } from "@/types/types";
 import { useQuery } from "@tanstack/react-query";
@@ -23,12 +24,10 @@ export const AutomationIndicator = memo(
     const { data } = useQuery<CountdownData>({
       queryKey: ["device", deviceId, "next-job"],
       queryFn: async () => {
-        const response = await fetch(`${urls.baker}/jobs/${deviceId}/next`);
-        const data = await response.json();
-
-        if (!response.ok || !automation) {
-          throw new Error("Failed to fetch next execution");
-        }
+        const data = await joystickApi.get<{
+          nextExecution: string;
+          jobName: string;
+        }>(`${urls.baker}/jobs/${deviceId}/next`);
 
         // Ensure we have a valid nextExecution date
         if (!data?.nextExecution) {

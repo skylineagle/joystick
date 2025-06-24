@@ -2,8 +2,9 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription
+  DialogDescription,
 } from "@/components/ui/dialog";
+import { joystickApi } from "@/lib/api-client";
 import { pb } from "@/lib/pocketbase";
 import { urls } from "@/lib/urls";
 import { getEventState } from "@/pages/gallery/utils";
@@ -30,14 +31,10 @@ export const FocusedEvent = ({
 
   const pullMutation = useMutation({
     mutationFn: async (eventId: string) => {
-      const response = await fetch(
+      return await joystickApi.post(
         `${urls.studio}/api/gallery/${focusedEvent?.device}/pull/${eventId}`,
-        {
-          method: "POST",
-        }
+        {}
       );
-      if (!response.ok) throw new Error("Failed to pull event");
-      return response.json();
     },
     onSuccess: () => {
       toast.success({
