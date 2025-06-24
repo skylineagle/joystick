@@ -3,7 +3,7 @@ import { AnalyticsPage } from "./analytics-page";
 
 export function AdminPage() {
   const { user } = useAuthStore();
-  const isAdmin = user?.email.startsWith("admin");
+  const isAdmin = user?.email?.startsWith("admin");
 
   if (!isAdmin) {
     return (
