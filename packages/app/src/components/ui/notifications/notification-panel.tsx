@@ -177,17 +177,16 @@ export const NotificationPanel = () => {
             handleMarkAsRead={handleMarkAsRead}
             handleRemoveNotification={handleRemoveNotification}
           />
-          {filteredNotifications.length > 0 && (
-            <NotificationPanelFooter
-              filteredNotifications={filteredNotifications}
-              filterCurrentDevice={filterCurrentDevice}
-              currentDeviceId={currentDeviceId}
-              getDeviceDisplayName={getDeviceDisplayName}
-              isNotificationsHistoryPermitted={isNotificationsHistoryPermitted}
-              isWebSocketConnected={!!isWebSocketConnected}
-              handleClose={handleClose}
-            />
-          )}
+
+          <NotificationPanelFooter
+            filteredNotifications={filteredNotifications}
+            filterCurrentDevice={filterCurrentDevice}
+            currentDeviceId={currentDeviceId}
+            getDeviceDisplayName={getDeviceDisplayName}
+            isNotificationsHistoryPermitted={isNotificationsHistoryPermitted}
+            isWebSocketConnected={!!isWebSocketConnected}
+            handleClose={handleClose}
+          />
         </PopoverContent>
       </Popover>
     </>
