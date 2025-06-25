@@ -488,6 +488,31 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
                     Set as active slot
                   </Label>
                 </div>
+                <div className="flex items-center space-x-2 mt-2">
+                  <Checkbox
+                    id="autoSlotSwitch"
+                    checked={
+                      editingConfig?.information?.autoSlotSwitch ?? false
+                    }
+                    onCheckedChange={(checked) =>
+                      setEditingConfig((prev) =>
+                        prev && prev.information
+                          ? {
+                              ...prev,
+                              information: {
+                                ...prev.information,
+                                autoSlotSwitch: Boolean(checked),
+                              },
+                            }
+                          : null
+                      )
+                    }
+                    aria-label="Enable automatic slot switching"
+                  />
+                  <Label htmlFor="autoSlotSwitch">
+                    Enable automatic slot switching
+                  </Label>
+                </div>
               </div>
             )}
           </TabsContent>

@@ -1,5 +1,6 @@
 import { ConfigurationEditor } from "@/components/configuration/configuration-editor";
 import { ResetDevice } from "@/components/device/reset-device";
+import { SlotHealthIndicator } from "@/components/device/slot-health-indicator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -111,6 +112,7 @@ export function DeviceHealthIndicator() {
             </Button>
           </div>
         </TooltipTrigger>
+        <SlotHealthIndicator deviceId={deviceId!} />
         <TooltipContent>
           <p>
             {lastCheckTime
