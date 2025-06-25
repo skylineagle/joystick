@@ -34,41 +34,106 @@ export const CellSearchControls = () => {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.2 }}
+          className="space-y-4"
         >
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Wifi className="h-4 w-4 text-primary" />
-              <h3 className="font-semibold text-sm">Signal Guide</h3>
+              <h3 className="font-semibold text-sm">Signal Quality Guide</h3>
             </div>
 
+            <div className="space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-0.5 items-end">
+                    <div className="w-0.5 h-1.5 bg-green-500 rounded-sm" />
+                    <div className="w-0.5 h-2 bg-green-500 rounded-sm" />
+                    <div className="w-0.5 h-2.5 bg-green-500 rounded-sm" />
+                    <div className="w-0.5 h-3 bg-green-500 rounded-sm" />
+                  </div>
+                  <span>Excellent</span>
+                </div>
+                <span className="text-muted-foreground font-mono">
+                  -80+ dBm
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-0.5 items-end">
+                    <div className="w-0.5 h-1.5 bg-yellow-500 rounded-sm" />
+                    <div className="w-0.5 h-2 bg-yellow-500 rounded-sm" />
+                    <div className="w-0.5 h-2.5 bg-yellow-500 rounded-sm" />
+                    <div className="w-0.5 h-3 bg-gray-300 rounded-sm" />
+                  </div>
+                  <span>Good</span>
+                </div>
+                <span className="text-muted-foreground font-mono">
+                  -90+ dBm
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-0.5 items-end">
+                    <div className="w-0.5 h-1.5 bg-orange-500 rounded-sm" />
+                    <div className="w-0.5 h-2 bg-orange-500 rounded-sm" />
+                    <div className="w-0.5 h-2.5 bg-gray-300 rounded-sm" />
+                    <div className="w-0.5 h-3 bg-gray-300 rounded-sm" />
+                  </div>
+                  <span>Fair</span>
+                </div>
+                <span className="text-muted-foreground font-mono">
+                  -100+ dBm
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex gap-0.5 items-end">
+                    <div className="w-0.5 h-1.5 bg-red-500 rounded-sm" />
+                    <div className="w-0.5 h-2.5 bg-gray-300 rounded-sm" />
+                    <div className="w-0.5 h-2 bg-gray-300 rounded-sm" />
+                    <div className="w-0.5 h-3 bg-gray-300 rounded-sm" />
+                  </div>
+                  <span>Poor</span>
+                </div>
+                <span className="text-muted-foreground font-mono">
+                  &lt;-110 dBm
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="font-semibold text-sm">Signal Quality (RSRQ)</h3>
             <div className="space-y-2 text-xs">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-green-500" />
                   <span>Excellent</span>
                 </div>
-                <span className="text-muted-foreground">-80+ dBm</span>
+                <span className="text-muted-foreground font-mono">-10+ dB</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-yellow-500" />
                   <span>Good</span>
                 </div>
-                <span className="text-muted-foreground">-90+ dBm</span>
+                <span className="text-muted-foreground font-mono">-15+ dB</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-orange-500" />
                   <span>Fair</span>
                 </div>
-                <span className="text-muted-foreground">-100+ dBm</span>
+                <span className="text-muted-foreground font-mono">-20+ dB</span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-red-500" />
                   <span>Poor</span>
                 </div>
-                <span className="text-muted-foreground">&lt;-100 dBm</span>
+                <span className="text-muted-foreground font-mono">
+                  &lt;-20 dB
+                </span>
               </div>
             </div>
           </div>

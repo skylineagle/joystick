@@ -5,15 +5,7 @@ import { runAction } from "@/lib/joystick-api";
 import { cn, parseCPSIResult } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
-import {
-  Clock,
-  RefreshCw,
-  Signal,
-  SignalHigh,
-  SignalLow,
-  SignalMedium,
-  SignalZero,
-} from "lucide-react";
+import { Clock, RefreshCw } from "lucide-react";
 
 interface CellularStatusProps {
   deviceId: string;
@@ -52,33 +44,49 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
     );
   }
 
-  const getSignalIcon = () => {
+  const getSignalBars = () => {
+    let signalValue = 0;
+
     // For LTE, use RSRP as the signal quality indicator
     if (data.technology === "LTE" && data.rsrp !== undefined) {
-      // RSRP ranges typically from -140 dBm (poor) to -80 dBm (excellent)
-      if (data.rsrp >= -75) return <Signal className="size-7 text-chart-2" />;
-      if (data.rsrp >= -85)
-        return <SignalHigh className="size-7 text-chart-2" />;
-      if (data.rsrp >= -100)
-        return <SignalMedium className="size-7 text-chart-4" />;
-      if (data.rsrp >= -110)
-        return <SignalLow className="size-7 text-chart-4" />;
-      return <SignalZero className="size-7 text-destructive" />;
+      signalValue = data.rsrp;
+    } else if (data.rssi !== undefined) {
+      // For GSM and WCDMA, use RSSI as the signal quality indicator
+      signalValue = data.rssi;
     }
 
-    // For GSM and WCDMA, use RSSI as the signal quality indicator
-    if (data.rssi !== undefined) {
-      // RSSI ranges typically from -110 dBm (poor) to -70 dBm (excellent)
-      if (data.rssi >= -70)
-        return <SignalHigh className="h-5 w-5 text-chart-2" />;
-      if (data.rssi >= -85)
-        return <SignalMedium className="h-5 w-5 text-chart-2" />;
-      if (data.rssi >= -100)
-        return <SignalLow className="h-5 w-5 text-chart-4" />;
-      return <SignalZero className="h-5 w-5 text-destructive" />;
-    }
+    const getBars = (value: number) => {
+      if (value >= -80) return 4;
+      if (value >= -90) return 3;
+      if (value >= -100) return 2;
+      if (value >= -110) return 1;
+      return 0;
+    };
 
-    return <Signal className="h-5 w-5 text-muted-foreground" />;
+    const getSignalColor = (value: number) => {
+      if (value >= -80) return "bg-green-500";
+      if (value >= -90) return "bg-yellow-500";
+      if (value >= -100) return "bg-orange-500";
+      return "bg-red-500";
+    };
+
+    const bars = getBars(signalValue);
+    const signalColor = getSignalColor(signalValue);
+
+    return (
+      <div className="flex gap-1 items-end">
+        {[...Array(4)].map((_, i) => (
+          <div
+            key={i}
+            className={cn(
+              "w-1 rounded-sm transition-colors",
+              i < bars ? signalColor : "bg-gray-200 dark:bg-gray-700",
+              i === 0 ? "h-2" : i === 1 ? "h-3" : i === 2 ? "h-4" : "h-5"
+            )}
+          />
+        ))}
+      </div>
+    );
   };
 
   const getNetworkTypeBadge = (technology: string) => {
@@ -186,8 +194,8 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
 
           {/* Cellular data content */}
           <div className="flex items-center justify-between gap-1 flex-wrap w-full">
-            <div className="flex items-center gap-1 min-w-0 truncate">
-              {getSignalIcon()}
+            <div className="flex items-center gap-2 min-w-0 truncate">
+              {getSignalBars()}
               {getNetworkTypeBadge(data?.technology)}
             </div>
           </div>

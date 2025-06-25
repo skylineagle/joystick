@@ -139,7 +139,12 @@ export function CellSearchPage() {
         cell: ({ row }) => {
           const tech = row.getValue("tech") as string;
           return (
-            <Badge variant={getTechnologyBadgeVariant(tech)}>{tech}</Badge>
+            <Badge
+              variant={getTechnologyBadgeVariant(tech)}
+              className="font-medium"
+            >
+              {tech}
+            </Badge>
           );
         },
       },
@@ -157,7 +162,6 @@ export function CellSearchPage() {
           <div className="font-mono text-xs">{row.getValue("cellIdHex")}</div>
         ),
       },
-
       {
         accessorKey: "rsrp",
         header: ({ column }) => (
@@ -173,12 +177,60 @@ export function CellSearchPage() {
         cell: ({ row }) => {
           const rsrp = row.getValue("rsrp") as number;
           const signalInfo = getSignalStrength(rsrp);
+
+          const getSignalBars = (value: number) => {
+            if (value >= -80) return 4;
+            if (value >= -90) return 3;
+            if (value >= -100) return 2;
+            if (value >= -110) return 1;
+            return 0;
+          };
+
+          const bars = getSignalBars(rsrp);
+
           return (
-            <div className="flex items-center gap-2">
-              <div className={cn("size-2 rounded-full", signalInfo.color)} />
-              <span className={cn("font-mono text-sm", signalInfo.textColor)}>
-                {rsrp} dBm
-              </span>
+            <div className="flex items-center gap-3">
+              <div className="flex gap-1 items-end">
+                {[...Array(4)].map((_, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      "w-1 rounded-sm transition-colors",
+                      i < bars
+                        ? signalInfo.color
+                        : "bg-gray-200 dark:bg-gray-700",
+                      i === 0
+                        ? "h-2"
+                        : i === 1
+                        ? "h-3"
+                        : i === 2
+                        ? "h-4"
+                        : "h-5"
+                    )}
+                  />
+                ))}
+              </div>
+              <div className="flex flex-col">
+                <span
+                  className={cn(
+                    "font-mono text-sm font-semibold",
+                    signalInfo.textColor
+                  )}
+                >
+                  {rsrp} dBm
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {rsrp >= -80
+                    ? "Excellent"
+                    : rsrp >= -90
+                    ? "Good"
+                    : rsrp >= -100
+                    ? "Fair"
+                    : rsrp >= -110
+                    ? "Poor"
+                    : "Very Poor"}
+                </span>
+              </div>
             </div>
           );
         },
@@ -195,9 +247,39 @@ export function CellSearchPage() {
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
         ),
-        cell: ({ row }) => (
-          <span className="font-mono text-sm">{row.getValue("rsrq")} dB</span>
-        ),
+        cell: ({ row }) => {
+          const rsrq = row.getValue("rsrq") as number;
+
+          const getQualityColor = (value: number) => {
+            if (value >= -10) return "text-green-600 dark:text-green-400";
+            if (value >= -15) return "text-yellow-600 dark:text-yellow-400";
+            if (value >= -20) return "text-orange-600 dark:text-orange-400";
+            return "text-red-600 dark:text-red-400";
+          };
+
+          const getQualityLabel = (value: number) => {
+            if (value >= -10) return "Excellent";
+            if (value >= -15) return "Good";
+            if (value >= -20) return "Fair";
+            return "Poor";
+          };
+
+          return (
+            <div className="flex flex-col">
+              <span
+                className={cn(
+                  "font-mono text-sm font-medium",
+                  getQualityColor(rsrq)
+                )}
+              >
+                {rsrq} dB
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {getQualityLabel(rsrq)}
+              </span>
+            </div>
+          );
+        },
       },
       {
         accessorKey: "pci",
