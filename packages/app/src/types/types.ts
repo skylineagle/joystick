@@ -1,14 +1,13 @@
 import {
-  ActionsResponse,
   ActionLogsResponse as BaseActionLogsResponse,
+  ActionsResponse,
   RunResponse as BaseRunResponse,
   DevicesResponse,
   ModelsResponse,
-  ParametersTreeResponse,
   RulesResponse,
   UsersResponse,
+  ParametersTreeResponse,
 } from "@/types/db.types";
-import { JSONSchema7 } from "json-schema";
 
 export type ModelStreamQulity = {
   [key: string]: {
@@ -135,7 +134,7 @@ export interface ActionSchema {
 export type ActionResponse = ActionsResponse;
 
 export type RunResponse = BaseRunResponse<
-  JSONSchema7,
+  Record<string, unknown>,
   {
     device: ModelsResponse;
     action: ActionsResponse;
