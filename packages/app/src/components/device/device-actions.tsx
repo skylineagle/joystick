@@ -2,6 +2,7 @@ import { ConfigurationEditor } from "@/components/configuration/configuration-ed
 import { ClientFileDownload } from "@/components/device/client-file-download";
 import { DeleteDevice } from "@/components/device/delete-device";
 import { SlotSelector } from "@/components/device/slot-selector";
+import { SlotHealthIndicator } from "@/components/device/slot-health-indicator";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
@@ -40,6 +41,7 @@ export function DeviceActions({ device }: DeviceActionsProps) {
       {hasSlotSelector && (
         <>
           <SlotSelector device={device} />
+          <SlotHealthIndicator deviceId={device.id} />
           <Separator orientation="vertical" className="h-6 mx-1" />
         </>
       )}
