@@ -490,6 +490,8 @@ export const TEST_PERMISSIONS = [
   "parameters-route",
   "gallery-route",
   "terminal-route",
+  "cell-search",
+  "cell-search-route",
 ] as const;
 
 export type UserType = keyof typeof TEST_USERS;

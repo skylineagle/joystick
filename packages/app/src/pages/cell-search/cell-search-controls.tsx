@@ -1,0 +1,83 @@
+import { Card } from "@/components/ui/card";
+import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
+import { cn } from "@/lib/utils";
+import { DeviceInfo } from "@/pages/stream-view/device-info";
+import { Wifi } from "lucide-react";
+import { motion } from "motion/react";
+import { useParams } from "react-router";
+
+const MotionCard = motion.create(Card);
+
+export const CellSearchControls = () => {
+  const { isMobileLandscape } = useMobileLandscape();
+  const { device: deviceId } = useParams<{ device: string }>();
+
+  return (
+    <MotionCard
+      className={cn(
+        "flex flex-col border-none shadow-2xl bg-muted/30",
+        isMobileLandscape
+          ? "p-4 w-[280px] h-full"
+          : "p-4 hidden md:flex w-[300px] gap-4"
+      )}
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <motion.div
+        className="flex flex-col h-full gap-2"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.3 }}
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.2 }}
+        >
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Wifi className="h-4 w-4 text-primary" />
+              <h3 className="font-semibold text-sm">Signal Guide</h3>
+            </div>
+
+            <div className="space-y-2 text-xs">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500" />
+                  <span>Excellent</span>
+                </div>
+                <span className="text-muted-foreground">-80+ dBm</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                  <span>Good</span>
+                </div>
+                <span className="text-muted-foreground">-90+ dBm</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-orange-500" />
+                  <span>Fair</span>
+                </div>
+                <span className="text-muted-foreground">-100+ dBm</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-red-500" />
+                  <span>Poor</span>
+                </div>
+                <span className="text-muted-foreground">&lt;-100 dBm</span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        <div className="flex-1" />
+
+        <DeviceInfo deviceId={deviceId!} />
+      </motion.div>
+    </MotionCard>
+  );
+};

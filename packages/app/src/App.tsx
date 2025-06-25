@@ -58,6 +58,11 @@ const GalleryPage = lazy(() =>
     default: module.default,
   }))
 );
+const CellSearchPage = lazy(() =>
+  import("@/pages/cell-search/cell-search-page").then((module) => ({
+    default: module.CellSearchPage,
+  }))
+);
 const NotificationsHistoryPage = lazy(() =>
   import("@/pages/notifications/notifications-history-page").then((module) => ({
     default: module.NotificationsHistoryPage,
@@ -333,6 +338,20 @@ function AnimatedRoutes() {
                 <ErrorBoundary>
                   <PageTransition>
                     <GalleryPage />
+                  </PageTransition>
+                </ErrorBoundary>
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="cell-search"
+          element={
+            <Layout>
+              <Suspense fallback={<LoadingFallback />}>
+                <ErrorBoundary>
+                  <PageTransition>
+                    <CellSearchPage />
                   </PageTransition>
                 </ErrorBoundary>
               </Suspense>
