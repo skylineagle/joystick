@@ -263,20 +263,28 @@ export function CellSearchPage() {
       "RSRQ (dB)",
     ];
 
+    const escapeCSV = (value: unknown) => {
+      const str = String(value);
+      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
     const csvContent = [
       headers.join(","),
       ...cellData.map((cell) =>
         [
-          cell.operator,
-          cell.operatorId,
-          cell.tech,
+          escapeCSV(cell.operator),
+          escapeCSV(cell.operatorId),
+          escapeCSV(cell.tech),
           cell.arfcn,
-          cell.band,
+          escapeCSV(cell.band),
           cell.frequency,
           cell.pci,
           cell.tac,
-          cell.cellIdHex,
-          cell.cellIdDec,
+          escapeCSV(cell.cellIdHex),
+          escapeCSV(cell.cellIdDec),
           cell.rsrp,
           cell.rsrq,
         ].join(",")

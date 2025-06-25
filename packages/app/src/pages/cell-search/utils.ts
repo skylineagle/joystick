@@ -3,7 +3,17 @@ import { CellTowerData } from "@/pages/cell-search/types";
 export const parseCellSearchResponse = (response: string): CellTowerData[] => {
   try {
     const parsed = JSON.parse(response);
-    if (Array.isArray(parsed)) {
+    if (
+      Array.isArray(parsed) &&
+      parsed.every(
+        (item) =>
+          typeof item === "object" &&
+          item !== null &&
+          "id" in item &&
+          "operator" in item &&
+          "rsrp" in item
+      )
+    ) {
       return parsed;
     }
   } catch {
