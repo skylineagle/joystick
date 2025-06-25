@@ -2,6 +2,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Table,
   TableBody,
   TableCell,
@@ -41,6 +49,8 @@ import {
   Download,
   Radio,
   RefreshCw,
+  Search,
+  Wifi,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { useMemo, useState } from "react";
@@ -51,6 +61,8 @@ export function CellSearchPage() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [hasSearched, setHasSearched] = useState(false);
+  const [showConfigDialog, setShowConfigDialog] = useState(false);
 
   const { isSupported: isCellSearchSupported } = useIsSupported(
     deviceId!,
@@ -75,10 +87,24 @@ export function CellSearchPage() {
 
       return parseCellSearchResponse(result ?? "[]");
     },
-    enabled: !!deviceId,
+    enabled: false,
   });
 
   const isLoading = isFetching || isQueryLoading;
+
+  const handleStartSearch = () => {
+    setShowConfigDialog(true);
+  };
+
+  const handleConfirmSearch = async () => {
+    setShowConfigDialog(false);
+    setHasSearched(true);
+    await refetch();
+  };
+
+  const handleRefresh = () => {
+    refetch();
+  };
 
   const columns: ColumnDef<CellTowerData>[] = useMemo(
     () => [
@@ -131,13 +157,7 @@ export function CellSearchPage() {
           <div className="font-mono text-xs">{row.getValue("cellIdHex")}</div>
         ),
       },
-      {
-        accessorKey: "pci",
-        header: "PCI",
-        cell: ({ row }) => (
-          <div className="font-mono text-sm">{row.getValue("pci")}</div>
-        ),
-      },
+
       {
         accessorKey: "rsrp",
         header: ({ column }) => (
@@ -177,6 +197,13 @@ export function CellSearchPage() {
         ),
         cell: ({ row }) => (
           <span className="font-mono text-sm">{row.getValue("rsrq")} dB</span>
+        ),
+      },
+      {
+        accessorKey: "pci",
+        header: "PCI",
+        cell: ({ row }) => (
+          <div className="font-mono text-sm">{row.getValue("pci")}</div>
         ),
       },
       {
@@ -307,24 +334,24 @@ export function CellSearchPage() {
         transition={{ duration: 0.5 }}
         className="flex-shrink-0 space-y-4 p-4 flex justify-between"
       >
-        {/* Header */}
         <div className="flex items-center gap-2">
           <Radio className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold">What The Cell</h1>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="link" onClick={() => refetch()}>
-            <RefreshCw className="h-4 w-4" />
-            Refresh
-          </Button>
-          <Button variant="outline" onClick={handleExportCSV}>
-            <Download className="h-4 w-4" />
-            Export CSV
-          </Button>
-        </div>
+        {hasSearched && (
+          <div className="flex items-center gap-2">
+            <Button variant="link" onClick={handleRefresh}>
+              <RefreshCw className="h-4 w-4" />
+              Refresh
+            </Button>
+            <Button variant="outline" onClick={handleExportCSV}>
+              <Download className="h-4 w-4" />
+              Export CSV
+            </Button>
+          </div>
+        )}
       </motion.div>
 
-      {/* Content Area */}
       <div className="flex-1">
         {isLoading && (
           <motion.div
@@ -336,14 +363,40 @@ export function CellSearchPage() {
           </motion.div>
         )}
 
-        {cellData.length > 0 && !isLoading && (
+        {!hasSearched && !isLoading && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="h-full flex items-center justify-center"
+          >
+            <div className="p-8 text-center">
+              <div className="relative">
+                <div className="mx-auto w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Wifi className="h-12 w-12 text-primary" />
+                </div>
+              </div>
+              <div className="space-y-3">
+                <h2 className="text-2xl font-bold">Cellular Network Scanner</h2>
+                <p className="text-muted-foreground max-w-md">
+                  Discover and analyze nearby cell towers, signal strength, and
+                  network information.
+                </p>
+              </div>
+              <Button onClick={handleStartSearch} size="lg" className="px-8">
+                <Search className="h-5 w-5 mr-2" />
+                Start Cell Search
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {cellData.length > 0 && !isLoading && hasSearched && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="h-full flex flex-col gap-4"
           >
-            {/* Table */}
             <Card className="flex-1 flex flex-col shadow-xl border-2 min-h-0 overflow-hidden">
               <CardContent className="flex-1 min-h-0 p-0 overflow-hidden">
                 <div className="h-full overflow-auto rounded-lg">
@@ -408,6 +461,61 @@ export function CellSearchPage() {
           </motion.div>
         )}
       </div>
+
+      <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Radio className="h-5 w-5 text-primary" />
+              Cell Search Configuration
+            </DialogTitle>
+            <DialogDescription>
+              Configure and start cellular network scanning
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-medium text-yellow-900 dark:text-yellow-100">
+                    Connection Warning
+                  </h4>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                    The device may temporarily disconnect during the cell search
+                    process. This is normal behavior as the device scans for
+                    nearby cellular networks.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <h4 className="font-medium">Scan Information</h4>
+              <div className="text-sm space-y-2 text-muted-foreground">
+                <p>• Searches for all available cellular networks</p>
+                <p>• Analyzes signal strength and quality metrics</p>
+                <p>• Collects network operator and technology data</p>
+                <p>• Process typically takes 30-60 seconds</p>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowConfigDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmSearch}>
+              <Search className="h-4 w-4 mr-2" />
+              Start Search
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
