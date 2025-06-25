@@ -15,9 +15,11 @@ import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 import { useIsMediaSupported } from "@/hooks/use-support-media";
 import { useIsParamsSupported } from "@/hooks/use-support-params";
 import { useIsTerminalSupported } from "@/hooks/use-support-terminal";
+import { useIsCellSearchSupported } from "@/hooks/use-support-cell-search";
 import {
   ArrowLeft,
   Image,
+  Radio,
   Send,
   Settings,
   Terminal,
@@ -57,6 +59,12 @@ const navItems = [
     path: "gallery",
     description: "View and manage device events",
   },
+  {
+    label: "What the cell",
+    icon: Radio,
+    path: "cell-search",
+    description: "Cellular network analysis and cell tower search",
+  },
 ];
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -64,11 +72,13 @@ export const getAvailableNavItems = (
   isParamsSupported: boolean,
   isTerminalSupported: boolean,
   isMediaSupported: boolean,
+  isCellSearchSupported: boolean,
   isMediaRouteAllowed: boolean,
   isActionRouteAllowed: boolean,
   isParamsRouteAllowed: boolean,
   isGalleryRouteAllowed: boolean,
-  isTerminalRouteAllowed: boolean
+  isTerminalRouteAllowed: boolean,
+  isCellSearchRouteAllowed: boolean
 ) => {
   return navItems.filter((item) => {
     if (
@@ -95,6 +105,12 @@ export const getAvailableNavItems = (
     if (item.path === "gallery" && !isGalleryRouteAllowed) {
       return false;
     }
+    if (
+      item.path === "cell-search" &&
+      (!isCellSearchSupported || !isCellSearchRouteAllowed)
+    ) {
+      return false;
+    }
     return true;
   });
 };
@@ -105,12 +121,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const isParamsSupported = useIsParamsSupported(deviceId!);
   const isTerminalSupported = useIsTerminalSupported(deviceId!);
   const isMediaSupported = useIsMediaSupported(deviceId!);
+  const isCellSearchSupported = useIsCellSearchSupported(deviceId!);
   const isRecentEventPermitted = useIsPermitted("recent-events");
   const isMediaRouteAllowed = useIsRouteAllowed("media");
   const isActionRouteAllowed = useIsRouteAllowed("action");
   const isParamsRouteAllowed = useIsRouteAllowed("parameters");
   const isGalleryRouteAllowed = useIsRouteAllowed("gallery");
   const isTerminalRouteAllowed = useIsRouteAllowed("terminal");
+  const isCellSearchRouteAllowed = useIsRouteAllowed("cell-search");
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -123,11 +141,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             !!isParamsSupported,
             !!isTerminalSupported,
             !!isMediaSupported,
+            !!isCellSearchSupported,
             !!isMediaRouteAllowed,
             !!isActionRouteAllowed,
             !!isParamsRouteAllowed,
             !!isGalleryRouteAllowed,
-            !!isTerminalRouteAllowed
+            !!isTerminalRouteAllowed,
+            !!isCellSearchRouteAllowed
           ).map((item) => {
             const isActive = location.pathname.endsWith(item.path);
             return (

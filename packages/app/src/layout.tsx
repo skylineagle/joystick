@@ -12,17 +12,19 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
+import { useIsCellSearchSupported } from "@/hooks/use-support-cell-search";
 import { useIsMediaSupported } from "@/hooks/use-support-media";
 import { useIsParamsSupported } from "@/hooks/use-support-params";
 import { useIsTerminalSupported } from "@/hooks/use-support-terminal";
 import { pb } from "@/lib/pocketbase";
 import { cn } from "@/lib/utils";
+import { CellSearchControls } from "@/pages/cell-search/cell-search-controls";
 import { Controls } from "@/pages/stream-view/controls";
 import { RoiProvider } from "@/pages/stream-view/roi/roi-provider";
 import { DeviceResponse } from "@/types/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { Suspense, lazy, useEffect } from "react";
-import { Outlet, useParams } from "react-router";
+import { Outlet, useLocation, useParams } from "react-router";
 
 // Lazy load components
 const AppSidebar = lazy(() =>
@@ -49,6 +51,9 @@ export function Layout({ children }: LayoutProps) {
   const queryClient = useQueryClient();
   const { isMobileLandscape } = useMobileLandscape();
   const { device: deviceId } = useParams();
+  const location = useLocation();
+
+  const isOnCellSearchRoute = location.pathname.endsWith("/cell-search");
 
   useEffect(() => {
     let unsubscribe: () => void;
@@ -77,21 +82,26 @@ export function Layout({ children }: LayoutProps) {
   const isParamsSupported = useIsParamsSupported(deviceId!);
   const isTerminalSupported = useIsTerminalSupported(deviceId!);
   const isMediaSupported = useIsMediaSupported(deviceId!);
+  const isCellSearchSupported = useIsCellSearchSupported(deviceId!);
   const isMediaRouteAllowed = useIsRouteAllowed("media");
   const isActionRouteAllowed = useIsRouteAllowed("action");
   const isParamsRouteAllowed = useIsRouteAllowed("parameters");
   const isGalleryRouteAllowed = useIsRouteAllowed("gallery");
   const isTerminalRouteAllowed = useIsRouteAllowed("terminal");
+  const isCellSearchRouteAllowed = useIsRouteAllowed("cell-search");
   const isSystemStatusRouteAllowed = useIsPermitted("system-status");
+
   const availableNavItems = getAvailableNavItems(
     !!isParamsSupported,
     !!isTerminalSupported,
     !!isMediaSupported,
+    !!isCellSearchSupported,
     !!isMediaRouteAllowed,
     !!isActionRouteAllowed,
     !!isParamsRouteAllowed,
     !!isGalleryRouteAllowed,
-    !!isTerminalRouteAllowed
+    !!isTerminalRouteAllowed,
+    !!isCellSearchRouteAllowed
   );
   const showSidebar = availableNavItems.length > 1;
 
@@ -139,7 +149,8 @@ export function Layout({ children }: LayoutProps) {
                 <div className="flex-1 min-h-0 relative border-none overflow-auto">
                   {children || <Outlet />}
                 </div>
-                <Controls />
+                {deviceId &&
+                  (isOnCellSearchRoute ? <CellSearchControls /> : <Controls />)}
               </div>
             </main>
           </SidebarInset>
