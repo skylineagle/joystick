@@ -60,7 +60,8 @@ export const parseCellSearchResponse = (response: string): CellTowerData[] => {
         const rsrp = parseInt(parts[6]);
         const rsrq = parseInt(parts[7]);
 
-        const cellIdDec = parseInt(cellIdHex, 16).toString();
+        const cellIdDecNum = parseInt(cellIdHex, 16);
+        const cellIdDec = isNaN(cellIdDecNum) ? "0" : cellIdDecNum.toString();
 
         const frequency = getFrequencyFromArfcn(arfcn, tech);
         const band = getBandFromArfcn(arfcn, tech);
