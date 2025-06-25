@@ -10,7 +10,7 @@ export const TO_REPLACE = ["camera", "action"];
 
 const SLOT_HEALTH_CHECK_INTERVAL = parseInt(
   Bun.env.SLOT_HEALTH_CHECK_INTERVAL || "30"
-);
+) || 30;
 
 async function addDevice(deviceName: string, configuration: any) {
   await fetch(`${STREAM_API_URL}/v3/config/paths/add/${deviceName}`, {
