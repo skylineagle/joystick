@@ -8,6 +8,8 @@ export enum CardType {
   IMU_STATUS = "imu_status",
   ACTION_RUNNER = "action_runner",
   PARAM_VALUE_EDITOR = "param_value_editor",
+  PING_CONTROL = "ping_control",
+  PTZ_CONTROL = "ptz_control",
 }
 
 // Base configuration interface that all card configs must extend
@@ -62,6 +64,18 @@ export interface ParamValueEditorCardConfig extends BaseCardConfig {
   paramConfig: ParamValue;
 }
 
+// Ping control card configuration
+export interface PingControlCardConfig extends BaseCardConfig {
+  type: CardType.PING_CONTROL;
+  deviceId: string;
+}
+
+// PTZ control card configuration
+export interface PTZControlCardConfig extends BaseCardConfig {
+  type: CardType.PTZ_CONTROL;
+  deviceId: string;
+}
+
 // Union type of all possible card configurations
 export type CardConfig =
   | StreamViewCardConfig
@@ -70,4 +84,6 @@ export type CardConfig =
   | LocationCardConfig
   | IMUStatusCardConfig
   | ActionRunnerCardConfig
-  | ParamValueEditorCardConfig;
+  | ParamValueEditorCardConfig
+  | PingControlCardConfig
+  | PTZControlCardConfig;
