@@ -149,8 +149,8 @@ const app = new Elysia()
           "Default parameters"
         );
         const command = Object.entries({
-          ...defaultParameters,
           ...body,
+          ...defaultParameters,
         }).reduce((acc, [key, value]) => {
           if (acc.includes(`$${key}`)) {
             return acc.replaceAll(`$${key}`, String(value));
