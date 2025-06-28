@@ -111,6 +111,17 @@ export function CellSearchPage() {
       try {
         const jsonData = JSON.parse(manualInputText.trim());
         if (Array.isArray(jsonData)) {
+          const isValidCellData = jsonData.every(
+            (item) =>
+              item &&
+              typeof item === "object" &&
+              "operator" in item &&
+              "tech" in item &&
+              "rsrp" in item
+          );
+          if (!isValidCellData) {
+            throw new Error("JSON array must contain valid cell tower objects");
+          }
           parsedData = jsonData;
         } else {
           throw new Error("JSON must be an array");
