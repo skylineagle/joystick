@@ -14,6 +14,13 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
 }
 
 :root {
@@ -1268,4 +1275,85 @@
 /* Remove the ::after pseudo-element if not needed */
 .react-resizable-handle::after {
   content: none;
+}
+
+/* Enhanced card content scaling */
+.react-grid-item .dashboard-card-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Ensure card content is responsive and scales properly */
+.react-grid-item .dashboard-card-content > * {
+  flex-shrink: 0;
+  min-height: 0;
+}
+
+/* Make scrollable areas work properly in resized cards */
+.react-grid-item .dashboard-card-content .scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Ensure text and controls scale appropriately */
+.react-grid-item .dashboard-card-content .scalable-text {
+  font-size: clamp(0.75rem, 2vw, 1rem);
+  line-height: 1.4;
+}
+
+/* PTZ control scaling */
+.react-grid-item .ptz-control-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: 100%;
+}
+
+.react-grid-item .ptz-touchpad {
+  flex-shrink: 0;
+}
+
+.react-grid-item .ptz-controls {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Ping terminal scaling */
+.react-grid-item .ping-terminal {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.react-grid-item .ping-terminal .terminal-output {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Status card content scaling */
+.react-grid-item .status-card-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0.5rem;
+}
+
+/* Stream view scaling */
+.react-grid-item .stream-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.react-grid-item .stream-container video,
+.react-grid-item .stream-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
