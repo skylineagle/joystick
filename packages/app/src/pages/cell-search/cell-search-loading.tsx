@@ -84,7 +84,8 @@ export const CellSearchLoadingAnimation = () => (
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
       >
-        Detecting nearby cell towers and analyzing signal strength
+        Device is scanning for nearby cell towers. Results will appear
+        automatically when ready.
       </motion.p>
 
       <div className="flex justify-center space-x-1 pt-2">

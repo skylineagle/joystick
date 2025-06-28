@@ -5,5 +5,5 @@ export function useIsCellSearchSupported(deviceId: string) {
   const { data: device } = useDevice(deviceId);
   const { data: actions } = useDeviceActions(device?.expand?.device.id);
 
-  return actions?.includes("cell-search");
+  return actions?.includes("run-scan") && actions?.includes("get-scan");
 }
