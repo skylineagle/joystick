@@ -1,4 +1,3 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -19,6 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { TechnologyBadge, SignalStrengthDisplay } from "@/components/ui/cell";
 import { useCellScan } from "@/hooks/use-cell-scan";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { useIsSupported } from "@/hooks/use-is-supported";
@@ -27,11 +27,7 @@ import { pb } from "@/lib/pocketbase";
 import { toast } from "@/utils/toast";
 import { CellSearchLoadingAnimation } from "@/pages/cell-search/cell-search-loading";
 import { CellTowerData } from "@/pages/cell-search/types";
-import {
-  getSignalStrength,
-  getTechnologyBadgeVariant,
-  parseCellSearchResponse,
-} from "@/pages/cell-search/utils";
+import { parseCellSearchResponse } from "@/pages/cell-search/utils";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -217,14 +213,7 @@ export function CellSearchPage() {
         ),
         cell: ({ row }) => {
           const tech = row.getValue("tech") as string;
-          return (
-            <Badge
-              variant={getTechnologyBadgeVariant(tech)}
-              className="font-medium"
-            >
-              {tech}
-            </Badge>
-          );
+          return <TechnologyBadge technology={tech} size="sm" />;
         },
       },
       {
@@ -255,44 +244,13 @@ export function CellSearchPage() {
         ),
         cell: ({ row }) => {
           const rsrp = row.getValue("rsrp") as number;
-          const signalInfo = getSignalStrength(rsrp);
-
-          const getSignalBars = (value: number) => {
-            if (value >= -80) return 4;
-            if (value >= -90) return 3;
-            if (value >= -100) return 2;
-            if (value >= -110) return 1;
-            return 0;
-          };
-
-          const bars = getSignalBars(rsrp);
-
           return (
-            <div className="flex items-center gap-3">
-              <div className="flex gap-1 items-end">
-                {[...Array(4)].map((_, i) => (
-                  <div
-                    key={i}
-                    className={cn(
-                      "w-1 rounded-sm transition-colors",
-                      i < bars
-                        ? signalInfo.color
-                        : "bg-gray-300 dark:bg-gray-600",
-                      i === 0 && "h-2",
-                      i === 1 && "h-3",
-                      i === 2 && "h-4",
-                      i === 3 && "h-5"
-                    )}
-                  />
-                ))}
-              </div>
-              <div className="text-right">
-                <div className="font-mono text-sm font-medium">{rsrp} dBm</div>
-                <div className={cn("text-xs capitalize", signalInfo.textColor)}>
-                  {signalInfo.level}
-                </div>
-              </div>
-            </div>
+            <SignalStrengthDisplay
+              rsrp={rsrp}
+              showValue
+              showQuality
+              size="sm"
+            />
           );
         },
       },
@@ -310,26 +268,30 @@ export function CellSearchPage() {
         ),
         cell: ({ row }) => {
           const rsrq = row.getValue("rsrq") as number;
-
-          const getQualityColor = (value: number) => {
-            if (value > -10) return "text-green-600 dark:text-green-400";
-            if (value > -15) return "text-yellow-600 dark:text-yellow-400";
-            if (value > -20) return "text-orange-600 dark:text-orange-400";
-            return "text-red-600 dark:text-red-400";
-          };
-
-          const getQualityLabel = (value: number) => {
-            if (value > -10) return "Excellent";
-            if (value > -15) return "Good";
-            if (value > -20) return "Fair";
-            return "Poor";
-          };
+          const qualityColor =
+            rsrq > -10
+              ? "text-green-600 dark:text-green-400"
+              : rsrq > -15
+              ? "text-yellow-600 dark:text-yellow-400"
+              : rsrq > -20
+              ? "text-orange-600 dark:text-orange-400"
+              : "text-red-600 dark:text-red-400";
 
           return (
             <div className="text-right">
-              <div className="font-mono text-sm font-medium">{rsrq} dB</div>
-              <div className={cn("text-xs", getQualityColor(rsrq))}>
-                {getQualityLabel(rsrq)}
+              <div
+                className={cn("font-mono text-sm font-medium", qualityColor)}
+              >
+                {rsrq} dB
+              </div>
+              <div className={cn("text-xs", qualityColor)}>
+                {rsrq > -10
+                  ? "Excellent"
+                  : rsrq > -15
+                  ? "Good"
+                  : rsrq > -20
+                  ? "Fair"
+                  : "Poor"}
               </div>
             </div>
           );
