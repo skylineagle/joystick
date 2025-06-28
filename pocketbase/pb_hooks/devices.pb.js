@@ -217,6 +217,8 @@ onRecordUpdateRequest((e) => {
 
 // Handle HOST change change
 onRecordUpdateRequest((e) => {
+  const MEDIAMTX_API =
+    $os.getenv("MEDIAMTX_API") || "http://host.docker.internal:9997";
   const { getActiveDeviceConnection } = require(`${__hooks}/utils`);
   const current = $app.findRecordById("devices", e.record.id);
   const information = JSON.parse(e.record.get("information"));
@@ -235,7 +237,8 @@ onRecordUpdateRequest((e) => {
         `name = "source" && model ?~ "${e.record.get("device")}"`
       );
 
-      const sourceUrl = sourceTemplate[0].value
+      const sourceTemplateValue = sourceTemplate[0].get("value");
+      const sourceUrl = sourceTemplateValue
         .replace("<ip>", activeHost)
         .replace("<id>", configuration.name);
 
@@ -245,19 +248,28 @@ onRecordUpdateRequest((e) => {
       });
 
       try {
-        $http.send({
+        const response = $http.send({
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            "x-api-key": $os.getenv("JOYSTICK_API_KEY"),
           },
-          url: `http://mediamtx:8888/v3/config/paths/patch/${e.record.get(
-            "id"
-          )}`,
-          body: {
+          url: `${MEDIAMTX_API}/v3/config/paths/patch/${configuration.name}`,
+          body: JSON.stringify({
             source: sourceUrl,
-          },
+          }),
         });
+
+        if (response.statusCode !== 200) {
+          $app
+            .logger()
+            .error(`Failed to update source URL for device ${e.record.id}`);
+
+          e.next();
+          return;
+        }
+
+        $app.logger().info(`Source URL updated for device ${e.record.id}`);
+        e.next();
       } catch (err) {
         $app.logger().error(err);
       }
