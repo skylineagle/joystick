@@ -125,6 +125,10 @@ export type DeviceInformation = {
     }>;
     timestamp: string;
   };
+  cellInfo?: {
+    data: CPSIResult;
+    timestamp: string;
+  };
 };
 
 export type DeviceResponse = DevicesResponse<
