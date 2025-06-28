@@ -71,7 +71,7 @@ async function runSlotCheckAction(
     return typeof result.output === "boolean"
       ? result.output
       : typeof result.output === "string"
-      ? result.output.trim().replace("\n", "").toLowerCase() === "true"
+      ? result.output.trim().replace(/\s+/g, "").toLowerCase() === "true"
       : false;
   } catch (error) {
     logger.debug(`Health check failed for ${host}: ${error}`);
