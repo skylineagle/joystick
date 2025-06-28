@@ -113,7 +113,7 @@ const getRSSIQuality = (
   technology?: string
 ): SignalQualityInfo => {
   const isLTE =
-    technology === "LTE" || technology === "4G" || technology === "5G";
+    technology === "LTE" || technology === "4G";
 
   if (isLTE) {
     if (value > -65) {
