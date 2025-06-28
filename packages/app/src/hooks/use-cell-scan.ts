@@ -17,12 +17,17 @@ export function useCellScan(deviceId: string) {
   // Subscribe to real-time updates
   useEffect(() => {
     const initialScanData = async () => {
-      const result = await pb
-        .collection("devices")
-        .getFirstListItem<DeviceResponse>(`id = "${deviceId}"`, {
-          fields: "information",
-        });
-      setScanData(result.information?.scan?.data ?? []);
+      try {
+        const result = await pb
+          .collection("devices")
+          .getFirstListItem<DeviceResponse>(`id = "${deviceId}"`, {
+            fields: "information",
+          });
+        setScanData(result.information?.scan?.data ?? []);
+      } catch (error) {
+        console.error("Failed to fetch initial scan data:", error);
+        setScanData([]);
+      }
     };
 
     pb.collection("devices").subscribe<DeviceResponse>(deviceId, (event) => {
@@ -33,7 +38,7 @@ export function useCellScan(deviceId: string) {
       }
     });
 
-    initialScanData();
+    initialScanData().catch(console.error);
     return () => {
       try {
         pb.collection("devices")?.unsubscribe(deviceId);
