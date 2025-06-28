@@ -62,8 +62,15 @@ const getRSRPQuality = (value: number): SignalQualityInfo => {
   if (value >= -100) {
     return {
       quality: "fair",
-      label: "Fair to poor",
+      label: "Fair",
       color: "text-orange-600 dark:text-orange-400",
+    };
+  }
+  if (value >= -120) {
+    return {
+      quality: "poor",
+      label: "Poor",
+      color: "text-red-600 dark:text-red-400",
     };
   }
   return {
