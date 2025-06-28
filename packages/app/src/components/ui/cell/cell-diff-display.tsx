@@ -164,23 +164,17 @@ export const CellDiffDisplay = ({
   currentTimestamp,
   savedTimestamp,
 }: CellDiffDisplayProps) => {
-  const getCurrentSignalValue = () => {
-    if (current.technology === "LTE" && current.rsrp !== undefined) {
-      return current.rsrp;
-    } else if (current.rssi !== undefined) {
-      return current.rssi;
+  const getSignalValue = (data: CPSIResult) => {
+    if (data.technology === "LTE" && data.rsrp !== undefined) {
+      return data.rsrp;
+    } else if (data.rssi !== undefined) {
+      return data.rssi;
     }
     return -120;
   };
 
-  const getSavedSignalValue = () => {
-    if (saved.technology === "LTE" && saved.rsrp !== undefined) {
-      return saved.rsrp;
-    } else if (saved.rssi !== undefined) {
-      return saved.rssi;
-    }
-    return -120;
-  };
+  const getCurrentSignalValue = () => getSignalValue(current);
+  const getSavedSignalValue = () => getSignalValue(saved);
 
   const getCurrentSignalType = (): SignalMetricType => {
     if (current.technology === "LTE" && current.rsrp !== undefined) {
