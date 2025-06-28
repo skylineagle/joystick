@@ -49,22 +49,22 @@ const CARD_SIZES: Record<
   }
 > = {
   // Stream cards - large by default, highly resizable for importance/visibility
-  [CardType.STREAM_VIEW]: { w: 12, h: 16 },
+  [CardType.STREAM_VIEW]: { w: 16, h: 16 },
 
   // Status cards - compact by default, can be made larger for emphasis
-  [CardType.BATTERY_STATUS]: { w: 4, h: 8 },
-  [CardType.CELL_STATUS]: { w: 4, h: 8 },
-  [CardType.IMU_STATUS]: { w: 4, h: 8 },
+  [CardType.BATTERY_STATUS]: { w: 6, h: 8 },
+  [CardType.CELL_STATUS]: { w: 6, h: 8 },
+  [CardType.IMU_STATUS]: { w: 6, h: 8 },
 
   // Control cards - sized to fit controls, expandable for better interaction
-  [CardType.ACTION_RUNNER]: { w: 4, h: 4 },
-  [CardType.PING_CONTROL]: { w: 6, h: 12 },
-  [CardType.PTZ_CONTROL]: { w: 6, h: 16 },
+  [CardType.ACTION_RUNNER]: { w: 6, h: 4 },
+  [CardType.PING_CONTROL]: { w: 8, h: 12 },
+  [CardType.PTZ_CONTROL]: { w: 8, h: 16 },
 
   // Data cards - medium size, highly customizable for user workflow
-  [CardType.LOCATION]: { w: 8, h: 12 },
+  [CardType.LOCATION]: { w: 12, h: 12 },
   [CardType.PARAM_VALUE_EDITOR]: {
-    w: 6,
+    w: 8,
     h: 8,
   },
 };
