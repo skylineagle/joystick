@@ -20,6 +20,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { TechnologyBadge, SignalStrengthDisplay } from "@/components/ui/cell";
 import { useCellScan } from "@/hooks/use-cell-scan";
+import { getSignalQuality } from "@/utils/cell";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { useIsSupported } from "@/hooks/use-is-supported";
 import { cn } from "@/lib/utils";
@@ -268,30 +269,17 @@ export function CellSearchPage() {
         ),
         cell: ({ row }) => {
           const rsrq = row.getValue("rsrq") as number;
-          const qualityColor =
-            rsrq > -10
-              ? "text-green-600 dark:text-green-400"
-              : rsrq > -15
-              ? "text-yellow-600 dark:text-yellow-400"
-              : rsrq > -20
-              ? "text-orange-600 dark:text-orange-400"
-              : "text-red-600 dark:text-red-400";
+          const quality = getSignalQuality(rsrq, "rsrq");
 
           return (
             <div className="text-right">
               <div
-                className={cn("font-mono text-sm font-medium", qualityColor)}
+                className={cn("font-mono text-sm font-medium", quality.color)}
               >
                 {rsrq} dB
               </div>
-              <div className={cn("text-xs", qualityColor)}>
-                {rsrq > -10
-                  ? "Excellent"
-                  : rsrq > -15
-                  ? "Good"
-                  : rsrq > -20
-                  ? "Fair"
-                  : "Poor"}
+              <div className={cn("text-xs", quality.color)}>
+                {quality.label}
               </div>
             </div>
           );

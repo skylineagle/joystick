@@ -1,27 +1,19 @@
 import { cn } from "@/lib/utils";
+import { getSignalBars, getSignalColor, SignalMetricType } from "@/utils/cell";
 
 interface SignalBarsProps {
   value: number;
   className?: string;
   size?: "sm" | "md" | "lg";
+  type?: SignalMetricType;
 }
 
-export function SignalBars({ value, className, size = "md" }: SignalBarsProps) {
-  const getBars = (signalValue: number) => {
-    if (signalValue >= -80) return 4;
-    if (signalValue >= -90) return 3;
-    if (signalValue >= -100) return 2;
-    if (signalValue >= -110) return 1;
-    return 0;
-  };
-
-  const getSignalColor = (signalValue: number) => {
-    if (signalValue >= -80) return "bg-green-500";
-    if (signalValue >= -90) return "bg-yellow-500";
-    if (signalValue >= -100) return "bg-orange-500";
-    return "bg-red-500";
-  };
-
+export function SignalBars({
+  value,
+  className,
+  size = "md",
+  type = "rsrp",
+}: SignalBarsProps) {
   const getSizeClasses = () => {
     switch (size) {
       case "sm":
@@ -42,8 +34,8 @@ export function SignalBars({ value, className, size = "md" }: SignalBarsProps) {
     }
   };
 
-  const bars = getBars(value);
-  const signalColor = getSignalColor(value);
+  const bars = getSignalBars(value, type);
+  const signalColor = getSignalColor(value, type);
   const { width, heights } = getSizeClasses();
 
   return (

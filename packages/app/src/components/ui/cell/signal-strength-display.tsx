@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { SignalBars } from "./signal-bars";
+import { getSignalQuality } from "@/utils/cell";
 
 interface SignalStrengthDisplayProps {
   rsrp: number;
@@ -18,25 +19,12 @@ export function SignalStrengthDisplay({
   size = "md",
   layout = "horizontal",
 }: SignalStrengthDisplayProps) {
-  const getSignalQuality = (value: number) => {
-    if (value >= -80)
-      return {
-        label: "Excellent",
-        color: "text-green-600 dark:text-green-400",
-      };
-    if (value >= -90)
-      return { label: "Good", color: "text-yellow-600 dark:text-yellow-400" };
-    if (value >= -100)
-      return { label: "Fair", color: "text-orange-600 dark:text-orange-400" };
-    return { label: "Poor", color: "text-red-600 dark:text-red-400" };
-  };
-
-  const quality = getSignalQuality(rsrp);
+  const quality = getSignalQuality(rsrp, "rsrp");
 
   if (layout === "vertical") {
     return (
       <div className={cn("flex flex-col items-center gap-2", className)}>
-        <SignalBars value={rsrp} size={size} />
+        <SignalBars value={rsrp} size={size} type="rsrp" />
         {showValue && (
           <div className="text-center">
             <div className={cn("font-mono text-sm font-medium", quality.color)}>
@@ -55,7 +43,7 @@ export function SignalStrengthDisplay({
 
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      <SignalBars value={rsrp} size={size} />
+      <SignalBars value={rsrp} size={size} type="rsrp" />
       {showValue && (
         <div className="text-right">
           <div className={cn("font-mono text-sm font-medium", quality.color)}>

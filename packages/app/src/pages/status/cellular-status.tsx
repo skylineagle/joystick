@@ -7,6 +7,7 @@ import {
   CellInfoDisplay,
   CellDiffDisplay,
 } from "@/components/ui/cell";
+import { SignalMetricType } from "@/utils/cell";
 import { useDevice } from "@/hooks/use-device";
 import { pb } from "@/lib/pocketbase";
 import { runAction } from "@/lib/joystick-api";
@@ -103,6 +104,17 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
     return -120; // Default poor signal value
   };
 
+  const getSignalType = (): SignalMetricType => {
+    // For LTE, use RSRP as the signal quality indicator
+    if (data.technology === "LTE" && data.rsrp !== undefined) {
+      return "rsrp";
+    } else if (data.rssi !== undefined) {
+      // For GSM and WCDMA, use RSSI as the signal quality indicator
+      return "rssi";
+    }
+    return "rsrp";
+  };
+
   // Format the time since last update
   const timeSinceUpdate = dataUpdatedAt
     ? formatDistanceToNow(dataUpdatedAt, { addSuffix: true })
@@ -189,7 +201,11 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
             <>
               <div className="flex items-center justify-between gap-1 flex-wrap w-full">
                 <div className="flex items-center gap-2 min-w-0 truncate">
-                  <SignalBars value={getSignalValue()} size="sm" />
+                  <SignalBars
+                    value={getSignalValue()}
+                    size="sm"
+                    type={getSignalType()}
+                  />
                   <TechnologyBadge
                     technology={data?.technology || "Unknown"}
                     showGeneration

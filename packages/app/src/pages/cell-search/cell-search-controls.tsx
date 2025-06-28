@@ -39,7 +39,7 @@ export const CellSearchControls = () => {
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <Wifi className="h-4 w-4 text-primary" />
-              <h3 className="font-semibold text-sm">Signal Quality Guide</h3>
+              <h3 className="font-semibold text-sm">Signal Strength (RSRP)</h3>
             </div>
 
             <div className="space-y-2 text-xs">
@@ -54,7 +54,7 @@ export const CellSearchControls = () => {
                   <span>Excellent</span>
                 </div>
                 <span className="text-muted-foreground font-mono">
-                  -80+ dBm
+                  ≥ -80 dBm
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -68,7 +68,7 @@ export const CellSearchControls = () => {
                   <span>Good</span>
                 </div>
                 <span className="text-muted-foreground font-mono">
-                  -90+ dBm
+                  -80 to -90 dBm
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -79,10 +79,10 @@ export const CellSearchControls = () => {
                     <div className="w-0.5 h-2.5 bg-gray-300 rounded-sm" />
                     <div className="w-0.5 h-3 bg-gray-300 rounded-sm" />
                   </div>
-                  <span>Fair</span>
+                  <span>Fair to poor</span>
                 </div>
                 <span className="text-muted-foreground font-mono">
-                  -100+ dBm
+                  -90 to -100 dBm
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -93,10 +93,10 @@ export const CellSearchControls = () => {
                     <div className="w-0.5 h-2 bg-gray-300 rounded-sm" />
                     <div className="w-0.5 h-3 bg-gray-300 rounded-sm" />
                   </div>
-                  <span>Poor</span>
+                  <span>No signal</span>
                 </div>
                 <span className="text-muted-foreground font-mono">
-                  &lt;-110 dBm
+                  ≤ -100 dBm
                 </span>
               </div>
             </div>
@@ -110,29 +110,35 @@ export const CellSearchControls = () => {
                   <div className="w-2 h-2 rounded-full bg-green-500" />
                   <span>Excellent</span>
                 </div>
-                <span className="text-muted-foreground font-mono">-10+ dB</span>
+                <span className="text-muted-foreground font-mono">
+                  ≥ -10 dB
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-yellow-500" />
                   <span>Good</span>
                 </div>
-                <span className="text-muted-foreground font-mono">-15+ dB</span>
+                <span className="text-muted-foreground font-mono">
+                  -10 to -15 dB
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-orange-500" />
-                  <span>Fair</span>
+                  <span>Fair to poor</span>
                 </div>
-                <span className="text-muted-foreground font-mono">-20+ dB</span>
+                <span className="text-muted-foreground font-mono">
+                  -15 to -20 dB
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-red-500" />
-                  <span>Poor</span>
+                  <span>No signal</span>
                 </div>
                 <span className="text-muted-foreground font-mono">
-                  &lt;-20 dB
+                  ≤ -20 dB
                 </span>
               </div>
             </div>

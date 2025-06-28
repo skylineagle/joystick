@@ -5,6 +5,7 @@ import {
 } from "@/components/ui/cell";
 import { cn } from "@/lib/utils";
 import { CPSIResult } from "@/types/types";
+import { SignalMetricType } from "@/utils/cell";
 
 interface CellDiffDisplayProps {
   current: CPSIResult;
@@ -77,7 +78,7 @@ const DiffValue = ({
       <span className="text-[10px] text-muted-foreground font-medium truncate">
         {label}
       </span>
-      <div className="flex flex-row gap-1 items-end space-y-0.5">
+      <div className="flex flex-row gap-1 items-end">
         <span
           className={cn(
             "text-xs",
@@ -112,7 +113,7 @@ interface DiffSignalMetricProps {
   currentValue?: number;
   savedValue?: number;
   unit: string;
-  type: "rsrp" | "rsrq" | "sinr" | "rssi";
+  type: SignalMetricType;
   technology?: string;
 }
 
@@ -181,6 +182,24 @@ export const CellDiffDisplay = ({
     return -120;
   };
 
+  const getCurrentSignalType = (): SignalMetricType => {
+    if (current.technology === "LTE" && current.rsrp !== undefined) {
+      return "rsrp";
+    } else if (current.rssi !== undefined) {
+      return "rssi";
+    }
+    return "rsrp";
+  };
+
+  const getSavedSignalType = (): SignalMetricType => {
+    if (saved.technology === "LTE" && saved.rsrp !== undefined) {
+      return "rsrp";
+    } else if (saved.rssi !== undefined) {
+      return "rssi";
+    }
+    return "rsrp";
+  };
+
   const technologyChanged = current.technology !== saved.technology;
 
   return (
@@ -193,7 +212,11 @@ export const CellDiffDisplay = ({
       <div className="flex items-center justify-between gap-1 flex-wrap w-full">
         <div className="flex items-center gap-2 min-w-0 truncate">
           <div className="flex flex-col items-center space-y-1">
-            <SignalBars value={getCurrentSignalValue()} size="sm" />
+            <SignalBars
+              value={getCurrentSignalValue()}
+              size="sm"
+              type={getCurrentSignalType()}
+            />
             <div className="text-[8px] text-green-600 dark:text-green-400">
               Current
             </div>
@@ -202,6 +225,7 @@ export const CellDiffDisplay = ({
             <SignalBars
               value={getSavedSignalValue()}
               size="sm"
+              type={getSavedSignalType()}
               className="opacity-60"
             />
             <div className="text-[8px] text-red-500 dark:text-red-400">

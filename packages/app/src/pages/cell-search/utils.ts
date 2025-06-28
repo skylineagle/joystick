@@ -130,27 +130,8 @@ export const getBandFromArfcn = (arfcn: number, tech: string): string => {
   return "Unknown";
 };
 
-export const getSignalStrength = (rsrp: number) => {
-  if (rsrp > -80)
-    return {
-      level: "excellent",
-      color: "bg-green-500",
-      textColor: "text-green-600",
-    };
-  if (rsrp > -90)
-    return {
-      level: "good",
-      color: "bg-yellow-500",
-      textColor: "text-yellow-600",
-    };
-  if (rsrp > -100)
-    return {
-      level: "fair",
-      color: "bg-orange-500",
-      textColor: "text-orange-600",
-    };
-  return { level: "poor", color: "bg-red-500", textColor: "text-red-600" };
-};
+// Signal strength utilities moved to @/utils/cell.ts
+// Use getSignalQuality, getSignalBars, and getSignalColor from there instead
 
 export const getTechnologyBadgeVariant = (tech: string) => {
   switch (tech.toLowerCase()) {
