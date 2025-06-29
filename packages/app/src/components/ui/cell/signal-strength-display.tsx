@@ -4,6 +4,8 @@ import { getSignalQuality } from "@/utils/cell";
 
 interface SignalStrengthDisplayProps {
   rsrp: number;
+  technology?: string;
+  signalType?: "rsrp" | "rssi" | "rscp";
   showValue?: boolean;
   showQuality?: boolean;
   className?: string;
@@ -13,18 +15,25 @@ interface SignalStrengthDisplayProps {
 
 export function SignalStrengthDisplay({
   rsrp,
+  technology,
+  signalType = "rsrp",
   showValue = true,
   showQuality = true,
   className,
   size = "md",
   layout = "horizontal",
 }: SignalStrengthDisplayProps) {
-  const quality = getSignalQuality(rsrp, "rsrp");
+  const quality = getSignalQuality(rsrp, signalType, technology);
 
   if (layout === "vertical") {
     return (
       <div className={cn("flex flex-col items-center gap-2", className)}>
-        <SignalBars value={rsrp} size={size} type="rsrp" />
+        <SignalBars
+          value={rsrp}
+          technology={technology}
+          size={size}
+          type={signalType}
+        />
         {showValue && (
           <div className="text-center">
             <div className={cn("font-mono text-sm font-medium", quality.color)}>
@@ -43,7 +52,12 @@ export function SignalStrengthDisplay({
 
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      <SignalBars value={rsrp} size={size} type="rsrp" />
+      <SignalBars
+        value={rsrp}
+        technology={technology}
+        size={size}
+        type={signalType}
+      />
       {showValue && (
         <div className="text-right">
           <div className={cn("font-mono text-sm font-medium", quality.color)}>

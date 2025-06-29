@@ -11,7 +11,13 @@ export interface SignalQualityInfo {
   color: string;
 }
 
-export type SignalMetricType = "rsrp" | "rsrq" | "rssi" | "sinr";
+export type SignalMetricType =
+  | "rsrp"
+  | "rsrq"
+  | "rssi"
+  | "sinr"
+  | "rscp"
+  | "ecno";
 
 export const getSignalQuality = (
   value: number | undefined,
@@ -28,13 +34,17 @@ export const getSignalQuality = (
 
   switch (type) {
     case "rsrp":
-      return getRSRPQuality(value);
+      return getRSRPQuality(value, technology);
     case "rsrq":
-      return getRSRQQuality(value);
+      return getRSRQQuality(value, technology);
     case "rssi":
       return getRSSIQuality(value, technology);
     case "sinr":
       return getSINRQuality(value);
+    case "rscp":
+      return getRSCPQuality(value);
+    case "ecno":
+      return getEcNoQuality(value);
     default:
       return {
         quality: "no-signal",
@@ -44,78 +54,198 @@ export const getSignalQuality = (
   }
 };
 
-const getRSRPQuality = (value: number): SignalQualityInfo => {
-  if (value >= -80) {
+const getRSRPQuality = (
+  value: number,
+  technology?: string
+): SignalQualityInfo => {
+  const is3G =
+    technology === "3G" || technology === "WCDMA" || technology === "UMTS";
+
+  if (is3G) {
+    if (value >= -70) {
+      return {
+        quality: "excellent",
+        label: "Excellent",
+        color: "text-green-600 dark:text-green-400",
+      };
+    }
+    if (value >= -85) {
+      return {
+        quality: "good",
+        label: "Good",
+        color: "text-yellow-600 dark:text-yellow-400",
+      };
+    }
+    if (value >= -95) {
+      return {
+        quality: "fair",
+        label: "Fair",
+        color: "text-orange-600 dark:text-orange-400",
+      };
+    }
+    if (value >= -105) {
+      return {
+        quality: "poor",
+        label: "Poor",
+        color: "text-red-600 dark:text-red-400",
+      };
+    }
     return {
-      quality: "excellent",
-      label: "Excellent",
-      color: "text-green-600 dark:text-green-400",
+      quality: "no-signal",
+      label: "No signal",
+      color: "text-red-600 dark:text-red-400",
     };
-  }
-  if (value >= -90) {
+  } else {
+    if (value >= -80) {
+      return {
+        quality: "excellent",
+        label: "Excellent",
+        color: "text-green-600 dark:text-green-400",
+      };
+    }
+    if (value >= -90) {
+      return {
+        quality: "good",
+        label: "Good",
+        color: "text-yellow-600 dark:text-yellow-400",
+      };
+    }
+    if (value >= -100) {
+      return {
+        quality: "fair",
+        label: "Fair",
+        color: "text-orange-600 dark:text-orange-400",
+      };
+    }
+    if (value >= -120) {
+      return {
+        quality: "poor",
+        label: "Poor",
+        color: "text-red-600 dark:text-red-400",
+      };
+    }
     return {
-      quality: "good",
-      label: "Good",
-      color: "text-yellow-600 dark:text-yellow-400",
-    };
-  }
-  if (value >= -100) {
-    return {
-      quality: "fair",
-      label: "Fair",
-      color: "text-orange-600 dark:text-orange-400",
-    };
-  }
-  if (value >= -120) {
-    return {
-      quality: "poor",
-      label: "Poor",
+      quality: "no-signal",
+      label: "No signal",
       color: "text-red-600 dark:text-red-400",
     };
   }
-  return {
-    quality: "no-signal",
-    label: "No signal",
-    color: "text-red-600 dark:text-red-400",
-  };
 };
 
-const getRSRQQuality = (value: number): SignalQualityInfo => {
-  if (value >= -10) {
+const getRSRQQuality = (
+  value: number,
+  technology?: string
+): SignalQualityInfo => {
+  const is3G =
+    technology === "3G" || technology === "WCDMA" || technology === "UMTS";
+
+  if (is3G) {
+    if (value >= -6) {
+      return {
+        quality: "excellent",
+        label: "Excellent",
+        color: "text-green-600 dark:text-green-400",
+      };
+    }
+    if (value >= -9) {
+      return {
+        quality: "good",
+        label: "Good",
+        color: "text-yellow-600 dark:text-yellow-400",
+      };
+    }
+    if (value >= -12) {
+      return {
+        quality: "fair",
+        label: "Fair",
+        color: "text-orange-600 dark:text-orange-400",
+      };
+    }
+    if (value >= -15) {
+      return {
+        quality: "poor",
+        label: "Poor",
+        color: "text-red-600 dark:text-red-400",
+      };
+    }
     return {
-      quality: "excellent",
-      label: "Excellent",
-      color: "text-green-600 dark:text-green-400",
+      quality: "no-signal",
+      label: "No signal",
+      color: "text-red-600 dark:text-red-400",
+    };
+  } else {
+    if (value >= -10) {
+      return {
+        quality: "excellent",
+        label: "Excellent",
+        color: "text-green-600 dark:text-green-400",
+      };
+    }
+    if (value >= -15) {
+      return {
+        quality: "good",
+        label: "Good",
+        color: "text-yellow-600 dark:text-yellow-400",
+      };
+    }
+    if (value >= -20) {
+      return {
+        quality: "fair",
+        label: "Fair to poor",
+        color: "text-orange-600 dark:text-orange-400",
+      };
+    }
+    return {
+      quality: "no-signal",
+      label: "No signal",
+      color: "text-red-600 dark:text-red-400",
     };
   }
-  if (value >= -15) {
-    return {
-      quality: "good",
-      label: "Good",
-      color: "text-yellow-600 dark:text-yellow-400",
-    };
-  }
-  if (value >= -20) {
-    return {
-      quality: "fair",
-      label: "Fair to poor",
-      color: "text-orange-600 dark:text-orange-400",
-    };
-  }
-  return {
-    quality: "no-signal",
-    label: "No signal",
-    color: "text-red-600 dark:text-red-400",
-  };
 };
 const getRSSIQuality = (
   value: number,
   technology?: string
 ): SignalQualityInfo => {
-  const isLTE =
-    technology === "LTE" || technology === "4G";
+  const isLTE = technology === "LTE" || technology === "4G";
+  const is3G =
+    technology === "3G" || technology === "WCDMA" || technology === "UMTS";
 
-  if (isLTE) {
+  if (is3G) {
+    // 3G RSSI thresholds based on research
+    if (value >= -75) {
+      return {
+        quality: "excellent",
+        label: "Excellent",
+        color: "text-green-600 dark:text-green-400",
+      };
+    }
+    if (value >= -80) {
+      return {
+        quality: "good",
+        label: "Good",
+        color: "text-yellow-600 dark:text-yellow-400",
+      };
+    }
+    if (value >= -90) {
+      return {
+        quality: "fair",
+        label: "Fair",
+        color: "text-orange-600 dark:text-orange-400",
+      };
+    }
+    if (value >= -112) {
+      return {
+        quality: "poor",
+        label: "Poor",
+        color: "text-red-600 dark:text-red-400",
+      };
+    }
+    return {
+      quality: "no-signal",
+      label: "No signal",
+      color: "text-red-600 dark:text-red-400",
+    };
+  } else if (isLTE) {
     if (value > -65) {
       return {
         quality: "excellent",
@@ -150,6 +280,7 @@ const getRSSIQuality = (
       color: "text-red-600 dark:text-red-400",
     };
   } else {
+    // Generic/2G thresholds
     if (value >= -70) {
       return {
         quality: "excellent",
@@ -215,11 +346,86 @@ const getSINRQuality = (value: number): SignalQualityInfo => {
   };
 };
 
+const getRSCPQuality = (value: number): SignalQualityInfo => {
+  // RSCP (Received Signal Code Power) thresholds for 3G/UMTS
+  if (value >= -60) {
+    return {
+      quality: "excellent",
+      label: "Excellent",
+      color: "text-green-600 dark:text-green-400",
+    };
+  }
+  if (value >= -75) {
+    return {
+      quality: "good",
+      label: "Good",
+      color: "text-yellow-600 dark:text-yellow-400",
+    };
+  }
+  if (value >= -85) {
+    return {
+      quality: "fair",
+      label: "Fair",
+      color: "text-orange-600 dark:text-orange-400",
+    };
+  }
+  if (value >= -95) {
+    return {
+      quality: "poor",
+      label: "Poor",
+      color: "text-red-600 dark:text-red-400",
+    };
+  }
+  return {
+    quality: "no-signal",
+    label: "No signal",
+    color: "text-red-600 dark:text-red-400",
+  };
+};
+
+const getEcNoQuality = (value: number): SignalQualityInfo => {
+  // Ec/No (Energy per chip to Noise ratio) thresholds for 3G/UMTS
+  if (value >= -6) {
+    return {
+      quality: "excellent",
+      label: "Excellent",
+      color: "text-green-600 dark:text-green-400",
+    };
+  }
+  if (value >= -10) {
+    return {
+      quality: "good",
+      label: "Good",
+      color: "text-yellow-600 dark:text-yellow-400",
+    };
+  }
+  if (value >= -15) {
+    return {
+      quality: "fair",
+      label: "Fair",
+      color: "text-orange-600 dark:text-orange-400",
+    };
+  }
+  if (value >= -20) {
+    return {
+      quality: "poor",
+      label: "Poor",
+      color: "text-red-600 dark:text-red-400",
+    };
+  }
+  return {
+    quality: "no-signal",
+    label: "No signal",
+    color: "text-red-600 dark:text-red-400",
+  };
+};
+
 export const getSignalBars = (
   value: number,
-  type: SignalMetricType = "rsrp"
+  type: SignalMetricType = "rsrp",
+  technology?: string
 ): number => {
-  const quality = getSignalQuality(value, type);
+  const quality = getSignalQuality(value, type, technology);
 
   switch (quality.quality) {
     case "excellent":
@@ -238,9 +444,10 @@ export const getSignalBars = (
 
 export const getSignalColor = (
   value: number,
-  type: SignalMetricType = "rsrp"
+  type: SignalMetricType = "rsrp",
+  technology?: string
 ): string => {
-  const quality = getSignalQuality(value, type);
+  const quality = getSignalQuality(value, type, technology);
 
   switch (quality.quality) {
     case "excellent":

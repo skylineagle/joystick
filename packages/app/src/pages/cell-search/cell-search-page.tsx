@@ -182,8 +182,19 @@ export function CellSearchPage() {
     }
   };
 
-  const columns: ColumnDef<CellTowerData>[] = useMemo(
-    () => [
+  // Check if we have any 3G results to determine if RSSI column should be visible
+  const has3GResults = useMemo(() => {
+    return (
+      scanData?.some((cell) => {
+        return (
+          cell.tech === "3G" || cell.tech === "WCDMA" || cell.tech === "UMTS"
+        );
+      }) ?? false
+    );
+  }, [scanData]);
+
+  const columns: ColumnDef<CellTowerData>[] = useMemo(() => {
+    const baseColumns: ColumnDef<CellTowerData>[] = [
       {
         accessorKey: "operator",
         header: ({ column }) => (
@@ -225,10 +236,10 @@ export function CellSearchPage() {
         ),
       },
       {
-        accessorKey: "cellIdHex",
+        accessorKey: "cellIdDec",
         header: "Cell ID",
         cell: ({ row }) => (
-          <div className="font-mono text-xs">{row.getValue("cellIdHex")}</div>
+          <div className="font-mono text-xs">{row.getValue("cellIdDec")}</div>
         ),
       },
       {
@@ -245,9 +256,20 @@ export function CellSearchPage() {
         ),
         cell: ({ row }) => {
           const rsrp = row.getValue("rsrp") as number;
+          const tech = row.getValue("tech") as string;
+          const rowData = row.original as CellTowerData;
+          const is3G = tech === "3G" || tech === "WCDMA" || tech === "UMTS";
+
+          // For 3G networks with RSSI, show "-" in RSRP column
+          if (is3G && rowData.rssi !== undefined) {
+            return <div className="text-center text-muted-foreground">-</div>;
+          }
+
           return (
             <SignalStrengthDisplay
               rsrp={rsrp}
+              technology={tech}
+              signalType="rsrp"
               showValue
               showQuality
               size="sm"
@@ -255,6 +277,48 @@ export function CellSearchPage() {
           );
         },
       },
+    ];
+
+    // Add RSSI column only if we have 3G results
+    if (has3GResults) {
+      baseColumns.push({
+        accessorKey: "rssi",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            className="h-auto p-0 font-semibold hover:bg-transparent hover:text-accent"
+          >
+            RSSI
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => {
+          const tech = row.getValue("tech") as string;
+          const rowData = row.original as CellTowerData;
+          const is3G = tech === "3G" || tech === "WCDMA" || tech === "UMTS";
+
+          // Only show RSSI for 3G networks
+          if (!is3G || rowData.rssi === undefined) {
+            return <div className="text-center text-muted-foreground">-</div>;
+          }
+
+          return (
+            <SignalStrengthDisplay
+              rsrp={rowData.rssi}
+              technology={tech}
+              signalType="rssi"
+              showValue
+              showQuality
+              size="sm"
+            />
+          );
+        },
+      });
+    }
+
+    // Add remaining columns
+    baseColumns.push(
       {
         accessorKey: "rsrq",
         header: ({ column }) => (
@@ -269,7 +333,16 @@ export function CellSearchPage() {
         ),
         cell: ({ row }) => {
           const rsrq = row.getValue("rsrq") as number;
-          const quality = getSignalQuality(rsrq, "rsrq");
+          const tech = row.getValue("tech") as string;
+          const rowData = row.original as CellTowerData;
+          const is3G = tech === "3G" || tech === "WCDMA" || tech === "UMTS";
+
+          // For 3G networks with RSSI, show "-" in RSRQ column
+          if (is3G && rowData.rssi !== undefined) {
+            return <div className="text-center text-muted-foreground">-</div>;
+          }
+
+          const quality = getSignalQuality(rsrq, "rsrq", tech);
 
           return (
             <div className="text-right">
@@ -302,10 +375,11 @@ export function CellSearchPage() {
             {row.getValue("frequency")} MHz
           </span>
         ),
-      },
-    ],
-    []
-  );
+      }
+    );
+
+    return baseColumns;
+  }, [has3GResults]);
 
   const table = useReactTable({
     data: scanData ?? [],
@@ -334,6 +408,7 @@ export function CellSearchPage() {
       "Cell ID (Hex)",
       "Cell ID (Dec)",
       "RSRP (dBm)",
+      ...(has3GResults ? ["RSSI (dBm)"] : []),
       "RSRQ (dB)",
       "Frequency (MHz)",
       "PCI",
@@ -359,6 +434,7 @@ export function CellSearchPage() {
           escapeCSV(row.cellIdHex),
           escapeCSV(row.cellIdDec),
           escapeCSV(row.rsrp),
+          ...(has3GResults ? [escapeCSV(row.rssi ?? "-")] : []),
           escapeCSV(row.rsrq),
           escapeCSV(row.frequency),
           escapeCSV(row.pci),
