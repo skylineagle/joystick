@@ -14,6 +14,7 @@ import {
   RunTargetOptions,
   STREAM_API_URL,
   SWITCHER_API_URL,
+  type SendNotificationPayload,
 } from "@joystick/core";
 import { $ } from "bun";
 import { Elysia, t } from "elysia";
@@ -23,7 +24,6 @@ import {
   addNotificationClient,
   removeNotificationClient,
   sendNotification,
-  type SendNotificationRequest,
 } from "./notifications";
 import { generateRandomCPSIResult, updateStatus } from "./utils";
 
@@ -180,7 +180,7 @@ const app = new Elysia()
             user: { name: userName, id: userId },
             device,
             action: params.action,
-            success: true,
+            response,
           },
           "Command executed successfully"
         );
@@ -305,13 +305,14 @@ const app = new Elysia()
         const userId = auth.userId ?? "";
         const userName = auth.user?.name || auth.user?.email || "system";
 
-        const request: SendNotificationRequest = {
+        const request: SendNotificationPayload = {
           type: body.type || "info",
           title: body.title,
           message: body.message,
           userId: !auth.isSuperuser && userId ? userId : undefined,
           deviceId: body.deviceId,
           dismissible: body.dismissible !== false,
+          metadata: body.metadata,
         };
 
         return await sendNotification(request, userId, userName);
@@ -341,6 +342,7 @@ const app = new Elysia()
         userId: t.Optional(t.String()),
         deviceId: t.Optional(t.String()),
         dismissible: t.Optional(t.Boolean()),
+        metadata: t.Optional(t.Record(t.String(), t.Any())),
       }),
     }
   )

@@ -330,6 +330,10 @@ onRecordUpdateRequest((e) => {
         deviceId: e.record.id,
         dismissible: true,
         userId: e.auth.id,
+        metadata: {
+          type: "stream-status",
+          status: newStatus,
+        },
       });
     }
   }
@@ -345,6 +349,10 @@ onRecordUpdateRequest((e) => {
       deviceId: e.record.id,
       dismissible: true,
       userId: e.auth.id,
+      metadata: {
+        type: "automation",
+        status: auto ? "enabled" : "disabled",
+      },
     });
   }
 
@@ -359,6 +367,10 @@ onRecordUpdateRequest((e) => {
       deviceId: e.record.id,
       dismissible: true,
       userId: e.auth.id,
+      metadata: {
+        type: "mode",
+        status: mode,
+      },
     });
   }
 

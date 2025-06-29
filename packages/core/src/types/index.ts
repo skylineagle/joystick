@@ -178,3 +178,20 @@ export type ParametersTree = ParametersTreeResponse & {
 };
 
 export type Notification = NotificationsResponse<Record<string, unknown>>;
+
+export type NotificationType =
+  | "info"
+  | "success"
+  | "warning"
+  | "error"
+  | "emergency";
+
+export type SendNotificationPayload = {
+  type: NotificationType;
+  title: string;
+  message: string;
+  userId?: string;
+  deviceId?: string;
+  dismissible?: boolean;
+  metadata?: Record<string, unknown>;
+};
