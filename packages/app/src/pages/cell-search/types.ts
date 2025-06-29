@@ -12,4 +12,5 @@ export interface CellTowerData {
   cellIdDec: string;
   rsrp: number;
   rsrq: number;
+  rssi?: number; // For 3G networks, RSSI is often the primary metric
 }

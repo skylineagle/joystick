@@ -3,6 +3,7 @@ import { getSignalBars, getSignalColor, SignalMetricType } from "@/utils/cell";
 
 interface SignalBarsProps {
   value: number;
+  technology?: string;
   className?: string;
   size?: "sm" | "md" | "lg";
   type?: SignalMetricType;
@@ -10,6 +11,7 @@ interface SignalBarsProps {
 
 export function SignalBars({
   value,
+  technology,
   className,
   size = "md",
   type = "rsrp",
@@ -34,8 +36,8 @@ export function SignalBars({
     }
   };
 
-  const bars = getSignalBars(value, type);
-  const signalColor = getSignalColor(value, type);
+  const bars = getSignalBars(value, type, technology);
+  const signalColor = getSignalColor(value, type, technology);
   const { width, heights } = getSizeClasses();
 
   return (

@@ -207,6 +207,7 @@ export const CellDiffDisplay = ({
           <div className="flex flex-col items-center space-y-1">
             <SignalBars
               value={getCurrentSignalValue()}
+              technology={current?.technology}
               size="sm"
               type={getCurrentSignalType()}
             />
@@ -217,6 +218,7 @@ export const CellDiffDisplay = ({
           <div className="flex flex-col items-center space-y-1">
             <SignalBars
               value={getSavedSignalValue()}
+              technology={saved?.technology}
               size="sm"
               type={getSavedSignalType()}
               className="opacity-60"

@@ -203,6 +203,7 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
                 <div className="flex items-center gap-2 min-w-0 truncate">
                   <SignalBars
                     value={getSignalValue()}
+                    technology={data?.technology}
                     size="sm"
                     type={getSignalType()}
                   />
