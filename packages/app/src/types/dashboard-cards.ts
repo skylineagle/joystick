@@ -10,6 +10,7 @@ export enum CardType {
   PARAM_VALUE_EDITOR = "param_value_editor",
   PING_CONTROL = "ping_control",
   PTZ_CONTROL = "ptz_control",
+  MODE_SELECTOR = "mode_selector",
 }
 
 // Base configuration interface that all card configs must extend
@@ -76,6 +77,12 @@ export interface PTZControlCardConfig extends BaseCardConfig {
   deviceId: string;
 }
 
+// Mode selector card configuration
+export interface ModeSelectorCardConfig extends BaseCardConfig {
+  type: CardType.MODE_SELECTOR;
+  deviceId: string;
+}
+
 // Union type of all possible card configurations
 export type CardConfig =
   | StreamViewCardConfig
@@ -86,4 +93,5 @@ export type CardConfig =
   | ActionRunnerCardConfig
   | ParamValueEditorCardConfig
   | PingControlCardConfig
-  | PTZControlCardConfig;
+  | PTZControlCardConfig
+  | ModeSelectorCardConfig;
