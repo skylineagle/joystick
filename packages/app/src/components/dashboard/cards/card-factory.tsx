@@ -8,6 +8,7 @@ import { ActionRunnerCard } from "./action-runner-card";
 import { ParamValueEditorCard } from "./param-value-editor-card";
 import { PingControlCard } from "./ping-control-card";
 import { PTZControlCard } from "./ptz-control-card";
+import { ModeSelectorCard } from "./mode-selector-card";
 
 interface CardFactoryProps {
   config: CardConfig;
@@ -72,6 +73,14 @@ export const CardFactory = ({
     case CardType.PTZ_CONTROL:
       return (
         <PTZControlCard config={config} isEditing={isEditing} onEdit={onEdit} />
+      );
+    case CardType.MODE_SELECTOR:
+      return (
+        <ModeSelectorCard
+          config={config}
+          isEditing={isEditing}
+          onEdit={onEdit}
+        />
       );
   }
 };

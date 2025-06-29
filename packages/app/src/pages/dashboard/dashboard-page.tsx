@@ -35,6 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { NotificationPanel } from "@/components/ui/notifications/notification-panel";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -67,6 +68,7 @@ const CARD_SIZES: Record<
     w: 8,
     h: 8,
   },
+  [CardType.MODE_SELECTOR]: { w: 6, h: 6 },
 };
 
 // All cards are now resizable to give users full control over importance/visibility
@@ -334,6 +336,7 @@ export const DashboardPage = () => {
                 Edit Mode
               </Label>
             </div>
+            <NotificationPanel />
             <AnimatedThemeToggle />
           </div>
         </div>

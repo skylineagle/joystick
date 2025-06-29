@@ -41,6 +41,7 @@ import {
   Move3D,
   ArrowRight,
   X,
+  ToggleLeft,
 } from "lucide-react";
 import MultipleSelector, { type Option } from "@/components/ui/multiselect";
 import { devicesToOptions } from "@/lib/device-utils";
@@ -167,6 +168,16 @@ const CARD_TYPES: CardTypeInfo[] = [
     icon: Move3D,
     category: "control",
     tags: ["ptz", "camera", "control"],
+    requiresDevice: true,
+    multiDevice: false,
+  },
+  {
+    type: CardType.MODE_SELECTOR,
+    name: "Mode Selector",
+    description: "Switch between different device operation modes",
+    icon: ToggleLeft,
+    category: "control",
+    tags: ["mode", "switch", "control"],
     requiresDevice: true,
     multiDevice: false,
   },
