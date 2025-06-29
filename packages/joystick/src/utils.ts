@@ -125,3 +125,15 @@ export function tryImpersonate(userId: string) {
     return pb;
   }
 }
+
+export async function tryGetDevice(deviceId: string) {
+  try {
+    const device = await pb
+      .collection("devices")
+      .getOne<DeviceResponse>(deviceId);
+    return device;
+  } catch (error) {
+    enhancedLogger.error({ error, deviceId }, "Failed to get device");
+    return null;
+  }
+}

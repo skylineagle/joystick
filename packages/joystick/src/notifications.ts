@@ -1,30 +1,17 @@
 import { pb } from "@/pocketbase";
 import { type Notification } from "@joystick/core";
 import { enhancedLogger } from "./enhanced-logger";
+import { tryGetDevice } from "@/utils";
+import type { SendNotificationPayload } from "@joystick/core";
 
-export interface NotificationPayload {
+export type NotificationPayload = Omit<SendNotificationPayload, "metadata"> & {
   id: string;
-  type: "info" | "success" | "warning" | "error" | "emergency";
-  title: string;
-  message: string;
   timestamp: number;
-  userId?: string;
-  deviceId?: string;
-  dismissible?: boolean;
-}
+};
 
 export interface WebSocketNotificationMessage {
   type: "notification";
   payload: NotificationPayload;
-}
-
-export interface SendNotificationRequest {
-  type?: "info" | "success" | "warning" | "error" | "emergency";
-  title: string;
-  message: string;
-  userId?: string;
-  deviceId?: string;
-  dismissible?: boolean;
 }
 
 export interface SendNotificationResponse {
@@ -64,12 +51,14 @@ export const broadcastNotification = (notification: NotificationPayload) => {
 };
 
 export const sendNotification = async (
-  request: SendNotificationRequest,
+  request: SendNotificationPayload,
   userId?: string,
   userName?: string
 ): Promise<SendNotificationResponse> => {
   const resolvedUserId = request.userId || userId || "system";
   const resolvedUserName = userName || "system";
+
+  const device = request.deviceId ? await tryGetDevice(request.deviceId) : null;
 
   const notification: Omit<NotificationPayload, "id"> = {
     type: request.type || "info",
@@ -83,6 +72,8 @@ export const sendNotification = async (
 
   enhancedLogger.info(
     {
+      device,
+      metadata: request.metadata,
       user: { name: resolvedUserName, id: resolvedUserId },
       notification,
     },
