@@ -115,7 +115,6 @@ export function GalleryEvent({
 
   const pullMutation = useMutation({
     mutationFn: async () => {
-      console.log("pulling event", event.id, event.device);
       const response = await joystickApi.post(
         `${urls.studio}/api/gallery/${event.device}/pull/${event.id}`,
         {}

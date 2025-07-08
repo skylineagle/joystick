@@ -148,7 +148,7 @@ export class GalleryService {
     }
 
     const events = await this.listEvents(device, config);
-    logger.info(events);
+
     const existingEvents = await pb
       .collection("gallery")
       .getFullList<GalleryResponse>({
