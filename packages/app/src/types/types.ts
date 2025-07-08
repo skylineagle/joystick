@@ -90,6 +90,7 @@ export type DeviceInformation = {
   autoSlotSwitch?: boolean;
   battery_capacity?: number;
   aspectRatio?: string;
+  harvestingInterval?: number;
   imuResetValues?: {
     x: number;
     y: number;
@@ -179,3 +180,11 @@ export type ParametersTree = ParametersTreeResponse & {
     write: ActionsResponse;
   };
 };
+
+export type MetadataValue =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: MetadataValue }
+  | MetadataValue[];

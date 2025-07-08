@@ -31,9 +31,11 @@ export async function runCommandOnDevice(
     tempKeyFiles.set(`${host}-${user}`, keyFileName);
   }
 
-  return key
+  const result = key
     ? await $`sshpass -i ${keyFileName} ssh -o StrictHostKeyChecking=no ${user}@${host} '${command}'`.text()
     : password
     ? await $`sshpass -p ${password} ssh -o StrictHostKeyChecking=no ${user}@${host} '${command}'`.text()
     : await $`ssh -o StrictHostKeyChecking=no ${user}@${host} '${command}'`.text();
+
+  return result;
 }

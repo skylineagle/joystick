@@ -93,6 +93,7 @@ export type DeviceInformation = {
   autoSlotSwitch?: boolean;
   battery_capacity?: number;
   aspectRatio?: string;
+  harvestingInterval?: number;
   imuResetValues?: {
     x: number;
     y: number;

@@ -64,6 +64,23 @@ export const GalleryStats: FC<GalleryStatsProperties> = ({ deviceId }) => {
         <div className="text-lg font-medium">{stats?.totalEvents || 0}</div>
         <div className="text-sm text-muted-foreground">Total</div>
       </div>
+
+      {/* Media Type Breakdown */}
+      {stats?.byMediaType && Object.keys(stats.byMediaType).length > 0 && (
+        <div className="flex items-center space-x-4 border-l pl-4 ml-4">
+          {Object.entries(stats.byMediaType).map(([type, count]) => (
+            <div key={type} className="flex items-center space-x-1">
+              <span className="text-sm">
+                {type === 'image' ? '🖼️' : 
+                 type === 'video' ? '🎥' : 
+                 type === 'audio' ? '🎵' : 
+                 type === 'document' ? '📄' : '📁'}
+              </span>
+              <span className="text-sm font-medium">{count}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
