@@ -4,21 +4,18 @@ import type {
   DeviceResponse,
   GalleryResponse,
   RunResponse,
+  StudioHooksResponse,
 } from "@joystick/core";
-import {
-  getActiveDeviceConnection,
-  JOYSTICK_API_URL,
-  runCommandOnDevice,
-  DEFAULT_API_KEY,
-} from "@joystick/core";
+import { getActiveDeviceConnection, runCommandOnDevice } from "@joystick/core";
 import { $ } from "bun";
 import { Baker } from "cronbake";
-import { existsSync, mkdirSync, readFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, statSync } from "fs";
 import { join } from "path";
+import { HookService } from "./services/hook-service";
 
+// find /gallery -type f -exec ls -l {} \; | awk '{print $9"\t"$5}'
 const GALLERY_BASE_PATH = join(process.cwd(), "data", "gallery");
 
-// Ensure gallery directory exists
 if (!existsSync(GALLERY_BASE_PATH)) {
   mkdirSync(GALLERY_BASE_PATH, { recursive: true });
 }
@@ -26,21 +23,29 @@ if (!existsSync(GALLERY_BASE_PATH)) {
 interface GalleryEvent {
   id: string;
   path: string;
-  thumbnail: string;
+  thumbnail?: string;
+  mediaType: string;
+  metadata?: Record<string, any>;
+  hasThumb: boolean;
+  fileSize?: number;
 }
 
 interface GalleryConfig {
-  interval: number; // in seconds
+  interval: number;
   autoPull: boolean;
+  supportedTypes: string[];
+  generateThumbnails: boolean;
 }
 
 export class GalleryService {
   private static instance: GalleryService;
-  private intervals: Map<string, Timer> = new Map();
-
   private baker = Baker.create();
+  private hookService: HookService;
+  private processingDevices = new Set<string>();
 
-  private constructor() {}
+  private constructor() {
+    this.hookService = HookService.getInstance();
+  }
 
   public static getInstance(): GalleryService {
     if (!GalleryService.instance) {
@@ -50,15 +55,20 @@ export class GalleryService {
   }
 
   public async startGalleryService(deviceId: string, config: GalleryConfig) {
-    logger.info(JSON.stringify(config, null, 2));
-    if (this.intervals.has(deviceId)) {
-      this.stopGalleryService(deviceId);
-    }
+    logger.info(
+      `Starting gallery service for device ${deviceId} with interval ${config.interval} and autoPull ${config.autoPull}`,
+      { config }
+    );
 
     if (this.baker.getStatus(deviceId) === "running") {
       logger.info(`Gallery service already running for device ${deviceId}`);
       return;
     }
+
+    // Update device harvesting status
+    await pb.collection("devices").update(deviceId, {
+      harvesting: true,
+    });
 
     this.baker.add({
       name: deviceId,
@@ -66,39 +76,79 @@ export class GalleryService {
       start: true,
       callback: async () => {
         try {
-          await this.processGalleryEvents(deviceId, config.autoPull);
+          if (this.processingDevices.has(deviceId)) {
+            logger.info(
+              `Skipping gallery processing for device ${deviceId} as previous processing is still running`
+            );
+            return;
+          }
+
+          this.processingDevices.add(deviceId);
+          await this.processGalleryEvents(deviceId, config);
         } catch (error) {
-          logger.debug(JSON.stringify(error, null, 2));
+          logger.error(
+            `Error processing gallery events for device ${deviceId}:`,
+            error
+          );
+        } finally {
+          this.processingDevices.delete(deviceId);
         }
       },
       onTick: () => {
-        logger.debug("Looking for new gallery events");
+        logger.debug(`Scanning for new gallery events on device ${deviceId}`);
       },
+    });
+
+    await this.hookService.executeHooks("after_gallery_start", {
+      deviceId,
+      config,
     });
   }
 
   public stopGalleryService(deviceId: string) {
     this.baker.stop(deviceId);
     this.baker.remove(deviceId);
+    this.processingDevices.delete(deviceId);
+
+    // Update device harvesting status
+    pb.collection("devices")
+      .update(deviceId, {
+        harvesting: false,
+      })
+      .catch((error) => {
+        logger.error(
+          `Error updating device harvesting status for device ${deviceId}:`,
+          error
+        );
+      });
+
+    this.hookService
+      .executeHooks("after_gallery_stop", { deviceId })
+      .catch((error) => {
+        logger.error(
+          `Error executing stop hooks for device ${deviceId}:`,
+          error
+        );
+      });
   }
 
   public getGalleryStatus(deviceId: string) {
-    return this.baker.getStatus(deviceId);
+    return {
+      status: this.baker.getStatus(deviceId),
+      isProcessing: this.processingDevices.has(deviceId),
+    };
   }
 
-  public async processGalleryEvents(deviceId: string, autoPull: boolean) {
-    logger.info(
-      `Processing gallery events for device ${deviceId}, autoPull: ${autoPull}`
-    );
+  public async processGalleryEvents(deviceId: string, config: GalleryConfig) {
+    logger.info(`Processing gallery events for device ${deviceId}`, { config });
+
     const device = await this.getDevice(deviceId);
     if (!device) {
       throw new Error(`Device ${deviceId} not found`);
     }
 
-    // List events from device
-    const events = await this.listEvents(device);
+    const events = await this.listEvents(device, config);
 
-    // Get all existing events for this device
     const existingEvents = await pb
       .collection("gallery")
       .getFullList<GalleryResponse>({
@@ -108,24 +158,41 @@ export class GalleryService {
       existingEvents.map((event) => event.event_id)
     );
 
-    // Filter out events that have already been processed
     const newEvents = events.filter((event) => !existingEventIds.has(event.id));
 
-    // Process each new event
     for (const event of newEvents) {
-      logger.debug(`processing event: ${JSON.stringify(event, null, 2)}`);
+      logger.debug(`Processing new event: ${event.id}`, event);
 
-      logger.debug(`downloading thumbnail`);
-      // Download thumbnail and get its content
-      const thumbnailContent = await this.downloadThumbnail(device, event);
+      let thumbnailContent: Buffer | null = null;
 
-      // Create gallery record with file content
+      if (event.hasThumb && event.thumbnail) {
+        try {
+          thumbnailContent = await this.downloadThumbnail(device, event);
+        } catch (error) {
+          logger.warn(
+            `Failed to download thumbnail for event ${event.id}:`,
+            error
+          );
+        }
+      }
+
       await this.createGalleryRecord(deviceId, event, thumbnailContent);
+      await this.hookService.executeHooks("after_event_created", {
+        deviceId,
+        event,
+      });
 
-      // Auto pull video if enabled
-      if (autoPull) {
+      if (config.autoPull) {
         await this.pullEvent(deviceId, event.id);
       }
+    }
+
+    if (newEvents.length > 0) {
+      await this.hookService.executeHooks("after_all_events_pulled", {
+        deviceId,
+        events: newEvents,
+        totalProcessed: newEvents.length,
+      });
     }
   }
 
@@ -140,61 +207,218 @@ export class GalleryService {
     return result[0] || null;
   }
 
-  private async listEvents(device: DeviceResponse): Promise<GalleryEvent[]> {
+  private async executeDeviceAction(
+    device: DeviceResponse,
+    actionName: string,
+    params?: Record<string, any>
+  ): Promise<string> {
     const action = await pb
       .collection("actions")
-      .getFirstListItem(`name = "list-events"`);
-
+      .getFirstListItem(`name = "${actionName}"`);
     if (!action) {
-      logger.error(`Action "list-events" not found`);
-      throw new Error(`Action "list-events" not found`);
+      throw new Error(`Action "${actionName}" not found`);
     }
 
-    const runResult = await pb.collection("run").getFullList<RunResponse>(1, {
+    const runConfig = await pb.collection("run").getFullList<RunResponse>({
       filter: `action = "${action.id}" && device = "${device.expand?.device.id}"`,
     });
+    logger.info(`Run config for ${action.name}: ${JSON.stringify(runConfig)}`);
 
-    if (runResult.length === 0) {
-      logger.error(`Action "list-events" not found for device ${device.name}`);
+    if (runConfig.length === 0) {
       throw new Error(
-        `Action "list-events" not found for device ${device.name}`
+        `Action "${actionName}" not configured for device ${device.name}`
       );
     }
 
-    const run = runResult[0];
-    const command =
-      run.command || Bun.env.LIST_EVENTS_COMMAND || `ls -1 /gallery/*.jpg`;
+    const run = runConfig[0];
+    const command = this.buildCommand(run.command, params);
+
+    logger.info(`${command}`);
+
+    return await runCommandOnDevice(device, command);
+  }
+
+  private buildCommand(command: string, params?: Record<string, any>): string {
+    if (!params) return command;
+
+    let result = command;
+    for (const [key, value] of Object.entries(params)) {
+      result = result.replace(new RegExp(`{{${key}}}`, "g"), String(value));
+    }
+    return result;
+  }
+
+  private async listEvents(
+    device: DeviceResponse,
+    config: GalleryConfig
+  ): Promise<GalleryEvent[]> {
+    const listActions = ["list-events", "list-files", "list-media"];
+
+    for (const actionName of listActions) {
+      try {
+        const output = await this.executeDeviceAction(device, actionName);
+        logger.warn(output);
+        return this.parseEventOutput(output, actionName, config.supportedTypes);
+      } catch (error) {
+        logger.debug(`Action ${actionName} failed or not available:`, error);
+        continue;
+      }
+    }
+
+    return [];
+  }
+
+  private parseEventOutput(
+    output: string,
+    actionName: string,
+    supportedTypes: string[]
+  ): GalleryEvent[] {
+    const lines = output.split("\n").filter(Boolean);
+
+    return lines
+      .map((line) => {
+        const parts = line.split("\t");
+        const path = parts[0];
+        const filename = path.split("/").pop() || "";
+        const extension = filename.split(".").pop()?.toLowerCase() || "";
+
+        const mediaType = this.getMediaType(extension);
+        const hasThumb = this.hasThumbExtension(extension) || parts.length > 1;
+
+        return {
+          id: this.generateEventId(path),
+          path,
+          thumbnail: hasThumb ? parts[1] || path : undefined,
+          mediaType,
+          hasThumb,
+          fileSize: parts[2] ? parseInt(parts[2]) : undefined,
+          metadata: parts.length > 3 ? this.parseMetadata(parts[3]) : {},
+        };
+      })
+      .filter(
+        (event) =>
+          supportedTypes.length === 0 ||
+          supportedTypes.includes(event.mediaType)
+      );
+  }
+
+  private getMediaType(extension: string): string {
+    const imageExts = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"];
+    const videoExts = ["mp4", "avi", "mov", "mkv", "webm", "flv"];
+    const audioExts = ["mp3", "wav", "flac", "aac", "ogg", "m4a"];
+    const documentExts = ["pdf", "doc", "docx", "txt", "rtf"];
+
+    if (imageExts.includes(extension)) return "image";
+    if (videoExts.includes(extension)) return "video";
+    if (audioExts.includes(extension)) return "audio";
+    if (documentExts.includes(extension)) return "document";
+
+    return "other";
+  }
+
+  private hasThumbExtension(extension: string): boolean {
+    return ["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(extension);
+  }
+
+  private generateEventId(path: string): string {
+    return (
+      path
+        .split("/")
+        .pop()
+        ?.replace(/\.[^/.]+$/, "") || ""
+    );
+  }
+
+  private parseMetadata(metadataStr: string): Record<string, any> {
+    try {
+      return JSON.parse(metadataStr);
+    } catch {
+      return {};
+    }
+  }
+
+  private async downloadThumbnail(
+    device: DeviceResponse,
+    event: GalleryEvent
+  ): Promise<Buffer> {
+    if (!device.information) {
+      throw new Error(`Device information not found for device ${device.id}`);
+    }
+
+    const { host: activeHost } = getActiveDeviceConnection(device.information);
+    if (!activeHost) {
+      throw new Error(`Active host not found for device ${device.id}`);
+    }
+
+    const thumbnailPath = event.thumbnail || event.path;
+    const localPath = join(
+      GALLERY_BASE_PATH,
+      device.id,
+      `thumb_${event.id}.tmp`
+    );
+
+    mkdirSync(join(GALLERY_BASE_PATH, device.id), { recursive: true });
+
+    const command = device.information.password
+      ? `sshpass -p ${device.information.password} scp -o StrictHostKeyChecking=no ${device.information.user}@${activeHost}:${thumbnailPath} ${localPath}`
+      : `scp -o StrictHostKeyChecking=no ${device.information.user}@${activeHost}:${thumbnailPath} ${localPath}`;
+
+    await $`${{ raw: command }}`.text();
+
+    const content = readFileSync(localPath);
 
     try {
-      const output = await runCommandOnDevice(device, command);
-
-      return output
-        .split("\n")
-        .filter(Boolean)
-        .map((path) => {
-          const id = path.split("/").pop()?.replace(".jpg", "") || "";
-          return {
-            id,
-            path,
-            thumbnail: path,
-          };
-        });
-    } catch (error: any) {
-      if (
-        error?.stderr &&
-        typeof error.stderr.toString === "function" &&
-        error.stderr.toString().includes("No such file or directory")
-      ) {
-        return [];
-      }
-      throw error;
+      await $`rm -f ${localPath}`;
+    } catch {
+      // Ignore cleanup errors
     }
+
+    return content;
+  }
+
+  private async createGalleryRecord(
+    deviceId: string,
+    event: GalleryEvent,
+    thumbnailContent: Buffer | null
+  ) {
+    const recordData: any = {
+      device: deviceId,
+      event_id: event.id,
+      name: event.path,
+      media_type: event.mediaType,
+      has_thumbnail: event.hasThumb,
+      file_size: event.fileSize,
+      metadata: event.metadata,
+    };
+
+    if (thumbnailContent) {
+      const extension = event.thumbnail?.split(".").pop() || "jpg";
+      recordData.thumbnail = new File(
+        [thumbnailContent],
+        `${event.id}.${extension}`
+      );
+    }
+
+    await pb.collection("gallery").create(recordData);
   }
 
   private async getExistingEvent(
     deviceId: string,
     eventId: string
   ): Promise<GalleryResponse | null> {
+    // First try to find by PocketBase ID
+    try {
+      const event = await pb
+        .collection("gallery")
+        .getOne<GalleryResponse>(eventId);
+      if (event && event.device === deviceId) {
+        return event;
+      }
+    } catch {
+      // If not found by ID, continue to search by event_id
+    }
+
+    // Then try to find by event_id (file name)
     const result = await pb
       .collection("gallery")
       .getFullList<GalleryResponse>(1, {
@@ -204,75 +428,16 @@ export class GalleryService {
     return result[0] || null;
   }
 
-  private async downloadThumbnail(
-    device: DeviceResponse,
-    event: GalleryEvent
-  ): Promise<Buffer> {
-    const deviceDir = join(GALLERY_BASE_PATH, device.id);
-    if (!existsSync(deviceDir)) {
-      mkdirSync(deviceDir, { recursive: true });
-    }
-
-    const thumbnailPath = join(deviceDir, `${event.id}.jpg`);
-
-    if (!device.information) {
-      throw new Error(`Device information not found for device ${device.id}`);
-    }
-    const { host: activeHost } = getActiveDeviceConnection(device.information);
-    if (!activeHost) {
-      throw new Error(`Active host not found for device ${device.id}`);
-    }
-
-    // Download the thumbnail file from the device to local storage
-    const command = device.information.password
-      ? `sshpass -p ${device.information.password} scp -o StrictHostKeyChecking=no ${device.information.user}@${activeHost}:${event.thumbnail} ${thumbnailPath}`
-      : `scp -o StrictHostKeyChecking=no ${device.information.user}@${activeHost}:${event.thumbnail} ${thumbnailPath}`;
-    await $`${{ raw: command }}`.text();
-
-    // Read the file content and return it as a Buffer
-    return readFileSync(thumbnailPath);
-  }
-
-  private async createGalleryRecord(
-    deviceId: string,
-    event: GalleryEvent,
-    thumbnailContent: Buffer
-  ) {
-    await pb.collection("gallery").create({
-      device: deviceId,
-      event_id: event.id,
-      name: event.path,
-      thumbnail: new File([thumbnailContent], event.path),
-    });
-  }
-
-  private async removeEventFromDevice(
-    device: DeviceResponse,
-    event: GalleryResponse
-  ): Promise<void> {
-    const response = await fetch(
-      `${JOYSTICK_API_URL}/api/run/${device.id}/delete-event`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-API-Key": DEFAULT_API_KEY,
-        },
-        body: JSON.stringify({ event: event.event_id }),
-      }
-    );
-
-    if (!response.ok) {
-      logger.error(`Failed to toggle mode: ${response.statusText}`);
-      throw new Error(`Failed to toggle mode: ${response.statusText}`);
-    }
-  }
-
   public async pullEvent(deviceId: string, eventId: string): Promise<void> {
     logger.info(`Pulling event ${eventId} for device ${deviceId}`);
+
+    await this.hookService.executeHooks("before_event_pull", {
+      deviceId,
+      eventId,
+    });
+
     const device = await this.getDevice(deviceId);
     if (!device) {
-      logger.error(`Device ${deviceId} not found`);
       throw new Error(`Device ${deviceId} not found`);
     }
 
@@ -284,28 +449,30 @@ export class GalleryService {
     if (!device.information) {
       throw new Error(`Device information not found for device ${device.id}`);
     }
+
     const { host: activeHost } = getActiveDeviceConnection(device.information);
     if (!activeHost) {
       throw new Error(`Active host not found for device ${device.id}`);
     }
 
     const deviceDir = join(GALLERY_BASE_PATH, device.id);
-    const videoPath = join(deviceDir, `${event.event_id}.mp4`);
-    const eventFilePath = event.name.replace(".jpg", ".mp4");
+    mkdirSync(deviceDir, { recursive: true });
 
-    // Download the video file from the device to local storage
+    const extension = event.name?.split(".").pop() || "bin";
+    const localPath = join(deviceDir, `${event.event_id}.${extension}`);
+
     const command = device.information.password
-      ? `sshpass -p ${device.information.password} scp -o StrictHostKeyChecking=no ${device.information.user}@${activeHost}:${eventFilePath} ${videoPath}`
-      : `scp -o StrictHostKeyChecking=no ${device.information.user}@${activeHost}:${eventFilePath} ${videoPath}`;
+      ? `sshpass -p ${device.information.password} scp -o StrictHostKeyChecking=no ${device.information.user}@${activeHost}:${event.name} ${localPath}`
+      : `scp -o StrictHostKeyChecking=no ${device.information.user}@${activeHost}:${event.name} ${localPath}`;
+
     await $`${{ raw: command }}`.text();
 
-    // Update gallery record with video path
-    logger.info(`Successfully pulled video from device`);
-    // Read the video file content
-    const videoContent = readFileSync(videoPath);
+    const fileContent = readFileSync(localPath);
+    const fileStats = statSync(localPath);
 
     await pb.collection("gallery").update(event.id, {
-      event: new File([videoContent], `${event.event_id}.mp4`),
+      event: new File([fileContent], `${event.event_id}.${extension}`),
+      file_size: fileStats.size,
     });
 
     try {
@@ -313,7 +480,42 @@ export class GalleryService {
       logger.info(`Successfully deleted event files from device: ${eventId}`);
     } catch (error) {
       logger.error(`Failed to delete event files from device: ${error}`);
+      throw error; // Re-throw to ensure proper error handling
     }
+
+    try {
+      await $`rm -f ${localPath}`;
+    } catch {
+      // Ignore cleanup errors
+    }
+
+    await this.hookService.executeHooks("after_event_pulled", {
+      deviceId,
+      eventId,
+      event,
+    });
+  }
+
+  private async removeEventFromDevice(
+    device: DeviceResponse,
+    event: GalleryResponse
+  ): Promise<void> {
+    const deleteActions = ["delete-event", "remove-file", "cleanup"];
+
+    for (const actionName of deleteActions) {
+      try {
+        await this.executeDeviceAction(device, actionName, {
+          eventId: event.event_id,
+          path: event.name,
+        });
+        return;
+      } catch (error) {
+        logger.debug(`Delete action ${actionName} failed:`, error);
+        continue;
+      }
+    }
+
+    throw new Error(`No delete action available for device ${device.name}`);
   }
 
   public async getGalleryStats(deviceId: string): Promise<{
@@ -321,16 +523,38 @@ export class GalleryService {
     newEvents: number;
     pulledEvents: number;
     viewedEvents: number;
+    byMediaType: Record<string, number>;
   }> {
     const events = await pb.collection("gallery").getFullList<GalleryResponse>({
       filter: `device = "${deviceId}"`,
+    });
+
+    const byMediaType: Record<string, number> = {};
+    events.forEach((event) => {
+      const type = event.media_type || "unknown";
+      byMediaType[type] = (byMediaType[type] || 0) + 1;
     });
 
     return {
       totalEvents: events.length,
       newEvents: events.filter((e) => !e.event).length,
       pulledEvents: events.filter((e) => e.event).length,
-      viewedEvents: events.filter((e) => e.viewed).length,
+      viewedEvents: events.filter((e) => e.viewed?.length > 0).length,
+      byMediaType,
     };
+  }
+
+  public async deleteEvent(deviceId: string, eventId: string): Promise<void> {
+    const event = await this.getExistingEvent(deviceId, eventId);
+    if (!event) {
+      throw new Error(`Event ${eventId} not found for device ${deviceId}`);
+    }
+
+    await pb.collection("gallery").delete(event.id);
+    await this.hookService.executeHooks("after_event_deleted", {
+      deviceId,
+      eventId,
+      event,
+    });
   }
 }

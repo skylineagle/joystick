@@ -16,8 +16,11 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { useDevice } from "@/hooks/use-device";
+import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 import { useIsSupported } from "@/hooks/use-is-supported";
 import { joystickApi } from "@/lib/api-client";
+import { useAuthStore } from "@/lib/auth";
 import { pb } from "@/lib/pocketbase";
 import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
@@ -42,62 +45,67 @@ import {
   View,
 } from "lucide-react";
 import { useState } from "react";
-import { useParams } from "react-router-dom";
-import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
+import { useParams } from "react-router";
 
 export interface GalleryStats {
   totalEvents: number;
   newEvents: number;
   pulledEvents: number;
   viewedEvents: number;
-}
-
-interface GalleryConfig {
-  interval: number;
-  autoPull: boolean;
+  byMediaType?: Record<string, number>;
 }
 
 type ViewMode = "grid" | "list";
 type SortOrder = "newest" | "oldest";
 type EventState = "all" | "new" | "pulled" | "viewed" | "flagged";
 
-export default function GalleryPage() {
+export function GalleryPage() {
   const { device: deviceId } = useParams();
+  const { user } = useAuthStore();
   const queryClient = useQueryClient();
   const [scope, animate] = useAnimate();
-  const [config, setConfig] = useState<GalleryConfig>({
-    interval: 60,
-    autoPull: false,
-  });
+  const { data: device } = useDevice(deviceId!);
+  const [autoPull, setAutoPull] = useState(false);
   const [focusedEvent, setFocusedEvent] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedState, setSelectedState] = useState<EventState>("all");
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
+  const [selectedMediaTypes, setSelectedMediaTypes] = useState<string[]>([]);
 
-  const { isSupported, isLoading } = useIsSupported(deviceId!, "list-events");
+  const { isSupported, isLoading } = useIsSupported(
+    deviceId!,
+    ["list-events", "list-media", "list-files"],
+    "any"
+  );
 
   // Fetch gallery events
   const { events, isLoading: isLoadingEvents } = useGalleryEvents(deviceId!);
 
-  const { data: isRunning, isLoading: isLoadingStatus } = useQuery({
+  const { data: galleryStatus, isLoading: isLoadingStatus } = useQuery({
     queryKey: ["gallery", deviceId, "status"],
     queryFn: async () => {
-      const data = await joystickApi.get<{ status: "running" | "stopped" }>(
-        `${urls.studio}/api/gallery/${deviceId}/status`
-      );
-      return data.status === "running";
+      const data = await joystickApi.get<{
+        status: "running" | "stopped";
+        isProcessing: boolean;
+      }>(`${urls.studio}/api/gallery/${deviceId}/status`);
+      return data;
     },
+    // Increase polling frequency to catch state changes faster
+    refetchInterval: 5000,
   });
   const isRouteAllowed = useIsRouteAllowed("gallery");
 
   // Start gallery service
   const startMutation = useMutation({
-    mutationFn: async (config: GalleryConfig) => {
+    mutationFn: async () => {
       const data = await joystickApi.post(
         `${urls.studio}/api/gallery/${deviceId}/start`,
-        config
+        {
+          interval: device?.information?.harvestingInterval ?? 60,
+          autoPull,
+        }
       );
       return data;
     },
@@ -106,6 +114,7 @@ export default function GalleryPage() {
         message: "Gallery service started",
       });
       queryClient.invalidateQueries({ queryKey: ["gallery", deviceId] });
+      queryClient.invalidateQueries({ queryKey: ["device", deviceId] });
     },
     onError: (error) => {
       toast.error({
@@ -131,6 +140,7 @@ export default function GalleryPage() {
         message: "Gallery service stopped",
       });
       queryClient.invalidateQueries({ queryKey: ["gallery", deviceId] });
+      queryClient.invalidateQueries({ queryKey: ["device", deviceId] });
     },
     onError: (error) => {
       toast.error({
@@ -142,11 +152,29 @@ export default function GalleryPage() {
     },
   });
 
-  const handleServiceToggle = (checked: boolean) => {
-    if (checked) {
-      startMutation.mutate(config);
-    } else {
-      stopMutation.mutate();
+  const updateHarvestingIntervalMutation = useMutation({
+    mutationFn: async (interval: number) => {
+      await pb.collection("devices").update(deviceId!, {
+        information: {
+          ...device?.information,
+          harvestingInterval: interval,
+        },
+      });
+    },
+  });
+
+  const handleServiceToggle = async (checked: boolean) => {
+    try {
+      if (checked) {
+        await startMutation.mutateAsync();
+      } else {
+        await stopMutation.mutateAsync();
+      }
+    } catch {
+      // If the mutation fails, force refetch status to ensure UI is in sync
+      queryClient.invalidateQueries({
+        queryKey: ["gallery", deviceId, "status"],
+      });
     }
   };
 
@@ -170,8 +198,11 @@ export default function GalleryPage() {
           ? true
           : selectedState === "flagged"
           ? event.flagged
-          : getEventState(event) === selectedState;
-      return matchesSearch && matchesState;
+          : getEventState(event, user?.id || "") === selectedState;
+      const matchesMediaType =
+        selectedMediaTypes.length === 0 ||
+        selectedMediaTypes.includes(event.media_type || "unknown");
+      return matchesSearch && matchesState && matchesMediaType;
     })
     .sort((a, b) => {
       const dateA = new Date(a.created);
@@ -186,7 +217,9 @@ export default function GalleryPage() {
     mutationFn: async (eventIds: string[]) => {
       await Promise.all(
         eventIds.map((id) =>
-          pb.collection("gallery").update(id, { viewed: true })
+          pb.collection("gallery").update(id, {
+            "viewed+": user?.id,
+          })
         )
       );
     },
@@ -201,20 +234,39 @@ export default function GalleryPage() {
 
   const bulkPullMutation = useMutation({
     mutationFn: async (eventIds: string[]) => {
-      await Promise.all(
+      const responses = await Promise.all(
         eventIds.map((id) =>
           fetch(`${urls.studio}/api/gallery/${deviceId}/pull/${id}`, {
             method: "POST",
+          }).then(async (res) => {
+            if (!res.ok) {
+              const error = await res.text();
+              throw new Error(error || "Failed to pull event");
+            }
+            return res;
           })
         )
       );
+      return responses;
     },
     onSuccess: () => {
       toast.success({
         message: "Events pulled",
       });
-      queryClient.invalidateQueries({ queryKey: ["gallery", deviceId] });
+      // Invalidate both gallery and device queries to ensure everything is up to date
+      queryClient.invalidateQueries({
+        queryKey: ["gallery"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["device", deviceId],
+      });
       setSelectedEvents(new Set());
+    },
+    onError: (error) => {
+      toast.error({
+        message:
+          error instanceof Error ? error.message : "Failed to pull events",
+      });
     },
   });
 
@@ -310,8 +362,27 @@ export default function GalleryPage() {
       <div className="flex flex-col items-center justify-center h-full">
         <div className="text-lg font-medium mb-2">Device not supported</div>
         <div className="text-sm">
-          Please ensure the device has "list-events" action enabled and try
-          again.
+          Please ensure the device has on of the following actions enabled:
+          <ul className="mt-2 space-y-1 text-muted-foreground">
+            <li className="flex items-center space-x-2">
+              <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full"></span>
+              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                list-events
+              </code>
+            </li>
+            <li className="flex items-center space-x-2">
+              <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full"></span>
+              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                list-media
+              </code>
+            </li>
+            <li className="flex items-center space-x-2">
+              <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full"></span>
+              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
+                list-files
+              </code>
+            </li>
+          </ul>
         </div>
       </div>
     );
@@ -347,12 +418,20 @@ export default function GalleryPage() {
             {isLoadingStatus ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Switch
-                checked={isRunning}
-                onCheckedChange={handleServiceToggle}
-                disabled={startMutation.isPending || stopMutation.isPending}
-                className="data-[state=checked]:bg-green-600"
-              />
+              <>
+                <Switch
+                  checked={device?.harvesting}
+                  onCheckedChange={handleServiceToggle}
+                  disabled={startMutation.isPending || stopMutation.isPending}
+                  className={cn(
+                    "data-[state=checked]:bg-green-600",
+                    device?.harvesting ? "bg-green-600/30" : ""
+                  )}
+                />
+                <span className="text-sm text-muted-foreground">
+                  {device?.harvesting ? "Harvesting" : "Stopped"}
+                </span>
+              </>
             )}
           </div>
           <Popover>
@@ -361,7 +440,9 @@ export default function GalleryPage() {
                 variant="ghost"
                 size="icon"
                 disabled={
-                  isRunning || startMutation.isPending || stopMutation.isPending
+                  galleryStatus?.status === "running" ||
+                  startMutation.isPending ||
+                  stopMutation.isPending
                 }
               >
                 <Settings2 className="h-4 w-4" />
@@ -382,12 +463,11 @@ export default function GalleryPage() {
                     <Input
                       id="interval"
                       type="number"
-                      value={config.interval}
+                      value={device?.information?.harvestingInterval}
                       onChange={(e) =>
-                        setConfig({
-                          ...config,
-                          interval: Number(e.target.value),
-                        })
+                        updateHarvestingIntervalMutation.mutate(
+                          Number(e.target.value)
+                        )
                       }
                       min={30}
                       step={30}
@@ -395,13 +475,11 @@ export default function GalleryPage() {
                     />
                   </div>
                   <div className="flex items-center justify-between">
-                    <Label htmlFor="auto-pull">Auto-pull videos</Label>
+                    <Label htmlFor="auto-pull">Auto pull events</Label>
                     <Switch
                       id="auto-pull"
-                      checked={config.autoPull}
-                      onCheckedChange={(checked) =>
-                        setConfig({ ...config, autoPull: checked })
-                      }
+                      checked={autoPull}
+                      onCheckedChange={(checked) => setAutoPull(checked)}
                     />
                   </div>
                 </div>
@@ -450,6 +528,37 @@ export default function GalleryPage() {
               <SelectItem value="oldest">Oldest First</SelectItem>
             </SelectContent>
           </Select>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Media:</span>
+            <div className="flex gap-1">
+              {["image", "video", "audio", "document"].map((type) => (
+                <Button
+                  key={type}
+                  variant={
+                    selectedMediaTypes.includes(type) ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() => {
+                    setSelectedMediaTypes((prev) =>
+                      prev.includes(type)
+                        ? prev.filter((t) => t !== type)
+                        : [...prev, type]
+                    );
+                  }}
+                  className="h-8 px-3 text-xs"
+                >
+                  {type === "image"
+                    ? "🖼️"
+                    : type === "video"
+                    ? "🎥"
+                    : type === "audio"
+                    ? "🎵"
+                    : "📄"}
+                  <span className="ml-1 hidden sm:inline">{type}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
           <div className="flex items-center space-x-2">
             <Button
               variant="outline"
@@ -497,7 +606,7 @@ export default function GalleryPage() {
           )}
           {Array.from(selectedEvents).some((id) => {
             const event = events?.find((e) => e.id === id);
-            return event && getEventState(event) === "new";
+            return event && getEventState(event, user?.id || "") === "new";
           }) && (
             <Button
               variant="outline"

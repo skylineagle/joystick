@@ -1,20 +1,57 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { joystickApi } from "@/lib/api-client";
+import { useAuthStore } from "@/lib/auth";
 import { pb } from "@/lib/pocketbase";
 import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
-import { getEventState } from "@/pages/gallery/utils";
 import { GalleryResponse } from "@/types/db.types";
+import { MetadataValue } from "@/types/types";
 import { toast } from "@/utils/toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Download, Flag, Loader2, Play } from "lucide-react";
+import {
+  ArrowDown,
+  Download,
+  Eye,
+  File,
+  FileArchive,
+  FileAudio,
+  FileCode,
+  FileImage,
+  FileJson,
+  FileText,
+  FileVideo,
+  Flag,
+  Loader2,
+  Play,
+} from "lucide-react";
+
+const formatFileSize = (bytes: number) => {
+  if (!bytes) return null;
+  const mb = bytes / 1024 / 1024;
+  if (mb >= 1) {
+    return `${mb.toFixed(2)} MB`;
+  }
+  const kb = bytes / 1024;
+  return `${kb.toFixed(2)} KB`;
+};
+
+const formatDate = (date: string | Date) => {
+  return new Date(date).toLocaleString(undefined, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+};
 
 interface GalleryEventProps {
-  event: GalleryResponse;
+  event: GalleryResponse<Record<string, MetadataValue>>;
   index: number;
   handleFocusEvent: (event: GalleryResponse) => void;
   viewMode: "grid" | "list";
@@ -22,51 +59,80 @@ interface GalleryEventProps {
   onSelect: () => void;
 }
 
-export const GalleryEvent = ({
+const getFileIcon = (mediaType: string, name: string) => {
+  const extension = name?.split(".").pop()?.toLowerCase();
+
+  switch (mediaType) {
+    case "video":
+      return <FileVideo className="h-4 w-4 text-blue-500" />;
+    case "audio":
+      return <FileAudio className="h-4 w-4 text-purple-500" />;
+    case "image":
+      return <FileImage className="h-4 w-4 text-green-500" />;
+    default:
+      switch (extension) {
+        case "txt":
+        case "log":
+          return <FileText className="h-4 w-4 text-gray-500" />;
+        case "json":
+          return <FileJson className="h-4 w-4 text-yellow-500" />;
+        case "zip":
+        case "tar":
+        case "gz":
+          return <FileArchive className="h-4 w-4 text-orange-500" />;
+        case "js":
+        case "ts":
+        case "py":
+        case "cpp":
+          return <FileCode className="h-4 w-4 text-cyan-500" />;
+        default:
+          return <File className="h-4 w-4 text-gray-500" />;
+      }
+  }
+};
+
+const isPreviewable = (mediaType: string) => {
+  return ["video", "image", "audio"].includes(mediaType);
+};
+
+export function GalleryEvent({
   event,
   index,
   handleFocusEvent,
   viewMode,
   isSelected,
   onSelect,
-}: GalleryEventProps) => {
+}: GalleryEventProps) {
+  const { user } = useAuthStore();
   const queryClient = useQueryClient();
-  const state = getEventState(event);
-
-  const viewMutation = useMutation({
-    mutationFn: async (eventId: string) => {
-      await pb.collection("gallery").update(eventId, {
-        viewed: true,
-      });
-    },
-    onSuccess: () => {
-      toast.success({
-        message: "Event marked as viewed",
-      });
-      queryClient.invalidateQueries({ queryKey: ["gallery", event.device] });
-    },
-    onError: (error) => {
-      toast.error({
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to mark event as viewed",
-      });
-    },
-  });
+  const state = event.flagged
+    ? "flagged"
+    : !event.event
+    ? "new"
+    : event.viewed?.includes(user?.id || "")
+    ? "viewed"
+    : "pulled";
 
   const pullMutation = useMutation({
-    mutationFn: async (eventId: string) => {
-      return await joystickApi.post(
-        `${urls.studio}/api/gallery/${event.device}/pull/${eventId}`,
+    mutationFn: async () => {
+      const response = await joystickApi.post(
+        `${urls.studio}/api/gallery/${event.device}/pull/${event.id}`,
         {}
       );
+
+      return response;
     },
     onSuccess: () => {
       toast.success({
-        message: "Event pulled",
+        message: "Event pulled successfully",
       });
-      queryClient.invalidateQueries({ queryKey: ["gallery", event.device] });
+      // Invalidate both gallery and device queries to ensure everything is up to date
+      queryClient.invalidateQueries({
+        queryKey: ["gallery"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["device", event.device],
+      });
     },
     onError: (error) => {
       toast.error({
@@ -78,9 +144,9 @@ export const GalleryEvent = ({
 
   const flagMutation = useMutation({
     mutationFn: async (eventId: string) => {
-      await pb.collection("gallery").update(eventId, {
-        flagged: !event.flagged,
-      });
+      await pb
+        .collection("gallery")
+        .update(eventId, { flagged: !event.flagged });
     },
     onSuccess: () => {
       toast.success({
@@ -88,63 +154,70 @@ export const GalleryEvent = ({
       });
       queryClient.invalidateQueries({ queryKey: ["gallery", event.device] });
     },
-    onError: (error) => {
-      toast.error({
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to update event flag status",
+  });
+
+  const viewMutation = useMutation({
+    mutationFn: async (eventId: string) => {
+      await pb.collection("gallery").update(eventId, {
+        "viewed+": user?.id,
       });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gallery", event.device] });
     },
   });
 
-  const handleClick = () => {
-    handleFocusEvent(event);
+  const handleDownload = () => {
+    const link = document.createElement("a");
+    link.href = pb.files.getURL(event, event.event);
+    link.download = event.name || event.event_id;
+    link.click();
+    if (!event.viewed?.includes(user?.id || "")) {
+      viewMutation.mutate(event.id);
+    }
   };
 
-  const EventContent = () => (
-    <div className="relative group">
-      <div className="aspect-video relative">
-        <div
-          className={cn(
-            "absolute top-2 left-2 z-10 transition-opacity duration-300 opacity-0",
-            "group-hover:opacity-100",
-            isSelected && "opacity-100"
-          )}
-        >
-          <Checkbox
-            checked={isSelected}
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            onCheckedChange={() => {
-              onSelect();
-            }}
-            className="bg-background/80 backdrop-blur-sm"
-          />
-        </div>
-
-        <motion.img
-          src={pb.files.getURL(event, event.thumbnail)}
-          alt={`Event ${event.event_id}`}
-          className="size-full object-contain transition-transform duration-300 group-hover:scale-105"
-          whileHover={{ scale: 1.05 }}
+  if (viewMode === "list") {
+    return (
+      <motion.div
+        key={event.id}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: index * 0.1 }}
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        className={cn(
+          "flex items-center gap-4 p-4 rounded-lg border transition-colors",
+          isSelected
+            ? "bg-accent/50 border-primary"
+            : "bg-card hover:bg-accent/50"
+        )}
+      >
+        <Checkbox
+          checked={isSelected}
           onClick={(e) => {
             e.stopPropagation();
-            handleFocusEvent(event);
+          }}
+          onCheckedChange={() => {
+            onSelect();
           }}
         />
-        <div
-          className={cn(
-            "absolute inset-0 bg-gradient-to-t from-black/60 to-transparent transition-opacity duration-300",
-            "group-hover:opacity-100",
-            isSelected && "opacity-100"
-          )}
-        />
-        <div className="absolute top-2 right-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            {getFileIcon(event.media_type, event.name)}
+            <span className="font-medium truncate">
+              {event.name || event.event_id}
+            </span>
+          </div>
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>{formatDate(event.created)}</span>
+            {event.file_size && <span>{formatFileSize(event.file_size)}</span>}
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
           <Badge
             variant={
-              state == "flagged"
+              state === "flagged"
                 ? "destructive"
                 : state === "new"
                 ? "disconnected"
@@ -155,64 +228,57 @@ export const GalleryEvent = ({
           >
             {state}
           </Badge>
-        </div>
-        <div
-          className={cn(
-            "absolute inset-0 flex items-center justify-center transition-opacity duration-300 event-actions",
-            "group-hover:opacity-100",
-            isSelected && "opacity-100"
-          )}
-        >
-          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            {state === "new" ? (
+          {state === "new" ? (
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                pullMutation.mutate();
+              }}
+              disabled={pullMutation.isPending}
+            >
+              {pullMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <ArrowDown className="h-4 w-4" />
+              )}
+            </Button>
+          ) : (
+            <>
               <Button
                 size="icon"
-                variant="secondary"
+                variant="ghost"
                 onClick={(e) => {
                   e.stopPropagation();
-                  pullMutation.mutate(event.id);
+                  if (isPreviewable(event.media_type)) {
+                    handleFocusEvent(event);
+                  } else {
+                    handleDownload();
+                  }
                 }}
-                disabled={pullMutation.isPending}
               >
-                {pullMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                {isPreviewable(event.media_type) ? (
+                  <Play className="h-4 w-4" />
                 ) : (
                   <Download className="h-4 w-4" />
                 )}
               </Button>
-            ) : state === "pulled" ? (
-              <Button
-                size="icon"
-                variant="secondary"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  viewMutation.mutate(event.id);
-                  return window.open(
-                    pb.files.getURL(event, event.event),
-                    "_blank"
-                  );
-                }}
-              >
-                <Play className="h-4 w-4" />
-              </Button>
-            ) : (
-              <Button
-                size="icon"
-                variant="secondary"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.open(pb.files.getURL(event, event.event), "_blank");
-                }}
-              >
-                <Play className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
-      <div className="p-3">
-        <div className="flex items-center justify-between">
-          <div className="text-sm font-medium">{event.event_id}</div>
+              {!isPreviewable(event.media_type) &&
+                !event.viewed?.includes(user?.id || "") && (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      viewMutation.mutate(event.id);
+                    }}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                )}
+            </>
+          )}
           <Button
             size="icon"
             variant="ghost"
@@ -233,30 +299,6 @@ export const GalleryEvent = ({
             )}
           </Button>
         </div>
-        <div className="text-xs text-muted-foreground">
-          {new Date(event.created).toLocaleString()}
-        </div>
-      </div>
-    </div>
-  );
-
-  if (viewMode === "list") {
-    return (
-      <motion.div
-        key={event.id}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.1 }}
-        whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.99 }}
-        className={cn(
-          "flex items-center gap-4 p-4 rounded-lg border transition-colors",
-          isSelected
-            ? "bg-accent/50 border-primary"
-            : "bg-card hover:bg-accent/50"
-        )}
-      >
-        <EventContent />
       </motion.div>
     );
   }
@@ -267,35 +309,151 @@ export const GalleryEvent = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.1 }}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      className={cn(
+        "group relative rounded-lg border overflow-hidden bg-card transition-colors h-fit",
+        isSelected && "border-primary"
+      )}
     >
-      <div
-        className={cn(
-          "w-full rounded-2xl border",
-          state === "new"
-            ? "[background:linear-gradient(45deg,#172033,theme(colors.yellow.800)_50%,#172033)_padding-box,conic-gradient(from_var(--border-angle),theme(colors.yellow.600/.48)_80%,_theme(colors.yellow.500)_86%,_theme(colors.yellow.300)_90%,_theme(colors.yellow.500)_94%,_theme(colors.yellow.600/.48))_border-box] rounded-2xl border border-transparent animate-border"
-            : "border-border bg-card"
-        )}
-      >
-        <Card
-          className={cn(
-            "overflow-hidden group transition-all duration-300 hover:shadow-2xl shadow-lg cursor-pointer",
-            {
-              "border-yellow-500": state === "new",
-              "border-blue-500": state === "pulled",
-              "border-gray-500": state === "viewed",
-              "border-red-500": state === "flagged",
-              "border-primary border-4": isSelected,
-            }
-          )}
-          onClick={handleClick}
+      {isPreviewable(event.media_type) ? (
+        <div
+          className="aspect-video relative cursor-pointer"
+          onClick={() => handleFocusEvent(event)}
         >
-          <CardContent className="p-0">
-            <EventContent />
-          </CardContent>
-        </Card>
+          {event.thumbnail && (
+            <img
+              src={pb.files.getURL(event, event.thumbnail)}
+              alt={event.name || event.event_id}
+              className="w-full h-full object-cover"
+            />
+          )}
+          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+            <Play className="h-8 w-8 text-white" />
+          </div>
+        </div>
+      ) : (
+        <div className="aspect-video flex items-center justify-center bg-muted/30 p-4">
+          {getFileIcon(event.media_type, event.name)}
+          <span className="ml-2 text-sm font-medium truncate">
+            {event.name?.split(".").pop()?.toUpperCase()}
+          </span>
+        </div>
+      )}
+
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={onSelect}
+              onClick={(e) => e.stopPropagation()}
+            />
+            <Badge
+              variant={
+                state === "flagged"
+                  ? "destructive"
+                  : state === "new"
+                  ? "disconnected"
+                  : state === "pulled"
+                  ? "secondary"
+                  : "outline"
+              }
+            >
+              {state}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-1">
+            {state === "new" ? (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  pullMutation.mutate();
+                }}
+                disabled={pullMutation.isPending}
+              >
+                {pullMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ArrowDown className="h-4 w-4" />
+                )}
+              </Button>
+            ) : (
+              !isPreviewable(event.media_type) && (
+                <>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDownload();
+                    }}
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                  {!event.viewed?.includes(user?.id || "") && (
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        viewMutation.mutate(event.id);
+                      }}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  )}
+                </>
+              )
+            )}
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                flagMutation.mutate(event.id);
+              }}
+              disabled={flagMutation.isPending}
+              className={cn(
+                event.flagged &&
+                  "text-red-500 hover:text-red-600 hover:bg-red-50"
+              )}
+            >
+              {flagMutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Flag className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </div>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            {getFileIcon(event.media_type, event.name)}
+            <span className="text-sm font-medium truncate">
+              {event.name || event.event_id}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>{formatDate(event.created)}</span>
+            {event.file_size && <span>{formatFileSize(event.file_size)}</span>}
+          </div>
+          {event.metadata && Object.keys(event.metadata).length > 0 && (
+            <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
+              {Object.entries(event.metadata).map(([key, value]) => (
+                <div key={key} className="flex items-center gap-1">
+                  <span className="font-medium">{key}:</span>
+                  <span className="truncate">
+                    {typeof value === "object"
+                      ? JSON.stringify(value)
+                      : String(value)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   );
-};
+}

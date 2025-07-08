@@ -1,18 +1,23 @@
 import { pb } from "@/lib/pocketbase";
 import { GalleryResponse } from "@/types/db.types";
+import { MetadataValue } from "@/types/types";
 import { useEffect, useState } from "react";
 
 export function useGalleryEvents(deviceId: string) {
-  const [events, setEvents] = useState<GalleryResponse[]>([]);
+  const [events, setEvents] = useState<
+    GalleryResponse<Record<string, MetadataValue>>[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const initEvents = async () => {
       setIsLoading(true);
-      const events = await pb.collection("gallery").getFullList({
-        filter: `device = "${deviceId}"`,
-        sort: "-created",
-      });
+      const events = await pb
+        .collection("gallery")
+        .getFullList<GalleryResponse<Record<string, MetadataValue>>>({
+          filter: `device = "${deviceId}"`,
+          sort: "-created",
+        });
 
       setEvents(events);
       setIsLoading(false);
@@ -24,12 +29,17 @@ export function useGalleryEvents(deviceId: string) {
 
       switch (e.action) {
         case "create":
-          setEvents((prev) => [...prev, e.record as GalleryResponse]);
+          setEvents((prev) => [
+            ...prev,
+            e.record as GalleryResponse<Record<string, MetadataValue>>,
+          ]);
           break;
         case "update":
           setEvents((prev) =>
             prev.map((event) =>
-              event.id === e.record.id ? (e.record as GalleryResponse) : event
+              event.id === e.record.id
+                ? (e.record as GalleryResponse<Record<string, MetadataValue>>)
+                : event
             )
           );
           break;
@@ -48,5 +58,6 @@ export function useGalleryEvents(deviceId: string) {
     };
   }, [deviceId]);
 
+  console.log("events", events);
   return { events, isLoading };
 }

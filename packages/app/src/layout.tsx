@@ -54,7 +54,7 @@ export function Layout({ children }: LayoutProps) {
   const location = useLocation();
 
   const isOnCellSearchRoute = location.pathname.endsWith("/cell-search");
-
+  const isOnGalleryRoute = location.pathname.endsWith("/gallery");
   useEffect(() => {
     let unsubscribe: () => void;
     if (!deviceId) return;
@@ -150,7 +150,11 @@ export function Layout({ children }: LayoutProps) {
                   {children || <Outlet />}
                 </div>
                 {deviceId &&
-                  (isOnCellSearchRoute ? <CellSearchControls /> : <Controls />)}
+                  (isOnCellSearchRoute ? (
+                    <CellSearchControls />
+                  ) : (
+                    !isOnGalleryRoute && <Controls />
+                  ))}
               </div>
             </main>
           </SidebarInset>

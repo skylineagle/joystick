@@ -55,7 +55,7 @@ const SettingsPage = lazy(() =>
 );
 const GalleryPage = lazy(() =>
   import("@/pages/gallery/gallery-page").then((module) => ({
-    default: module.default,
+    default: module.GalleryPage,
   }))
 );
 const CellSearchPage = lazy(() =>
@@ -335,11 +335,7 @@ function AnimatedRoutes() {
           element={
             <Layout>
               <Suspense fallback={<LoadingFallback />}>
-                <ErrorBoundary>
-                  <PageTransition>
-                    <GalleryPage />
-                  </PageTransition>
-                </ErrorBoundary>
+                <GalleryPage />
               </Suspense>
             </Layout>
           }
