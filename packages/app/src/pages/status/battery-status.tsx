@@ -56,7 +56,7 @@ export function BatteryStatus({ deviceId }: BatteryStatusProps) {
   // Calculate percentage based on consumption and battery capacity
   const calculatePercentage = () => {
     if (!data || !batteryCapacity) return 0;
-    const percentage = (data.consumption / batteryCapacity) * 100;
+    const percentage = 100 - (data.consumption / batteryCapacity) * 100;
     return Math.min(100, Math.max(0, percentage));
   };
 
@@ -129,9 +129,7 @@ export function BatteryStatus({ deviceId }: BatteryStatusProps) {
             <div className="flex flex-col items-center justify-center py-1">
               <span className="text-xs text-muted-foreground">Voltage</span>
               <div className="flex items-center gap-1">
-                <span className="font-medium text-sm">
-                  {Math.abs(data.voltage / 1000).toFixed(2)}
-                </span>
+                <span className="font-medium text-sm">{data.voltage}</span>
                 <span className="text-xs text-muted-foreground">V</span>
               </div>
             </div>
@@ -140,9 +138,7 @@ export function BatteryStatus({ deviceId }: BatteryStatusProps) {
             <div className="flex flex-col items-center justify-center py-1">
               <span className="text-xs text-muted-foreground">Current</span>
               <div className="flex items-center gap-1">
-                <span className="font-medium text-sm">
-                  {Math.abs(data.current / 1000).toFixed(2)}
-                </span>
+                <span className="font-medium text-sm">{data.current}</span>
                 <span className="text-xs text-muted-foreground">mA</span>
               </div>
             </div>
@@ -151,9 +147,7 @@ export function BatteryStatus({ deviceId }: BatteryStatusProps) {
             <div className="flex flex-col items-center justify-center py-1">
               <span className="text-xs text-muted-foreground">Power</span>
               <div className="flex items-center gap-1">
-                <span className="font-medium text-sm">
-                  {Math.abs(data.power / 1000).toFixed(2)}
-                </span>
+                <span className="font-medium text-sm">{data.power}</span>
                 <span className="text-xs text-muted-foreground">W</span>
               </div>
             </div>
@@ -162,9 +156,7 @@ export function BatteryStatus({ deviceId }: BatteryStatusProps) {
             <div className="flex flex-col items-center justify-center py-1">
               <span className="text-xs text-muted-foreground">Consumption</span>
               <div className="flex items-center gap-1">
-                <span className="font-medium text-sm">
-                  {Math.abs(data.consumption).toFixed(2)}
-                </span>
+                <span className="font-medium text-sm">{data.consumption}</span>
                 <span className="text-xs text-muted-foreground">mWh</span>
               </div>
             </div>
