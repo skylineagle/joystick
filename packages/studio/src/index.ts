@@ -6,9 +6,18 @@ import { createAuthPlugin, type DeviceResponse } from "@joystick/core";
 import { Elysia, t } from "elysia";
 import { GalleryService } from "./gallery";
 import { HookService } from "./services/hook-service";
+import { FileWatcherService } from "./services/file-watcher";
+import type {
+  EventUploadRequest,
+  EventUploadResponse,
+  EventUploadUrlResponse,
+} from "./types/types";
+import { join } from "path";
+import { GALLERY_BASE_PATH } from "./config";
 
 const galleryService = GalleryService.getInstance();
 const hookService = HookService.getInstance();
+const fileWatcherService = FileWatcherService.getInstance();
 
 const app = new Elysia()
   .use(
@@ -187,6 +196,130 @@ const app = new Elysia()
       };
     }
   })
+  // Direct event upload endpoint
+  .post("/api/gallery/:device/upload", async ({ params, body }) => {
+    try {
+      const uploadRequest = body as EventUploadRequest;
+      const eventId =
+        uploadRequest.event_id ||
+        galleryService.generateEventId(uploadRequest.name);
+
+      await galleryService.createGalleryRecord(
+        params.device,
+        {
+          id: eventId,
+          path: uploadRequest.name,
+          mediaType:
+            uploadRequest.media_type ||
+            galleryService.getMediaType(
+              uploadRequest.name.split(".").pop() || ""
+            ),
+          metadata: uploadRequest.metadata || {},
+          hasThumb: uploadRequest.has_thumbnail || false,
+          fileSize: uploadRequest.file_size,
+          thumbnail: undefined,
+        },
+        null
+      );
+
+      if (uploadRequest.event) {
+        await pb.collection("gallery").update(eventId, {
+          event: uploadRequest.event,
+          file_size: uploadRequest.file_size || uploadRequest.event.size,
+        });
+      }
+
+      if (uploadRequest.thumbnail) {
+        await pb.collection("gallery").update(eventId, {
+          thumbnail: uploadRequest.thumbnail,
+        });
+      }
+
+      await hookService.executeHooks("after_event_created", {
+        deviceId: params.device,
+        event: {
+          id: eventId,
+          path: uploadRequest.name,
+          mediaType:
+            uploadRequest.media_type ||
+            galleryService.getMediaType(
+              uploadRequest.name.split(".").pop() || ""
+            ),
+          metadata: uploadRequest.metadata || {},
+          hasThumb: uploadRequest.has_thumbnail || false,
+          fileSize: uploadRequest.file_size,
+        },
+      });
+
+      return {
+        success: true,
+        event_id: eventId,
+      } as EventUploadResponse;
+    } catch (error) {
+      logger.error({ error, device: params.device }, "Error uploading event");
+      return {
+        success: false,
+        event_id: "",
+        error: error instanceof Error ? error.message : String(error),
+      } as EventUploadResponse;
+    }
+  })
+
+  // Get pre-signed upload URLs
+  .get("/api/gallery/:device/upload-url", async ({ params, query }) => {
+    try {
+      const filename = query.filename as string;
+      if (!filename) {
+        throw new Error("Filename is required");
+      }
+
+      const eventId =
+        query.event_id || galleryService.generateEventId(filename);
+      const hasThumbnail = query.thumbnail === "true";
+
+      // Create initial record
+      await galleryService.createGalleryRecord(
+        params.device,
+        {
+          id: eventId,
+          path: filename,
+          mediaType: galleryService.getMediaType(
+            filename.split(".").pop() || ""
+          ),
+          metadata: {},
+          hasThumb: hasThumbnail,
+          fileSize: undefined,
+          thumbnail: undefined,
+        },
+        null
+      );
+
+      // Get upload URLs from PocketBase
+      const record = await pb.collection("gallery").getOne(eventId);
+      const uploadUrl = await pb.files.getUrl(record, "event", {
+        token: "upload",
+      });
+      const thumbnailUploadUrl = hasThumbnail
+        ? await pb.files.getUrl(record, "thumbnail", { token: "upload" })
+        : undefined;
+
+      return {
+        success: true,
+        upload_url: uploadUrl,
+        thumbnail_upload_url: thumbnailUploadUrl,
+      } as EventUploadUrlResponse;
+    } catch (error) {
+      logger.error(
+        { error, device: params.device },
+        "Error getting upload URL"
+      );
+      return {
+        success: false,
+        upload_url: "",
+        error: error instanceof Error ? error.message : String(error),
+      } as EventUploadUrlResponse;
+    }
+  })
   // Hook management endpoints
   .get("/api/hooks", async ({ query }) => {
     try {
@@ -267,6 +400,29 @@ const app = new Elysia()
       logger.error(
         { error, eventType: params.eventType },
         "Error getting hooks by event type"
+      );
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  })
+  .get("/api/gallery/:device/paths", async ({ params }) => {
+    try {
+      await fileWatcherService.setupDeviceDirectories(params.device);
+      const devicePath = join(GALLERY_BASE_PATH, params.device);
+
+      return {
+        success: true,
+        paths: {
+          incoming: join(devicePath, "incoming"),
+          thumbnails: join(devicePath, "thumbnails"),
+        },
+      };
+    } catch (error) {
+      logger.error(
+        { error, device: params.device },
+        "Error getting device paths"
       );
       return {
         success: false,
