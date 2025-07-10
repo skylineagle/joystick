@@ -97,7 +97,11 @@ export default inngest.createFunction(
               ? await runCommandOnDevice(device, healthcheckCommand)
               : await $`${{ raw: healthcheckCommand }}`.text();
 
-          if (result === "true") {
+          if (
+            typeof result === "string"
+              ? result.replace("\n", "") === "true"
+              : result
+          ) {
             logger.info(`Device ${device.name} is online`);
             return;
           }
