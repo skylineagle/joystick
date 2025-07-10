@@ -91,10 +91,15 @@ services:
       - SWITCHER_API_URL=http://switcher:8080
       - PORT=8000
       - HOST=0.0.0.0
+      - INNGEST_EVENT_KEY=${INNGEST_EVENT_KEY:-dev}
+      - INNGEST_SIGNING_KEY=${INNGEST_SIGNING_KEY:-dev}
+      - INNGEST_SERVE_URL=http://inngest:8288
     depends_on:
       pocketbase:
         condition: service_healthy
       mediamtx:
+        condition: service_started
+      inngest:
         condition: service_started
     networks: *default-networks
     extra_hosts: *default-extra-hosts
@@ -109,6 +114,29 @@ services:
       - "traefik.http.middlewares.cors.headers.addvaryheader=true"
       - "traefik.http.routers.joystick.middlewares=joystick-strip,cors"
       - "traefik.http.services.joystick.loadbalancer.server.port=8000"
+
+  inngest:
+    image: inngest/inngest:latest
+    <<: *default-platform-restart
+    environment:
+      - INNGEST_BASE_URL=http://${HOST:-localhost}/inngest
+      - INNGEST_EVENT_KEY=${INNGEST_EVENT_KEY:-dev}
+      - INNGEST_SIGNING_KEY=${INNGEST_SIGNING_KEY:-dev}
+      - INNGEST_SERVE_PORT=8288
+    networks: *default-networks
+    extra_hosts: *default-extra-hosts
+    logging: *default-logging
+    command: ["inngest", "dev", "-u", "http://joystick:8000/api/inngest"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.inngest.rule=Host(${HOST:-localhost}) && PathPrefix(`/inngest`)"
+      - "traefik.http.middlewares.inngest-strip.stripprefix.prefixes=/inngest"
+      - "traefik.http.routers.inngest.middlewares=inngest-strip,cors"
+      - "traefik.http.services.inngest.loadbalancer.server.port=8288"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=*"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=*"
+      - "traefik.http.middlewares.cors.headers.addvaryheader=true"
 
   panel:
     image: ghcr.io/skylineagle/joystick/panel:latest

@@ -47,6 +47,28 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  inngest:
+    image: inngest/inngest:latest
+    restart: unless-stopped
+    ports:
+      - "8288:8288"
+    environment:
+      - INNGEST_BASE_URL=http://localhost:8288
+      - INNGEST_EVENT_KEY=dev
+      - INNGEST_SIGNING_KEY=dev
+      - INNGEST_SERVE_PORT=8288
+    command:
+      ["inngest", "dev", "-u", "http://host.docker.internal:8000/api/inngest"]
+    networks:
+      - app-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 networks:
   app-network:
     driver: bridge
