@@ -12,6 +12,7 @@ import { Label } from "@radix-ui/react-label";
 import { useQuery } from "@tanstack/react-query";
 import { VariantProps } from "class-variance-authority";
 import { memo } from "react";
+import { Link } from "react-router";
 
 export interface DeviceNameProps {
   deviceId: string;
@@ -24,6 +25,7 @@ type BadgeVariant = VariantProps<typeof badgeVariants>["variant"];
 export const DeviceName = memo(
   ({ deviceId, configurationName, name }: DeviceNameProps) => {
     const isAllowedToViewStream = useIsPermitted("view-stream");
+    const isAllowedToControlDevice = useIsPermitted("control-device");
     const { isSupported: isHealthcheckSupported } = useIsSupported(
       deviceId ?? "",
       "healthcheck"
@@ -66,7 +68,13 @@ export const DeviceName = memo(
                 variant={getBadgeVariant()}
                 className="text-md transition-all duration-300"
               >
-                <Label>{name}</Label>
+                {isAllowedToControlDevice ? (
+                  <Link to={`/${deviceId}`} className="self-center">
+                    <span>{name}</span>
+                  </Link>
+                ) : (
+                  <Label>{name}</Label>
+                )}
               </Badge>
             </TooltipTrigger>
             <TooltipContent side="right" sideOffset={30}>
