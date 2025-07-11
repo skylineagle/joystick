@@ -123,10 +123,30 @@ services:
       - INNGEST_EVENT_KEY=${INNGEST_EVENT_KEY:-dev}
       - INNGEST_SIGNING_KEY=${INNGEST_SIGNING_KEY:-dev}
       - INNGEST_SERVE_PORT=8288
+      - INNGEST_SQLITE_PATH=/var/lib/inngest/inngest.db
+      - INNGEST_STATE_STORE_PATH=/var/lib/inngest/state
+      - INNGEST_LOG_LEVEL=info
+      - INNGEST_TELEMETRY_ENABLED=false
+    volumes:
+      - inngest_data:/var/lib/inngest
     networks: *default-networks
     extra_hosts: *default-extra-hosts
     logging: *default-logging
     command: ["inngest", "dev", "-u", "http://joystick:8000/api/inngest"]
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8288/health",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.inngest.rule=Host(${HOST:-localhost}) && PathPrefix(`/inngest`)"
@@ -287,3 +307,4 @@ networks:
 
 volumes:
   pb_data:
+  inngest_data: {}
