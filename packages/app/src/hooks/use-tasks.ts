@@ -9,7 +9,7 @@ export function useTasks() {
         name: "device/offline.action",
       });
     },
-    refetchInterval: 1000,
+    refetchInterval: 5000,
   });
 
   return {
