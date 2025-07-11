@@ -48,6 +48,11 @@ const ActionsPage = lazy(() =>
     default: module.ActionsPage,
   }))
 );
+const TasksPage = lazy(() =>
+  import("@/pages/tasks/tasks-page").then((module) => ({
+    default: module.TasksPage,
+  }))
+);
 const SettingsPage = lazy(() =>
   import("@/pages/settings/settings-page").then((module) => ({
     default: module.SettingsPage,
@@ -314,6 +319,20 @@ function AnimatedRoutes() {
                 <ErrorBoundary>
                   <PageTransition>
                     <ActionsPage />
+                  </PageTransition>
+                </ErrorBoundary>
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="tasks"
+          element={
+            <Layout>
+              <Suspense fallback={<LoadingFallback />}>
+                <ErrorBoundary>
+                  <PageTransition>
+                    <TasksPage />
                   </PageTransition>
                 </ErrorBoundary>
               </Suspense>

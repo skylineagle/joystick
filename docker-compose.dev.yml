@@ -48,26 +48,55 @@ services:
         max-file: "3"
 
   inngest:
-    image: inngest/inngest:latest
-    restart: unless-stopped
+    image: inngest/inngest
+    command: "inngest start -u http://host.docker.internal:8000/api/inngest"
     ports:
       - "8288:8288"
+      - "8289:8289"
     environment:
-      - INNGEST_BASE_URL=http://localhost:8288
       - INNGEST_EVENT_KEY=dev
       - INNGEST_SIGNING_KEY=dev
-      - INNGEST_SERVE_PORT=8288
-    command:
-      ["inngest", "dev", "-u", "http://host.docker.internal:8000/api/inngest"]
+      - INNGEST_POSTGRES_URI=postgres://inngest:password@postgres:5432/inngest
+      - INNGEST_REDIS_URI=redis://redis:6379
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - app-network
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+
+  postgres:
+    image: postgres:17
+    environment:
+      - POSTGRES_DB=inngest
+      - POSTGRES_USER=inngest
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inngest -d inngest"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 networks:
   app-network:
@@ -75,3 +104,5 @@ networks:
 
 volumes:
   pb_data:
+  postgres_data:
+  redis_data:

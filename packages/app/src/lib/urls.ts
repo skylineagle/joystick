@@ -18,6 +18,8 @@ const getPorts = (service: string) => {
       return 8080;
     case "whisper":
       return 8081;
+    case "inngest":
+      return 8288;
     default:
       break;
   }
@@ -30,6 +32,7 @@ const PREFIXES = {
   studio: "studio",
   switcher: "switcher",
   whisper: "whisper",
+  inngest: "inngest",
 } as const;
 
 function getServiceUrl(service: string): string {
@@ -69,5 +72,8 @@ export const urls = {
   },
   get studio() {
     return getServiceUrl("studio");
+  },
+  get inngest() {
+    return getServiceUrl("inngest");
   },
 };

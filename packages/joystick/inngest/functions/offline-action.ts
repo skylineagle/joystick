@@ -1,12 +1,8 @@
-import { inngest } from "../client";
 import { pb } from "@/pocketbase";
-import {
-  getActiveDeviceConnection,
-  runCommandOnDevice,
-  RunTargetOptions,
-} from "@joystick/core";
 import type { DeviceResponse, RunResponse } from "@joystick/core";
+import { runCommandOnDevice, RunTargetOptions } from "@joystick/core";
 import { $ } from "bun";
+import { inngest } from "../client";
 
 type OfflineActionPayload = {
   deviceId: string;
@@ -39,7 +35,7 @@ export default inngest.createFunction(
     });
 
     // Step 2: Get run configuration
-    const run = await step.run("get-run", async () => {
+    const runStep = step.run("get-run", async () => {
       const result = await pb.collection("run").getFullList<RunResponse>(1, {
         filter: `action.name = "${action}" && device = "${device.expand?.device.id}"`,
       });
@@ -54,7 +50,7 @@ export default inngest.createFunction(
     });
 
     // Step 3: Get healthcheck run configuration
-    const healthcheckRun = await step.run("get-healthcheck-run", async () => {
+    const healthcheckRunStep = step.run("get-healthcheck-run", async () => {
       const result = await pb.collection("run").getFullList<RunResponse>(1, {
         filter: `action.name = "healthcheck" && device = "${device.expand?.device.id}"`,
       });
@@ -67,6 +63,11 @@ export default inngest.createFunction(
 
       return result[0];
     });
+
+    const [healthcheckRun, run] = await Promise.all([
+      healthcheckRunStep,
+      runStep,
+    ]);
 
     // Step 4: Wait for device to be online
     await step.run("wait-for-device", async () => {
@@ -123,7 +124,7 @@ export default inngest.createFunction(
     });
 
     // Step 5: Run the actual action
-    return await step.run("run-action", async () => {
+    const result = await step.run("run-action", async () => {
       // Build command with parameters
       const defaultParameters = {
         device: deviceId,
@@ -150,5 +151,7 @@ export default inngest.createFunction(
 
       return { success: true, output: result };
     });
+
+    return result;
   }
 );

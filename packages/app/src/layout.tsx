@@ -55,6 +55,8 @@ export function Layout({ children }: LayoutProps) {
 
   const isOnCellSearchRoute = location.pathname.endsWith("/cell-search");
   const isOnGalleryRoute = location.pathname.endsWith("/gallery");
+  const isOnTasksRoute = location.pathname.endsWith("/tasks");
+
   useEffect(() => {
     let unsubscribe: () => void;
     if (!deviceId) return;
@@ -153,7 +155,7 @@ export function Layout({ children }: LayoutProps) {
                   (isOnCellSearchRoute ? (
                     <CellSearchControls />
                   ) : (
-                    !isOnGalleryRoute && <Controls />
+                    !isOnGalleryRoute && !isOnTasksRoute && <Controls />
                   ))}
               </div>
             </main>

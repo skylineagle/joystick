@@ -132,7 +132,7 @@ services:
     networks: *default-networks
     extra_hosts: *default-extra-hosts
     logging: *default-logging
-    command: ["inngest", "dev", "-u", "http://joystick:8000/api/inngest"]
+    command: "inngest start -u http://joystick:8000/api/inngest"
     healthcheck:
       test:
         [
@@ -157,6 +157,38 @@ services:
       - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
       - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=*"
       - "traefik.http.middlewares.cors.headers.addvaryheader=true"
+
+  postgres:
+    image: postgres:17
+    environment:
+      - POSTGRES_DB=inngest
+      - POSTGRES_USER=inngest
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inngest -d inngest"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   panel:
     image: ghcr.io/skylineagle/joystick/panel:latest

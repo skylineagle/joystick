@@ -148,16 +148,22 @@ export type UpdateDevice = Partial<InsertDevice> & {
   overlay?: File;
 };
 
-export interface ActionSchema {
-  name: string;
+export type SchemaProperty = {
+  type: string;
+  enum?: string[];
+  default?: unknown;
   description?: string;
-  params?: Record<string, unknown>; // JSON Schema for parameters
+};
+
+export interface ActionSchema {
+  properties: Record<string, SchemaProperty>;
+  required?: string[];
 }
 
 export type ActionResponse = ActionsResponse;
 
 export type RunResponse = BaseRunResponse<
-  Record<string, unknown>,
+  ActionSchema,
   {
     device: ModelsResponse;
     action: ActionsResponse;

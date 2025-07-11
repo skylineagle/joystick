@@ -1,0 +1,5 @@
+---
+description: Always have one component per file.
+globs: **/*.tsx
+alwaysApply: false
+---

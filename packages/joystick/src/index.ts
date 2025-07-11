@@ -19,6 +19,9 @@ import {
 import { $ } from "bun";
 import { Elysia, t } from "elysia";
 import { validate } from "jsonschema";
+import { inngest } from "../inngest/client";
+import { functions } from "../inngest/functions";
+import { createInngestHandler } from "../inngest/handler";
 import { enhancedLogger, setupLoggingMiddleware } from "./enhanced-logger";
 import {
   addNotificationClient,
@@ -26,9 +29,6 @@ import {
   sendNotification,
 } from "./notifications";
 import { generateRandomCPSIResult, updateStatus } from "./utils";
-import { createInngestHandler } from "../inngest/handler";
-import { inngest } from "../inngest/client";
-import { functions } from "../inngest/functions";
 
 const app = new Elysia()
   .use(cors())
@@ -65,6 +65,7 @@ const app = new Elysia()
   )
   .use(createAuthPlugin(pb))
   .use(setupLoggingMiddleware())
+
   .ws("/notifications", {
     open(ws: any) {
       addNotificationClient(ws);
@@ -272,11 +273,11 @@ const app = new Elysia()
         }
 
         // Trigger Inngest function
-        await inngest.send({
+        const { ids } = await inngest.send({
           name: "device/offline.action",
           data: {
             deviceId: params.device,
-            actionId: action.id,
+            action: params.action,
             params: body?.params,
             ttl: body?.ttl,
           },
@@ -291,7 +292,7 @@ const app = new Elysia()
           "Offline action queued successfully"
         );
 
-        return { success: true, message: "Action queued for execution" };
+        return { success: true, message: "Action queued for execution", ids };
       } catch (error) {
         enhancedLogger.error(
           {
