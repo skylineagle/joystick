@@ -91,6 +91,7 @@ export function Layout({ children }: LayoutProps) {
   const isGalleryRouteAllowed = useIsRouteAllowed("gallery");
   const isTerminalRouteAllowed = useIsRouteAllowed("terminal");
   const isCellSearchRouteAllowed = useIsRouteAllowed("cell-search");
+  const isTaskRouteAllowed = useIsRouteAllowed("task");
   const isSystemStatusRouteAllowed = useIsPermitted("system-status");
 
   const availableNavItems = getAvailableNavItems(
@@ -103,7 +104,8 @@ export function Layout({ children }: LayoutProps) {
     !!isParamsRouteAllowed,
     !!isGalleryRouteAllowed,
     !!isTerminalRouteAllowed,
-    !!isCellSearchRouteAllowed
+    !!isCellSearchRouteAllowed,
+    !!isTaskRouteAllowed
   );
   const showSidebar = availableNavItems.length > 1;
 

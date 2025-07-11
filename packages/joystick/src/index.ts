@@ -65,7 +65,6 @@ const app = new Elysia()
   )
   .use(createAuthPlugin(pb))
   .use(setupLoggingMiddleware())
-
   .ws("/notifications", {
     open(ws: any) {
       addNotificationClient(ws);

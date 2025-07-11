@@ -107,7 +107,7 @@ export const getAvailableNavItems = (
     if (item.path === "actions" && !isActionRouteAllowed) {
       return false;
     }
-    if (item.path === "tasks" && !isActionRouteAllowed) {
+    if (item.path === "tasks" && !isTaskRouteAllowed) {
       return false;
     }
     if (item.path === "parameters" && !isParamsRouteAllowed) {
@@ -122,9 +122,7 @@ export const getAvailableNavItems = (
     ) {
       return false;
     }
-    if (item.path === "tasks" && !isTaskRouteAllowed) {
-      return false;
-    }
+
     return true;
   });
 };
