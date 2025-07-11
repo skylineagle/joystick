@@ -12,9 +12,7 @@ import { Baker } from "cronbake";
 import { existsSync, mkdirSync, readFileSync, statSync } from "fs";
 import { join } from "path";
 import { HookService } from "./services/hook-service";
-
-// find /gallery -type f -exec ls -l {} \; | awk '{print $9"\t"$5}'
-const GALLERY_BASE_PATH = join(process.cwd(), "data", "gallery");
+import { GALLERY_BASE_PATH } from "./config";
 
 if (!existsSync(GALLERY_BASE_PATH)) {
   mkdirSync(GALLERY_BASE_PATH, { recursive: true });
@@ -302,31 +300,33 @@ export class GalleryService {
       );
   }
 
-  private getMediaType(extension: string): string {
-    const imageExts = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"];
-    const videoExts = ["mp4", "avi", "mov", "mkv", "webm", "flv"];
-    const audioExts = ["mp3", "wav", "flac", "aac", "ogg", "m4a"];
-    const documentExts = ["pdf", "doc", "docx", "txt", "rtf"];
-
-    if (imageExts.includes(extension)) return "image";
-    if (videoExts.includes(extension)) return "video";
-    if (audioExts.includes(extension)) return "audio";
-    if (documentExts.includes(extension)) return "document";
-
-    return "other";
-  }
-
-  private hasThumbExtension(extension: string): boolean {
-    return ["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(extension);
-  }
-
-  private generateEventId(path: string): string {
+  public generateEventId(path: string): string {
     return (
       path
         .split("/")
         .pop()
         ?.replace(/\.[^/.]+$/, "") || ""
     );
+  }
+
+  public getMediaType(extension: string): string {
+    const imageTypes = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff"];
+    const videoTypes = ["mp4", "webm", "avi", "mov", "mkv", "flv"];
+    const audioTypes = ["mp3", "wav", "ogg", "m4a", "aac"];
+    const documentTypes = ["pdf", "doc", "docx", "xls", "xlsx", "txt", "md"];
+
+    extension = extension.toLowerCase();
+
+    if (imageTypes.includes(extension)) return "image";
+    if (videoTypes.includes(extension)) return "video";
+    if (audioTypes.includes(extension)) return "audio";
+    if (documentTypes.includes(extension)) return "document";
+
+    return "other";
+  }
+
+  private hasThumbExtension(extension: string): boolean {
+    return ["jpg", "jpeg", "png", "gif", "bmp", "webp"].includes(extension);
   }
 
   private parseMetadata(metadataStr: string): Record<string, any> {
@@ -376,7 +376,7 @@ export class GalleryService {
     return content;
   }
 
-  private async createGalleryRecord(
+  public async createGalleryRecord(
     deviceId: string,
     event: GalleryEvent,
     thumbnailContent: Buffer | null
