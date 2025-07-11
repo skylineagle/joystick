@@ -12,7 +12,7 @@ import { Label } from "@radix-ui/react-label";
 import { useQuery } from "@tanstack/react-query";
 import { VariantProps } from "class-variance-authority";
 import { memo } from "react";
-import { useNavigate, Link } from "react-router";
+import { Link } from "react-router";
 
 export interface DeviceNameProps {
   deviceId: string;
@@ -24,7 +24,6 @@ type BadgeVariant = VariantProps<typeof badgeVariants>["variant"];
 
 export const DeviceName = memo(
   ({ deviceId, configurationName, name }: DeviceNameProps) => {
-    const navigate = useNavigate();
     const isAllowedToViewStream = useIsPermitted("view-stream");
     const isAllowedToControlDevice = useIsPermitted("control-device");
     const { isSupported: isHealthcheckSupported } = useIsSupported(
@@ -71,7 +70,7 @@ export const DeviceName = memo(
               >
                 {isAllowedToControlDevice ? (
                   <Link to={`/${deviceId}`} className="self-center">
-                    <Label>{name}</Label>
+                    <span>{name}</span>
                   </Link>
                 ) : (
                   <Label>{name}</Label>
