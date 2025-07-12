@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Copy package files
 COPY package.json ./
-RUN bun install --production
+RUN bun i
 
 
 # Copy source code and env files
