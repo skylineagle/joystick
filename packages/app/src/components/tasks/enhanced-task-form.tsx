@@ -24,10 +24,11 @@ import { Switch } from "@/components/ui/switch";
 import { useAction } from "@/hooks/use-action";
 import { useDevice } from "@/hooks/use-device";
 import { useDeviceActions } from "@/hooks/use-device-actions";
-import { inngest } from "@/lib/inngest";
+import { createUrl, joystickApi } from "@/lib/api-client";
+import { urls } from "@/lib/urls";
 import { buildZodSchema, isActionSchema } from "@/pages/actions/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   AlertCircle,
@@ -41,6 +42,7 @@ import {
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "react-router";
+import { toast } from "sonner";
 import { z } from "zod";
 
 export function EnhancedTaskForm() {
@@ -71,27 +73,55 @@ export function EnhancedTaskForm() {
     actions?.filter((action): action is string => typeof action === "string") ??
     [];
 
+  const { mutate } = useMutation({
+    mutationFn: async (params: {
+      deviceId: string;
+      deviceName: string;
+      action: string;
+      params: Record<string, unknown>;
+      ttl: number;
+    }) => {
+      const response = await joystickApi.post<{
+        success: boolean;
+        message: string;
+        ids: string[];
+      }>(
+        createUrl(
+          urls.joystick,
+          `/api/run/${params.deviceId}/offline/${params.action}`
+        ),
+        {
+          params,
+        }
+      );
+
+      return response;
+    },
+    onSuccess: (data) => {
+      if (data.success) {
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ["tasks"] });
+        }, 1000);
+        form.reset();
+        setSelectedAction("");
+        setTtl(300);
+      }
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   const handleSubmit = async (params: Record<string, unknown>) => {
     if (!selectedAction || !device) return;
 
-    await inngest.send({
-      name: "device/offline.action",
-      data: {
-        deviceId: device.id,
-        deviceName: device.name,
-        action: selectedAction,
-        params,
-        ttl,
-      },
+    mutate({
+      deviceId: device.id,
+      deviceName: device.name,
+      action: selectedAction,
+      params,
+      ttl,
     });
-
-    setTimeout(() => {
-      queryClient.invalidateQueries({ queryKey: ["tasks"] });
-    }, 1000);
-
-    form.reset();
-    setSelectedAction("");
-    setTtl(300);
   };
 
   const hasParameters =

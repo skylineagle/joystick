@@ -13,6 +13,7 @@ import {
   ChevronUp,
   Clock,
   ExternalLink,
+  RefreshCcw,
   Settings,
   Timer,
   Zap,
@@ -49,7 +50,7 @@ interface TaskCardProps {
 
 export const TaskCard: FC<TaskCardProps> = ({ task, className }) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const { task: runs } = useTask(task.id);
+  const { task: runs, refetch, isLoading } = useTask(task.id);
   const taskRun = runs?.[0];
   const progress = getTaskProgress(taskRun);
   const duration = getTaskDuration(taskRun);
@@ -137,6 +138,19 @@ export const TaskCard: FC<TaskCardProps> = ({ task, className }) => {
                   {taskRun.cron}
                 </div>
               )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => refetch()}
+                disabled={isLoading}
+              >
+                <RefreshCcw
+                  className={cn("h-3 w-3", { "animate-spin": isLoading })}
+                />
+              </Button>
             </div>
           </div>
 

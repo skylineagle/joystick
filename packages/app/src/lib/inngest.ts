@@ -1,17 +1,5 @@
-import { Inngest } from "inngest";
-import { createUrl, joystickApi } from "./api-client";
 import { urls } from "@/lib/urls";
-
-const INNGEST_BASE_URL =
-  import.meta.env.VITE_INNGEST_URL ||
-  (import.meta.env.PROD ? "/inngest" : "http://localhost:8288");
-const INNGEST_EVENT_KEY = import.meta.env.VITE_INNGEST_EVENT_KEY || "dev";
-
-export const inngest = new Inngest({
-  id: "joystick-app",
-  eventKey: INNGEST_EVENT_KEY,
-  baseUrl: INNGEST_BASE_URL,
-});
+import { createUrl, joystickApi } from "./api-client";
 
 export type InngestEvent = {
   internal_id: string;

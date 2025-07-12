@@ -12,3 +12,7 @@ export const SUPERUSER_USERNAME =
 export const PASSWORD = process.env.PASSWORD || "Aa123456";
 export const DEFAULT_API_KEY =
   process.env.JOYSTICK_API_KEY || "dev-api-key-12345";
+export const INNGEST_BASE_URL =
+  process.env.INNGEST_URL ||
+  (process.env.PROD ? "/inngest" : "http://localhost:8288");
+export const INNGEST_EVENT_KEY = process.env.INNGEST_EVENT_KEY || "dev";

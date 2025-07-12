@@ -291,8 +291,9 @@ const app = new Elysia()
           "Offline action queued successfully"
         );
 
-        return { success: true, message: "Action queued for execution", ids };
+        return { success: true, ids };
       } catch (error) {
+        console.log(error);
         enhancedLogger.error(
           {
             error,
@@ -313,6 +314,11 @@ const app = new Elysia()
       body: t.Object({
         params: t.Optional(t.Record(t.String(), t.Any())),
         ttl: t.Optional(t.Number()),
+      }),
+      response: t.Object({
+        success: t.Boolean(),
+        error: t.Optional(t.String()),
+        ids: t.Optional(t.Array(t.String())),
       }),
     }
   )
