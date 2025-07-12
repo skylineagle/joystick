@@ -13,4 +13,13 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      // Fix for React 19 readonly property error
+      treeshake: {
+        propertyReadSideEffects: false,
+        tryCatchDeoptimization: false,
+      },
+    },
+  },
 });
