@@ -102,16 +102,26 @@ export const RoiProvider = ({
 
   // Local storage handlers for ROIs
   const handleLocalRoiChange = (roi: Partial<CommittedRoiProperties>) => {
-    const updatedRois = [...localRois];
-    const existingRoiIndex = updatedRois.findIndex((r) => r.id === roi.id);
+    const existingRoiIndex = localRois.findIndex((r) => r.id === roi.id);
 
+    let updatedRois: CommittedRoiProperties[];
+    
     if (existingRoiIndex >= 0) {
-      updatedRois[existingRoiIndex] = {
-        ...updatedRois[existingRoiIndex],
-        ...roi,
-      };
+      // Update existing ROI
+      updatedRois = localRois.map((r, index) =>
+        index === existingRoiIndex
+          ? {
+              ...r,
+              ...roi,
+            }
+          : r
+      );
     } else if (roi.id) {
-      updatedRois.push(roi as CommittedRoiProperties);
+      // Add new ROI
+      updatedRois = [...localRois, roi as CommittedRoiProperties];
+    } else {
+      // No changes needed
+      return;
     }
 
     setLocalRois(updatedRois);
