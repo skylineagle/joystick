@@ -221,7 +221,7 @@ export const useParamsStore = create<ParamsState>()(
       const deviceId = get().deviceId;
       if (!deviceId) return;
       const treeValues = get().values[treeId] || {};
-      const paths = Object.keys(treeValues).map((path) => path.split("."));
+      const paths = Object.keys(treeValues).map((path) => Array.from(path.split(".")));
       await Promise.all(paths.map((path) => get().readValue(treeId, path)));
     },
   }))

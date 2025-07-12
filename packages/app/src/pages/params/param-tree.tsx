@@ -48,7 +48,7 @@ export function ParamTree({
             collectPaths(value, [...currentPath, key]);
           });
         } else {
-          childPaths.push(currentPath);
+          childPaths.push([...currentPath]);
         }
       };
       collectPaths(schema, path);
@@ -153,7 +153,7 @@ export function ParamTree({
               <ParamTree
                 key={key}
                 schema={value}
-                path={[...path, key]}
+                path={Array.from([...path, key])}
                 expanded={expanded}
                 onToggle={onToggle}
                 treeId={treeId}
