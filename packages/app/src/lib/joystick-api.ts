@@ -29,6 +29,13 @@ export type RunActionRequest = {
   log?: boolean;
 };
 
+export type RunOfflineActionRequest = {
+  deviceId: string;
+  action: string;
+  params?: Record<string, unknown>;
+  ttl?: number;
+};
+
 export async function writeParams({
   deviceId,
   path,
@@ -126,6 +133,56 @@ export async function runAction({
         : "Failed to run action";
 
     // Allow the caller to handle specific errors
+    throw new ApiError(message, {
+      status: error instanceof ApiError ? error.status : 0,
+      isNetworkError: error instanceof ApiError ? error.isNetworkError : false,
+      isTimeout: error instanceof ApiError ? error.isTimeout : false,
+    });
+  }
+}
+
+export async function runOfflineAction({
+  deviceId,
+  action,
+  params,
+  ttl,
+}: RunOfflineActionRequest): Promise<{
+  success: boolean;
+  message: string;
+  ids: string[];
+}> {
+  try {
+    const url = createUrl(
+      urls.joystick,
+      `/api/run/${deviceId}/offline/${action}`
+    );
+    const data = await joystickApi.post<{
+      success: boolean;
+      message?: string;
+      error?: string;
+      ids: string[];
+    }>(url, {
+      params,
+      ttl,
+    });
+
+    if (!data.success) {
+      throw new ApiError(data.error || "Failed to queue offline action");
+    }
+
+    return {
+      success: true,
+      message: data.message || "Action queued for execution",
+      ids: data.ids,
+    };
+  } catch (error) {
+    const message =
+      error instanceof ApiError
+        ? error.message
+        : error instanceof Error
+        ? error.message
+        : "Failed to queue offline action";
+
     throw new ApiError(message, {
       status: error instanceof ApiError ? error.status : 0,
       isNetworkError: error instanceof ApiError ? error.isNetworkError : false,

@@ -22,7 +22,10 @@ export const ModeSelector = ({ device }: ModeSelectorProps) => {
   const { action, mode, setMode, isAutomated, isLoading, isSetModePending } =
     useMode(device?.id);
   const availableModes = useMemo(
-    () => getModeOptionsFromSchema(action?.parameters ?? {}),
+    () =>
+      getModeOptionsFromSchema(
+        (action?.parameters as unknown as Record<string, unknown>) ?? {}
+      ),
     [action]
   );
   const { data: modes, isLoading: isModesLoading } = useModelConfig(device.id);

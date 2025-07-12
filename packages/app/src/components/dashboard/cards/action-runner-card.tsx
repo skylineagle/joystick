@@ -19,6 +19,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useAction } from "@/hooks/use-action";
 import { useActions } from "@/hooks/use-actions";
+import { buildZodSchema, isActionSchema } from "@/pages/actions/utils";
 import type { ActionRunnerCardConfig } from "@/types/dashboard-cards";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Play } from "lucide-react";
@@ -38,42 +39,6 @@ interface SchemaProperty {
   enum?: string[];
   default?: unknown;
   description?: string;
-}
-
-interface ActionSchema {
-  properties: Record<string, SchemaProperty>;
-  required?: string[];
-}
-
-function buildZodSchema(schema: ActionSchema): z.ZodType {
-  const properties: Record<string, z.ZodType> = {};
-
-  Object.entries(schema.properties || {}).forEach(([key, value]) => {
-    switch (value.type) {
-      case "string":
-        properties[key] = z.string();
-        if (value.enum)
-          properties[key] = z.enum(value.enum as [string, ...string[]]);
-        break;
-      case "number":
-        properties[key] = z.number();
-        break;
-      case "integer":
-        properties[key] = z.number().int();
-        break;
-      case "boolean":
-        properties[key] = z.boolean().default(false);
-        break;
-      default:
-        properties[key] = z.any();
-    }
-
-    if (!schema.required?.includes(key)) {
-      properties[key] = properties[key].optional();
-    }
-  });
-
-  return z.object(properties);
 }
 
 function renderField(schema: SchemaProperty, field: ControllerRenderProps) {
@@ -129,12 +94,6 @@ function renderField(schema: SchemaProperty, field: ControllerRenderProps) {
         </FormControl>
       );
   }
-}
-
-function isActionSchema(obj: unknown): obj is ActionSchema {
-  if (!obj || typeof obj !== "object") return false;
-  const schema = obj as Record<string, unknown>;
-  return "properties" in schema && typeof schema.properties === "object";
 }
 
 export const ActionRunnerCard = ({

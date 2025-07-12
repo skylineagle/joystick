@@ -15,7 +15,11 @@ export function useAvailableModes(modelIds: string[]) {
       );
 
       const allModes = actions
-        .map((action) => getModeOptionsFromSchema(action?.parameters ?? {}))
+        .map((action) =>
+          getModeOptionsFromSchema(
+            (action?.parameters as unknown as Record<string, unknown>) ?? {}
+          )
+        )
         .flat();
 
       // Return unique values only

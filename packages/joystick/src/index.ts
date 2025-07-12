@@ -19,6 +19,9 @@ import {
 import { $ } from "bun";
 import { Elysia, t } from "elysia";
 import { validate } from "jsonschema";
+import { inngest } from "../inngest/client";
+import { functions } from "../inngest/functions";
+import { createInngestHandler } from "../inngest/handler";
 import { enhancedLogger, setupLoggingMiddleware } from "./enhanced-logger";
 import {
   addNotificationClient,
@@ -52,6 +55,12 @@ const app = new Elysia()
         },
         security: [{ bearerAuth: [] }, { apiKey: [] }],
       },
+    })
+  )
+  .use(
+    createInngestHandler({
+      client: inngest,
+      functions,
     })
   )
   .use(createAuthPlugin(pb))
@@ -205,6 +214,112 @@ const app = new Elysia()
     },
     {
       body: t.Optional(t.Record(t.String(), t.Any())),
+    }
+  )
+  .post(
+    "/api/run/:device/offline/:action",
+    async ({ params, body, set, auth }) => {
+      try {
+        const userId = auth.userId || "system";
+        const userName = auth.user?.name || auth.user?.email || "system";
+        const userPb =
+          auth.isApiKey || auth.isInternal ? pb : await tryImpersonate(userId);
+
+        // Verify device exists
+        const result = await userPb
+          .collection("devices")
+          .getFullList<DeviceResponse>(1, {
+            filter: `id = "${params.device}"`,
+            expand: "device",
+          });
+
+        if (result.length !== 1) {
+          throw new Error(`Device ${params.device} not found`);
+        }
+
+        // Verify action exists
+        const actionResult = await userPb
+          .collection("actions")
+          .getFullList<ActionsResponse>(1, {
+            filter: `name="${params.action}"`,
+          });
+
+        if (actionResult.length !== 1) {
+          throw new Error(`Action ${params.action} not found`);
+        }
+
+        const action = actionResult[0];
+
+        // Verify run configuration exists
+        const runResult = await userPb
+          .collection("run")
+          .getFullList<RunResponse>(1, {
+            filter: `action = "${action.id}" && device = "${result[0].expand?.device.id}"`,
+          });
+
+        if (runResult.length === 0) {
+          throw new Error(
+            `Action ${params.action} not found for device ${result[0].expand?.device.name}`
+          );
+        }
+
+        // Validate parameters if needed
+        if (runResult[0].parameters) {
+          if (!body) throw new Error("Parameters are required for this action");
+          if (!validate(body.params || {}, runResult[0].parameters)) {
+            throw new Error("Invalid parameters for this action");
+          }
+        }
+
+        // Trigger Inngest function
+        const { ids } = await inngest.send({
+          name: "device/offline.action",
+          data: {
+            deviceId: params.device,
+            action: params.action,
+            params: body?.params,
+            ttl: body?.ttl,
+          },
+        });
+
+        enhancedLogger.info(
+          {
+            user: { name: userName, id: userId },
+            device: result[0],
+            action: params.action,
+          },
+          "Offline action queued successfully"
+        );
+
+        return { success: true, ids };
+      } catch (error) {
+        console.log(error);
+        enhancedLogger.error(
+          {
+            error,
+            device: params.device,
+            action: params.action,
+          },
+          "Failed to queue offline action"
+        );
+
+        set.status = 500;
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : "Unknown error",
+        };
+      }
+    },
+    {
+      body: t.Object({
+        params: t.Optional(t.Record(t.String(), t.Any())),
+        ttl: t.Optional(t.Number()),
+      }),
+      response: t.Object({
+        success: t.Boolean(),
+        error: t.Optional(t.String()),
+        ids: t.Optional(t.Array(t.String())),
+      }),
     }
   )
   .get("/api/cpsi", () => generateRandomCPSIResult())

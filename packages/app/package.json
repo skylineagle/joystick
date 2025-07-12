@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && bunx --bun vite build",
     "db:generate": "pocketbase-typegen -d ../../pocketbase/pb_data/data.db -o ./src/types/db.types.ts",
     "lint": "eslint .",
     "test": "playwright test",
@@ -129,7 +129,7 @@
     "tailwindcss": "^3.4.17",
     "typescript": "~5.7.3",
     "typescript-eslint": "^8.32.1",
-    "vite": "^6.3.5",
+    "vite": "^7.0.4",
     "vite-plugin-checker": "^0.9.3"
   },
   "module": "index.ts"

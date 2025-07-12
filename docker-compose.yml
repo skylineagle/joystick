@@ -91,10 +91,15 @@ services:
       - SWITCHER_API_URL=http://switcher:8080
       - PORT=8000
       - HOST=0.0.0.0
+      - INNGEST_EVENT_KEY=${INNGEST_EVENT_KEY:-dev}
+      - INNGEST_SIGNING_KEY=${INNGEST_SIGNING_KEY:-dev}
+      - INNGEST_SERVE_URL=http://inngest:8288
     depends_on:
       pocketbase:
         condition: service_healthy
       mediamtx:
+        condition: service_started
+      inngest:
         condition: service_started
     networks: *default-networks
     extra_hosts: *default-extra-hosts
@@ -109,6 +114,81 @@ services:
       - "traefik.http.middlewares.cors.headers.addvaryheader=true"
       - "traefik.http.routers.joystick.middlewares=joystick-strip,cors"
       - "traefik.http.services.joystick.loadbalancer.server.port=8000"
+
+  inngest:
+    image: inngest/inngest:latest
+    <<: *default-platform-restart
+    environment:
+      - INNGEST_BASE_URL=http://${HOST:-localhost}/inngest
+      - INNGEST_EVENT_KEY=${INNGEST_EVENT_KEY:-dev}
+      - INNGEST_SIGNING_KEY=${INNGEST_SIGNING_KEY:-dev}
+      - INNGEST_SERVE_PORT=8288
+      - INNGEST_SQLITE_PATH=/var/lib/inngest/inngest.db
+      - INNGEST_STATE_STORE_PATH=/var/lib/inngest/state
+      - INNGEST_LOG_LEVEL=info
+      - INNGEST_TELEMETRY_ENABLED=false
+    volumes:
+      - inngest_data:/var/lib/inngest
+    networks: *default-networks
+    extra_hosts: *default-extra-hosts
+    logging: *default-logging
+    command: "inngest start -u http://joystick:8000/api/inngest"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8288/health",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.inngest.rule=Host(${HOST:-localhost}) && PathPrefix(`/inngest`)"
+      - "traefik.http.middlewares.inngest-strip.stripprefix.prefixes=/inngest"
+      - "traefik.http.routers.inngest.middlewares=inngest-strip,cors"
+      - "traefik.http.services.inngest.loadbalancer.server.port=8288"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=*"
+      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=*"
+      - "traefik.http.middlewares.cors.headers.addvaryheader=true"
+
+  postgres:
+    image: postgres:17
+    environment:
+      - POSTGRES_DB=inngest
+      - POSTGRES_USER=inngest
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inngest -d inngest"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   panel:
     image: ghcr.io/skylineagle/joystick/panel:latest
@@ -259,3 +339,4 @@ networks:
 
 volumes:
   pb_data:
+  inngest_data: {}

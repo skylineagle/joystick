@@ -52,7 +52,9 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
     device.id,
     "set-mode"
   );
-  const availableModes = getModeOptionsFromSchema(action?.parameters ?? {});
+  const availableModes = getModeOptionsFromSchema(
+    (action?.parameters as unknown as Record<string, unknown>) ?? {}
+  );
   const [editingConfig, setEditingConfig] = useState<EditorConfig | null>(null);
   const [isJsonValid, setIsJsonValid] = useState(true);
   const [currentTab, setCurrentTab] = useState<

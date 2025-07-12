@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 const barColors = "from-primary to-primary-foreground";
 const textColors = "text-gray-700 dark:text-gray-300";

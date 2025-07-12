@@ -1,10 +1,11 @@
 # Build stage
-FROM oven/bun:1.1.43 as builder
+FROM oven/bun:latest as builder
 WORKDIR /app
 
 # Copy package files
 COPY package.json ./
-RUN bun install --frozen-lockfile
+RUN bun i --frozen-lockfile
+
 
 # Copy source code and env files
 COPY . .

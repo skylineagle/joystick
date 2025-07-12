@@ -55,6 +55,8 @@ export function Layout({ children }: LayoutProps) {
 
   const isOnCellSearchRoute = location.pathname.endsWith("/cell-search");
   const isOnGalleryRoute = location.pathname.endsWith("/gallery");
+  const isOnTasksRoute = location.pathname.endsWith("/tasks");
+
   useEffect(() => {
     let unsubscribe: () => void;
     if (!deviceId) return;
@@ -89,6 +91,7 @@ export function Layout({ children }: LayoutProps) {
   const isGalleryRouteAllowed = useIsRouteAllowed("gallery");
   const isTerminalRouteAllowed = useIsRouteAllowed("terminal");
   const isCellSearchRouteAllowed = useIsRouteAllowed("cell-search");
+  const isTaskRouteAllowed = useIsRouteAllowed("task");
   const isSystemStatusRouteAllowed = useIsPermitted("system-status");
 
   const availableNavItems = getAvailableNavItems(
@@ -101,7 +104,8 @@ export function Layout({ children }: LayoutProps) {
     !!isParamsRouteAllowed,
     !!isGalleryRouteAllowed,
     !!isTerminalRouteAllowed,
-    !!isCellSearchRouteAllowed
+    !!isCellSearchRouteAllowed,
+    !!isTaskRouteAllowed
   );
   const showSidebar = availableNavItems.length > 1;
 
@@ -153,7 +157,7 @@ export function Layout({ children }: LayoutProps) {
                   (isOnCellSearchRoute ? (
                     <CellSearchControls />
                   ) : (
-                    !isOnGalleryRoute && <Controls />
+                    !isOnGalleryRoute && !isOnTasksRoute && <Controls />
                   ))}
               </div>
             </main>

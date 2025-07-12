@@ -1,6 +1,4 @@
 ---
-description: 
-globs: 
-alwaysApply: true
+description: When working on the app, im always running all services and the frontend in the background and there is no no need to run any dev command, if needed u can try and build the app to valiate code working.
+alwaysApply: false
 ---
-When working on the app, im always running all services and the frontend in the background and there is no no need to run any type check or dev envs.

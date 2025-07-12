@@ -24,6 +24,7 @@ import {
   Settings,
   Terminal,
   Video,
+  ListTodo,
 } from "lucide-react";
 import * as React from "react";
 import { Link, useLocation, useParams } from "react-router";
@@ -46,6 +47,12 @@ const navItems = [
     icon: Send,
     path: "actions",
     description: "Execute device actions",
+  },
+  {
+    label: "Tasks",
+    icon: ListTodo,
+    path: "tasks",
+    description: "Manage offline tasks",
   },
   {
     label: "Terminal",
@@ -78,7 +85,8 @@ export const getAvailableNavItems = (
   isParamsRouteAllowed: boolean,
   isGalleryRouteAllowed: boolean,
   isTerminalRouteAllowed: boolean,
-  isCellSearchRouteAllowed: boolean
+  isCellSearchRouteAllowed: boolean,
+  isTaskRouteAllowed: boolean
 ) => {
   return navItems.filter((item) => {
     if (
@@ -99,6 +107,9 @@ export const getAvailableNavItems = (
     if (item.path === "actions" && !isActionRouteAllowed) {
       return false;
     }
+    if (item.path === "tasks" && !isTaskRouteAllowed) {
+      return false;
+    }
     if (item.path === "parameters" && !isParamsRouteAllowed) {
       return false;
     }
@@ -111,6 +122,7 @@ export const getAvailableNavItems = (
     ) {
       return false;
     }
+
     return true;
   });
 };
@@ -129,7 +141,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const isGalleryRouteAllowed = useIsRouteAllowed("gallery");
   const isTerminalRouteAllowed = useIsRouteAllowed("terminal");
   const isCellSearchRouteAllowed = useIsRouteAllowed("cell-search");
-
+  const isTaskRouteAllowed = useIsRouteAllowed("task");
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -147,7 +159,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             !!isParamsRouteAllowed,
             !!isGalleryRouteAllowed,
             !!isTerminalRouteAllowed,
-            !!isCellSearchRouteAllowed
+            !!isCellSearchRouteAllowed,
+            !!isTaskRouteAllowed
           ).map((item) => {
             const isActive = location.pathname.endsWith(item.path);
             return (

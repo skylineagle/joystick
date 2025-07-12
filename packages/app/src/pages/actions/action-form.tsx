@@ -28,6 +28,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { useAction } from "@/hooks/use-action";
+import { buildZodSchema } from "@/pages/actions/utils";
+import { ActionSchema } from "@/types/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -46,7 +48,9 @@ export function ActionForm({
   isSubmitting,
 }: ActionFormProps) {
   const { action: actionData, isLoading } = useAction(deviceId ?? "", action);
-  const zodSchema = buildZodSchema(actionData?.parameters ?? {});
+  const zodSchema = buildZodSchema(
+    actionData?.parameters ?? ({ properties: {} } as ActionSchema)
+  );
   const form = useForm<z.infer<typeof zodSchema>>({
     resolver: zodResolver(zodSchema),
   });
@@ -127,39 +131,6 @@ export function ActionForm({
       </form>
     </Form>
   );
-}
-
-function buildZodSchema(schema: Record<string, any>): z.ZodType {
-  const properties: Record<string, z.ZodType> = {};
-
-  Object.entries(schema.properties || {}).forEach(
-    ([key, value]: [string, any]) => {
-      switch (value.type) {
-        case "string":
-          properties[key] = z.string();
-          if (value.enum)
-            properties[key] = z.enum(value.enum as [string, ...string[]]);
-          break;
-        case "number":
-          properties[key] = z.number();
-          break;
-        case "integer":
-          properties[key] = z.number().int();
-          break;
-        case "boolean":
-          properties[key] = z.boolean().default(false);
-          break;
-        default:
-          properties[key] = z.any();
-      }
-
-      if (!schema.required?.includes(key)) {
-        properties[key] = properties[key].optional();
-      }
-    }
-  );
-
-  return z.object(properties);
 }
 
 function renderField(schema: any, field: any) {
