@@ -19,5 +19,8 @@
   "type": "module",
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "inngest": "^3.40.1"
+  }
 }
