@@ -24,7 +24,7 @@ export const ModeSelector = ({ device }: ModeSelectorProps) => {
   const availableModes = useMemo(
     () =>
       getModeOptionsFromSchema(
-        action?.parameters as unknown as Record<string, unknown>
+        (action?.parameters as unknown as Record<string, unknown>) ?? {}
       ),
     [action]
   );

@@ -53,7 +53,7 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
     "set-mode"
   );
   const availableModes = getModeOptionsFromSchema(
-    action?.parameters as unknown as Record<string, unknown>
+    (action?.parameters as unknown as Record<string, unknown>) ?? {}
   );
   const [editingConfig, setEditingConfig] = useState<EditorConfig | null>(null);
   const [isJsonValid, setIsJsonValid] = useState(true);
