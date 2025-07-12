@@ -47,39 +47,6 @@ interface TaskCardProps {
   className?: string;
 }
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 20, scale: 0.95 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 30,
-    },
-  },
-  completed: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      type: "spring",
-      stiffness: 400,
-      damping: 25,
-      duration: 0.6,
-    },
-  },
-  exit: {
-    opacity: 0,
-    y: -20,
-    scale: 0.95,
-    transition: {
-      duration: 0.2,
-    },
-  },
-};
-
 export const TaskCard: FC<TaskCardProps> = ({ task, className }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { task: runs } = useTask(task.id);
@@ -94,7 +61,6 @@ export const TaskCard: FC<TaskCardProps> = ({ task, className }) => {
 
   return (
     <motion.div
-      variants={cardVariants}
       initial="hidden"
       animate={isCompleted ? "completed" : "visible"}
       exit="exit"

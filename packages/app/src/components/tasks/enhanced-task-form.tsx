@@ -85,7 +85,9 @@ export function EnhancedTaskForm() {
       },
     });
 
-    queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    setTimeout(() => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    }, 1000);
 
     form.reset();
     setSelectedAction("");
@@ -262,18 +264,6 @@ export function EnhancedTaskForm() {
                             ([key, schema]) => (
                               <motion.div
                                 key={key}
-                                variants={{
-                                  hidden: { opacity: 0, x: -20 },
-                                  visible: {
-                                    opacity: 1,
-                                    x: 0,
-                                    transition: {
-                                      type: "spring",
-                                      stiffness: 400,
-                                      damping: 25,
-                                    },
-                                  },
-                                }}
                                 initial="hidden"
                                 animate="visible"
                                 transition={{ delay: 0.1 }}

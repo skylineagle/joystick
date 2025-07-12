@@ -172,6 +172,7 @@ dist
 .idea
 
 .turbo
+.turbo/cookies
 
 # Finder (MacOS) folder config
 .DS_Store

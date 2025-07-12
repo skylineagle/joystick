@@ -5,6 +5,7 @@ export function useTasks() {
   const { data, isLoading } = useQuery({
     queryKey: ["tasks"],
     queryFn: () => {
+      console.log("fetching tasks");
       return fetchInngestEvents({
         name: "device/offline.action",
       });
