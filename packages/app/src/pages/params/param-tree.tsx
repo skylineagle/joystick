@@ -45,10 +45,10 @@ export function ParamTree({
       ) => {
         if (node.type === "object") {
           Object.entries(node.properties).forEach(([key, value]) => {
-            collectPaths(value, [...currentPath, key]);
+            collectPaths(value, Array.from([...currentPath, key]));
           });
         } else {
-          childPaths.push([...currentPath]);
+          childPaths.push(Array.from([...currentPath]));
         }
       };
       collectPaths(schema, path);
@@ -149,16 +149,19 @@ export function ParamTree({
               ]
             )}
           >
-            {Object.entries(schema.properties).map(([key, value]) => (
-              <ParamTree
-                key={key}
-                schema={value}
-                path={Array.from([...path, key])}
-                expanded={expanded}
-                onToggle={onToggle}
-                treeId={treeId}
-              />
-            ))}
+            {Object.entries(schema.properties).map(([key, value]) => {
+              const newPath = Array.from([...path, key]);
+              return (
+                <ParamTree
+                  key={key}
+                  schema={value}
+                  path={newPath}
+                  expanded={expanded}
+                  onToggle={onToggle}
+                  treeId={treeId}
+                />
+              );
+            })}
           </div>
         )}
       </div>

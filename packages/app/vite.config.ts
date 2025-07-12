@@ -14,6 +14,7 @@ export default defineConfig({
     },
   },
   build: {
+    target: "es2020",
     rollupOptions: {
       output: {
         manualChunks: undefined,
@@ -21,7 +22,26 @@ export default defineConfig({
       treeshake: {
         propertyReadSideEffects: false,
         tryCatchDeoptimization: false,
+        annotations: false,
+      },
+      onwarn(warning, warn) {
+        // Suppress readonly property warnings
+        if (
+          warning.code === "CIRCULAR_DEPENDENCY" ||
+          warning.message?.includes("readonly") ||
+          warning.message?.includes("property")
+        ) {
+          return;
+        }
+        warn(warning);
       },
     },
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
+  },
+  esbuild: {
+    target: "es2020",
+    legalComments: "none",
   },
 });
