@@ -1,8 +1,6 @@
 import { useFrame } from "@react-three/fiber";
-import { useRef, useMemo } from "react";
+import { useRef } from "react";
 import * as THREE from "three";
-
-const DOUBLE_SIDE = THREE.DoubleSide;
 
 export const BoxModel = ({
   rotation = { x: 0, y: 0, z: 0 },
@@ -10,7 +8,6 @@ export const BoxModel = ({
   rotation?: { x: number; y: number; z: number };
 }) => {
   const groupRef = useRef<THREE.Group>(null);
-  const boxGeometry = useMemo(() => new THREE.BoxGeometry(1, 1, 1), []);
 
   useFrame(() => {
     if (groupRef.current) {
@@ -34,7 +31,7 @@ export const BoxModel = ({
             metalness={0.2}
             transparent
             opacity={0.7}
-            side={DOUBLE_SIDE}
+            side={THREE.DoubleSide}
           />
         </mesh>
 
@@ -47,7 +44,7 @@ export const BoxModel = ({
             metalness={0.2}
             transparent
             opacity={0.7}
-            side={DOUBLE_SIDE}
+            side={THREE.DoubleSide}
           />
         </mesh>
 
@@ -60,7 +57,7 @@ export const BoxModel = ({
             metalness={0.2}
             transparent
             opacity={0.7}
-            side={DOUBLE_SIDE}
+            side={THREE.DoubleSide}
           />
         </mesh>
 
@@ -73,7 +70,7 @@ export const BoxModel = ({
             metalness={0.2}
             transparent
             opacity={0.7}
-            side={DOUBLE_SIDE}
+            side={THREE.DoubleSide}
           />
         </mesh>
 
@@ -86,7 +83,7 @@ export const BoxModel = ({
             metalness={0.2}
             transparent
             opacity={0.7}
-            side={DOUBLE_SIDE}
+            side={THREE.DoubleSide}
           />
         </mesh>
 
@@ -99,14 +96,14 @@ export const BoxModel = ({
             metalness={0.2}
             transparent
             opacity={0.7}
-            side={DOUBLE_SIDE}
+            side={THREE.DoubleSide}
           />
         </mesh>
       </group>
 
       {/* Edges for better visibility */}
       <lineSegments>
-        <edgesGeometry args={[boxGeometry]} />
+        <edgesGeometry args={[new THREE.BoxGeometry(1, 1, 1)]} />
         <lineBasicMaterial color="#1E40AF" linewidth={1} />
       </lineSegments>
 

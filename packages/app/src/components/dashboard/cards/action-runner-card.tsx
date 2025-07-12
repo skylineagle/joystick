@@ -41,42 +41,6 @@ interface SchemaProperty {
   description?: string;
 }
 
-// interface ActionSchema {
-//   properties: Record<string, SchemaProperty>;
-//   required?: string[];
-// }
-
-// function buildZodSchema(schema: ActionSchema): z.ZodType {
-//   const properties: Record<string, z.ZodType> = {};
-
-//   Object.entries(schema.properties || {}).forEach(([key, value]) => {
-//     switch (value.type) {
-//       case "string":
-//         properties[key] = z.string();
-//         if (value.enum)
-//           properties[key] = z.enum(value.enum as [string, ...string[]]);
-//         break;
-//       case "number":
-//         properties[key] = z.number();
-//         break;
-//       case "integer":
-//         properties[key] = z.number().int();
-//         break;
-//       case "boolean":
-//         properties[key] = z.boolean().default(false);
-//         break;
-//       default:
-//         properties[key] = z.any();
-//     }
-
-//     if (!schema.required?.includes(key)) {
-//       properties[key] = properties[key].optional();
-//     }
-//   });
-
-//   return z.object(properties);
-// }
-
 function renderField(schema: SchemaProperty, field: ControllerRenderProps) {
   switch (schema.type) {
     case "string":
