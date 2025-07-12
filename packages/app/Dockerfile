@@ -20,7 +20,7 @@ ENV VITE_POCKETBASE_URL=$VITE_POCKETBASE_URL
 
 ENV NODE_ENV=production
 
-RUN bun run build
+RUN bun run build --debug
 
 # Production stage
 FROM nginx:alpine
