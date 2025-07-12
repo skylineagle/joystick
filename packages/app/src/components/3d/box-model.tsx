@@ -2,6 +2,8 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
 
+const DOUBLE_SIDE = THREE.DoubleSide;
+
 export const BoxModel = ({
   rotation = { x: 0, y: 0, z: 0 },
 }: {
@@ -31,7 +33,7 @@ export const BoxModel = ({
             metalness={0.2}
             transparent
             opacity={0.7}
-            side={THREE.DoubleSide}
+            side={DOUBLE_SIDE}
           />
         </mesh>
 
@@ -44,7 +46,7 @@ export const BoxModel = ({
             metalness={0.2}
             transparent
             opacity={0.7}
-            side={THREE.DoubleSide}
+            side={DOUBLE_SIDE}
           />
         </mesh>
 
@@ -57,7 +59,7 @@ export const BoxModel = ({
             metalness={0.2}
             transparent
             opacity={0.7}
-            side={THREE.DoubleSide}
+            side={DOUBLE_SIDE}
           />
         </mesh>
 
@@ -70,7 +72,7 @@ export const BoxModel = ({
             metalness={0.2}
             transparent
             opacity={0.7}
-            side={THREE.DoubleSide}
+            side={DOUBLE_SIDE}
           />
         </mesh>
 
@@ -83,7 +85,7 @@ export const BoxModel = ({
             metalness={0.2}
             transparent
             opacity={0.7}
-            side={THREE.DoubleSide}
+            side={DOUBLE_SIDE}
           />
         </mesh>
 
@@ -96,7 +98,7 @@ export const BoxModel = ({
             metalness={0.2}
             transparent
             opacity={0.7}
-            side={THREE.DoubleSide}
+            side={DOUBLE_SIDE}
           />
         </mesh>
       </group>
