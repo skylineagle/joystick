@@ -1,10 +1,10 @@
 # Build stage
-FROM oven/bun:1.2.18 as builder
+FROM oven/bun:latest as builder
 WORKDIR /app
 
 # Copy package files
 COPY package.json ./
-RUN bun i
+RUN bun i --frozen-lockfile
 
 
 # Copy source code and env files
@@ -20,7 +20,7 @@ ENV VITE_POCKETBASE_URL=$VITE_POCKETBASE_URL
 
 ENV NODE_ENV=production
 
-RUN bun run build --debug
+RUN bun run build
 
 # Production stage
 FROM nginx:alpine
