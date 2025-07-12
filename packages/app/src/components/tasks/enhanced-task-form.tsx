@@ -43,32 +43,6 @@ import { useForm } from "react-hook-form";
 import { useParams } from "react-router";
 import { z } from "zod";
 
-const formVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      type: "spring",
-      stiffness: 300,
-      damping: 30,
-    },
-  },
-};
-
-const fieldVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: {
-      type: "spring",
-      stiffness: 400,
-      damping: 25,
-    },
-  },
-};
-
 export function EnhancedTaskForm() {
   const { device: deviceId } = useParams();
   const { data: device } = useDevice(deviceId ?? "");
@@ -164,7 +138,22 @@ export function EnhancedTaskForm() {
   }
 
   return (
-    <motion.div variants={formVariants} initial="hidden" animate="visible">
+    <motion.div
+      variants={{
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: {
+            type: "spring",
+            stiffness: 300,
+            damping: 30,
+          },
+        },
+      }}
+      initial="hidden"
+      animate="visible"
+    >
       <Card className="relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/20 via-primary to-primary/20" />
 
@@ -184,7 +173,7 @@ export function EnhancedTaskForm() {
 
         <CardContent className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <motion.div variants={fieldVariants} className="space-y-3">
+            <motion.div className="space-y-3">
               <Label
                 htmlFor="action"
                 className="flex items-center gap-2 text-sm font-medium"
@@ -209,7 +198,7 @@ export function EnhancedTaskForm() {
               </Select>
             </motion.div>
 
-            <motion.div variants={fieldVariants} className="space-y-3">
+            <motion.div className="space-y-3">
               <Label
                 htmlFor="ttl"
                 className="flex items-center gap-2 text-sm font-medium"
@@ -255,10 +244,7 @@ export function EnhancedTaskForm() {
                 </div>
 
                 {isLoadingAction ? (
-                  <motion.div
-                    variants={fieldVariants}
-                    className="flex items-center justify-center py-8"
-                  >
+                  <motion.div className="flex items-center justify-center py-8">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />
                       Loading action details...
@@ -276,7 +262,18 @@ export function EnhancedTaskForm() {
                             ([key, schema]) => (
                               <motion.div
                                 key={key}
-                                variants={fieldVariants}
+                                variants={{
+                                  hidden: { opacity: 0, x: -20 },
+                                  visible: {
+                                    opacity: 1,
+                                    x: 0,
+                                    transition: {
+                                      type: "spring",
+                                      stiffness: 400,
+                                      damping: 25,
+                                    },
+                                  },
+                                }}
                                 initial="hidden"
                                 animate="visible"
                                 transition={{ delay: 0.1 }}
@@ -369,7 +366,6 @@ export function EnhancedTaskForm() {
                         </div>
                       ) : (
                         <motion.div
-                          variants={fieldVariants}
                           initial="hidden"
                           animate="visible"
                           className="space-y-4"
