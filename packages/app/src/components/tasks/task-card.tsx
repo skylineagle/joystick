@@ -7,7 +7,7 @@ import { InngestEvent } from "@/lib/inngest";
 import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
   ChevronDown,
   ChevronUp,

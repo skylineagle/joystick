@@ -1,11 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { TaskCard } from "./task-card";
-
-import { AnimatePresence, motion } from "framer-motion";
-import { Clock, Filter, Play } from "lucide-react";
-
 import { InngestEvent } from "@/lib/inngest";
+import { Clock, Filter, Play } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { TaskCard } from "./task-card";
 
 interface EnhancedTaskListProps {
   tasks: InngestEvent[];

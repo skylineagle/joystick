@@ -29,7 +29,7 @@ import { urls } from "@/lib/urls";
 import { buildZodSchema, isActionSchema } from "@/pages/actions/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import {
   AlertCircle,
   Clock,
