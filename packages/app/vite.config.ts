@@ -13,4 +13,35 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    target: "es2020",
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+      treeshake: {
+        propertyReadSideEffects: false,
+        tryCatchDeoptimization: false,
+        annotations: false,
+      },
+      onwarn(warning, warn) {
+        // Suppress readonly property warnings
+        if (
+          warning.code === "CIRCULAR_DEPENDENCY" ||
+          warning.message?.includes("readonly") ||
+          warning.message?.includes("property")
+        ) {
+          return;
+        }
+        warn(warning);
+      },
+    },
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
+  },
+  esbuild: {
+    target: "es2020",
+    legalComments: "none",
+  },
 });
