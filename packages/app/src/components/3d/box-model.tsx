@@ -1,5 +1,5 @@
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import * as THREE from "three";
 
 const DOUBLE_SIDE = THREE.DoubleSide;
@@ -10,6 +10,7 @@ export const BoxModel = ({
   rotation?: { x: number; y: number; z: number };
 }) => {
   const groupRef = useRef<THREE.Group>(null);
+  const boxGeometry = useMemo(() => new THREE.BoxGeometry(1, 1, 1), []);
 
   useFrame(() => {
     if (groupRef.current) {
@@ -105,7 +106,7 @@ export const BoxModel = ({
 
       {/* Edges for better visibility */}
       <lineSegments>
-        <edgesGeometry args={[new THREE.BoxGeometry(1, 1, 1)]} />
+        <edgesGeometry args={[boxGeometry]} />
         <lineBasicMaterial color="#1E40AF" linewidth={1} />
       </lineSegments>
 
