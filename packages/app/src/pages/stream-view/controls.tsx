@@ -81,16 +81,18 @@ export const Controls = () => {
                     <Skeleton className="w-36 h-10" />
                     <Skeleton className="w-6 h-6 rounded-full" />
                   </div>
-                ) : isSetModeSupported ? (
+                ) : (
                   <>
-                    <div className="flex-shrink min-w-0 max-w-[210px]">
-                      {device && <ModeSelector device={device} />}
-                    </div>
+                    {isSetModeSupported && (
+                      <div className="flex-shrink min-w-0 max-w-[210px]">
+                        {device && <ModeSelector device={device} />}
+                      </div>
+                    )}
                     <div className="flex-shrink-0">
                       <StatusIndicator status={device?.status ?? "unknown"} />
                     </div>
                   </>
-                ) : null}
+                )}
               </div>
             </motion.div>
             <motion.div

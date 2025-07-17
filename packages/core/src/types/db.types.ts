@@ -1,9 +1,9 @@
 /**
-* This file was @generated using pocketbase-typegen
-*/
+ * This file was @generated using pocketbase-typegen
+ */
 
-import type PocketBase from 'pocketbase'
-import type { RecordService } from 'pocketbase'
+import type PocketBase from "pocketbase";
+import type { RecordService } from "pocketbase";
 
 export enum Collections {
 	Authorigins = "_authOrigins",
@@ -29,143 +29,147 @@ export enum Collections {
 }
 
 // Alias types for improved usability
-export type IsoDateString = string
-export type RecordIdString = string
-export type HTMLString = string
+export type IsoDateString = string;
+export type RecordIdString = string;
+export type HTMLString = string;
 
 type ExpandType<T> = unknown extends T
-	? T extends unknown
-		? { expand?: unknown }
-		: { expand: T }
-	: { expand: T }
+  ? T extends unknown
+    ? { expand?: unknown }
+    : { expand: T }
+  : { expand: T };
 
 // System fields
 export type BaseSystemFields<T = unknown> = {
-	id: RecordIdString
-	collectionId: string
-	collectionName: Collections
-} & ExpandType<T>
+  id: RecordIdString;
+  collectionId: string;
+  collectionName: Collections;
+} & ExpandType<T>;
 
 export type AuthSystemFields<T = unknown> = {
-	email: string
-	emailVisibility: boolean
-	username: string
-	verified: boolean
-} & BaseSystemFields<T>
+  email: string;
+  emailVisibility: boolean;
+  username: string;
+  verified: boolean;
+} & BaseSystemFields<T>;
 
 // Record types for each collection
 
 export type AuthoriginsRecord = {
-	collectionRef: string
-	created?: IsoDateString
-	fingerprint: string
-	id: string
-	recordRef: string
-	updated?: IsoDateString
-}
+  collectionRef: string;
+  created?: IsoDateString;
+  fingerprint: string;
+  id: string;
+  recordRef: string;
+  updated?: IsoDateString;
+};
 
 export type ExternalauthsRecord = {
-	collectionRef: string
-	created?: IsoDateString
-	id: string
-	provider: string
-	providerId: string
-	recordRef: string
-	updated?: IsoDateString
-}
+  collectionRef: string;
+  created?: IsoDateString;
+  id: string;
+  provider: string;
+  providerId: string;
+  recordRef: string;
+  updated?: IsoDateString;
+};
 
 export type MfasRecord = {
-	collectionRef: string
-	created?: IsoDateString
-	id: string
-	method: string
-	recordRef: string
-	updated?: IsoDateString
-}
+  collectionRef: string;
+  created?: IsoDateString;
+  id: string;
+  method: string;
+  recordRef: string;
+  updated?: IsoDateString;
+};
 
 export type OtpsRecord = {
-	collectionRef: string
-	created?: IsoDateString
-	id: string
-	password: string
-	recordRef: string
-	sentTo?: string
-	updated?: IsoDateString
-}
+  collectionRef: string;
+  created?: IsoDateString;
+  id: string;
+  password: string;
+  recordRef: string;
+  sentTo?: string;
+  updated?: IsoDateString;
+};
 
 export type SuperusersRecord = {
-	created?: IsoDateString
-	email: string
-	emailVisibility?: boolean
-	id: string
-	password: string
-	tokenKey: string
-	updated?: IsoDateString
-	verified?: boolean
-}
+  created?: IsoDateString;
+  email: string;
+  emailVisibility?: boolean;
+  id: string;
+  password: string;
+  tokenKey: string;
+  updated?: IsoDateString;
+  verified?: boolean;
+};
 
 export type ActionLogsRecord<Tparameters = unknown, Tresult = unknown> = {
-	action?: RecordIdString
-	created?: IsoDateString
-	device?: RecordIdString
-	execution_time?: number
-	id: string
-	ip_address?: string
-	parameters?: null | Tparameters
-	result?: null | Tresult
-	updated?: IsoDateString
-	user?: RecordIdString
-	user_agent?: string
-}
+  action?: RecordIdString;
+  created?: IsoDateString;
+  device?: RecordIdString;
+  execution_time?: number;
+  id: string;
+  ip_address?: string;
+  parameters?: null | Tparameters;
+  result?: null | Tresult;
+  updated?: IsoDateString;
+  user?: RecordIdString;
+  user_agent?: string;
+};
 
 export type ActionsRecord = {
-	created?: IsoDateString
-	id: string
-	name: string
-	updated?: IsoDateString
-}
+  created?: IsoDateString;
+  id: string;
+  name: string;
+  updated?: IsoDateString;
+};
 
 export enum DevicesStatusOptions {
-	"off" = "off",
-	"on" = "on",
-	"waiting" = "waiting",
+  "off" = "off",
+  "on" = "on",
+  "waiting" = "waiting",
 }
-export type DevicesRecord<Tautomation = unknown, Tconfiguration = unknown, Tinformation = unknown> = {
-	allow?: RecordIdString[]
-	auto?: boolean
-	automation?: null | Tautomation
-	client?: string
-	configuration?: null | Tconfiguration
-	created?: IsoDateString
-	description?: HTMLString
-	device: RecordIdString
-	harvesting?: boolean
-	hide?: boolean
-	id: string
-	information: null | Tinformation
-	mode: string
-	name?: string
-	overlay?: string
-	status?: DevicesStatusOptions
-	updated?: IsoDateString
-}
+export type DevicesRecord<
+  Tautomation = unknown,
+  Tconfiguration = unknown,
+  Tinformation = unknown
+> = {
+  allow?: RecordIdString[];
+  auto?: boolean;
+  automation?: null | Tautomation;
+  client?: string;
+  configuration?: null | Tconfiguration;
+  created?: IsoDateString;
+  description?: HTMLString;
+  device: RecordIdString;
+  harvesting?: boolean;
+  hide?: boolean;
+  id: string;
+  information: null | Tinformation;
+  mode: string;
+  name?: string;
+  overlay?: string;
+  status?: DevicesStatusOptions;
+  updated?: IsoDateString;
+};
 
 export type GalleryRecord<Tmetadata = unknown> = {
-	created?: IsoDateString
-	device: RecordIdString
-	event?: string
-	event_id: string
-	file_size?: number
-	flagged?: boolean
-	has_thumbnail?: boolean
-	id: string
-	media_type?: string
-	metadata?: null | Tmetadata
-	name?: string
-	thumbnail?: string
-	updated?: IsoDateString
-	viewed?: RecordIdString[]
-}
+  created?: IsoDateString;
+  device: RecordIdString;
+  event?: string;
+  event_id: string;
+  file_size?: number;
+  flagged?: boolean;
+  has_thumbnail?: boolean;
+  id: string;
+  media_type?: string;
+  metadata?: null | Tmetadata;
+  name?: string;
+  thumbnail?: string;
+  updated?: IsoDateString;
+  viewed?: RecordIdString[];
+};
 
 export enum MessageDirectionOptions {
 	"from" = "from",
@@ -202,97 +206,97 @@ export type ModelsRecord<Tmessage_persets = unknown, Tmode_configs = unknown, Tp
 }
 
 export enum NotificationsTypeOptions {
-	"info" = "info",
-	"success" = "success",
-	"error" = "error",
-	"warning" = "warning",
-	"emergency" = "emergency",
+  "info" = "info",
+  "success" = "success",
+  "error" = "error",
+  "warning" = "warning",
+  "emergency" = "emergency",
 }
 export type NotificationsRecord<Tmetadata = unknown> = {
-	created?: IsoDateString
-	device?: RecordIdString
-	dismissed?: RecordIdString[]
-	id: string
-	message?: string
-	metadata?: null | Tmetadata
-	seen?: RecordIdString[]
-	title: string
-	type: NotificationsTypeOptions
-	updated?: IsoDateString
-	user?: RecordIdString
-}
+  created?: IsoDateString;
+  device?: RecordIdString;
+  dismissed?: RecordIdString[];
+  id: string;
+  message?: string;
+  metadata?: null | Tmetadata;
+  seen?: RecordIdString[];
+  title: string;
+  type: NotificationsTypeOptions;
+  updated?: IsoDateString;
+  user?: RecordIdString;
+};
 
 export type ParametersTreeRecord<Tschema = unknown> = {
-	created?: IsoDateString
-	id: string
-	model: RecordIdString
-	name: string
-	read: RecordIdString
-	schema: null | Tschema
-	updated?: IsoDateString
-	write: RecordIdString
-}
+  created?: IsoDateString;
+  id: string;
+  model: RecordIdString;
+  name: string;
+  read: RecordIdString;
+  schema: null | Tschema;
+  updated?: IsoDateString;
+  write: RecordIdString;
+};
 
 export type PermissionsRecord = {
-	created?: IsoDateString
-	id: string
-	name: string
-	updated?: IsoDateString
-	users: RecordIdString[]
-}
+  created?: IsoDateString;
+  id: string;
+  name: string;
+  updated?: IsoDateString;
+  users: RecordIdString[];
+};
 
 export type RulesRecord = {
-	action?: RecordIdString[]
-	allow?: RecordIdString[]
-	created?: IsoDateString
-	id: string
-	updated?: IsoDateString
-}
+  action?: RecordIdString[];
+  allow?: RecordIdString[];
+  created?: IsoDateString;
+  id: string;
+  updated?: IsoDateString;
+};
 
 export enum RunTargetOptions {
-	"local" = "local",
-	"device" = "device",
+  "local" = "local",
+  "device" = "device",
 }
 export type RunRecord<Tparameters = unknown> = {
-	action: RecordIdString
-	command: string
-	created?: IsoDateString
-	device: RecordIdString
-	id: string
-	parameters?: null | Tparameters
-	target: RunTargetOptions
-	updated?: IsoDateString
-}
+  action: RecordIdString;
+  command: string;
+  created?: IsoDateString;
+  device: RecordIdString;
+  id: string;
+  parameters?: null | Tparameters;
+  target: RunTargetOptions;
+  updated?: IsoDateString;
+};
 
 export enum StudioHooksEventTypeOptions {
-	"after_event_pulled" = "after_event_pulled",
-	"after_all_events_pulled" = "after_all_events_pulled",
-	"after_event_created" = "after_event_created",
-	"after_event_deleted" = "after_event_deleted",
-	"before_event_pull" = "before_event_pull",
-	"after_gallery_start" = "after_gallery_start",
-	"after_gallery_stop" = "after_gallery_stop",
+  "after_event_pulled" = "after_event_pulled",
+  "after_all_events_pulled" = "after_all_events_pulled",
+  "after_event_created" = "after_event_created",
+  "after_event_deleted" = "after_event_deleted",
+  "before_event_pull" = "before_event_pull",
+  "after_gallery_start" = "after_gallery_start",
+  "after_gallery_stop" = "after_gallery_stop",
 }
 export type StudioHooksRecord<Tparameters = unknown> = {
-	action: RecordIdString
-	created?: IsoDateString
-	device?: RecordIdString
-	enabled?: boolean
-	event_type: StudioHooksEventTypeOptions
-	hook_name: string
-	id: string
-	parameters?: null | Tparameters
-	updated?: IsoDateString
-}
+  action: RecordIdString;
+  created?: IsoDateString;
+  device?: RecordIdString;
+  enabled?: boolean;
+  event_type: StudioHooksEventTypeOptions;
+  hook_name: string;
+  id: string;
+  parameters?: null | Tparameters;
+  updated?: IsoDateString;
+};
 
 export type TemplatesRecord = {
-	created?: IsoDateString
-	id: string
-	model?: RecordIdString[]
-	name: string
-	updated?: IsoDateString
-	value?: string
-}
+  created?: IsoDateString;
+  id: string;
+  model?: RecordIdString[];
+  name: string;
+  updated?: IsoDateString;
+  value?: string;
+};
 
 export enum TerminalSessionsSessionStatusOptions {
 	"active" = "active",
@@ -312,17 +316,17 @@ export type TerminalSessionsRecord<Tterminal_data = unknown> = {
 }
 
 export type UsersRecord = {
-	avatar?: string
-	created?: IsoDateString
-	email: string
-	emailVisibility?: boolean
-	id: string
-	name?: string
-	password: string
-	tokenKey: string
-	updated?: IsoDateString
-	verified?: boolean
-}
+  avatar?: string;
+  created?: IsoDateString;
+  email: string;
+  emailVisibility?: boolean;
+  id: string;
+  name?: string;
+  password: string;
+  tokenKey: string;
+  updated?: IsoDateString;
+  verified?: boolean;
+};
 
 // Response types include system fields and match responses from the PocketBase API
 export type AuthoriginsResponse<Texpand = unknown> = Required<AuthoriginsRecord> & BaseSystemFields<Texpand>

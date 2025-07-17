@@ -13,6 +13,7 @@ import {
 import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 import { useIsCellSearchSupported } from "@/hooks/use-support-cell-search";
+import { useIsAudioSupported } from "@/hooks/use-support-audio";
 import { useIsMediaSupported } from "@/hooks/use-support-media";
 import { useIsParamsSupported } from "@/hooks/use-support-params";
 import { useIsTerminalSupported } from "@/hooks/use-support-terminal";
@@ -20,6 +21,7 @@ import {
   ArrowLeft,
   Image,
   MessageCircle,
+  Music,
   Radio,
   Send,
   Settings,
@@ -35,6 +37,12 @@ const navItems = [
     icon: Video,
     path: "stream",
     description: "Live video stream and controls",
+  },
+  {
+    label: "Audio",
+    icon: Music,
+    path: "audio",
+    description: "Live audio stream and visualization",
   },
   {
     label: "Parameters",
@@ -79,8 +87,10 @@ export const getAvailableNavItems = (
   isParamsSupported: boolean,
   isTerminalSupported: boolean,
   isMediaSupported: boolean,
+  isAudioSupported: boolean,
   isCellSearchSupported: boolean,
   isMediaRouteAllowed: boolean,
+  isAudioRouteAllowed: boolean,
   isActionRouteAllowed: boolean,
   isParamsRouteAllowed: boolean,
   isGalleryRouteAllowed: boolean,
@@ -101,7 +111,13 @@ export const getAvailableNavItems = (
     ) {
       return false;
     }
-    if (item.path === "stream" && (!isMediaSupported || !isMediaRouteAllowed)) {
+    if (
+      item.path === "stream" &&
+      (!isMediaSupported || !isMediaRouteAllowed || isAudioRouteAllowed)
+    ) {
+      return false;
+    }
+    if (item.path === "audio" && (!isAudioSupported || !isAudioRouteAllowed)) {
       return false;
     }
     if (item.path === "actions" && !isActionRouteAllowed) {
@@ -132,9 +148,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const isParamsSupported = useIsParamsSupported(deviceId!);
   const isTerminalSupported = useIsTerminalSupported(deviceId!);
   const isMediaSupported = useIsMediaSupported(deviceId!);
+  const isAudioSupported = useIsAudioSupported(deviceId!);
   const isCellSearchSupported = useIsCellSearchSupported(deviceId!);
   const isRecentEventPermitted = useIsPermitted("recent-events");
   const isMediaRouteAllowed = useIsRouteAllowed("media");
+  const isAudioRouteAllowed = useIsRouteAllowed("audio");
   const isActionRouteAllowed = useIsRouteAllowed("action");
   const isParamsRouteAllowed = useIsRouteAllowed("parameters");
   const isGalleryRouteAllowed = useIsRouteAllowed("gallery");
@@ -153,8 +171,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             !!isParamsSupported,
             !!isTerminalSupported,
             !!isMediaSupported,
+            !!isAudioSupported,
             !!isCellSearchSupported,
             !!isMediaRouteAllowed,
+            !!isAudioRouteAllowed,
             !!isActionRouteAllowed,
             !!isParamsRouteAllowed,
             !!isGalleryRouteAllowed,
