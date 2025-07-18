@@ -16,7 +16,10 @@ export const useUnreadMessages = (deviceId?: string) => {
     const loadMessages = async () => {
       try {
         const unread = await pb.collection("message").getFullList({
-          filter: `device = "${deviceId}" && seen ?!~ "${user.id}"`,
+          filter: pb.filter("device = {:deviceId} && seen ?!~ {:userId}", {
+            deviceId,
+            userId: user.id,
+          }),
         });
 
         setUnreadMessageCount(unread.length);
@@ -31,12 +34,9 @@ export const useUnreadMessages = (deviceId?: string) => {
     pb.collection("message").subscribe(
       "*",
       (e) => {
-        console.log(e);
         if (e.action === "create") {
-          console.log("create");
           setUnreadMessageCount((prev) => prev + 1);
         } else if (e.action === "update") {
-          console.log(e.record.seen);
           if (e.record.seen?.includes(user.id)) {
             setUnreadMessageCount((prev) => Math.max(0, prev - 1));
           }
