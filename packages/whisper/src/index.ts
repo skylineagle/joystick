@@ -125,11 +125,11 @@ const app = new Elysia()
         }
 
         try {
-          // const result = await apiClient.send({
-          //   phoneNumbers: [activePhone],
-          //   message,
-          // });
-          const result = { state: "yay" };
+          const result = await apiClient.send({
+            phoneNumbers: [activePhone],
+            message,
+          });
+
           if (result.state === "Failed") {
             throw new Error("Failed to send SMS");
           }
