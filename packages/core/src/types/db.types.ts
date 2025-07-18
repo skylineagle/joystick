@@ -17,6 +17,7 @@ export enum Collections {
 	Devices = "devices",
 	Gallery = "gallery",
 	Insights = "insights",
+	Message = "message",
 	Models = "models",
 	MonitorExecutions = "monitor_executions",
 	Monitors = "monitors",
@@ -215,6 +216,22 @@ export type InsightsRecord<Tconfig = unknown> = {
 	updated?: IsoDateString
 }
 
+export enum MessageDirectionOptions {
+	"from" = "from",
+	"to" = "to",
+}
+export type MessageRecord = {
+	created?: IsoDateString
+	device: RecordIdString
+	direction: MessageDirectionOptions
+	id: string
+	message: HTMLString
+	phone?: number
+	seen?: RecordIdString[]
+	updated?: IsoDateString
+	user?: RecordIdString
+}
+
 export enum ModelsStreamOptions {
 	"mediamtx" = "mediamtx",
 	"ws" = "ws",
@@ -223,6 +240,7 @@ export enum ModelsStreamOptions {
 export type ModelsRecord<Tmode_configs = unknown, Tparams = unknown, Tstream_quality = unknown> = {
 	created?: IsoDateString
 	id: string
+	isAudio?: boolean
 	mode_configs?: null | Tmode_configs
 	name: string
 	params: null | Tparams
@@ -379,6 +397,7 @@ export type DashboardsResponse<Tlayout = unknown, Texpand = unknown> = Required<
 export type DevicesResponse<Tautomation = unknown, Tconfiguration = unknown, Tinformation = unknown, Texpand = unknown> = Required<DevicesRecord<Tautomation, Tconfiguration, Tinformation>> & BaseSystemFields<Texpand>
 export type GalleryResponse<Tmetadata = unknown, Texpand = unknown> = Required<GalleryRecord<Tmetadata>> & BaseSystemFields<Texpand>
 export type InsightsResponse<Tconfig = unknown, Texpand = unknown> = Required<InsightsRecord<Tconfig>> & BaseSystemFields<Texpand>
+export type MessageResponse<Texpand = unknown> = Required<MessageRecord> & BaseSystemFields<Texpand>
 export type ModelsResponse<Tmode_configs = unknown, Tparams = unknown, Tstream_quality = unknown, Texpand = unknown> = Required<ModelsRecord<Tmode_configs, Tparams, Tstream_quality>> & BaseSystemFields<Texpand>
 export type MonitorExecutionsResponse<Tparameters = unknown, Tresult = unknown, Texpand = unknown> = Required<MonitorExecutionsRecord<Tparameters, Tresult>> & BaseSystemFields<Texpand>
 export type MonitorsResponse<Tparameters = unknown, Texpand = unknown> = Required<MonitorsRecord<Tparameters>> & BaseSystemFields<Texpand>
@@ -405,6 +424,7 @@ export type CollectionRecords = {
 	devices: DevicesRecord
 	gallery: GalleryRecord
 	insights: InsightsRecord
+	message: MessageRecord
 	models: ModelsRecord
 	monitor_executions: MonitorExecutionsRecord
 	monitors: MonitorsRecord
@@ -430,6 +450,7 @@ export type CollectionResponses = {
 	devices: DevicesResponse
 	gallery: GalleryResponse
 	insights: InsightsResponse
+	message: MessageResponse
 	models: ModelsResponse
 	monitor_executions: MonitorExecutionsResponse
 	monitors: MonitorsResponse
@@ -458,6 +479,7 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: 'devices'): RecordService<DevicesResponse>
 	collection(idOrName: 'gallery'): RecordService<GalleryResponse>
 	collection(idOrName: 'insights'): RecordService<InsightsResponse>
+	collection(idOrName: 'message'): RecordService<MessageResponse>
 	collection(idOrName: 'models'): RecordService<ModelsResponse>
 	collection(idOrName: 'monitor_executions'): RecordService<MonitorExecutionsResponse>
 	collection(idOrName: 'monitors'): RecordService<MonitorsResponse>

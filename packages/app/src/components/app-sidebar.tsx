@@ -12,13 +12,14 @@ import {
 } from "@/components/ui/sidebar";
 import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
+import { useIsCellSearchSupported } from "@/hooks/use-support-cell-search";
 import { useIsMediaSupported } from "@/hooks/use-support-media";
 import { useIsParamsSupported } from "@/hooks/use-support-params";
 import { useIsTerminalSupported } from "@/hooks/use-support-terminal";
-import { useIsCellSearchSupported } from "@/hooks/use-support-cell-search";
 import {
   ArrowLeft,
   Image,
+  MessageCircle,
   Radio,
   Send,
   Settings,
@@ -60,6 +61,12 @@ const navItems = [
     description: "View and manage device events",
   },
   {
+    label: "Messages",
+    icon: MessageCircle,
+    path: "messages",
+    description: "Send and receive messages",
+  },
+  {
     label: "What the cell",
     icon: Radio,
     path: "cell-search",
@@ -78,7 +85,8 @@ export const getAvailableNavItems = (
   isParamsRouteAllowed: boolean,
   isGalleryRouteAllowed: boolean,
   isTerminalRouteAllowed: boolean,
-  isCellSearchRouteAllowed: boolean
+  isCellSearchRouteAllowed: boolean,
+  isMessageRouteAllowed: boolean
 ) => {
   return navItems.filter((item) => {
     if (
@@ -111,6 +119,9 @@ export const getAvailableNavItems = (
     ) {
       return false;
     }
+    if (item.path === "messages" && !isMessageRouteAllowed) {
+      return false;
+    }
     return true;
   });
 };
@@ -129,6 +140,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const isGalleryRouteAllowed = useIsRouteAllowed("gallery");
   const isTerminalRouteAllowed = useIsRouteAllowed("terminal");
   const isCellSearchRouteAllowed = useIsRouteAllowed("cell-search");
+  const isMessageRouteAllowed = useIsRouteAllowed("message");
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -147,9 +159,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             !!isParamsRouteAllowed,
             !!isGalleryRouteAllowed,
             !!isTerminalRouteAllowed,
-            !!isCellSearchRouteAllowed
+            !!isCellSearchRouteAllowed,
+            !!isMessageRouteAllowed
           ).map((item) => {
             const isActive = location.pathname.endsWith(item.path);
+
             return (
               <SidebarMenuItem key={item.path}>
                 <SidebarMenuButton
@@ -159,9 +173,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 >
                   <Link
                     to={`/${deviceId}/${item.path}`}
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-2 relative"
                   >
-                    <item.icon className="h-4 w-4" />
+                    <div className="relative">
+                      <item.icon className="h-4 w-4" />
+                    </div>
                     <span>{item.label}</span>
                   </Link>
                 </SidebarMenuButton>

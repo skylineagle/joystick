@@ -4,12 +4,11 @@ import { swagger } from "@elysiajs/swagger";
 import type { DeviceResponse } from "@joystick/core";
 import { createAuthPlugin, getActiveDeviceConnection } from "@joystick/core";
 import Client from "android-sms-gateway";
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { logger } from "./logger";
 import type {
   FetchClient,
   PendingSmsMessage,
-  SmsMessage,
   SmsResponse,
   WebhookEvent,
 } from "./types";
@@ -90,115 +89,131 @@ const app = new Elysia()
       "Incoming request"
     );
   })
-  .post("/api/:device/send-sms", async ({ params, body, set, query }) => {
-    try {
-      const { message } = body as SmsMessage;
-
-      const device = await pb
-        .collection("devices")
-        .getOne<DeviceResponse>(params.device);
-
-      if (!device) {
-        return {
-          success: false,
-          available: false,
-          error: "Device not found",
-        };
-      }
-
-      const { phone: activePhone } = getActiveDeviceConnection(
-        device.information
-      );
-
-      if (!activePhone) {
-        set.status = 400;
-        return {
-          success: false,
-          error: "Device does not have an active phone number",
-        };
-      }
-
-      if (!message) {
-        set.status = 400;
-        return { error: "Message is required" };
-      }
-
+  .post(
+    "/api/:device/send-sms",
+    async ({ params, body, set, query, auth }) => {
       try {
-        // Send the SMS
-        const result = await apiClient.send({
-          phoneNumbers: [activePhone],
-          message,
-        });
-        if (result.state === "Failed") {
-          throw new Error("Failed to send SMS");
+        const { message } = body;
+
+        const device = await pb
+          .collection("devices")
+          .getOne<DeviceResponse>(params.device);
+
+        if (!device) {
+          return {
+            success: false,
+            available: false,
+            error: "Device not found",
+          };
         }
 
-        if ((query?.["response"] ?? "true") === "false") {
-          return;
-        }
-
-        const phoneKey = activePhone;
-
-        const responsePromise = new Promise<SmsResponse[]>(
-          (resolve, reject) => {
-            const createTimeout = (isInitial = false) => {
-              return setTimeout(
-                () => {
-                  const pendingMessage = pendingSmsMessages.get(phoneKey);
-                  if (pendingMessage) {
-                    pendingSmsMessages.delete(phoneKey);
-                    if (pendingMessage.responses.length > 0) {
-                      pendingMessage.finalResolve(pendingMessage.responses);
-                    } else {
-                      reject(new Error("SMS response timeout"));
-                    }
-                  }
-                },
-                isInitial ? 80000 : 5000
-              ); // 80 seconds for initial timeout, 5 seconds for subsequent timeouts
-            };
-
-            pendingSmsMessages.set(phoneKey, {
-              resolve: (value: SmsResponse) => {
-                const pendingMessage = pendingSmsMessages.get(phoneKey);
-                if (pendingMessage) {
-                  clearTimeout(pendingMessage.timeout);
-                  pendingMessage.responses.push(value);
-                  pendingMessage.timeout = createTimeout(false);
-                }
-              },
-              reject,
-              timeout: createTimeout(true), // Initial timeout
-              responses: [],
-              finalResolve: resolve,
-            });
-          }
+        const { phone: activePhone } = getActiveDeviceConnection(
+          device.information
         );
 
-        const responses = await responsePromise;
-        return responses?.map((response) => response.message).join("\n");
-      } catch (error: unknown) {
-        set.status = 500;
-        return {
-          error: `Failed to send SMS: ${
-            error instanceof Error ? error.message : String(error)
-          }`,
-        };
-      }
-    } catch (authError) {
-      if (
-        authError instanceof Error &&
-        (authError.message.includes("Authentication") ||
-          authError.message.includes("permissions"))
-      ) {
-        set.status = authError.message.includes("permissions") ? 403 : 401;
-        return { success: false, error: authError.message };
-      }
-      throw authError;
-    }
-  })
+        if (!activePhone) {
+          set.status = 400;
+          return {
+            success: false,
+            error: "Device does not have an active phone number",
+          };
+        }
 
-  .post("/api/receive-sms", ({ body, set }) => {
+        if (!message) {
+          set.status = 400;
+          return { error: "Message is required" };
+        }
+
+        try {
+          const result = await apiClient.send({
+            phoneNumbers: [activePhone],
+            message,
+          });
+
+          if (result.state === "Failed") {
+            throw new Error("Failed to send SMS");
+          }
+
+          await pb.collection("message").create({
+            device: params.device,
+            direction: "to",
+            message,
+            phone: activePhone,
+            user: auth.userId,
+          });
+
+          if ((query?.["response"] ?? "true") === "false") {
+            return;
+          }
+
+          const phoneKey = activePhone;
+
+          const responsePromise = new Promise<SmsResponse[]>(
+            (resolve, reject) => {
+              const createTimeout = (isInitial = false) => {
+                return setTimeout(
+                  () => {
+                    const pendingMessage = pendingSmsMessages.get(phoneKey);
+                    if (pendingMessage) {
+                      pendingSmsMessages.delete(phoneKey);
+                      if (pendingMessage.responses.length > 0) {
+                        pendingMessage.finalResolve(pendingMessage.responses);
+                      } else {
+                        reject(new Error("SMS response timeout"));
+                      }
+                    }
+                  },
+                  isInitial ? 80000 : 5000
+                );
+              };
+
+              pendingSmsMessages.set(phoneKey, {
+                resolve: (value: SmsResponse) => {
+                  const pendingMessage = pendingSmsMessages.get(phoneKey);
+                  if (pendingMessage) {
+                    clearTimeout(pendingMessage.timeout);
+                    pendingMessage.responses.push(value);
+                    pendingMessage.timeout = createTimeout(false);
+                  }
+                },
+                reject,
+                timeout: createTimeout(true),
+                responses: [],
+                finalResolve: resolve,
+              });
+            }
+          );
+
+          const responses = await responsePromise;
+          return responses?.map((response) => response.message).join("\n");
+        } catch (error: unknown) {
+          set.status = 500;
+          return {
+            error: `Failed to send SMS: ${
+              error instanceof Error ? error.message : String(error)
+            }`,
+          };
+        }
+      } catch (authError) {
+        if (
+          authError instanceof Error &&
+          (authError.message.includes("Authentication") ||
+            authError.message.includes("permissions"))
+        ) {
+          set.status = authError.message.includes("permissions") ? 403 : 401;
+          return { success: false, error: authError.message };
+        }
+        throw authError;
+      }
+    },
+    {
+      body: t.Object({
+        message: t.String(),
+      }),
+    }
+  )
+
+  .post("/api/receive-sms", async ({ body, set }) => {
     const { event, id, status, payload } = body as WebhookEvent;
 
     if (event === "sms:received" && payload?.phoneNumber) {
@@ -212,12 +227,37 @@ const app = new Elysia()
           timestamp: Date.now(),
         };
 
-        // Call the resolve function which will handle adding the response and resetting the timeout
         pendingMessage.resolve(response);
-
         set.status = 200;
-        return { success: true };
       }
+
+      let deviceId;
+      try {
+        const devices = await pb.collection("devices").getFullList({
+          filter: `information.phone='${payload.phoneNumber}' || information.secondSlotPhone='${payload.phoneNumber}'`,
+        });
+
+        const activeDevice = devices.find((device) => {
+          const { phone } = getActiveDeviceConnection(device.information);
+
+          return phone === payload.phoneNumber;
+        });
+        logger.debug(activeDevice);
+
+        if (activeDevice && activeDevice.id) {
+          deviceId = activeDevice.id;
+        }
+        logger.debug(deviceId);
+
+        await pb.collection("message").create({
+          device: deviceId,
+          direction: "from",
+          message: payload.message,
+          phone: payload.phoneNumber,
+        });
+      } catch {}
+
+      return { success: true };
     }
 
     set.status = 200;
