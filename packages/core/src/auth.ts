@@ -76,6 +76,7 @@ export const createAuthPlugin = (
           isSuperuser: false,
         };
 
+        const userHeader = headers["x-user"] || headers["X-User"];
         const apiKeyHeader = headers["x-api-key"] || headers["X-API-Key"];
         const tokenQuery = query.token as string;
         const { id: systemUserId } = await pb
@@ -84,13 +85,13 @@ export const createAuthPlugin = (
 
         if (isInternalRequest(headers)) {
           authContext.isInternal = true;
-          authContext.userId = systemUserId;
+          authContext.userId = userHeader || systemUserId;
           return { auth: authContext };
         }
 
         if (apiKeyHeader === DEFAULT_API_KEY) {
           authContext.isApiKey = true;
-          authContext.userId = systemUserId;
+          authContext.userId = userHeader || systemUserId;
           return { auth: authContext };
         }
 

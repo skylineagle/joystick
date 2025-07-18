@@ -69,6 +69,12 @@ const NotificationsHistoryPage = lazy(() =>
   }))
 );
 
+const MessagePage = lazy(() =>
+  import("@/pages/messages/messages-page").then((module) => ({
+    default: module.MessagesPage,
+  }))
+);
+
 // Add DashboardPage to lazy loaded components
 const DashboardPage = lazy(() =>
   import("@/pages/dashboard/dashboard-page").then((module) => ({
@@ -291,6 +297,21 @@ function AnimatedRoutes() {
             </Layout>
           }
         />
+        <Route
+          path="messages"
+          element={
+            <Layout>
+              <Suspense fallback={<LoadingFallback />}>
+                <ErrorBoundary>
+                  <PageTransition>
+                    <MessagePage />
+                  </PageTransition>
+                </ErrorBoundary>
+              </Suspense>
+            </Layout>
+          }
+        />
+
         <Route
           path="params"
           element={

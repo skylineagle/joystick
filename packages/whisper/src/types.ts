@@ -12,11 +12,6 @@ export interface FetchClient {
   delete: (url: string, headers?: Record<string, string>) => Promise<any>;
 }
 
-export interface SmsMessage {
-  phoneNumbers: string[];
-  message: string;
-}
-
 export interface SmsResponse {
   id: string;
   status: string;

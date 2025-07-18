@@ -140,6 +140,7 @@ const app = new Elysia()
           device: params.device,
           mediamtx: STREAM_API_URL,
           switcher: SWITCHER_API_URL,
+          userId: auth.userId,
           ...device.information,
         };
         enhancedLogger.info(
@@ -157,6 +158,8 @@ const app = new Elysia()
           }
           return acc;
         }, run.command);
+
+        enhancedLogger.warn(command);
 
         const output =
           run.target === RunTargetOptions.device
