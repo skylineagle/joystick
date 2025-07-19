@@ -898,7 +898,6 @@ export function TerminalPage() {
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-2">
-          <h1 className="text-lg font-semibold">Terminal</h1>
           <div className="flex items-center gap-2">
             <div
               className={cn(
