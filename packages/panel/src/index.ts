@@ -147,7 +147,9 @@ const cleanupSession = async (sessionId: string) => {
     try {
       const dbSession = await pb
         .collection("terminal_sessions")
-        .getFirstListItem(`session_id = "${sessionId}"`);
+        .getFirstListItem(
+          pb.filter("session_id = {:sessionId}", { sessionId })
+        );
       if (dbSession) {
         await pb.collection("terminal_sessions").update(dbSession.id, {
           session_status: "terminated",
