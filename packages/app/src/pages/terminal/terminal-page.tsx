@@ -9,7 +9,7 @@ import { useAuthStore } from "@/lib/auth";
 import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 import { toast } from "@/utils/toast";
-import { RefreshCw, Settings, X } from "lucide-react";
+import { Play, RefreshCw, Settings, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { Terminal } from "xterm";
@@ -75,7 +75,7 @@ export function TerminalPage() {
   const commandBufferRef = useRef<string>("");
   const matrixIntervalRef = useRef<number | null>(null);
   const snakeGameIntervalRef = useRef<number | null>(null);
-  const [isTerminalLoading, setIsTerminalLoading] = useState(true);
+  const [isTerminalLoading, setIsTerminalLoading] = useState(false);
   const isMountedRef = useRef(true);
   const isTerminalRouteAllowed = useIsRouteAllowed("terminal");
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -83,7 +83,7 @@ export function TerminalPage() {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [sessionStatus, setSessionStatus] = useState<
     "connecting" | "connected" | "disconnected" | "reconnecting"
-  >("connecting");
+  >("disconnected");
   const [showSessions, setShowSessions] = useState(false);
   const hasInitializedRef = useRef(false);
 
@@ -143,7 +143,6 @@ export function TerminalPage() {
     cleanupExistingConnection();
 
     setIsTerminalLoading(true);
-    setIsRefreshing(false);
     setSessionStatus("connecting");
 
     const terminal = new Terminal({
@@ -175,8 +174,21 @@ export function TerminalPage() {
     const ws = new WebSocket(`${urls.panel}/terminal?token=${token}`);
     wsRef.current = ws;
 
+    const connectionTimeout = setTimeout(() => {
+      if (ws.readyState === WebSocket.CONNECTING) {
+        ws.close();
+        setSessionStatus("disconnected");
+        setIsTerminalLoading(false);
+        setIsRefreshing(false);
+        toast.error({ message: "Connection timeout. Please try again." });
+      }
+    }, 10000);
+
     ws.onopen = () => {
       if (!isMountedRef.current) return;
+
+      clearTimeout(connectionTimeout);
+      console.log("WebSocket opened, attempting to connect/reconnect");
 
       const storedSessionId = getStoredSessionId();
 
@@ -209,18 +221,22 @@ export function TerminalPage() {
           storeSessionId(data.sessionId);
           setSessionStatus("connected");
           setIsTerminalLoading(false);
+          setIsRefreshing(false);
           toast.success({ message: "Terminal session created" });
         } else if (data.type === "session_restored") {
+          console.log("Session restored successfully");
           setCurrentSessionId(data.sessionId);
           storeSessionId(data.sessionId);
           setSessionStatus("connected");
           setIsTerminalLoading(false);
+          setIsRefreshing(false);
           toast.success({ message: "Terminal session restored" });
         } else if (data.type === "session_not_found") {
           clearStoredSessionId();
           setCurrentSessionId(null);
           setSessionStatus("disconnected");
           setIsTerminalLoading(false);
+          setIsRefreshing(false);
           toast.info({ message: "Session not found, creating new session" });
 
           const connectMessage = {
@@ -233,6 +249,7 @@ export function TerminalPage() {
           clearStoredSessionId();
           setSessionStatus("disconnected");
           setIsTerminalLoading(false);
+          setIsRefreshing(false);
           toast.info({ message: "Terminal session terminated" });
         } else if (data.type === "terminal_data") {
           terminal.write(data.data);
@@ -246,23 +263,26 @@ export function TerminalPage() {
 
     ws.onerror = (error) => {
       if (!isMountedRef.current) return;
+      clearTimeout(connectionTimeout);
       console.error("Terminal WebSocket error:", error);
-      terminal.write(
-        "\r\n\x1b[31mError: WebSocket connection failed. Please try again.\x1b[0m\r\n"
-      );
       setSessionStatus("disconnected");
       setIsTerminalLoading(false);
+      setIsRefreshing(false);
       hasInitializedRef.current = false;
     };
 
     ws.onclose = () => {
       if (!isMountedRef.current) return;
-      terminal.write(
-        "\r\n\x1b[33mConnection closed. Click the refresh button to reconnect.\x1b[0m\r\n"
-      );
+      clearTimeout(connectionTimeout);
       setSessionStatus("disconnected");
       setIsTerminalLoading(false);
+      setIsRefreshing(false);
       hasInitializedRef.current = false;
+
+      if (terminalInstance.current) {
+        terminalInstance.current.dispose();
+        terminalInstance.current = null;
+      }
     };
 
     const runMatrixEffect = () => {
@@ -660,41 +680,100 @@ export function TerminalPage() {
     token,
   ]);
 
-  const handleRefresh = useCallback(() => {
-    setIsRefreshing(true);
-    toast.info({ message: "Reconnecting terminal..." });
-    hasInitializedRef.current = false;
+  const handleConnect = useCallback(() => {
+    if (isTerminalLoading) return;
+
+    setCurrentSessionId(null);
+    setSessionStatus("connecting");
+    setIsTerminalLoading(true);
 
     setTimeout(() => {
+      hasInitializedRef.current = false;
       initializeTerminal();
     }, 100);
-  }, []);
+  }, [initializeTerminal, isTerminalLoading]);
+
+  const handleRefresh = useCallback(() => {
+    if (isRefreshing || isTerminalLoading) return;
+
+    setIsRefreshing(true);
+    toast.info({ message: "Reconnecting terminal..." });
+
+    const storedSessionId = getStoredSessionId();
+    if (storedSessionId) {
+      setCurrentSessionId(storedSessionId);
+      setSessionStatus("reconnecting");
+    } else {
+      setCurrentSessionId(null);
+      setSessionStatus("connecting");
+    }
+
+    setTimeout(() => {
+      hasInitializedRef.current = false;
+      initializeTerminal();
+    }, 100);
+  }, [initializeTerminal, isRefreshing, isTerminalLoading]);
+
+  useEffect(() => {
+    if (isRefreshing) {
+      const timeoutId = setTimeout(() => {
+        console.log("Refresh timeout - resetting state");
+        setIsRefreshing(false);
+        setSessionStatus("disconnected");
+        setIsTerminalLoading(false);
+        toast.error({ message: "Connection timeout. Please try again." });
+      }, 15000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isRefreshing]);
 
   const handleDisconnect = useCallback(() => {
     const sessionId = getStoredSessionId();
     if (wsRef.current && sessionId) {
-      wsRef.current.send(
-        JSON.stringify({
-          type: "disconnect",
-          sessionId: sessionId,
-        })
-      );
-      clearStoredSessionId();
-      setCurrentSessionId(null);
-      setSessionStatus("disconnected");
-      hasInitializedRef.current = false;
+      try {
+        wsRef.current.send(
+          JSON.stringify({
+            type: "disconnect",
+            sessionId: sessionId,
+          })
+        );
+      } catch (error) {
+        console.error("Failed to send disconnect message:", error);
+      }
     }
-  }, []);
 
-  const handleReconnect = useCallback((sessionId: string) => {
-    setCurrentSessionId(sessionId);
-    setSessionStatus("reconnecting");
+    clearStoredSessionId();
+    setCurrentSessionId(null);
+    setSessionStatus("disconnected");
+    setIsTerminalLoading(false);
     hasInitializedRef.current = false;
 
-    setTimeout(() => {
-      initializeTerminal();
-    }, 100);
+    if (terminalInstance.current) {
+      terminalInstance.current.dispose();
+      terminalInstance.current = null;
+    }
+
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+
+    toast.info({ message: "Terminal session disconnected" });
   }, []);
+
+  const handleReconnect = useCallback(
+    (sessionId: string) => {
+      setCurrentSessionId(sessionId);
+      setSessionStatus("reconnecting");
+      hasInitializedRef.current = false;
+
+      setTimeout(() => {
+        initializeTerminal();
+      }, 100);
+    },
+    [initializeTerminal]
+  );
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -707,7 +786,7 @@ export function TerminalPage() {
     }
 
     setTimeout(() => {
-      if (!hasInitializedRef.current && !wsRef.current) {
+      if (!hasInitializedRef.current && !wsRef.current && storedSessionId) {
         initializeTerminal();
         hasInitializedRef.current = true;
       }
@@ -843,26 +922,45 @@ export function TerminalPage() {
           >
             <Settings className="h-4 w-4" />
           </Button>
-          {getStoredSessionId() && (
+          {sessionStatus === "connected" && getStoredSessionId() && (
             <Button
               size="sm"
               variant="outline"
               onClick={handleDisconnect}
-              disabled={sessionStatus === "disconnected"}
+              title="Disconnect terminal"
             >
               <X className="h-4 w-4" />
             </Button>
           )}
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleRefresh}
-            disabled={isTerminalLoading || isRefreshing}
-          >
-            <RefreshCw
-              className={cn("h-4 w-4", isRefreshing && "animate-spin")}
-            />
-          </Button>
+          {(sessionStatus === "connecting" ||
+            sessionStatus === "reconnecting") && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleRefresh}
+              disabled={isTerminalLoading || isRefreshing}
+              title="Refresh connection"
+            >
+              <RefreshCw
+                className={cn(
+                  "h-4 w-4",
+                  (isRefreshing || sessionStatus === "reconnecting") &&
+                    "animate-spin"
+                )}
+              />
+            </Button>
+          )}
+          {sessionStatus === "disconnected" && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleConnect}
+              disabled={isTerminalLoading}
+              title="Connect to terminal"
+            >
+              <Play className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -876,21 +974,9 @@ export function TerminalPage() {
             />
           </div>
         )}
-        <div className="absolute top-2 right-2 z-20">
-          <Button
-            size="sm"
-            variant="ghost"
-            className="bg-background/80 hover:bg-background/60"
-            onClick={handleRefresh}
-            disabled={isTerminalLoading || isRefreshing}
-            title="Refresh terminal connection"
-          >
-            <RefreshCw
-              className={cn("h-4 w-4", isRefreshing && "animate-spin")}
-            />
-          </Button>
-        </div>
-        {(isDeviceLoading || isTerminalLoading) && (
+
+        {(isDeviceLoading ||
+          (isTerminalLoading && sessionStatus !== "disconnected")) && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-10">
             <div className="flex flex-col items-center gap-2">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
@@ -902,14 +988,35 @@ export function TerminalPage() {
             </div>
           </div>
         )}
-        <div
-          className={cn(
-            "flex gap-4 md:gap-6 h-full",
-            isMobileLandscape ? "flex-row" : "flex-col md:flex-row"
-          )}
-        >
-          <div ref={terminalRef} className="size-full" />
-        </div>
+        {sessionStatus === "disconnected" ? (
+          <div className="flex-1 flex items-center justify-center m-8">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center">
+                <X className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold">Terminal Disconnected</h3>
+                <p className="text-sm text-muted-foreground max-w-md">
+                  The terminal connection has been closed. Click the connect
+                  button to start a new session.
+                </p>
+              </div>
+              <Button onClick={handleConnect} disabled={isTerminalLoading}>
+                <Play className="h-4 w-4 mr-2" />
+                Connect Terminal
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div
+            className={cn(
+              "flex gap-4 md:gap-6 h-full",
+              isMobileLandscape ? "flex-row" : "flex-col md:flex-row"
+            )}
+          >
+            <div ref={terminalRef} className="size-full" />
+          </div>
+        )}
       </div>
     </div>
   );

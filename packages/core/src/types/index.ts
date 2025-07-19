@@ -8,6 +8,7 @@ import type {
   UsersResponse,
   ParametersTreeResponse,
   NotificationsResponse,
+  TerminalSessionsResponse,
 } from "@/types/db.types";
 
 export * from "./db.types";
@@ -196,3 +197,8 @@ export type SendNotificationPayload = {
   dismissible?: boolean;
   metadata?: Record<string, unknown>;
 };
+
+export type TerminalSession = TerminalSessionsResponse<
+  Record<string, unknown>,
+  { user: UsersResponse; device: DevicesResponse }
+>;

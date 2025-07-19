@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useActiveTerminalSessions } from "@/hooks/use-terminal-sessions";
 import { cn } from "@/lib/utils";
-import { Clock, Terminal, User } from "lucide-react";
+import { Terminal, User } from "lucide-react";
 
 type TerminalSessionsProps = {
   deviceId: string;
@@ -17,10 +17,6 @@ export function TerminalSessions({
   onReconnect,
 }: TerminalSessionsProps) {
   const sessions = useActiveTerminalSessions(deviceId);
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -83,18 +79,11 @@ export function TerminalSessions({
                 />
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">
-                      Session {session.session_id.slice(-8)}
-                    </span>
                     <Badge variant="outline" className="text-xs">
                       {session.session_status}
                     </Badge>
                   </div>
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      {formatDate(session.last_activity)}
-                    </div>
                     <div className="flex items-center gap-1">
                       <User className="h-3 w-3" />
                       {session.user}

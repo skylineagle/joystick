@@ -1,6 +1,7 @@
 import { pb } from "@/pocketbase";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
+import type { TerminalSession } from "@joystick/core";
 import {
   createAuthPlugin,
   type DeviceResponse,
@@ -19,7 +20,7 @@ type WebSocketMessage = {
   reconnect?: boolean;
 };
 
-type TerminalSession = {
+type Session = {
   id: string;
   sessionId: string;
   deviceId: string;
@@ -31,7 +32,7 @@ type TerminalSession = {
   terminalData: string[];
 };
 
-const connections = new Map<string, TerminalSession>();
+const connections = new Map<string, Session>();
 const tempKeyFiles = new Map<string, string>();
 
 const generateSessionId = () => {
@@ -84,11 +85,11 @@ const createTerminalSession = async (
   userId: string,
   sshProcess: ChildProcess,
   keyFile?: string
-): Promise<TerminalSession> => {
+): Promise<Session> => {
   const sessionId = generateSessionId();
   const now = new Date();
 
-  const session: TerminalSession = {
+  const session: Session = {
     id: sessionId,
     sessionId,
     deviceId,
@@ -184,7 +185,7 @@ const reconnectToSession = async (
   sessionId: string,
   deviceId: string,
   userId: string
-): Promise<TerminalSession | null> => {
+): Promise<Session | null> => {
   try {
     let existingSession = connections.get(sessionId);
 
@@ -301,7 +302,7 @@ const reconnectToSession = async (
         : spawn("ssh", sshArgs);
     }
 
-    const session: TerminalSession = {
+    const session: Session = {
       id: existingSession.id,
       sessionId,
       deviceId,
@@ -384,17 +385,20 @@ const app = new Elysia()
     try {
       const user = auth.user;
 
-      const dbSessions = await pb.collection("terminal_sessions").getFullList({
-        filter: `device = "${params.deviceId}" && user = "${user.id}" && session_status != "terminated"`,
-        sort: "-last_activity",
-        perPage: 10,
-      });
+      const dbSessions = await pb
+        .collection("terminal_sessions")
+        .getFullList<TerminalSession>({
+          filter: `device = "${params.deviceId}" && user = "${user.id}" && session_status != "terminated"`,
+          sort: "-last_activity",
+          perPage: 10,
+          expand: "device,user",
+        });
 
       const sessions = dbSessions.map((session) => ({
         id: session.id,
         session_id: session.session_id,
-        user: session.user,
-        device: session.device,
+        user: session.expand?.user?.username,
+        device: session.expand?.device?.name,
         session_status: session.session_status,
         last_activity: session.last_activity,
         created_at: session.created,
@@ -424,7 +428,7 @@ const app = new Elysia()
         const userId = ws.data.auth.userId;
 
         if (message.type === "connect" && message.device) {
-          let session: TerminalSession | null = null;
+          let session: Session | null = null;
 
           if (message.reconnect && message.sessionId) {
             session = await reconnectToSession(

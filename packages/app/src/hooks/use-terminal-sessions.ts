@@ -26,10 +26,10 @@ export function useTerminalSessions(deviceId: string) {
 
       try {
         const response = await joystickApi.get<{
-          data: { sessions: TerminalSession[] };
+          sessions: TerminalSession[];
         }>(createUrl(urls.panel, `/api/terminal/sessions/${deviceId}`));
 
-        return response.data?.sessions || [];
+        return response.sessions || [];
       } catch (error) {
         console.error("Failed to fetch terminal sessions:", error);
         return [];
