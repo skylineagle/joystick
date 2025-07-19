@@ -1,3 +1,4 @@
+import { TerminalSessions } from "@/components/terminal/terminal-sessions";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { useDevice } from "@/hooks/use-device";
@@ -8,7 +9,7 @@ import { useAuthStore } from "@/lib/auth";
 import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
 import { toast } from "@/utils/toast";
-import { RefreshCw, X } from "lucide-react";
+import { Play, RefreshCw, Settings, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { Terminal } from "xterm";
@@ -19,28 +20,35 @@ import { getTerminalTheme } from "./terminal-theme";
 import "xterm/css/xterm.css";
 
 const joystickAsciiLines = [
-  "                                       ....                                     ",
-  "                                 ......:;;:.....                                ",
-  "                              $x..X&&&&&&&&&&&&x..$X                            ",
-  "                           $&&$.X&&X..........&&&:.&&&x                         ",
-  "                         $&&$.......$&&&&&&&&X.......&&&X                       ",
-  "                       $&&X........X&X......&&;........&&&X                     ",
-  "                      &&$..............&&&&..............&&$                    ",
-  "                    x&&+....X$$XXXX$&$.$&&$.&&&$$XX$$X....$&&                   ",
-  "                    &&+...$+...:..................+...X$...$&&                  ",
-  "                   &&x...$..&$::x&x..............$&&...;&...&&&                 ",
-  "                  &&&...X&.X$X:.&X&...x.;..x..$&&...&&&.&x...&&                 ",
-  "                  &&:...&&.;&X$$$&&............x..+..+..&&...$&$                ",
-  "                 x&&...;&&&..&&&&+.&;.&:..+$.X$..$&&...&&&...x&&                ",
-  "                 &&&...X&;$&x......&&$&;..x&$&$......$&Xx&:..+&&                ",
-  "                 X&&...$$+++&&&x..................$&&$+xx&x..x&&                ",
-  "                  &&:..&$xxxxxX$&&&&&&&&&&&&&&&&&&$xxXXXX&&..$&$                ",
-  "                  &&$..&&xXXXXXX&&&:..........;&&&XXXXXX$&$..&&.                ",
-  "                   &&+.X&&$X$$&&&+..............x&&&$$$$&&:.&&&                 ",
-  "                   ;&&..+&&&&&&+..................X&&&&&&:.X&&                  ",
-  "                    X&&+..................................$&&                   ",
-  "                     $&&&...............................;&&&                    ",
-  "                       $&&$:..........................;&&&X                     ",
+  "                                                                                ",
+  "                                    x$&&&&&&$;                                  ",
+  "                               $&&&&&&&&&&&&&&&&&&X                             ",
+  "                           X&&&&$:..............;&&&&$x                         ",
+  "                         $&&&;......................x&&&X                       ",
+  "                       $&&&:..........................:&&&$                     ",
+  "                     $&&&:............................:&&&$                   ",
+  "                   $&&&:..............................:&&&$                 ",
+  "                 $&&&:................................:&&&$               ",
+  "               $&&&:..................................:&&&$             ",
+  "             $&&&:....................................:&&&$           ",
+  "           $&&&:......................................:&&&$         ",
+  "         $&&&:........................................:&&&$       ",
+  "       $&&&:..........................................:&&&$     ",
+  "     $&&&:............................................:&&&$   ",
+  "   $&&&:..............................................:&&&$ ",
+  " $&&&:................................................:&&&$",
+  " $&&&:................................................:&&&$",
+  "   $&&&:..............................................:&&&$ ",
+  "     $&&&:............................................:&&&$   ",
+  "       $&&&:..........................................:&&&$     ",
+  "         $&&&:........................................:&&&$       ",
+  "           $&&&:......................................:&&&$         ",
+  "             $&&&:....................................:&&&$           ",
+  "               $&&&:..................................:&&&$             ",
+  "                 $&&&:................................:&&&$               ",
+  "                   $&&&:..............................:&&&$                 ",
+  "                     $&&&:............................:&&&$                   ",
+  "                       $&&&:..........................:&&&$                     ",
   "                         $&&&;......................x&&&X                       ",
   "                           X&&&&$:..............;&&&&$x                         ",
   "                               $&&&&&&&&&&&&&&&&&&X                             ",
@@ -48,7 +56,6 @@ const joystickAsciiLines = [
   "                                                                                ",
 ];
 
-// Matrix characters for the matrix easter egg
 const matrixChars =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%\"'#&_(),.;:?!\\|{}<>[]^~";
 
@@ -59,7 +66,7 @@ export function TerminalPage() {
   const { data: selectedDevice, isLoading: isDeviceLoading } = useDevice(
     deviceId ?? ""
   );
-  const [activeMiniGame, setActiveMiniGame] = useState<string | null>(null);
+  const [, setActiveMiniGame] = useState<string | null>(null);
   const isEasterEggsPermitted = useIsPermitted("easter-eggs");
   const { isMobileLandscape } = useMobileLandscape();
   const terminalInstance = useRef<Terminal | null>(null);
@@ -68,40 +75,75 @@ export function TerminalPage() {
   const commandBufferRef = useRef<string>("");
   const matrixIntervalRef = useRef<number | null>(null);
   const snakeGameIntervalRef = useRef<number | null>(null);
-  const [isTerminalLoading, setIsTerminalLoading] = useState(true);
+  const [isTerminalLoading, setIsTerminalLoading] = useState(false);
   const isMountedRef = useRef(true);
   const isTerminalRouteAllowed = useIsRouteAllowed("terminal");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { token } = useAuthStore();
-  // Function to initialize the terminal and connection
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [sessionStatus, setSessionStatus] = useState<
+    "connecting" | "connected" | "disconnected" | "reconnecting"
+  >("disconnected");
+  const [showSessions, setShowSessions] = useState(false);
+  const hasInitializedRef = useRef(false);
+
+  const getStoredSessionId = () => {
+    if (typeof window !== "undefined" && selectedDevice?.id) {
+      return localStorage.getItem(`terminal_session_${selectedDevice.id}`);
+    }
+    return null;
+  };
+
+  const storeSessionId = (sessionId: string) => {
+    if (typeof window !== "undefined" && selectedDevice?.id) {
+      localStorage.setItem(`terminal_session_${selectedDevice.id}`, sessionId);
+    }
+  };
+
+  const clearStoredSessionId = () => {
+    if (typeof window !== "undefined" && selectedDevice?.id) {
+      localStorage.removeItem(`terminal_session_${selectedDevice.id}`);
+    }
+  };
+
   const initializeTerminal = useCallback(() => {
     if (!terminalRef.current || !selectedDevice?.configuration) {
       return;
     }
 
-    // Clean up existing terminal and connection
-    if (wsRef.current) {
-      wsRef.current.onopen = null;
-      wsRef.current.onmessage = null;
-      wsRef.current.onerror = null;
-      wsRef.current.onclose = null;
+    const storedSessionId = getStoredSessionId();
+    const hasValidConnection = wsRef.current?.readyState === WebSocket.OPEN;
 
-      if (
-        wsRef.current.readyState === WebSocket.OPEN ||
-        wsRef.current.readyState === WebSocket.CONNECTING
-      ) {
-        wsRef.current.close();
+    if (storedSessionId && hasValidConnection) {
+      return;
+    }
+
+    const cleanupExistingConnection = () => {
+      if (wsRef.current) {
+        wsRef.current.onopen = null;
+        wsRef.current.onmessage = null;
+        wsRef.current.onerror = null;
+        wsRef.current.onclose = null;
+
+        if (
+          wsRef.current.readyState === WebSocket.OPEN ||
+          wsRef.current.readyState === WebSocket.CONNECTING
+        ) {
+          wsRef.current.close();
+        }
+        wsRef.current = null;
       }
-      wsRef.current = null;
-    }
 
-    if (terminalInstance.current) {
-      terminalInstance.current.dispose();
-      terminalInstance.current = null;
-    }
+      if (terminalInstance.current) {
+        terminalInstance.current.dispose();
+        terminalInstance.current = null;
+      }
+    };
+
+    cleanupExistingConnection();
 
     setIsTerminalLoading(true);
-    setIsRefreshing(false);
+    setSessionStatus("connecting");
 
     const terminal = new Terminal({
       cursorBlink: true,
@@ -132,88 +174,151 @@ export function TerminalPage() {
     const ws = new WebSocket(`${urls.panel}/terminal?token=${token}`);
     wsRef.current = ws;
 
+    const connectionTimeout = setTimeout(() => {
+      if (ws.readyState === WebSocket.CONNECTING) {
+        ws.close();
+        setSessionStatus("disconnected");
+        setIsTerminalLoading(false);
+        setIsRefreshing(false);
+        toast.error({ message: "Connection timeout. Please try again." });
+      }
+    }, 10000);
+
     ws.onopen = () => {
       if (!isMountedRef.current) return;
 
-      ws.send(
-        JSON.stringify({
+      clearTimeout(connectionTimeout);
+      console.log("WebSocket opened, attempting to connect/reconnect");
+
+      const storedSessionId = getStoredSessionId();
+
+      if (storedSessionId) {
+        const connectMessage = {
           type: "connect",
-          device: selectedDevice.id,
-        })
-      );
-      setIsTerminalLoading(false);
+          device: selectedDevice!.id,
+          reconnect: true,
+          sessionId: storedSessionId,
+        };
+        ws.send(JSON.stringify(connectMessage));
+      } else {
+        const connectMessage = {
+          type: "connect",
+          device: selectedDevice!.id,
+        };
+        ws.send(JSON.stringify(connectMessage));
+      }
     };
 
     ws.onmessage = (event) => {
       if (!isMountedRef.current) return;
-      terminal.write(event.data);
+
+      try {
+        const data = JSON.parse(event.data);
+
+        if (data.type === "session_created") {
+          terminal.clear();
+          setCurrentSessionId(data.sessionId);
+          storeSessionId(data.sessionId);
+          setSessionStatus("connected");
+          setIsTerminalLoading(false);
+          setIsRefreshing(false);
+          toast.success({ message: "Terminal session created" });
+        } else if (data.type === "session_restored") {
+          console.log("Session restored successfully");
+          setCurrentSessionId(data.sessionId);
+          storeSessionId(data.sessionId);
+          setSessionStatus("connected");
+          setIsTerminalLoading(false);
+          setIsRefreshing(false);
+          toast.success({ message: "Terminal session restored" });
+        } else if (data.type === "session_not_found") {
+          clearStoredSessionId();
+          setCurrentSessionId(null);
+          setSessionStatus("disconnected");
+          setIsTerminalLoading(false);
+          setIsRefreshing(false);
+          toast.info({ message: "Session not found, creating new session" });
+
+          const connectMessage = {
+            type: "connect",
+            device: selectedDevice!.id,
+          };
+          ws.send(JSON.stringify(connectMessage));
+        } else if (data.type === "session_terminated") {
+          setCurrentSessionId(null);
+          clearStoredSessionId();
+          setSessionStatus("disconnected");
+          setIsTerminalLoading(false);
+          setIsRefreshing(false);
+          toast.info({ message: "Terminal session terminated" });
+        } else if (data.type === "terminal_data") {
+          terminal.write(data.data);
+        } else {
+          terminal.write(event.data);
+        }
+      } catch {
+        terminal.write(event.data);
+      }
     };
 
     ws.onerror = (error) => {
       if (!isMountedRef.current) return;
+      clearTimeout(connectionTimeout);
       console.error("Terminal WebSocket error:", error);
-      terminal.write(
-        "\r\n\x1b[31mError: WebSocket connection failed. Please try again.\x1b[0m\r\n"
-      );
+      setSessionStatus("disconnected");
       setIsTerminalLoading(false);
+      setIsRefreshing(false);
+      hasInitializedRef.current = false;
     };
 
     ws.onclose = () => {
       if (!isMountedRef.current) return;
-      terminal.write(
-        "\r\n\x1b[33mConnection closed. Click the refresh button to reconnect.\x1b[0m\r\n"
-      );
+      clearTimeout(connectionTimeout);
+      setSessionStatus("disconnected");
       setIsTerminalLoading(false);
+      setIsRefreshing(false);
+      hasInitializedRef.current = false;
+
+      if (terminalInstance.current) {
+        terminalInstance.current.dispose();
+        terminalInstance.current = null;
+      }
     };
 
-    // Function to run the Matrix effect
     const runMatrixEffect = () => {
-      // Clear any existing interval
       if (matrixIntervalRef.current) {
         window.clearInterval(matrixIntervalRef.current);
       }
 
-      // Show toast notification
       toast.success({ message: "Matrix Easter Egg Activated!" });
 
-      // Get terminal dimensions
       const cols = terminal.cols;
       const rows = terminal.rows;
 
-      // Create arrays to track the state of each column
       const drops: number[] = [];
       for (let i = 0; i < cols; i++) {
         drops[i] = Math.floor(Math.random() * rows);
       }
 
-      // Set text color to green
       terminal.write("\x1b[32m");
 
-      // Start the animation
       let frameCount = 0;
-      const maxFrames = 300; // Run for about 10 seconds at 30fps
+      const maxFrames = 300;
 
       matrixIntervalRef.current = window.setInterval(() => {
-        // Clear the screen with a black background
         terminal.write("\x1b[2J\x1b[H");
 
-        // Draw each drop
         for (let i = 0; i < cols; i++) {
-          // Get a random character
           const char =
             matrixChars[Math.floor(Math.random() * matrixChars.length)];
 
-          // Calculate position
           const pos = drops[i];
           if (pos >= 0 && pos < rows) {
-            // Move cursor to position
             terminal.write(`\x1b[${pos + 1};${i + 1}H${char}`);
           }
 
-          // Move drop down
           drops[i]++;
 
-          // Reset drop with small probability or if it's off screen
           if (drops[i] > rows || Math.random() > 0.98) {
             drops[i] = 0;
           }
@@ -226,45 +331,39 @@ export function TerminalPage() {
             matrixIntervalRef.current = null;
           }
 
-          // Reset terminal
-          terminal.write("\x1b[0m"); // Reset colors
-          terminal.write("\x1b[2J\x1b[H"); // Clear screen
+          terminal.write("\x1b[0m");
+          terminal.write("\x1b[2J\x1b[H");
           terminal.write(
             "Matrix effect complete. Welcome back to reality.\r\n\n"
           );
 
-          // Reconnect to the terminal
-          if (ws.readyState === WebSocket.OPEN) {
+          if (ws.readyState === WebSocket.OPEN && getStoredSessionId()) {
             ws.send(
               JSON.stringify({
                 type: "connect",
                 device: selectedDevice.id,
+                reconnect: true,
+                sessionId: getStoredSessionId(),
               })
             );
           }
         }
-      }, 33); // ~30fps
+      }, 33);
     };
 
-    // Function to run the Snake game
     const runSnakeGame = () => {
-      // Clear any existing game
       if (snakeGameIntervalRef.current) {
         window.clearInterval(snakeGameIntervalRef.current);
       }
 
-      // Show toast notification
       toast.success({ message: "Snake Game Activated!" });
 
-      // Get terminal dimensions
       const cols = terminal.cols;
       const rows = terminal.rows;
 
-      // Game area boundaries (leave some space for borders)
       const gameWidth = Math.min(cols - 4, 40);
       const gameHeight = Math.min(rows - 6, 20);
 
-      // Initialize game state
       let snake = [
         { x: Math.floor(gameWidth / 2), y: Math.floor(gameHeight / 2) },
       ];
@@ -277,64 +376,52 @@ export function TerminalPage() {
       let gameOver = false;
       let keyHandlerAdded = false;
 
-      // Clear the screen
       terminal.write("\x1b[2J\x1b[H");
 
-      // Draw game instructions
       terminal.write("SNAKE GAME\r\n");
       terminal.write("Use arrow keys to move. Press 'q' to quit.\r\n\n");
 
-      // Function to draw the game board
       const drawGame = () => {
-        // Clear the screen
-        terminal.write("\x1b[2J\x1b[H");
+        terminal.write("\x1b[H");
 
-        // Draw score
-        terminal.write(`Score: ${score}\r\n`);
-
-        // Draw top border
-        terminal.write("+" + "-".repeat(gameWidth) + "+\r\n");
-
-        // Draw game area with snake and food
-        for (let y = 0; y < gameHeight; y++) {
-          let line = "|";
-          for (let x = 0; x < gameWidth; x++) {
-            // Check if this position has snake
-            const isSnake = snake.some(
-              (segment) => segment.x === x && segment.y === y
-            );
-            // Check if this position has food
-            const isFood = food.x === x && food.y === y;
-
-            if (isSnake) {
-              line += "O";
-            } else if (isFood) {
-              line += "*";
+        for (let y = 0; y < gameHeight + 2; y++) {
+          for (let x = 0; x < gameWidth + 2; x++) {
+            if (
+              y === 0 ||
+              y === gameHeight + 1 ||
+              x === 0 ||
+              x === gameWidth + 1
+            ) {
+              terminal.write("#");
             } else {
-              line += " ";
+              const snakeSegment = snake.find(
+                (segment) => segment.x === x - 1 && segment.y === y - 1
+              );
+              const isFood = food.x === x - 1 && food.y === y - 1;
+
+              if (snakeSegment) {
+                terminal.write("O");
+              } else if (isFood) {
+                terminal.write("*");
+              } else {
+                terminal.write(" ");
+              }
             }
           }
-          line += "|\r\n";
-          terminal.write(line);
+          terminal.write("\r\n");
         }
 
-        // Draw bottom border
-        terminal.write("+" + "-".repeat(gameWidth) + "+\r\n");
-
-        // Show game over message if applicable
+        terminal.write(`\r\nScore: ${score}\r\n`);
         if (gameOver) {
-          terminal.write(
-            "\r\nGame Over! Press 'r' to restart or 'q' to quit.\r\n"
-          );
+          terminal.write("Game Over! Press 'r' to restart or 'q' to quit.\r\n");
         }
       };
 
-      // Function to update the game state
       const updateGame = () => {
         if (gameOver) return;
 
-        // Calculate new head position based on direction
         const head = { ...snake[0] };
+
         switch (direction) {
           case "up":
             head.y--;
@@ -350,45 +437,30 @@ export function TerminalPage() {
             break;
         }
 
-        // Check for collisions with walls
         if (
           head.x < 0 ||
           head.x >= gameWidth ||
           head.y < 0 ||
-          head.y >= gameHeight
-        ) {
-          gameOver = true;
-          return;
-        }
-
-        // Check for collisions with self
-        if (
+          head.y >= gameHeight ||
           snake.some((segment) => segment.x === head.x && segment.y === head.y)
         ) {
           gameOver = true;
           return;
         }
 
-        // Add new head to snake
         snake.unshift(head);
 
-        // Check if snake ate food
         if (head.x === food.x && head.y === food.y) {
-          // Increase score
           score++;
-
-          // Generate new food
           food = {
             x: Math.floor(Math.random() * gameWidth),
             y: Math.floor(Math.random() * gameHeight),
           };
         } else {
-          // Remove tail if no food was eaten
           snake.pop();
         }
       };
 
-      // Set up key handler for game controls
       const handleGameKeys = (e: { key: string }) => {
         switch (e.key) {
           case "ArrowUp":
@@ -404,7 +476,6 @@ export function TerminalPage() {
             if (direction !== "left") direction = "right";
             break;
           case "q":
-            // Quit game
             if (snakeGameIntervalRef.current) {
               window.clearInterval(snakeGameIntervalRef.current);
               snakeGameIntervalRef.current = null;
@@ -412,17 +483,17 @@ export function TerminalPage() {
             terminal.write("\x1b[2J\x1b[H");
             terminal.write("Snake game ended. Thanks for playing!\r\n\n");
 
-            // Reconnect to the terminal
-            if (ws.readyState === WebSocket.OPEN) {
+            if (ws.readyState === WebSocket.OPEN && currentSessionId) {
               ws.send(
                 JSON.stringify({
                   type: "connect",
                   device: selectedDevice.id,
+                  reconnect: true,
+                  sessionId: currentSessionId,
                 })
               );
             }
 
-            // Remove key handler
             if (keyHandlerAdded) {
               terminal.onKey(() => {});
               keyHandlerAdded = false;
@@ -430,7 +501,6 @@ export function TerminalPage() {
             break;
           case "r":
             if (gameOver) {
-              // Restart game
               snake = [
                 { x: Math.floor(gameWidth / 2), y: Math.floor(gameHeight / 2) },
               ];
@@ -446,30 +516,25 @@ export function TerminalPage() {
         }
       };
 
-      // Add key handler
       terminal.onKey((e) => {
         handleGameKeys(e.domEvent);
       });
       keyHandlerAdded = true;
 
-      // Start game loop
       drawGame();
       snakeGameIntervalRef.current = window.setInterval(() => {
         updateGame();
         drawGame();
-      }, 200); // Update every 200ms
+      }, 200);
     };
 
     terminal.onData((data) => {
-      // Check for easter egg command
       if (data === "\r") {
-        // Enter key
         const command = commandBufferRef.current.trim();
 
         if (isEasterEggsPermitted) {
           if (command === "help") {
-            // Display all available terminal easter eggs
-            terminal.write("\r\n\n"); // Add some space
+            terminal.write("\r\n\n");
             terminal.write("🎮 Available Terminal Easter Eggs 🎮\r\n");
             terminal.write("================================\r\n\n");
             terminal.write("joystick  - Display ASCII art of a joystick\r\n");
@@ -492,80 +557,31 @@ export function TerminalPage() {
             terminal.write("F9 - Disco mode\r\n");
             terminal.write("F10 - Typewriter effect\r\n");
             terminal.write("F11 - Rain effect\r\n");
-            terminal.write("Shift+Ctrl+E - Neon mode\r\n");
-            terminal.write("Shift+Ctrl+S - Slow motion mode\r\n");
-            terminal.write("Shift+Ctrl+P - Pixel art mode\r\n");
-            terminal.write("Shift+Ctrl+M - Mirror mode\r\n");
-            terminal.write("Shift+Ctrl+V - Vaporwave mode\r\n");
-            terminal.write("Shift+Ctrl+Z - Zoom mode\r\n");
-            terminal.write("Shift+Ctrl+J - Jitter mode\r\n");
-            terminal.write("Shift+Ctrl+A - Sparkle mode\r\n");
-            terminal.write("↑↑↓↓←→←→BA - Konami code\r\n\n");
-
-            // Clear the command buffer
+            terminal.write("F12 - Earthquake effect\r\n");
+            terminal.write("Ctrl+Shift+E - Enable all easter eggs\r\n");
+            terminal.write("Ctrl+Shift+D - Disable all easter eggs\r\n");
+            terminal.write("\r\n");
             commandBufferRef.current = "";
-
-            // Send a new line to the terminal to maintain proper cursor position
-            if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-              wsRef.current.send(
-                JSON.stringify({
-                  type: "data",
-                  device: selectedDevice.id,
-                  data: "\x03",
-                })
-              );
-            }
             return;
           } else if (command === "joystick") {
-            // Display the ASCII art line by line
-            terminal.write("\r\n\n"); // Add some space
-
-            // Write each line of the ASCII art with proper line breaks
+            terminal.write("\r\n\n");
             joystickAsciiLines.forEach((line) => {
               terminal.write(line + "\r\n");
             });
-
-            terminal.write("\r\nYou found a hidden easter egg! 🎉\r\n\n");
-
-            // Show toast notification
-            toast.success({ message: "Terminal Easter Egg Activated!" });
-
-            // Clear the command buffer
+            terminal.write("\r\n");
             commandBufferRef.current = "";
-
-            // Send a new line to the terminal to maintain proper cursor position
-            if (ws.readyState === WebSocket.OPEN) {
-              ws.send(
-                JSON.stringify({
-                  type: "data",
-                  device: selectedDevice.id,
-                  data: "\r",
-                })
-              );
-            }
             return;
           } else if (command === "matrix") {
-            // Run the Matrix effect
             terminal.write("\r\n\nEntering the Matrix...\r\n\n");
-
-            // Clear the command buffer
             commandBufferRef.current = "";
-
-            // Start the Matrix effect after a short delay
             setTimeout(runMatrixEffect, 1000);
             return;
           } else if (command === "snake") {
-            // Run the Snake game
             terminal.write("\r\n\nStarting Snake game...\r\n\n");
-
-            // Clear the command buffer
             commandBufferRef.current = "";
-
-            // Start the Snake game after a short delay
             setTimeout(runSnakeGame, 1000);
             return;
           } else if (command === "mariokart") {
-            // Run the Mario Kart game
             terminal.write("\r\n\nStarting Mario Kart...\r\n\n");
             setActiveMiniGame("mariokart");
             if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -573,41 +589,41 @@ export function TerminalPage() {
                 JSON.stringify({
                   type: "data",
                   device: selectedDevice.id,
+                  sessionId: getStoredSessionId(),
                   data: "\x03",
                 })
               );
             }
             return;
           } else if (command === "ninja") {
-            // Run the Ninja Game Mode
-            terminal.write("\r\n\nStarting Fruit Ninja Game Mode...\r\n\n");
+            terminal.write("\r\n\nStarting Fruit Ninja...\r\n\n");
             setActiveMiniGame("ninja");
             if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
               wsRef.current.send(
                 JSON.stringify({
                   type: "data",
                   device: selectedDevice.id,
+                  sessionId: getStoredSessionId(),
                   data: "\x03",
                 })
               );
             }
             return;
           } else if (command === "driver") {
-            // Run the Driver Game Mode
-            terminal.write("\r\n\nStarting Drunk Driving Game Mode...\r\n\n");
+            terminal.write("\r\n\nStarting Drunk Driving...\r\n\n");
             setActiveMiniGame("driver");
             if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
               wsRef.current.send(
                 JSON.stringify({
                   type: "data",
                   device: selectedDevice.id,
+                  sessionId: getStoredSessionId(),
                   data: "\x03",
                 })
               );
             }
             return;
           } else if (command === "angrybirds") {
-            // Run the Angry Birds Game Mode
             terminal.write("\r\n\nStarting Angry Birds Game Mode...\r\n\n");
             setActiveMiniGame("angrybirds");
             if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -615,13 +631,13 @@ export function TerminalPage() {
                 JSON.stringify({
                   type: "data",
                   device: selectedDevice.id,
+                  sessionId: getStoredSessionId(),
                   data: "\x03",
                 })
               );
             }
             return;
           } else if (command === "doodle") {
-            // Run the Doodle Jump Game Mode
             terminal.write("\r\n\nStarting Doodle Jump Game Mode...\r\n\n");
             setActiveMiniGame("doodle");
             if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -629,6 +645,7 @@ export function TerminalPage() {
                 JSON.stringify({
                   type: "data",
                   device: selectedDevice.id,
+                  sessionId: getStoredSessionId(),
                   data: "\x03",
                 })
               );
@@ -636,14 +653,10 @@ export function TerminalPage() {
             return;
           }
         }
-        // Reset command buffer on enter
         commandBufferRef.current = "";
       } else if (data === "\u007f") {
-        // Backspace
-        // Remove last character from buffer
         commandBufferRef.current = commandBufferRef.current.slice(0, -1);
       } else if (data.length === 1 && data.charCodeAt(0) >= 32) {
-        // Add printable characters to buffer
         commandBufferRef.current += data;
       }
 
@@ -652,6 +665,7 @@ export function TerminalPage() {
           JSON.stringify({
             type: "data",
             device: selectedDevice.id,
+            sessionId: getStoredSessionId(),
             data,
           })
         );
@@ -666,30 +680,122 @@ export function TerminalPage() {
     token,
   ]);
 
-  // Function to handle refresh button click
+  const handleConnect = useCallback(() => {
+    if (isTerminalLoading) return;
+
+    setCurrentSessionId(null);
+    setSessionStatus("connecting");
+    setIsTerminalLoading(true);
+
+    setTimeout(() => {
+      hasInitializedRef.current = false;
+      initializeTerminal();
+    }, 100);
+  }, [initializeTerminal, isTerminalLoading]);
+
   const handleRefresh = useCallback(() => {
+    if (isRefreshing || isTerminalLoading) return;
+
     setIsRefreshing(true);
     toast.info({ message: "Reconnecting terminal..." });
 
-    // Small delay to allow UI to update
+    const storedSessionId = getStoredSessionId();
+    if (storedSessionId) {
+      setCurrentSessionId(storedSessionId);
+      setSessionStatus("reconnecting");
+    } else {
+      setCurrentSessionId(null);
+      setSessionStatus("connecting");
+    }
+
     setTimeout(() => {
+      hasInitializedRef.current = false;
       initializeTerminal();
     }, 100);
-  }, [initializeTerminal]);
+  }, [initializeTerminal, isRefreshing, isTerminalLoading]);
+
+  useEffect(() => {
+    if (isRefreshing) {
+      const timeoutId = setTimeout(() => {
+        console.log("Refresh timeout - resetting state");
+        setIsRefreshing(false);
+        setSessionStatus("disconnected");
+        setIsTerminalLoading(false);
+        toast.error({ message: "Connection timeout. Please try again." });
+      }, 15000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isRefreshing]);
+
+  const handleDisconnect = useCallback(() => {
+    const sessionId = getStoredSessionId();
+    if (wsRef.current && sessionId) {
+      try {
+        wsRef.current.send(
+          JSON.stringify({
+            type: "disconnect",
+            sessionId: sessionId,
+          })
+        );
+      } catch (error) {
+        console.error("Failed to send disconnect message:", error);
+      }
+    }
+
+    clearStoredSessionId();
+    setCurrentSessionId(null);
+    setSessionStatus("disconnected");
+    setIsTerminalLoading(false);
+    hasInitializedRef.current = false;
+
+    if (terminalInstance.current) {
+      terminalInstance.current.dispose();
+      terminalInstance.current = null;
+    }
+
+    if (wsRef.current) {
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+
+    toast.info({ message: "Terminal session disconnected" });
+  }, []);
+
+  const handleReconnect = useCallback(
+    (sessionId: string) => {
+      setCurrentSessionId(sessionId);
+      setSessionStatus("reconnecting");
+      hasInitializedRef.current = false;
+
+      setTimeout(() => {
+        initializeTerminal();
+      }, 100);
+    },
+    [initializeTerminal]
+  );
 
   useEffect(() => {
     isMountedRef.current = true;
+    hasInitializedRef.current = false;
 
-    // Initialize the terminal
+    const storedSessionId = getStoredSessionId();
+    if (storedSessionId) {
+      setCurrentSessionId(storedSessionId);
+      setSessionStatus("connected");
+    }
+
     setTimeout(() => {
-      initializeTerminal();
+      if (!hasInitializedRef.current && !wsRef.current && storedSessionId) {
+        initializeTerminal();
+        hasInitializedRef.current = true;
+      }
     }, 200);
 
-    // Cleanup function
     return () => {
       isMountedRef.current = false;
+      hasInitializedRef.current = false;
 
-      // Clear any active intervals
       if (matrixIntervalRef.current !== null) {
         window.clearInterval(matrixIntervalRef.current);
         matrixIntervalRef.current = null;
@@ -700,15 +806,26 @@ export function TerminalPage() {
         snakeGameIntervalRef.current = null;
       }
 
-      // Close WebSocket connection
+      const storedSessionId = getStoredSessionId();
+      if (wsRef.current && storedSessionId) {
+        try {
+          wsRef.current.send(
+            JSON.stringify({
+              type: "pause",
+              sessionId: storedSessionId,
+            })
+          );
+        } catch (error) {
+          console.error("Failed to send pause message:", error);
+        }
+      }
+
       if (wsRef.current) {
-        // Remove event handlers to prevent memory leaks
         wsRef.current.onopen = null;
         wsRef.current.onmessage = null;
         wsRef.current.onerror = null;
         wsRef.current.onclose = null;
 
-        // Close the connection
         if (
           wsRef.current.readyState === WebSocket.OPEN ||
           wsRef.current.readyState === WebSocket.CONNECTING
@@ -718,75 +835,147 @@ export function TerminalPage() {
         wsRef.current = null;
       }
 
-      // Clean up terminal
       if (terminalInstance.current) {
         terminalInstance.current.dispose();
         terminalInstance.current = null;
       }
     };
-  }, [initializeTerminal]);
+  }, [selectedDevice?.id, token]);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const sessionId = getStoredSessionId();
+      if (sessionId) {
+        wsRef.current?.send(
+          JSON.stringify({
+            type: "pause",
+            sessionId: sessionId,
+          })
+        );
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        const sessionId = getStoredSessionId();
+        if (wsRef.current && sessionId) {
+          wsRef.current.send(
+            JSON.stringify({
+              type: "pause",
+              sessionId: sessionId,
+            })
+          );
+        }
+      } else if (document.visibilityState === "visible") {
+        const sessionId = getStoredSessionId();
+        if (wsRef.current && sessionId) {
+          wsRef.current.send(
+            JSON.stringify({
+              type: "resume",
+              sessionId: sessionId,
+            })
+          );
+        }
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   if (!selectedDevice) return <div>Please select a device first</div>;
 
   if (!isTerminalRouteAllowed) {
     return <div>You are not allowed to access this page</div>;
   }
+
   return (
-    <div className="h-full flex flex-col overflow-hidden">
-      {activeMiniGame && (
-        <div className="flex items-center justify-center">
-          {activeMiniGame === "mariokart" ? (
-            <iframe
-              src="https://funhtml5games.com?embed=mariokart"
-              className="h-[400px] w-[640px] rounded-3xl self-center"
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
+            <div
+              className={cn(
+                "w-2 h-2 rounded-full",
+                sessionStatus === "connected" && "bg-green-500",
+                sessionStatus === "connecting" && "bg-yellow-500",
+                sessionStatus === "disconnected" && "bg-red-500",
+                sessionStatus === "reconnecting" && "bg-blue-500"
+              )}
             />
-          ) : activeMiniGame === "ninja" ? (
-            <iframe
-              src="https://funhtml5games.com?embed=blockninja"
-              className="h-[400px] w-[640px] rounded-3xl self-center"
-            />
-          ) : activeMiniGame === "driver" ? (
-            <iframe
-              src="https://funhtml5games.com?embed=drunkdrive"
-              className="h-[400px] w-[640px] rounded-3xl self-center"
-            />
-          ) : activeMiniGame === "angrybirds" ? (
-            <iframe
-              src="https://funhtml5games.com?embed=angrybirds"
-              className="h-[400px] w-[640px] rounded-3xl self-center"
-            />
-          ) : activeMiniGame === "doodle" ? (
-            <iframe
-              src="https://funhtml5games.com?embed=doodlejump"
-              style={{ width: "422px", height: "572px", border: "none" }}
-              className="h-[400px] w-[640px] rounded-3xl self-center"
-            />
-          ) : null}
-          <Button
-            onClick={() => setActiveMiniGame(null)}
-            className="relative top-2 left-2 bg-black/70 hover:bg-black/90 text-white rounded-full p-2 z-10 transition-colors"
-            aria-label="Close Mini Game"
-          >
-            <X />
-          </Button>
+            <span className="text-sm text-muted-foreground capitalize">
+              {sessionStatus}
+            </span>
+          </div>
         </div>
-      )}
-      <div className="flex-1 min-h-0 overflow-hidden relative">
-        <div className="absolute top-2 right-2 z-20">
+        <div className="flex items-center gap-2">
           <Button
             size="sm"
-            variant="ghost"
-            className="bg-background/80 hover:bg-background/60"
-            onClick={handleRefresh}
-            disabled={isTerminalLoading || isRefreshing}
-            title="Refresh terminal connection"
+            variant="outline"
+            onClick={() => setShowSessions(!showSessions)}
           >
-            <RefreshCw
-              className={cn("h-4 w-4", isRefreshing && "animate-spin")}
-            />
+            <Settings className="h-4 w-4" />
           </Button>
+          {sessionStatus === "connected" && getStoredSessionId() && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleDisconnect}
+              title="Disconnect terminal"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+          {(sessionStatus === "connecting" ||
+            sessionStatus === "reconnecting") && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleRefresh}
+              disabled={isTerminalLoading || isRefreshing}
+              title="Refresh connection"
+            >
+              <RefreshCw
+                className={cn(
+                  "h-4 w-4",
+                  (isRefreshing || sessionStatus === "reconnecting") &&
+                    "animate-spin"
+                )}
+              />
+            </Button>
+          )}
+          {sessionStatus === "disconnected" && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleConnect}
+              disabled={isTerminalLoading}
+              title="Connect to terminal"
+            >
+              <Play className="h-4 w-4" />
+            </Button>
+          )}
         </div>
-        {(isDeviceLoading || isTerminalLoading) && (
+      </div>
+
+      <div className="flex-1 min-h-0 overflow-hidden relative">
+        {showSessions && (
+          <div className="absolute top-2 left-2 z-30 w-80 max-h-96 overflow-y-auto">
+            <TerminalSessions
+              deviceId={selectedDevice.id}
+              currentSessionId={getStoredSessionId()}
+              onReconnect={handleReconnect}
+            />
+          </div>
+        )}
+
+        {(isDeviceLoading ||
+          (isTerminalLoading && sessionStatus !== "disconnected")) && (
           <div className="absolute inset-0 bg-background/80 flex items-center justify-center z-10">
             <div className="flex flex-col items-center gap-2">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
@@ -798,14 +987,35 @@ export function TerminalPage() {
             </div>
           </div>
         )}
-        <div
-          className={cn(
-            "flex gap-4 md:gap-6 h-full",
-            isMobileLandscape ? "flex-row" : "flex-col md:flex-row"
-          )}
-        >
-          <div ref={terminalRef} className="size-full" />
-        </div>
+        {sessionStatus === "disconnected" ? (
+          <div className="flex-1 flex items-center justify-center m-8">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 mx-auto rounded-full bg-muted flex items-center justify-center">
+                <X className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold">Terminal Disconnected</h3>
+                <p className="text-sm text-muted-foreground max-w-md">
+                  The terminal connection has been closed. Click the connect
+                  button to start a new session.
+                </p>
+              </div>
+              <Button onClick={handleConnect} disabled={isTerminalLoading}>
+                <Play className="h-4 w-4 mr-2" />
+                Connect Terminal
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div
+            className={cn(
+              "flex gap-4 md:gap-6 h-full",
+              isMobileLandscape ? "flex-row" : "flex-col md:flex-row"
+            )}
+          >
+            <div ref={terminalRef} className="size-full" />
+          </div>
+        )}
       </div>
     </div>
   );

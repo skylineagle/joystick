@@ -13,14 +13,10 @@ export enum Collections {
 	Superusers = "_superusers",
 	ActionLogs = "action_logs",
 	Actions = "actions",
-	Dashboards = "dashboards",
 	Devices = "devices",
 	Gallery = "gallery",
-	Insights = "insights",
 	Message = "message",
 	Models = "models",
-	MonitorExecutions = "monitor_executions",
-	Monitors = "monitors",
 	Notifications = "notifications",
 	ParametersTree = "parameters_tree",
 	Permissions = "permissions",
@@ -28,6 +24,7 @@ export enum Collections {
 	Run = "run",
 	StudioHooks = "studio_hooks",
 	Templates = "templates",
+	TerminalSessions = "terminal_sessions",
 	Users = "users",
 }
 
@@ -128,17 +125,6 @@ export type ActionsRecord = {
 	updated?: IsoDateString
 }
 
-export type DashboardsRecord<Tlayout = unknown> = {
-	created?: IsoDateString
-	description?: HTMLString
-	id: string
-	insights?: RecordIdString[]
-	is_default?: boolean
-	layout?: null | Tlayout
-	name: string
-	updated?: IsoDateString
-}
-
 export enum DevicesStatusOptions {
 	"off" = "off",
 	"on" = "on",
@@ -181,41 +167,6 @@ export type GalleryRecord<Tmetadata = unknown> = {
 	viewed?: RecordIdString[]
 }
 
-export enum InsightsTypeOptions {
-	"line_chart" = "line_chart",
-	"bar_chart" = "bar_chart",
-	"area_chart" = "area_chart",
-	"pie_chart" = "pie_chart",
-	"gauge" = "gauge",
-	"stat_card" = "stat_card",
-	"table" = "table",
-	"heatmap" = "heatmap",
-}
-
-export enum InsightsRefreshIntervalOptions {
-	"realtime" = "realtime",
-	"5m" = "5m",
-	"15m" = "15m",
-	"30m" = "30m",
-	"1h" = "1h",
-	"6h" = "6h",
-	"12h" = "12h",
-	"24h" = "24h",
-}
-export type InsightsRecord<Tconfig = unknown> = {
-	config: null | Tconfig
-	created?: IsoDateString
-	description?: HTMLString
-	enabled?: boolean
-	id: string
-	monitors: RecordIdString[]
-	name: string
-	refresh_interval?: InsightsRefreshIntervalOptions
-	time_range_days?: number
-	type: InsightsTypeOptions
-	updated?: IsoDateString
-}
-
 export enum MessageDirectionOptions {
 	"from" = "from",
 	"to" = "to",
@@ -240,42 +191,11 @@ export enum ModelsStreamOptions {
 export type ModelsRecord<Tmode_configs = unknown, Tparams = unknown, Tstream_quality = unknown> = {
 	created?: IsoDateString
 	id: string
-	isAudio?: boolean
 	mode_configs?: null | Tmode_configs
 	name: string
 	params: null | Tparams
 	stream?: ModelsStreamOptions
 	stream_quality?: null | Tstream_quality
-	updated?: IsoDateString
-}
-
-export type MonitorExecutionsRecord<Tparameters = unknown, Tresult = unknown> = {
-	action: RecordIdString
-	created?: IsoDateString
-	device: RecordIdString
-	error?: HTMLString
-	execution_time?: number
-	id: string
-	monitor: RecordIdString
-	parameters?: null | Tparameters
-	result?: null | Tresult
-	success?: boolean
-	updated?: IsoDateString
-}
-
-export type MonitorsRecord<Tparameters = unknown> = {
-	action: RecordIdString
-	created?: IsoDateString
-	description?: HTMLString
-	devices: RecordIdString[]
-	enabled?: boolean
-	id: string
-	last_execution?: IsoDateString
-	name: string
-	next_execution?: IsoDateString
-	parameters?: null | Tparameters
-	retention_days?: number
-	schedule: string
 	updated?: IsoDateString
 }
 
@@ -372,6 +292,23 @@ export type TemplatesRecord = {
 	value?: string
 }
 
+export enum TerminalSessionsSessionStatusOptions {
+	"active" = "active",
+	"disconnected" = "disconnected",
+	"terminated" = "terminated",
+}
+export type TerminalSessionsRecord<Tterminal_data = unknown> = {
+	created?: IsoDateString
+	device: RecordIdString
+	id: string
+	last_activity: IsoDateString
+	session_id: string
+	session_status: TerminalSessionsSessionStatusOptions
+	terminal_data?: null | Tterminal_data
+	updated?: IsoDateString
+	user: RecordIdString
+}
+
 export type UsersRecord = {
 	avatar?: string
 	created?: IsoDateString
@@ -393,14 +330,10 @@ export type OtpsResponse<Texpand = unknown> = Required<OtpsRecord> & BaseSystemF
 export type SuperusersResponse<Texpand = unknown> = Required<SuperusersRecord> & AuthSystemFields<Texpand>
 export type ActionLogsResponse<Tparameters = unknown, Tresult = unknown, Texpand = unknown> = Required<ActionLogsRecord<Tparameters, Tresult>> & BaseSystemFields<Texpand>
 export type ActionsResponse<Texpand = unknown> = Required<ActionsRecord> & BaseSystemFields<Texpand>
-export type DashboardsResponse<Tlayout = unknown, Texpand = unknown> = Required<DashboardsRecord<Tlayout>> & BaseSystemFields<Texpand>
 export type DevicesResponse<Tautomation = unknown, Tconfiguration = unknown, Tinformation = unknown, Texpand = unknown> = Required<DevicesRecord<Tautomation, Tconfiguration, Tinformation>> & BaseSystemFields<Texpand>
 export type GalleryResponse<Tmetadata = unknown, Texpand = unknown> = Required<GalleryRecord<Tmetadata>> & BaseSystemFields<Texpand>
-export type InsightsResponse<Tconfig = unknown, Texpand = unknown> = Required<InsightsRecord<Tconfig>> & BaseSystemFields<Texpand>
 export type MessageResponse<Texpand = unknown> = Required<MessageRecord> & BaseSystemFields<Texpand>
 export type ModelsResponse<Tmode_configs = unknown, Tparams = unknown, Tstream_quality = unknown, Texpand = unknown> = Required<ModelsRecord<Tmode_configs, Tparams, Tstream_quality>> & BaseSystemFields<Texpand>
-export type MonitorExecutionsResponse<Tparameters = unknown, Tresult = unknown, Texpand = unknown> = Required<MonitorExecutionsRecord<Tparameters, Tresult>> & BaseSystemFields<Texpand>
-export type MonitorsResponse<Tparameters = unknown, Texpand = unknown> = Required<MonitorsRecord<Tparameters>> & BaseSystemFields<Texpand>
 export type NotificationsResponse<Tmetadata = unknown, Texpand = unknown> = Required<NotificationsRecord<Tmetadata>> & BaseSystemFields<Texpand>
 export type ParametersTreeResponse<Tschema = unknown, Texpand = unknown> = Required<ParametersTreeRecord<Tschema>> & BaseSystemFields<Texpand>
 export type PermissionsResponse<Texpand = unknown> = Required<PermissionsRecord> & BaseSystemFields<Texpand>
@@ -408,6 +341,7 @@ export type RulesResponse<Texpand = unknown> = Required<RulesRecord> & BaseSyste
 export type RunResponse<Tparameters = unknown, Texpand = unknown> = Required<RunRecord<Tparameters>> & BaseSystemFields<Texpand>
 export type StudioHooksResponse<Tparameters = unknown, Texpand = unknown> = Required<StudioHooksRecord<Tparameters>> & BaseSystemFields<Texpand>
 export type TemplatesResponse<Texpand = unknown> = Required<TemplatesRecord> & BaseSystemFields<Texpand>
+export type TerminalSessionsResponse<Tterminal_data = unknown, Texpand = unknown> = Required<TerminalSessionsRecord<Tterminal_data>> & BaseSystemFields<Texpand>
 export type UsersResponse<Texpand = unknown> = Required<UsersRecord> & AuthSystemFields<Texpand>
 
 // Types containing all Records and Responses, useful for creating typing helper functions
@@ -420,14 +354,10 @@ export type CollectionRecords = {
 	_superusers: SuperusersRecord
 	action_logs: ActionLogsRecord
 	actions: ActionsRecord
-	dashboards: DashboardsRecord
 	devices: DevicesRecord
 	gallery: GalleryRecord
-	insights: InsightsRecord
 	message: MessageRecord
 	models: ModelsRecord
-	monitor_executions: MonitorExecutionsRecord
-	monitors: MonitorsRecord
 	notifications: NotificationsRecord
 	parameters_tree: ParametersTreeRecord
 	permissions: PermissionsRecord
@@ -435,6 +365,7 @@ export type CollectionRecords = {
 	run: RunRecord
 	studio_hooks: StudioHooksRecord
 	templates: TemplatesRecord
+	terminal_sessions: TerminalSessionsRecord
 	users: UsersRecord
 }
 
@@ -446,14 +377,10 @@ export type CollectionResponses = {
 	_superusers: SuperusersResponse
 	action_logs: ActionLogsResponse
 	actions: ActionsResponse
-	dashboards: DashboardsResponse
 	devices: DevicesResponse
 	gallery: GalleryResponse
-	insights: InsightsResponse
 	message: MessageResponse
 	models: ModelsResponse
-	monitor_executions: MonitorExecutionsResponse
-	monitors: MonitorsResponse
 	notifications: NotificationsResponse
 	parameters_tree: ParametersTreeResponse
 	permissions: PermissionsResponse
@@ -461,6 +388,7 @@ export type CollectionResponses = {
 	run: RunResponse
 	studio_hooks: StudioHooksResponse
 	templates: TemplatesResponse
+	terminal_sessions: TerminalSessionsResponse
 	users: UsersResponse
 }
 
@@ -475,14 +403,10 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: '_superusers'): RecordService<SuperusersResponse>
 	collection(idOrName: 'action_logs'): RecordService<ActionLogsResponse>
 	collection(idOrName: 'actions'): RecordService<ActionsResponse>
-	collection(idOrName: 'dashboards'): RecordService<DashboardsResponse>
 	collection(idOrName: 'devices'): RecordService<DevicesResponse>
 	collection(idOrName: 'gallery'): RecordService<GalleryResponse>
-	collection(idOrName: 'insights'): RecordService<InsightsResponse>
 	collection(idOrName: 'message'): RecordService<MessageResponse>
 	collection(idOrName: 'models'): RecordService<ModelsResponse>
-	collection(idOrName: 'monitor_executions'): RecordService<MonitorExecutionsResponse>
-	collection(idOrName: 'monitors'): RecordService<MonitorsResponse>
 	collection(idOrName: 'notifications'): RecordService<NotificationsResponse>
 	collection(idOrName: 'parameters_tree'): RecordService<ParametersTreeResponse>
 	collection(idOrName: 'permissions'): RecordService<PermissionsResponse>
@@ -490,5 +414,6 @@ export type TypedPocketBase = PocketBase & {
 	collection(idOrName: 'run'): RecordService<RunResponse>
 	collection(idOrName: 'studio_hooks'): RecordService<StudioHooksResponse>
 	collection(idOrName: 'templates'): RecordService<TemplatesResponse>
+	collection(idOrName: 'terminal_sessions'): RecordService<TerminalSessionsResponse>
 	collection(idOrName: 'users'): RecordService<UsersResponse>
 }
