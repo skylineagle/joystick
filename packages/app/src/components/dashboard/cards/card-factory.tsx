@@ -4,6 +4,7 @@ import { BatteryStatusCard } from "./battery-status-card";
 import { CellStatusCard } from "./cell-status-card";
 import { LocationCard } from "./location-card";
 import { IMUStatusCard } from "./imu-status-card";
+import { TemperatureStatusCard } from "./temperature-status-card";
 import { ActionRunnerCard } from "./action-runner-card";
 import { ParamValueEditorCard } from "./param-value-editor-card";
 import { PingControlCard } from "./ping-control-card";
@@ -45,6 +46,14 @@ export const CardFactory = ({
     case CardType.IMU_STATUS:
       return (
         <IMUStatusCard config={config} isEditing={isEditing} onEdit={onEdit} />
+      );
+    case CardType.TEMPERATURE_STATUS:
+      return (
+        <TemperatureStatusCard
+          config={config}
+          isEditing={isEditing}
+          onEdit={onEdit}
+        />
       );
     case CardType.ACTION_RUNNER:
       return (

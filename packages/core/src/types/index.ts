@@ -1,14 +1,14 @@
 import type {
-  ActionLogsResponse as BaseActionLogsResponse,
   ActionsResponse,
+  ActionLogsResponse as BaseActionLogsResponse,
   RunResponse as BaseRunResponse,
   DevicesResponse,
   ModelsResponse,
-  RulesResponse,
-  UsersResponse,
-  ParametersTreeResponse,
   NotificationsResponse,
+  ParametersTreeResponse,
+  RulesResponse,
   TerminalSessionsResponse,
+  UsersResponse,
 } from "@/types/db.types";
 
 export * from "./db.types";
@@ -33,10 +33,25 @@ export type ModelModeConfigs = {
   };
 };
 
+export type TemperatureLevel = {
+  min: number;
+  max: number;
+  color: string;
+  status: string;
+};
+
+export type TempLevelPresets = {
+  cool: TemperatureLevel;
+  normal: TemperatureLevel;
+  warm: TemperatureLevel;
+  hot: TemperatureLevel;
+};
+
 export type ModelResponse = ModelsResponse<
   ModelModeConfigs,
   unknown,
-  ModelStreamQulity
+  ModelStreamQulity,
+  TempLevelPresets
 >;
 
 export type CPSIResult = {

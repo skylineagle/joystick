@@ -18,6 +18,20 @@ export type ModelStreamQulity = {
   };
 };
 
+export type TemperatureLevel = {
+  min: number;
+  max: number;
+  color: string;
+  status: string;
+};
+
+export type TempLevelPresets = {
+  cool: TemperatureLevel;
+  normal: TemperatureLevel;
+  warm: TemperatureLevel;
+  hot: TemperatureLevel;
+};
+
 export type ModelModeConfigs = {
   [key: string]: {
     label: string;
@@ -32,7 +46,8 @@ export type ModelModeConfigs = {
 export type ModelResponse = ModelsResponse<
   ModelModeConfigs,
   unknown,
-  ModelStreamQulity
+  ModelStreamQulity,
+  TempLevelPresets
 >;
 
 export type CPSIResult = {

@@ -6,6 +6,7 @@ export enum CardType {
   CELL_STATUS = "cell_status",
   LOCATION = "location",
   IMU_STATUS = "imu_status",
+  TEMPERATURE_STATUS = "temperature_status",
   ACTION_RUNNER = "action_runner",
   PARAM_VALUE_EDITOR = "param_value_editor",
   PING_CONTROL = "ping_control",
@@ -50,6 +51,12 @@ export interface IMUStatusCardConfig extends BaseCardConfig {
   deviceId: string;
 }
 
+// Temperature status card configuration
+export interface TemperatureStatusCardConfig extends BaseCardConfig {
+  type: CardType.TEMPERATURE_STATUS;
+  deviceId: string;
+}
+
 // Action runner card configuration
 export interface ActionRunnerCardConfig extends BaseCardConfig {
   type: CardType.ACTION_RUNNER;
@@ -90,6 +97,7 @@ export type CardConfig =
   | CellStatusCardConfig
   | LocationCardConfig
   | IMUStatusCardConfig
+  | TemperatureStatusCardConfig
   | ActionRunnerCardConfig
   | ParamValueEditorCardConfig
   | PingControlCardConfig

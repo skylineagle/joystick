@@ -31,8 +31,6 @@ export function useCellScan(deviceId: string) {
     };
 
     pb.collection("devices").subscribe<DeviceResponse>(deviceId, (event) => {
-      console.log(event);
-
       if (event.action === "update") {
         setScanData(event.record.information?.scan?.data ?? []);
       }
