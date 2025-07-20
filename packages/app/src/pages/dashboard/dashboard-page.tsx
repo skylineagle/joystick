@@ -56,6 +56,7 @@ const CARD_SIZES: Record<
   [CardType.BATTERY_STATUS]: { w: 6, h: 8 },
   [CardType.CELL_STATUS]: { w: 6, h: 8 },
   [CardType.IMU_STATUS]: { w: 6, h: 8 },
+  [CardType.TEMPERATURE_STATUS]: { w: 6, h: 8 },
 
   // Control cards - sized to fit controls, expandable for better interaction
   [CardType.ACTION_RUNNER]: { w: 6, h: 4 },

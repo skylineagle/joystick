@@ -88,18 +88,9 @@ export const useNotifications = () => {
     async (id: string) => {
       if (!user?.id) return;
 
-      console.log(
-        "handleRemoveNotification called with id:",
-        id,
-        "user:",
-        user.id
-      );
-
       try {
         await markNotificationAsDismissed(id, user.id);
-        console.log(
-          "markNotificationAsDismissed completed, invalidating queries"
-        );
+
         queryClient.invalidateQueries({
           queryKey: ["notifications", user?.id],
         });

@@ -1,4 +1,5 @@
 import { ConfigurationEditor } from "@/components/configuration/configuration-editor";
+import { DeviceTemperatureIndicator } from "@/components/device/device-temperature-indicator";
 import { ResetDevice } from "@/components/device/reset-device";
 import { SlotHealthIndicator } from "@/components/device/slot-health-indicator";
 import { Badge } from "@/components/ui/badge";
@@ -124,6 +125,8 @@ export function DeviceHealthIndicator() {
           <p className="text-xs text-muted-foreground">Click to refresh</p>
         </TooltipContent>
       </Tooltip>
+
+      <DeviceTemperatureIndicator />
 
       {device && isAllowedToEditDevice && (
         <ConfigurationEditor device={device} />

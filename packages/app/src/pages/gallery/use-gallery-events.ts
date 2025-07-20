@@ -58,6 +58,5 @@ export function useGalleryEvents(deviceId: string) {
     };
   }, [deviceId]);
 
-  console.log("events", events);
   return { events, isLoading };
 }
