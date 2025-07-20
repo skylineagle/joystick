@@ -63,7 +63,7 @@ export function parseCPSIResult(input: string): CPSIResult | null {
     default:
       return null;
   }
-  result.simSlot = 2;
+
   return result;
 }
 

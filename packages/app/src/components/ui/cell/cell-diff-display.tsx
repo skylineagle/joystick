@@ -40,9 +40,12 @@ const DiffValue = ({
   const getOldValueColor = () => {
     if (!hasChanged) return "text-foreground opacity-70";
 
-    if (label === "RSRP" || label === "RSSI") {
+    if (
+      (label === "RSRP" || label === "RSSI") &&
+      typeof savedValue === "number"
+    ) {
       const qualityInfo = getSignalQuality(
-        savedValue as number,
+        savedValue,
         label.toLowerCase() as SignalMetricType
       );
       return `${qualityInfo.color} opacity-60 line-through`;
@@ -104,11 +107,7 @@ const DiffValue = ({
           {unit && ` ${unit}`}
         </span>
         <span
-          className={cn(
-            "text-[10px]",
-            mono && "font-mono",
-            getOldValueColor()
-          )}
+          className={cn("text-[10px]", mono && "font-mono", getOldValueColor())}
         >
           {formatValue(savedValue)}
           {unit && ` ${unit}`}
@@ -139,9 +138,13 @@ const DiffSignalMetric = ({
 
   const getOldValueColor = () => {
     if (!hasChanged) return "text-foreground opacity-70";
-    
-    const qualityInfo = getSignalQuality(savedValue, type, technology);
-    return `${qualityInfo.color} opacity-60 line-through`;
+
+    if (savedValue !== undefined && savedValue !== null) {
+      const qualityInfo = getSignalQuality(savedValue, type, technology);
+      return `${qualityInfo.color} opacity-60 line-through`;
+    }
+
+    return "text-red-500 dark:text-red-400 opacity-60 line-through";
   };
 
   return (
@@ -160,12 +163,7 @@ const DiffSignalMetric = ({
             hasChanged ? "text-green-600 dark:text-green-400" : undefined
           }
         />
-        <div
-          className={cn(
-            "text-[10px] font-mono",
-            getOldValueColor()
-          )}
-        >
+        <div className={cn("text-[10px] font-mono", getOldValueColor())}>
           {savedValue !== undefined ? `${savedValue} ${unit}` : "N/A"}
         </div>
       </div>
