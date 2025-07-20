@@ -65,6 +65,7 @@ export type CPSIResult = {
   rsrq?: number;
   bsic?: number;
   timingAdvance?: number;
+  simSlot?: number;
 };
 
 export type RuleResponse = RulesResponse & {
