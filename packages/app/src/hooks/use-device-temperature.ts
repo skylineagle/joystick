@@ -25,10 +25,21 @@ export const useDeviceTemperature = (
 
         if (typeof data === "string") {
           const parsed = JSON.parse(data);
+          const tempValue =
+            parsed.temperature ||
+            parsed.temp ||
+            (typeof data === "string" && !isNaN(Number(data))
+              ? Number(data)
+              : null);
+          if (tempValue === null || isNaN(tempValue)) {
+            throw new Error("Invalid temperature data received");
+          }
+
           const result = {
-            temperature: parsed.temperature || parsed.temp || Number(data) || 0,
+            temperature: tempValue,
             unit: parsed.unit || "°C",
           };
+
           onDataFetched?.();
 
           return result;

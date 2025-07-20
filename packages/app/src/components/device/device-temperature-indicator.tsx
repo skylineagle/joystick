@@ -22,7 +22,7 @@ import { useParams } from "react-router";
 export function DeviceTemperatureIndicator() {
   const { device: deviceId } = useParams();
   const { isSupported: isGetTempSupported, isLoading: isSupportedLoading } =
-    useIsSupported(deviceId, "get-temp");
+    useIsSupported(deviceId!, "get-temp");
   const isDeviceTempPermitted = useIsPermitted("device-temp");
   const { data: deviceModel } = useDeviceModel(deviceId ?? "");
   const [lastCheckTime, setLastCheckTime] = useState<Date | null>(null);
