@@ -9,7 +9,7 @@ import type { DeviceInformation } from "../types";
  */
 export const getActiveDeviceConnection = (
   deviceInfo: DeviceInformation
-): { host: string; port?: string; phone?: string } => {
+): { host: string; port?: number; phone?: string } => {
   if (deviceInfo.activeSlot === "secondary" && deviceInfo.secondSlotHost) {
     return {
       host: deviceInfo.secondSlotHost,
