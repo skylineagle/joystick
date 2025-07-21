@@ -527,6 +527,9 @@ const app = new Elysia()
                 "StrictHostKeyChecking=no",
                 "-i",
                 keyFile,
+                ...(device.information?.port
+                  ? ["-p", device.information.port]
+                  : []),
                 ...(device.expand?.device.name === Bun.env.SPECIAL_DEVICE
                   ? ["-o", "HostKeyAlgorithms=+ssh-dss"]
                   : []),
@@ -548,6 +551,9 @@ const app = new Elysia()
             const sshArgs = [
               "-o",
               "StrictHostKeyChecking=no",
+              ...(device.information?.port
+                ? ["-p", device.information.port]
+                : []),
               ...(device.expand?.device.name === Bun.env.SPECIAL_DEVICE
                 ? ["-o", "HostKeyAlgorithms=+ssh-dss"]
                 : []),

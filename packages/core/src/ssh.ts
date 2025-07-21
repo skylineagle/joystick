@@ -14,7 +14,7 @@ export async function runCommandOnDevice(
   }
 
   const { host } = getActiveDeviceConnection(device.information);
-  const { user, password, key } = device.information;
+  const { user, password, port = 22, key } = device.information;
 
   // Use SSH key authentication
   // Create a temporary file to store the SSH key
@@ -32,10 +32,10 @@ export async function runCommandOnDevice(
   }
 
   const result = key
-    ? await $`sshpass -i ${keyFileName} ssh -o StrictHostKeyChecking=no ${user}@${host} '${command}'`.text()
+    ? await $`sshpass -i ${keyFileName} ssh -o StrictHostKeyChecking=no -p ${port} ${user}@${host} '${command}'`.text()
     : password
-    ? await $`sshpass -p ${password} ssh -o StrictHostKeyChecking=no ${user}@${host} '${command}'`.text()
-    : await $`ssh -o StrictHostKeyChecking=no ${user}@${host} '${command}'`.text();
+    ? await $`sshpass -p ${password} ssh -o StrictHostKeyChecking=no -p ${port} ${user}@${host} '${command}'`.text()
+    : await $`ssh -o StrictHostKeyChecking=no -p ${port} ${user}@${host} '${command}'`.text();
 
   return result;
 }

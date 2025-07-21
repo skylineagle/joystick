@@ -19,17 +19,20 @@ export interface SmsResponse {
   timestamp: number;
 }
 
-export interface WebhookEvent {
-  event: string;
-  id: string;
-  status: string;
-
-  payload?: {
-    message?: string;
-    phoneNumber?: string;
-    receivedAt?: string;
-  };
+export interface WebHookPayload {
+  message?: string;
+  phoneNumber?: string;
+  receivedAt?: string;
 }
+
+export type WebhookEvent =
+  | {
+      event: string;
+      id: string;
+      status: string;
+      payload?: WebHookPayload;
+    }
+  | ({ event: string } & WebHookPayload);
 
 export interface PendingSmsMessage {
   resolve: (value: SmsResponse) => void;

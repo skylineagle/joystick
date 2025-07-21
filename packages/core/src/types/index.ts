@@ -102,6 +102,7 @@ export type DeviceInformation = {
   password: string;
   key: string;
   host: string;
+  port?: string;
   phone?: string;
   secondSlotHost?: string;
   secondSlotPhone?: string;

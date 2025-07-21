@@ -357,6 +357,28 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
               />
             </div>
             <div className="grid gap-2">
+              <Label htmlFor="port">Port</Label>
+              <Input
+                id="port"
+                type="number"
+                placeholder="Default: 22"
+                value={editingConfig?.information?.port ?? ""}
+                onChange={(e) =>
+                  setEditingConfig((prev) =>
+                    prev && prev.information
+                      ? {
+                          ...prev,
+                          information: {
+                            ...prev.information,
+                            port: e.target.value || undefined,
+                          },
+                        }
+                      : null
+                  )
+                }
+              />
+            </div>
+            <div className="grid gap-2">
               <Label htmlFor="phone">Phone Number (Primary)</Label>
               <RPNInput.default
                 className="flex rounded-md shadow-xs"
