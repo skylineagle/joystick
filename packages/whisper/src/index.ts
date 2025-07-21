@@ -7,6 +7,7 @@ import Client from "android-sms-gateway";
 import { Elysia, t } from "elysia";
 import { logger } from "./logger";
 import type {
+  AndroidSmsGatewayEvent,
   FetchClient,
   PendingSmsMessage,
   SmsResponse,
@@ -90,79 +91,65 @@ const app = new Elysia()
     );
   })
   // Unauthenticated endpoint for receiving SMS
-  .post(
-    "/api/receive-sms",
-    async ({ body, set }) => {
-      const event = body.event;
-      const message = "message" in body ? body.message : body.payload?.message;
-      const phoneNumber =
-        "phoneNumber" in body ? body.phoneNumber : body.payload?.phoneNumber;
-      const status = "status" in body && body.status;
-      const id = "id" in body && body.id;
+  .post("/api/receive-sms", async ({ body: rawBody, set }) => {
+    const body = rawBody as WebhookEvent;
+    const event = "event" in body ? body.event : undefined;
+    const message =
+      "message" in body
+        ? body.message
+        : (body as AndroidSmsGatewayEvent).payload?.message;
+    const phoneNumber =
+      "phoneNumber" in body
+        ? body.phoneNumber
+        : (body as AndroidSmsGatewayEvent).payload?.phoneNumber;
+    const status = "status" in body && body.status;
+    const id = "id" in body && body.id;
 
-      if (event === "sms:received" && phoneNumber) {
-        const pendingMessage = pendingSmsMessages.get(phoneNumber);
+    if (event === "sms:received" && phoneNumber) {
+      const pendingMessage = pendingSmsMessages.get(phoneNumber);
 
-        if (pendingMessage) {
-          const response: SmsResponse = {
-            id: id || "unknown",
-            status: status || "unknown",
-            message,
-            timestamp: Date.now(),
-          };
+      if (pendingMessage) {
+        const response: SmsResponse = {
+          id: id || "unknown",
+          status: status || "unknown",
+          message,
+          timestamp: Date.now(),
+        };
 
-          pendingMessage.resolve(response);
-          set.status = 200;
-        }
-
-        let deviceId;
-        try {
-          const devices = await pb.collection("devices").getFullList({
-            filter: `information.phone='${phoneNumber}' || information.secondSlotPhone='${phoneNumber}'`,
-          });
-
-          const activeDevice = devices.find((device) => {
-            const { phone } = getActiveDeviceConnection(device.information);
-
-            return phone === phoneNumber;
-          });
-
-          if (activeDevice && activeDevice.id) {
-            deviceId = activeDevice.id;
-          }
-          logger.debug(deviceId);
-
-          await pb.collection("message").create({
-            device: deviceId,
-            direction: "from",
-            message,
-            phone: phoneNumber,
-          });
-        } catch {}
-
-        return { success: true };
+        pendingMessage.resolve(response);
+        set.status = 200;
       }
 
-      set.status = 200;
+      let deviceId;
+      try {
+        const devices = await pb.collection("devices").getFullList({
+          filter: `information.phone='${phoneNumber}' || information.secondSlotPhone='${phoneNumber}'`,
+        });
+
+        const activeDevice = devices.find((device) => {
+          const { phone } = getActiveDeviceConnection(device.information);
+
+          return phone === phoneNumber;
+        });
+
+        if (activeDevice && activeDevice.id) {
+          deviceId = activeDevice.id;
+        }
+
+        await pb.collection("message").create({
+          device: deviceId,
+          direction: "from",
+          message,
+          phone: phoneNumber,
+        });
+      } catch {}
+
       return { success: true };
-    },
-    {
-      body: t.Union([
-        t.Object({
-          event: t.String(),
-          id: t.String(),
-          status: t.String(),
-          payload: t.Object({ phoneNumber: t.String(), message: t.String() }),
-        }),
-        t.Object({
-          event: t.String(),
-          phoneNumber: t.String(),
-          message: t.String(),
-          status: t.String(),
-        }),
-      ]),
     }
-  )
+
+    set.status = 200;
+    return { success: true };
+  })
   // Authenticated group for all other endpoints
   .group("/api", (app) =>
     app
