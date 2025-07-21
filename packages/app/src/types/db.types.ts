@@ -188,9 +188,10 @@ export enum ModelsStreamOptions {
 	"ws" = "ws",
 	"none" = "none",
 }
-export type ModelsRecord<Tmode_configs = unknown, Tparams = unknown, Tstream_quality = unknown, Ttemp_levels = unknown> = {
+export type ModelsRecord<Tmessage_persets = unknown, Tmode_configs = unknown, Tparams = unknown, Tstream_quality = unknown, Ttemp_levels = unknown> = {
 	created?: IsoDateString
 	id: string
+	message_persets?: null | Tmessage_persets
 	mode_configs?: null | Tmode_configs
 	name: string
 	params: null | Tparams
@@ -334,7 +335,7 @@ export type ActionsResponse<Texpand = unknown> = Required<ActionsRecord> & BaseS
 export type DevicesResponse<Tautomation = unknown, Tconfiguration = unknown, Tinformation = unknown, Texpand = unknown> = Required<DevicesRecord<Tautomation, Tconfiguration, Tinformation>> & BaseSystemFields<Texpand>
 export type GalleryResponse<Tmetadata = unknown, Texpand = unknown> = Required<GalleryRecord<Tmetadata>> & BaseSystemFields<Texpand>
 export type MessageResponse<Texpand = unknown> = Required<MessageRecord> & BaseSystemFields<Texpand>
-export type ModelsResponse<Tmode_configs = unknown, Tparams = unknown, Tstream_quality = unknown, Ttemp_levels = unknown, Texpand = unknown> = Required<ModelsRecord<Tmode_configs, Tparams, Tstream_quality, Ttemp_levels>> & BaseSystemFields<Texpand>
+export type ModelsResponse<Tmessage_persets = unknown, Tmode_configs = unknown, Tparams = unknown, Tstream_quality = unknown, Ttemp_levels = unknown, Texpand = unknown> = Required<ModelsRecord<Tmessage_persets, Tmode_configs, Tparams, Tstream_quality, Ttemp_levels>> & BaseSystemFields<Texpand>
 export type NotificationsResponse<Tmetadata = unknown, Texpand = unknown> = Required<NotificationsRecord<Tmetadata>> & BaseSystemFields<Texpand>
 export type ParametersTreeResponse<Tschema = unknown, Texpand = unknown> = Required<ParametersTreeRecord<Tschema>> & BaseSystemFields<Texpand>
 export type PermissionsResponse<Texpand = unknown> = Required<PermissionsRecord> & BaseSystemFields<Texpand>

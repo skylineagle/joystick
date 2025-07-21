@@ -214,6 +214,15 @@ export function CellularStatus({ deviceId }: CellularStatusProps) {
                 </div>
               </div>
 
+              {data?.simSlot !== undefined && (
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                    SIM Slot {data.simSlot}
+                  </span>
+                </div>
+              )}
+
               <CellInfoDisplay
                 label="Provider"
                 value={data?.operator || "Unknown"}

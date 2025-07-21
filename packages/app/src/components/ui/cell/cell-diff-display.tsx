@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/cell";
 import { cn } from "@/lib/utils";
 import { CPSIResult } from "@/types/types";
-import { SignalMetricType } from "@/utils/cell";
+import { SignalMetricType, getSignalQuality } from "@/utils/cell";
 
 interface CellDiffDisplayProps {
   current: CPSIResult;
@@ -37,6 +37,23 @@ const DiffValue = ({
     return typeof value === "number" ? value.toString() : value;
   };
 
+  const getOldValueColor = () => {
+    if (!hasChanged) return "text-foreground opacity-70";
+
+    if (
+      (label === "RSRP" || label === "RSSI") &&
+      typeof savedValue === "number"
+    ) {
+      const qualityInfo = getSignalQuality(
+        savedValue,
+        label.toLowerCase() as SignalMetricType
+      );
+      return `${qualityInfo.color} opacity-60 line-through`;
+    }
+
+    return "text-red-500 dark:text-red-400 opacity-60 line-through";
+  };
+
   if (layout === "vertical") {
     return (
       <div className="space-y-1">
@@ -58,11 +75,9 @@ const DiffValue = ({
           </div>
           <div
             className={cn(
-              "text-[10px] opacity-60",
+              "text-[10px]",
               mono && "font-mono",
-              hasChanged
-                ? "text-red-500 dark:text-red-400 line-through"
-                : "text-muted-foreground"
+              getOldValueColor()
             )}
           >
             {formatValue(savedValue)}
@@ -92,13 +107,7 @@ const DiffValue = ({
           {unit && ` ${unit}`}
         </span>
         <span
-          className={cn(
-            "text-[10px] opacity-60",
-            mono && "font-mono",
-            hasChanged
-              ? "text-red-500 dark:text-red-400 line-through"
-              : "text-muted-foreground"
-          )}
+          className={cn("text-[10px]", mono && "font-mono", getOldValueColor())}
         >
           {formatValue(savedValue)}
           {unit && ` ${unit}`}
@@ -127,6 +136,17 @@ const DiffSignalMetric = ({
 }: DiffSignalMetricProps) => {
   const hasChanged = currentValue !== savedValue;
 
+  const getOldValueColor = () => {
+    if (!hasChanged) return "text-foreground opacity-70";
+
+    if (savedValue !== undefined && savedValue !== null) {
+      const qualityInfo = getSignalQuality(savedValue, type, technology);
+      return `${qualityInfo.color} opacity-60 line-through`;
+    }
+
+    return "text-red-500 dark:text-red-400 opacity-60 line-through";
+  };
+
   return (
     <div className="space-y-1">
       <div className="text-[10px] text-muted-foreground font-medium">
@@ -143,14 +163,7 @@ const DiffSignalMetric = ({
             hasChanged ? "text-green-600 dark:text-green-400" : undefined
           }
         />
-        <div
-          className={cn(
-            "text-[10px] font-mono opacity-60",
-            hasChanged
-              ? "text-red-500 dark:text-red-400 line-through"
-              : "text-muted-foreground"
-          )}
-        >
+        <div className={cn("text-[10px] font-mono", getOldValueColor())}>
           {savedValue !== undefined ? `${savedValue} ${unit}` : "N/A"}
         </div>
       </div>
@@ -261,6 +274,30 @@ export const CellDiffDisplay = ({
         savedValue={saved?.cellId}
         mono
       />
+
+      {current?.simSlot !== undefined && (
+        <div className="space-y-1">
+          <div className="text-[10px] text-muted-foreground font-medium">
+            SIM Slot
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <div className="w-1 h-1 bg-blue-500 rounded-full animate-pulse"></div>
+              <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                {current.simSlot}
+              </span>
+            </div>
+            {current.simSlot !== saved?.simSlot && (
+              <div className="flex items-center gap-1.5 opacity-60 line-through">
+                <div className="w-1 h-1 bg-red-500 rounded-full"></div>
+                <span className="text-xs font-medium text-red-600 dark:text-red-400">
+                  {saved?.simSlot}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-2 pt-1 text-xs w-full">
         <DiffValue
