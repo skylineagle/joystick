@@ -3,15 +3,24 @@ import { urls } from "@/lib/urls";
 import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Send } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "@/utils/toast";
+import { MessagePreset } from "@/hooks/use-message-presets";
 
 interface NewMessageProps {
   deviceId: string;
+  onPresetSelect?: (preset: MessagePreset) => void;
+  selectedPreset?: MessagePreset | null;
 }
 
-export const NewMessage = ({ deviceId }: NewMessageProps) => {
+export const NewMessage = ({ deviceId, selectedPreset }: NewMessageProps) => {
   const [input, setInput] = useState("");
+
+  useEffect(() => {
+    if (selectedPreset) {
+      setInput(selectedPreset.message);
+    }
+  }, [selectedPreset]);
   const { mutate: sendMessageMutation, isPending } = useMutation({
     mutationFn: async () => {
       const result = await joystickApi.post<{

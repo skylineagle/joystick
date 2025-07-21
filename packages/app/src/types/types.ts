@@ -32,6 +32,12 @@ export type TempLevelPresets = {
   hot: TemperatureLevel;
 };
 
+export type MessagePreset = {
+  id: string;
+  name: string;
+  message: string;
+};
+
 export type ModelModeConfigs = {
   [key: string]: {
     label: string;
@@ -44,6 +50,7 @@ export type ModelModeConfigs = {
 };
 
 export type ModelResponse = ModelsResponse<
+  MessagePreset[],
   ModelModeConfigs,
   unknown,
   ModelStreamQulity,

@@ -2,10 +2,12 @@ import { useTheme } from "@/components/theme-provider";
 import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 import { useIsSupported } from "@/hooks/use-is-supported";
 import { useMessages } from "@/hooks/use-messages";
+import { useMessagePresets, MessagePreset } from "@/hooks/use-message-presets";
 import { useAuthStore } from "@/lib/auth";
 import { pb } from "@/lib/pocketbase";
 import { Message } from "@/pages/messages/message";
 import { NewMessage } from "@/pages/messages/new-message";
+import { MessagePresetsManager } from "@/components/messages/message-presets-manager";
 import {
   DevicesResponse,
   MessageResponse,
@@ -30,6 +32,10 @@ export function MessagesPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { messages, isLoading } = useMessages(deviceId);
+  const { data: presets = [] } = useMessagePresets(deviceId!);
+  const [selectedPreset, setSelectedPreset] = useState<MessagePreset | null>(
+    null
+  );
 
   const isMessageSeen = useCallback(
     (message: MessageWithSeen) => {
@@ -195,7 +201,20 @@ export function MessagesPage() {
       </div>
 
       <div className="border-t border-border bg-background p-4">
-        <NewMessage deviceId={deviceId!} />
+        <div className="space-y-3">
+          <MessagePresetsManager
+            deviceId={deviceId!}
+            presets={presets}
+            onPresetSelect={setSelectedPreset}
+          />
+          <div className="relative">
+            <NewMessage
+              deviceId={deviceId!}
+              onPresetSelect={setSelectedPreset}
+              selectedPreset={selectedPreset}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
