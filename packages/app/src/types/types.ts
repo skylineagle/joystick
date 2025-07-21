@@ -98,7 +98,7 @@ export type DeviceInformation = {
   password: string;
   key?: string;
   host: string;
-  port?: string;
+  port?: number;
   phone?: string;
   secondSlotHost?: string;
   secondSlotPhone?: string;
