@@ -18,7 +18,7 @@ export const NewMessage = ({ deviceId }: NewMessageProps) => {
         success: boolean;
         output: string;
       }>(`${urls.joystick}/api/run/${deviceId}/send-sms`, {
-        message: input,
+        sms: input,
       });
 
       try {
