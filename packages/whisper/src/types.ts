@@ -25,13 +25,15 @@ export interface WebHookPayload {
   receivedAt?: string;
 }
 
+export type AndroidSmsGatewayEvent = {
+  event: string;
+  id: string;
+  status: string;
+  payload?: WebHookPayload;
+};
+
 export type WebhookEvent =
-  | {
-      event: string;
-      id: string;
-      status: string;
-      payload?: WebHookPayload;
-    }
+  | AndroidSmsGatewayEvent
   | ({ event: string } & WebHookPayload);
 
 export interface PendingSmsMessage {
