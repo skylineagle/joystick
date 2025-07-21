@@ -32,7 +32,9 @@ export type AndroidSmsGatewayEvent = {
   payload?: WebHookPayload;
 };
 
-export type WebhookEvent = AndroidSmsGatewayEvent | WebHookPayload;
+export type WebhookEvent =
+  | AndroidSmsGatewayEvent
+  | ({ event: string } & WebHookPayload);
 
 export interface PendingSmsMessage {
   resolve: (value: SmsResponse) => void;

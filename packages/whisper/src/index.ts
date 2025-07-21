@@ -93,7 +93,7 @@ const app = new Elysia()
   // Unauthenticated endpoint for receiving SMS
   .post("/api/receive-sms", async ({ body: rawBody, set }) => {
     const body = rawBody as WebhookEvent;
-    const event = "event" in body ? body.event : undefined;
+    const event = body.event;
     const message =
       "message" in body
         ? body.message
