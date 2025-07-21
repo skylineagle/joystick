@@ -2,12 +2,14 @@ const getActiveDeviceConnection = (deviceInfo) => {
   if (deviceInfo?.activeSlot === "secondary" && deviceInfo?.secondSlotHost) {
     return {
       host: deviceInfo.secondSlotHost,
+      port: deviceInfo.port,
       phone: deviceInfo.secondSlotPhone,
     };
   }
 
   return {
     host: deviceInfo.host,
+    port: deviceInfo.port,
     phone: deviceInfo.phone,
   };
 };
