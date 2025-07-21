@@ -370,7 +370,7 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
                           ...prev,
                           information: {
                             ...prev.information,
-                            port: e.target.value || undefined,
+                            port: parseInt(e.target.value) || undefined,
                           },
                         }
                       : null
