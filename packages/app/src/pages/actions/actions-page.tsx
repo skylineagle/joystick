@@ -120,7 +120,7 @@ export function ActionsPage() {
                   <div className="p-3 rounded-md border">
                     <ScrollArea
                       className={cn(
-                        "w-full font-mono text-sm",
+                        "w-full font-mono text-sm overflow-y-auto",
                         expandedResult ? "max-h-96" : "max-h-32"
                       )}
                     >
