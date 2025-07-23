@@ -37,6 +37,7 @@ services:
       - "8888:8888" # API and metrics
       - "8889:8889" # HLS
       - "1935:1935" # RTMP
+      - "5555:5555"
     volumes:
       - ./mediamtx/mediamtx.yml:/mediamtx.yml
     networks:

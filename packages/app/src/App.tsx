@@ -81,6 +81,11 @@ const DashboardPage = lazy(() =>
     default: module.DashboardPage,
   }))
 );
+const AudioView = lazy(() =>
+  import("@/pages/audio-view/audio-view").then((module) => ({
+    default: module.AudioView,
+  }))
+);
 
 // Loading fallback component
 const LoadingFallback = () => (
@@ -291,6 +296,20 @@ function AnimatedRoutes() {
                 <ErrorBoundary>
                   <PageTransition>
                     <StreamView />
+                  </PageTransition>
+                </ErrorBoundary>
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="audio"
+          element={
+            <Layout>
+              <Suspense fallback={<LoadingFallback />}>
+                <ErrorBoundary>
+                  <PageTransition>
+                    <AudioView />
                   </PageTransition>
                 </ErrorBoundary>
               </Suspense>

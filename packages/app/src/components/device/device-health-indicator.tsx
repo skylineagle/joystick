@@ -24,8 +24,10 @@ import { useParams } from "react-router";
 export function DeviceHealthIndicator() {
   const { device: deviceId } = useParams();
   const { data: device } = useDevice(deviceId ?? "");
-  const { isSupported: isHealthcheckSupported, isLoading: isSupportedLoading } =
-    useIsSupported(deviceId ?? "", "healthcheck");
+  const { isSupported: isHealthcheckSupported } = useIsSupported(
+    deviceId ?? "",
+    "healthcheck"
+  );
   const { isSupported: isResetSupported } = useIsSupported(
     deviceId ?? "",
     "reset"
@@ -60,7 +62,7 @@ export function DeviceHealthIndicator() {
     await refetch();
   };
 
-  if (!deviceId || isSupportedLoading || !isHealthcheckSupported) {
+  if (!deviceId) {
     return null;
   }
 
@@ -68,63 +70,65 @@ export function DeviceHealthIndicator() {
 
   return (
     <div className="flex items-center gap-2">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <div className="relative group">
-            {isLoading ? (
-              <Badge
-                variant="outline"
-                className="h-8 px-2 flex items-center gap-1 animate-pulse"
-              >
-                <div className="h-2 w-2 rounded-full" />
-                <span className="text-xs">Checking...</span>
-              </Badge>
-            ) : isConnected ? (
-              <Badge
-                variant="outline"
-                className="h-8 px-2 flex items-center gap-1 text-emerald-500 dark:text-green-300"
-              >
-                <Wifi className="h-3 w-3" />
-                <span className="text-xs">Connected</span>
-              </Badge>
-            ) : (
-              <Badge
-                variant="outline"
-                className="h-8 px-2 flex items-center gap-1 text-rose-600 dark:text-red-300"
-              >
-                <WifiOff className="h-3 w-3" />
-                <span className="text-xs">Disconnected</span>
-              </Badge>
-            )}
+      {isHealthcheckSupported && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div className="relative group">
+              {isLoading ? (
+                <Badge
+                  variant="outline"
+                  className="h-8 px-2 flex items-center gap-1 animate-pulse"
+                >
+                  <div className="h-2 w-2 rounded-full" />
+                  <span className="text-xs">Checking...</span>
+                </Badge>
+              ) : isConnected ? (
+                <Badge
+                  variant="outline"
+                  className="h-8 px-2 flex items-center gap-1 text-emerald-500 dark:text-green-300"
+                >
+                  <Wifi className="h-3 w-3" />
+                  <span className="text-xs">Connected</span>
+                </Badge>
+              ) : (
+                <Badge
+                  variant="outline"
+                  className="h-8 px-2 flex items-center gap-1 text-rose-600 dark:text-red-300"
+                >
+                  <WifiOff className="h-3 w-3" />
+                  <span className="text-xs">Disconnected</span>
+                </Badge>
+              )}
 
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute -right-2 -top-2 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={handleRefresh}
-              disabled={isLoading || isRefetchingHealthcheck}
-            >
-              <RefreshCw
-                className={cn(
-                  "h-3 w-3",
-                  isLoading || isRefetchingHealthcheck ? "animate-spin" : ""
-                )}
-              />
-            </Button>
-          </div>
-        </TooltipTrigger>
-        <SlotHealthIndicator deviceId={deviceId!} />
-        <TooltipContent>
-          <p>
-            {lastCheckTime
-              ? `Last checked ${formatDistanceToNow(lastCheckTime, {
-                  addSuffix: true,
-                })}`
-              : "No check performed yet"}
-          </p>
-          <p className="text-xs text-muted-foreground">Click to refresh</p>
-        </TooltipContent>
-      </Tooltip>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute -right-2 -top-2 h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={handleRefresh}
+                disabled={isLoading || isRefetchingHealthcheck}
+              >
+                <RefreshCw
+                  className={cn(
+                    "h-3 w-3",
+                    isLoading || isRefetchingHealthcheck ? "animate-spin" : ""
+                  )}
+                />
+              </Button>
+            </div>
+          </TooltipTrigger>
+          <SlotHealthIndicator deviceId={deviceId!} />
+          <TooltipContent>
+            <p>
+              {lastCheckTime
+                ? `Last checked ${formatDistanceToNow(lastCheckTime, {
+                    addSuffix: true,
+                  })}`
+                : "No check performed yet"}
+            </p>
+            <p className="text-xs text-muted-foreground">Click to refresh</p>
+          </TooltipContent>
+        </Tooltip>
+      )}
 
       <DeviceTemperatureIndicator />
 

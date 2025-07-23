@@ -13,6 +13,7 @@ import { useIsPermitted } from "@/hooks/use-is-permitted";
 import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 import { useMobileLandscape } from "@/hooks/use-mobile-landscape";
 import { useIsCellSearchSupported } from "@/hooks/use-support-cell-search";
+import { useIsAudioSupported } from "@/hooks/use-support-audio";
 import { useIsMediaSupported } from "@/hooks/use-support-media";
 import { useIsParamsSupported } from "@/hooks/use-support-params";
 import { useIsTerminalSupported } from "@/hooks/use-support-terminal";
@@ -82,8 +83,10 @@ export function Layout({ children }: LayoutProps) {
   const isParamsSupported = useIsParamsSupported(deviceId!);
   const isTerminalSupported = useIsTerminalSupported(deviceId!);
   const isMediaSupported = useIsMediaSupported(deviceId!);
+  const isAudioSupported = useIsAudioSupported(deviceId!);
   const isCellSearchSupported = useIsCellSearchSupported(deviceId!);
   const isMediaRouteAllowed = useIsRouteAllowed("media");
+  const isAudioRouteAllowed = useIsRouteAllowed("audio");
   const isActionRouteAllowed = useIsRouteAllowed("action");
   const isParamsRouteAllowed = useIsRouteAllowed("parameters");
   const isGalleryRouteAllowed = useIsRouteAllowed("gallery");
@@ -96,8 +99,10 @@ export function Layout({ children }: LayoutProps) {
     !!isParamsSupported,
     !!isTerminalSupported,
     !!isMediaSupported,
+    !!isAudioSupported,
     !!isCellSearchSupported,
     !!isMediaRouteAllowed,
+    !!isAudioRouteAllowed,
     !!isActionRouteAllowed,
     !!isParamsRouteAllowed,
     !!isGalleryRouteAllowed,

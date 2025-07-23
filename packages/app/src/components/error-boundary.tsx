@@ -56,10 +56,12 @@ export function ErrorBoundary({ children, fallback }: ErrorBoundaryProps) {
           <div className="flex max-w-md flex-col items-center gap-4 text-center">
             <AlertTriangle className="h-12 w-12 text-destructive" />
             <h1 className="text-2xl font-bold">Something went wrong</h1>
-            <p className="text-muted-foreground">
-              {error?.message ||
-                "An unexpected error occurred. The application has recovered, but some data may have been lost."}
-            </p>
+            <div className="bg-muted/30 rounded-md p-3 border">
+              <p className="text-sm text-muted-foreground font-mono select-text cursor-text">
+                {error?.message ||
+                  "An unexpected error occurred. The application has recovered, but some data may have been lost."}
+              </p>
+            </div>
             <Button
               onClick={() => {
                 setHasError(false);

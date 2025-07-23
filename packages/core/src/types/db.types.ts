@@ -191,6 +191,7 @@ export enum ModelsStreamOptions {
 export type ModelsRecord<Tmessage_persets = unknown, Tmode_configs = unknown, Tparams = unknown, Tstream_quality = unknown, Ttemp_levels = unknown> = {
 	created?: IsoDateString
 	id: string
+	isAudio?: boolean
 	message_persets?: null | Tmessage_persets
 	mode_configs?: null | Tmode_configs
 	name: string
