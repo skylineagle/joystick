@@ -32,7 +32,7 @@ export async function runCommandOnDevice(
   }
 
   const result = key
-    ? await $`sshpass -i ${keyFileName} ssh -o StrictHostKeyChecking=no -p ${port} ${user}@${host} '${command}'`.text()
+    ? await $`ssh -i ${keyFileName} -o StrictHostKeyChecking=no -p ${port} ${user}@${host} '${command}'`.text()
     : password
     ? await $`sshpass -p ${password} ssh -o StrictHostKeyChecking=no -p ${port} ${user}@${host} '${command}'`.text()
     : await $`ssh -o StrictHostKeyChecking=no -p ${port} ${user}@${host} '${command}'`.text();
