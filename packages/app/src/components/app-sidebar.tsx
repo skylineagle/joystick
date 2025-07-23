@@ -113,7 +113,7 @@ export const getAvailableNavItems = (
     }
     if (
       item.path === "stream" &&
-      (!isMediaSupported || !isMediaRouteAllowed || isAudioRouteAllowed)
+      (!isMediaSupported || !isMediaRouteAllowed || (isAudioSupported && isAudioRouteAllowed))
     ) {
       return false;
     }
