@@ -61,7 +61,6 @@ export function AudioView() {
       <div className="text-center mb-8">
         <Music className="size-12 mx-auto mb-4 text-primary" />
         <h1 className="text-2xl font-bold mb-2">{device.name}</h1>
-        <p className="text-muted-foreground">Audio Stream</p>
       </div>
 
       <AudioVisualizer isPlaying={isPlaying} className="mb-8" />

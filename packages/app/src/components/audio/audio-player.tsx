@@ -246,10 +246,6 @@ export const AudioPlayer = ({
             />
           </div>
         </div>
-
-        <div className="text-xs text-muted-foreground text-center">
-          Streaming from: {deviceName}
-        </div>
       </div>
     </div>
   );
