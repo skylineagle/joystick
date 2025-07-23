@@ -1,10 +1,8 @@
 import { AudioPlayer } from "@/components/audio/audio-player";
-import { AudioVisualizer } from "@/components/audio/audio-visualizer";
 import { useDevice } from "@/hooks/use-device";
-import { useIsAudioSupported } from "@/hooks/use-support-audio";
 import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
+import { useIsAudioSupported } from "@/hooks/use-support-audio";
 import { Music } from "lucide-react";
-import { useState } from "react";
 import { useParams } from "react-router";
 
 export function AudioView() {
@@ -12,7 +10,6 @@ export function AudioView() {
   const { data: device } = useDevice(deviceId ?? "");
   const isAudioSupported = useIsAudioSupported(deviceId ?? "");
   const isRouteAllowed = useIsRouteAllowed("audio");
-  const [isPlaying, setIsPlaying] = useState(false);
 
   if (!isAudioSupported) {
     return (
@@ -63,13 +60,8 @@ export function AudioView() {
         <h1 className="text-2xl font-bold mb-2">{device.name}</h1>
       </div>
 
-      <AudioVisualizer isPlaying={isPlaying} className="mb-8" />
-
       <div className="w-full max-w-md">
-        <AudioPlayer
-          deviceName={device.configuration?.name || ""}
-          onPlayingChange={setIsPlaying}
-        />
+        <AudioPlayer deviceName={device.configuration?.name || ""} />
       </div>
     </div>
   );
