@@ -239,8 +239,8 @@ onRecordUpdateRequest((e) => {
 
       const sourceTemplateValue = sourceTemplate[0].get("value");
       const sourceUrl = sourceTemplateValue
-        .replace("<ip>", activeHost)
-        .replace("<id>", configuration.name);
+        .replaceAll("<ip>", activeHost)
+        .replaceAll("<id>", configuration.name);
 
       e.record.set("configuration", {
         ...configuration,
