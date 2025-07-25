@@ -24,11 +24,9 @@ import { useEffect, useRef, useState } from "react";
 
 interface DocumentPreviewProps {
   url: string;
-  fileName: string;
-  extension?: string;
 }
 
-const DocumentPreview = ({ url, fileName, extension }: DocumentPreviewProps) => {
+const DocumentPreview = ({ url }: DocumentPreviewProps) => {
   const [content, setContent] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,10 +66,7 @@ const DocumentPreview = ({ url, fileName, extension }: DocumentPreviewProps) => 
       <div className="flex flex-col items-center justify-center p-8">
         <FileText className="h-16 w-16 mb-4 text-muted-foreground" />
         <p className="text-red-500 mb-4">{error}</p>
-        <Button
-          variant="outline"
-          onClick={() => window.open(url, "_blank")}
-        >
+        <Button variant="outline" onClick={() => window.open(url, "_blank")}>
           Open File
         </Button>
       </div>
@@ -79,39 +74,14 @@ const DocumentPreview = ({ url, fileName, extension }: DocumentPreviewProps) => 
   }
 
   // Format content based on file type
-  let formattedContent = content;
-  let language = "text";
-  
-  if (extension === "json") {
-    try {
-      const parsed = JSON.parse(content);
-      formattedContent = JSON.stringify(parsed, null, 2);
-      language = "json";
-    } catch {
-      // If JSON parsing fails, show as plain text
-    }
-  } else if (extension === "xml") {
-    language = "xml";
-  } else if (extension === "html") {
-    language = "html";
-  } else if (extension === "css") {
-    language = "css";
-  } else if (["js", "ts"].includes(extension || "")) {
-    language = extension === "ts" ? "typescript" : "javascript";
-  } else if (extension === "py") {
-    language = "python";
-  } else if (["cpp", "c", "h"].includes(extension || "")) {
-    language = "cpp";
-  } else if (extension === "sql") {
-    language = "sql";
-  } else if (extension === "md") {
-    language = "markdown";
-  }
+  const formattedContent = content;
 
   // Limit content size for performance
   const maxContentLength = 100000; // 100KB
   const isTruncated = content.length > maxContentLength;
-  const displayContent = isTruncated ? content.substring(0, maxContentLength) + "\n\n... (content truncated)" : formattedContent;
+  const displayContent = isTruncated
+    ? content.substring(0, maxContentLength) + "\n\n... (content truncated)"
+    : formattedContent;
 
   return (
     <div className="w-full h-full flex flex-col">
@@ -119,7 +89,8 @@ const DocumentPreview = ({ url, fileName, extension }: DocumentPreviewProps) => 
         <div className="bg-muted/50 p-4 rounded-lg max-h-[60vh] overflow-auto">
           {isTruncated && (
             <div className="mb-2 p-2 bg-yellow-100 text-yellow-800 rounded text-xs">
-              File is too large to display completely. Showing first {maxContentLength.toLocaleString()} characters.
+              File is too large to display completely. Showing first{" "}
+              {maxContentLength.toLocaleString()} characters.
             </div>
           )}
           <pre className="text-sm font-mono whitespace-pre-wrap break-words">
@@ -241,7 +212,7 @@ export const FocusedEvent = ({
           </p>
           <Button
             variant="outline"
-            onClick={() => pullMutation.mutate(focusedEvent.id)}
+            onClick={() => pullMutation.mutate(focusedEvent?.id || "")}
             disabled={pullMutation.isPending}
           >
             {pullMutation.isPending ? (
@@ -320,12 +291,28 @@ export const FocusedEvent = ({
           />
         );
       case "document":
-        return <DocumentPreview url={url} fileName={fileName} extension={extension} />;
-      default:
+        return <DocumentPreview url={url} />;
+      default: {
         // Check if it's a text-based file by extension
-        const textExtensions = ["txt", "md", "json", "xml", "csv", "log", "js", "ts", "py", "cpp", "c", "h", "html", "css", "sql"];
+        const textExtensions = [
+          "txt",
+          "md",
+          "json",
+          "xml",
+          "csv",
+          "log",
+          "js",
+          "ts",
+          "py",
+          "cpp",
+          "c",
+          "h",
+          "html",
+          "css",
+          "sql",
+        ];
         if (extension && textExtensions.includes(extension)) {
-          return <DocumentPreview url={url} fileName={fileName} extension={extension} />;
+          return <DocumentPreview url={url} />;
         }
         return (
           <div className="flex flex-col items-center justify-center p-8">
@@ -338,6 +325,7 @@ export const FocusedEvent = ({
             </Button>
           </div>
         );
+      }
     }
   };
 
@@ -414,8 +402,12 @@ export const FocusedEvent = ({
                           variant="outline"
                           onClick={() => {
                             const link = document.createElement("a");
-                            link.href = pb.files.getURL(focusedEvent, focusedEvent.event);
-                            link.download = focusedEvent.name || focusedEvent.event_id;
+                            link.href = pb.files.getURL(
+                              focusedEvent,
+                              focusedEvent.event
+                            );
+                            link.download =
+                              focusedEvent.name || focusedEvent.event_id;
                             link.click();
                           }}
                         >
