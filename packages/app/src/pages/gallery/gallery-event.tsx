@@ -1,6 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { joystickApi } from "@/lib/api-client";
 import { useAuthStore } from "@/lib/auth";
 import { pb } from "@/lib/pocketbase";
@@ -38,6 +44,13 @@ const formatFileSize = (bytes: number) => {
   return `${kb.toFixed(2)} KB`;
 };
 
+const getFileName = (fullPath: string) => {
+  if (!fullPath) return "";
+  // Handle both forward and backward slashes
+  const parts = fullPath.split(/[/\\]/);
+  return parts[parts.length - 1] || fullPath;
+};
+
 const formatDate = (date: string | Date) => {
   return new Date(date).toLocaleString(undefined, {
     year: "numeric",
@@ -69,13 +82,40 @@ const getFileIcon = (mediaType: string, name: string) => {
       return <FileAudio className="h-4 w-4 text-purple-500" />;
     case "image":
       return <FileImage className="h-4 w-4 text-green-500" />;
+    case "document":
+      switch (extension) {
+        case "txt":
+        case "log":
+        case "md":
+          return <FileText className="h-4 w-4 text-gray-500" />;
+        case "json":
+          return <FileJson className="h-4 w-4 text-yellow-500" />;
+        case "xml":
+        case "html":
+        case "css":
+          return <FileCode className="h-4 w-4 text-cyan-500" />;
+        case "csv":
+          return <FileText className="h-4 w-4 text-green-500" />;
+        default:
+          return <FileText className="h-4 w-4 text-gray-500" />;
+      }
     default:
       switch (extension) {
         case "txt":
         case "log":
+        case "md":
           return <FileText className="h-4 w-4 text-gray-500" />;
         case "json":
           return <FileJson className="h-4 w-4 text-yellow-500" />;
+        case "xml":
+        case "html":
+        case "css":
+          return <FileCode className="h-4 w-4 text-cyan-500" />;
+        case "csv":
+          return <FileText className="h-4 w-4 text-green-500" />;
+        case "heic":
+        case "heif":
+          return <FileImage className="h-4 w-4 text-green-500" />;
         case "zip":
         case "tar":
         case "gz":
@@ -84,6 +124,9 @@ const getFileIcon = (mediaType: string, name: string) => {
         case "ts":
         case "py":
         case "cpp":
+        case "c":
+        case "h":
+        case "sql":
           return <FileCode className="h-4 w-4 text-cyan-500" />;
         default:
           return <File className="h-4 w-4 text-gray-500" />;
@@ -91,8 +134,59 @@ const getFileIcon = (mediaType: string, name: string) => {
   }
 };
 
-const isPreviewable = (mediaType: string) => {
-  return ["video", "image", "audio"].includes(mediaType);
+const isPreviewable = (mediaType: string, fileName?: string) => {
+  // Always previewable media types
+  if (["video", "image", "audio"].includes(mediaType)) {
+    return true;
+  }
+  
+  // Check file extension for additional previewable types
+  if (fileName) {
+    const extension = fileName.split(".").pop()?.toLowerCase();
+    const previewableExtensions = [
+      "txt", "md", "json", "xml", "csv", "log", "js", "ts", "py", "cpp", "c", "h", "html", "css", "sql"
+    ];
+    return previewableExtensions.includes(extension || "");
+  }
+  
+  return false;
+};
+
+interface FileNameDisplayProps {
+  name: string;
+  eventId: string;
+  className?: string;
+}
+
+const FileNameDisplay = ({
+  name,
+  eventId,
+  className,
+}: FileNameDisplayProps) => {
+  const fileName = getFileName(name);
+  const fullPath = name;
+
+  // If the filename is the same as the full path, no need for tooltip
+  if (fileName === fullPath) {
+    return (
+      <span className={cn("font-medium truncate", className)}>
+        {fileName || eventId}
+      </span>
+    );
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className={cn("font-medium truncate cursor-help", className)}>
+          {fileName || eventId}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p className="max-w-xs break-all">{fullPath}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
 };
 
 export function GalleryEvent({
@@ -179,174 +273,43 @@ export function GalleryEvent({
 
   if (viewMode === "list") {
     return (
-      <motion.div
-        key={event.id}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.1 }}
-        whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.99 }}
-        className={cn(
-          "flex items-center gap-4 p-4 rounded-lg border transition-colors",
-          isSelected
-            ? "bg-accent/50 border-primary"
-            : "bg-card hover:bg-accent/50"
-        )}
-      >
-        <Checkbox
-          checked={isSelected}
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-          onCheckedChange={() => {
-            onSelect();
-          }}
-        />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            {getFileIcon(event.media_type, event.name)}
-            <span className="font-medium truncate">
-              {event.name || event.event_id}
-            </span>
-          </div>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span>{formatDate(event.created)}</span>
-            {event.file_size && <span>{formatFileSize(event.file_size)}</span>}
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge
-            variant={
-              state === "flagged"
-                ? "destructive"
-                : state === "new"
-                ? "disconnected"
-                : state === "pulled"
-                ? "secondary"
-                : "outline"
-            }
-          >
-            {state}
-          </Badge>
-          {state === "new" ? (
-            <Button
-              size="icon"
-              variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-                pullMutation.mutate();
-              }}
-              disabled={pullMutation.isPending}
-            >
-              {pullMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <ArrowDown className="h-4 w-4" />
-              )}
-            </Button>
-          ) : (
-            <>
-              <Button
-                size="icon"
-                variant="ghost"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (isPreviewable(event.media_type)) {
-                    handleFocusEvent(event);
-                  } else {
-                    handleDownload();
-                  }
-                }}
-              >
-                {isPreviewable(event.media_type) ? (
-                  <Play className="h-4 w-4" />
-                ) : (
-                  <Download className="h-4 w-4" />
-                )}
-              </Button>
-              {!isPreviewable(event.media_type) &&
-                !event.viewed?.includes(user?.id || "") && (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      viewMutation.mutate(event.id);
-                    }}
-                  >
-                    <Eye className="h-4 w-4" />
-                  </Button>
-                )}
-            </>
+      <TooltipProvider>
+        <motion.div
+          key={event.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: index * 0.1 }}
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+          className={cn(
+            "flex items-center gap-4 p-4 rounded-lg border transition-colors",
+            isSelected
+              ? "bg-accent/50 border-primary"
+              : "bg-card hover:bg-accent/50"
           )}
-          <Button
-            size="icon"
-            variant="ghost"
+        >
+          <Checkbox
+            checked={isSelected}
             onClick={(e) => {
               e.stopPropagation();
-              flagMutation.mutate(event.id);
             }}
-            disabled={flagMutation.isPending}
-            className={cn(
-              "h-8 w-8",
-              event.flagged && "text-red-500 hover:text-red-600 hover:bg-red-50"
-            )}
-          >
-            {flagMutation.isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Flag className="h-4 w-4" />
-            )}
-          </Button>
-        </div>
-      </motion.div>
-    );
-  }
-
-  return (
-    <motion.div
-      key={event.id}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.1 }}
-      className={cn(
-        "group relative rounded-lg border overflow-hidden bg-card transition-colors h-fit",
-        isSelected && "border-primary"
-      )}
-    >
-      {isPreviewable(event.media_type) ? (
-        <div
-          className="aspect-video relative cursor-pointer"
-          onClick={() => handleFocusEvent(event)}
-        >
-          {event.thumbnail && (
-            <img
-              src={pb.files.getURL(event, event.thumbnail)}
-              alt={event.name || event.event_id}
-              className="w-full h-full object-cover"
-            />
-          )}
-          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <Play className="h-8 w-8 text-white" />
+            onCheckedChange={() => {
+              onSelect();
+            }}
+          />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              {getFileIcon(event.media_type, event.name)}
+              <FileNameDisplay name={event.name} eventId={event.event_id} />
+            </div>
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <span>{formatDate(event.created)}</span>
+              {event.file_size && (
+                <span>{formatFileSize(event.file_size)}</span>
+              )}
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="aspect-video flex items-center justify-center bg-muted/30 p-4">
-          {getFileIcon(event.media_type, event.name)}
-          <span className="ml-2 text-sm font-medium truncate">
-            {event.name?.split(".").pop()?.toUpperCase()}
-          </span>
-        </div>
-      )}
-
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <Checkbox
-              checked={isSelected}
-              onCheckedChange={onSelect}
-              onClick={(e) => e.stopPropagation()}
-            />
             <Badge
               variant={
                 state === "flagged"
@@ -360,8 +323,6 @@ export function GalleryEvent({
             >
               {state}
             </Badge>
-          </div>
-          <div className="flex items-center gap-1">
             {state === "new" ? (
               <Button
                 size="icon"
@@ -379,19 +340,27 @@ export function GalleryEvent({
                 )}
               </Button>
             ) : (
-              !isPreviewable(event.media_type) && (
-                <>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={(e) => {
-                      e.stopPropagation();
+              <>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (isPreviewable(event.media_type, event.name)) {
+                      handleFocusEvent(event);
+                    } else {
                       handleDownload();
-                    }}
-                  >
+                    }
+                  }}
+                >
+                  {isPreviewable(event.media_type, event.name) ? (
+                    <Play className="h-4 w-4" />
+                  ) : (
                     <Download className="h-4 w-4" />
-                  </Button>
-                  {!event.viewed?.includes(user?.id || "") && (
+                  )}
+                </Button>
+                {!isPreviewable(event.media_type, event.name) &&
+                  !event.viewed?.includes(user?.id || "") && (
                     <Button
                       size="icon"
                       variant="ghost"
@@ -403,8 +372,7 @@ export function GalleryEvent({
                       <Eye className="h-4 w-4" />
                     </Button>
                   )}
-                </>
-              )
+              </>
             )}
             <Button
               size="icon"
@@ -415,6 +383,7 @@ export function GalleryEvent({
               }}
               disabled={flagMutation.isPending}
               className={cn(
+                "h-8 w-8",
                 event.flagged &&
                   "text-red-500 hover:text-red-600 hover:bg-red-50"
               )}
@@ -426,34 +395,168 @@ export function GalleryEvent({
               )}
             </Button>
           </div>
-        </div>
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
+        </motion.div>
+      </TooltipProvider>
+    );
+  }
+
+  return (
+    <TooltipProvider>
+      <motion.div
+        key={event.id}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: index * 0.1 }}
+        className={cn(
+          "group relative rounded-lg border overflow-hidden bg-card transition-colors h-fit",
+          isSelected && "border-primary"
+        )}
+      >
+        {isPreviewable(event.media_type, event.name) ? (
+          <div
+            className="aspect-video relative cursor-pointer"
+            onClick={() => handleFocusEvent(event)}
+          >
+            {event.thumbnail && (
+              <img
+                src={pb.files.getURL(event, event.thumbnail)}
+                alt={event.name || event.event_id}
+                className="w-full h-full object-cover"
+              />
+            )}
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Play className="h-8 w-8 text-white" />
+            </div>
+          </div>
+        ) : (
+          <div className="aspect-video flex items-center justify-center bg-muted/30 p-4">
             {getFileIcon(event.media_type, event.name)}
-            <span className="text-sm font-medium truncate">
-              {event.name || event.event_id}
+            <span className="ml-2 text-sm font-medium truncate">
+              {event.name?.split(".").pop()?.toUpperCase()}
             </span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>{formatDate(event.created)}</span>
-            {event.file_size && <span>{formatFileSize(event.file_size)}</span>}
-          </div>
-          {event.metadata && Object.keys(event.metadata).length > 0 && (
-            <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
-              {Object.entries(event.metadata).map(([key, value]) => (
-                <div key={key} className="flex items-center gap-1">
-                  <span className="font-medium">{key}:</span>
-                  <span className="truncate">
-                    {typeof value === "object"
-                      ? JSON.stringify(value)
-                      : String(value)}
-                  </span>
-                </div>
-              ))}
+        )}
+
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={onSelect}
+                onClick={(e) => e.stopPropagation()}
+              />
+              <Badge
+                variant={
+                  state === "flagged"
+                    ? "destructive"
+                    : state === "new"
+                    ? "disconnected"
+                    : state === "pulled"
+                    ? "secondary"
+                    : "outline"
+                }
+              >
+                {state}
+              </Badge>
             </div>
-          )}
+            <div className="flex items-center gap-1">
+              {state === "new" ? (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    pullMutation.mutate();
+                  }}
+                  disabled={pullMutation.isPending}
+                >
+                  {pullMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <ArrowDown className="h-4 w-4" />
+                  )}
+                </Button>
+              ) : (
+                !isPreviewable(event.media_type, event.name) && (
+                  <>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload();
+                      }}
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                    {!event.viewed?.includes(user?.id || "") && (
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          viewMutation.mutate(event.id);
+                        }}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </>
+                )
+              )}
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  flagMutation.mutate(event.id);
+                }}
+                disabled={flagMutation.isPending}
+                className={cn(
+                  event.flagged &&
+                    "text-red-500 hover:text-red-600 hover:bg-red-50"
+                )}
+              >
+                {flagMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Flag className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              {getFileIcon(event.media_type, event.name)}
+              <FileNameDisplay
+                name={event.name}
+                eventId={event.event_id}
+                className="text-sm"
+              />
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <span>{formatDate(event.created)}</span>
+              {event.file_size && (
+                <span>{formatFileSize(event.file_size)}</span>
+              )}
+            </div>
+            {event.metadata && Object.keys(event.metadata).length > 0 && (
+              <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
+                {Object.entries(event.metadata).map(([key, value]) => (
+                  <div key={key} className="flex items-center gap-1">
+                    <span className="font-medium">{key}:</span>
+                    <span className="truncate">
+                      {typeof value === "object"
+                        ? JSON.stringify(value)
+                        : String(value)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </TooltipProvider>
   );
 }

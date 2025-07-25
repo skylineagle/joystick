@@ -222,15 +222,22 @@ const app = new Elysia()
         null
       );
 
+      // Get the created record to use its PocketBase ID for updates
+      const createdRecord = await pb
+        .collection("gallery")
+        .getFirstListItem(
+          `device = "${params.device}" && event_id = "${eventId}"`
+        );
+
       if (uploadRequest.event) {
-        await pb.collection("gallery").update(eventId, {
+        await pb.collection("gallery").update(createdRecord.id, {
           event: uploadRequest.event,
           file_size: uploadRequest.file_size || uploadRequest.event.size,
         });
       }
 
       if (uploadRequest.thumbnail) {
-        await pb.collection("gallery").update(eventId, {
+        await pb.collection("gallery").update(createdRecord.id, {
           thumbnail: uploadRequest.thumbnail,
         });
       }
@@ -294,8 +301,13 @@ const app = new Elysia()
         null
       );
 
-      // Get upload URLs from PocketBase
-      const record = await pb.collection("gallery").getOne(eventId);
+      // Get the created record to use its PocketBase ID for getting upload URLs
+      const record = await pb
+        .collection("gallery")
+        .getFirstListItem(
+          `device = "${params.device}" && event_id = "${eventId}"`
+        );
+
       const uploadUrl = await pb.files.getUrl(record, "event", {
         token: "upload",
       });
