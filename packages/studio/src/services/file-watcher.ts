@@ -12,10 +12,10 @@ export class FileWatcherService {
   private galleryService: GalleryService;
   private watchers: Map<string, { abort: AbortController; deviceId: string }> =
     new Map();
+  private isInitialized = false;
 
   private constructor() {
     this.galleryService = GalleryService.getInstance();
-    this.initializeWatchers();
   }
 
   public static getInstance(): FileWatcherService {
@@ -25,7 +25,12 @@ export class FileWatcherService {
     return FileWatcherService.instance;
   }
 
-  private async initializeWatchers() {
+  public async initialize(): Promise<void> {
+    if (this.isInitialized) {
+      logger.warn("FileWatcherService already initialized");
+      return;
+    }
+
     try {
       const devices = await pb
         .collection("devices")
@@ -36,9 +41,11 @@ export class FileWatcherService {
         await this.startWatcher(device.id);
       }
 
+      this.isInitialized = true;
       logger.info("File watchers initialized for all devices");
     } catch (error) {
       logger.error("Failed to initialize file watchers:", error);
+      throw error;
     }
   }
 
@@ -54,6 +61,87 @@ export class FileWatcherService {
       if (!existsSync(path)) {
         mkdirSync(path, { recursive: true });
       }
+    }
+  }
+
+  public async addDevice(deviceId: string): Promise<void> {
+    try {
+      await this.setupDeviceDirectories(deviceId);
+      await this.startWatcher(deviceId);
+      logger.info(`Added file watcher for device ${deviceId}`);
+    } catch (error) {
+      logger.error(`Failed to add file watcher for device ${deviceId}:`, error);
+      throw error;
+    }
+  }
+
+  public async removeDevice(deviceId: string): Promise<void> {
+    try {
+      await this.stopWatcher(deviceId);
+      logger.info(`Removed file watcher for device ${deviceId}`);
+    } catch (error) {
+      logger.error(
+        `Failed to remove file watcher for device ${deviceId}:`,
+        error
+      );
+      throw error;
+    }
+  }
+
+  public async refreshWatchers(): Promise<void> {
+    try {
+      // Stop all existing watchers
+      await this.stopAllWatchers();
+
+      // Get current devices and restart watchers
+      const devices = await pb
+        .collection("devices")
+        .getFullList<DeviceResponse>();
+
+      for (const device of devices) {
+        await this.setupDeviceDirectories(device.id);
+        await this.startWatcher(device.id);
+      }
+
+      this.isInitialized = true;
+      logger.info("Refreshed file watchers for all devices");
+    } catch (error) {
+      logger.error("Failed to refresh file watchers:", error);
+      throw error;
+    }
+  }
+
+  public async syncWatchers(): Promise<void> {
+    try {
+      // Get current devices from database
+      const devices = await pb
+        .collection("devices")
+        .getFullList<DeviceResponse>();
+
+      const deviceIds = new Set(devices.map((device) => device.id));
+      const currentWatcherIds = new Set(this.watchers.keys());
+
+      // Add watchers for new devices
+      for (const device of devices) {
+        if (!currentWatcherIds.has(device.id)) {
+          await this.setupDeviceDirectories(device.id);
+          await this.startWatcher(device.id);
+          logger.info(`Added watcher for new device ${device.id}`);
+        }
+      }
+
+      // Remove watchers for deleted devices
+      for (const watcherDeviceId of Array.from(currentWatcherIds)) {
+        if (!deviceIds.has(watcherDeviceId)) {
+          await this.stopWatcher(watcherDeviceId);
+          logger.info(`Removed watcher for deleted device ${watcherDeviceId}`);
+        }
+      }
+
+      logger.info("Synced file watchers with current device list");
+    } catch (error) {
+      logger.error("Failed to sync file watchers:", error);
+      throw error;
     }
   }
 
@@ -73,7 +161,7 @@ export class FileWatcherService {
         }
       }
     } catch (error) {
-      if (error.name !== "AbortError") {
+      if (error instanceof Error && error.name !== "AbortError") {
         logger.error(`Error watching directory for device ${deviceId}:`, error);
       }
     }
@@ -154,10 +242,64 @@ export class FileWatcherService {
   }
 
   public async stopAllWatchers() {
-    for (const [deviceId, watcher] of this.watchers) {
+    for (const [deviceId, watcher] of Array.from(this.watchers.entries())) {
       watcher.abort.abort();
       this.watchers.delete(deviceId);
     }
+    this.isInitialized = false;
     logger.info("Stopped all file watchers");
+  }
+
+  public getWatcherStatus(): { deviceId: string; active: boolean }[] {
+    return Array.from(this.watchers.keys()).map((deviceId) => ({
+      deviceId,
+      active: true,
+    }));
+  }
+
+  public isWatcherActive(deviceId: string): boolean {
+    return this.watchers.has(deviceId);
+  }
+
+  public async cleanup(): Promise<void> {
+    try {
+      await this.stopAllWatchers();
+      logger.info("FileWatcherService cleanup completed");
+    } catch (error) {
+      logger.error("Error during FileWatcherService cleanup:", error);
+      throw error;
+    }
+  }
+
+  public async cleanupOrphanedWatchers(): Promise<void> {
+    try {
+      // Get current devices from database
+      const devices = await pb
+        .collection("devices")
+        .getFullList<DeviceResponse>();
+
+      const deviceIds = new Set(devices.map((device) => device.id));
+      const orphanedWatchers: string[] = [];
+
+      // Check for watchers that don't have corresponding devices
+      for (const [watcherDeviceId] of Array.from(this.watchers.entries())) {
+        if (!deviceIds.has(watcherDeviceId)) {
+          orphanedWatchers.push(watcherDeviceId);
+        }
+      }
+
+      // Remove orphaned watchers
+      for (const deviceId of orphanedWatchers) {
+        await this.stopWatcher(deviceId);
+        logger.info(`Cleaned up orphaned watcher for device ${deviceId}`);
+      }
+
+      if (orphanedWatchers.length > 0) {
+        logger.info(`Cleaned up ${orphanedWatchers.length} orphaned watchers`);
+      }
+    } catch (error) {
+      logger.error("Error cleaning up orphaned watchers:", error);
+      throw error;
+    }
   }
 }

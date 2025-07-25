@@ -113,6 +113,16 @@ The service will:
 - `DELETE /api/hooks/:id` - Delete hook
 - `GET /api/hooks/events/:eventType` - Get hooks by event type
 
+### File Watcher Management
+
+- `GET /api/watchers` - Get status of all file watchers
+- `POST /api/watchers/refresh` - Refresh all file watchers (restart all)
+- `POST /api/watchers/sync` - Sync watchers with current device list
+- `POST /api/watchers/:deviceId/add` - Add watcher for specific device
+- `DELETE /api/watchers/:deviceId` - Remove watcher for specific device
+- `GET /api/watchers/:deviceId/status` - Check if watcher is active for device
+- `POST /api/watchers/cleanup-orphaned` - Clean up orphaned watchers manually
+
 ## Event Upload Examples
 
 ### File-Based Upload Script
@@ -177,6 +187,50 @@ curl "http://localhost:8001/api/gallery/device123/upload-url?filename=event.mp4&
 # Upload files to the pre-signed URLs
 curl -X PUT "UPLOAD_URL" --upload-file /path/to/event.mp4
 curl -X PUT "THUMBNAIL_UPLOAD_URL" --upload-file /path/to/thumb.jpg
+```
+
+## File Watcher Management
+
+The Studio service automatically manages file watchers for all devices to monitor incoming files. The file watcher system provides:
+
+### Automatic Management
+
+- **Auto-initialization**: File watchers are automatically created for all devices on service startup
+- **Periodic sync**: Watchers are automatically synced with the device list every 5 minutes
+- **Graceful cleanup**: Orphaned watchers are automatically cleaned up when devices are deleted
+- **Error recovery**: Watchers are automatically restarted if they encounter errors
+
+### Manual Management
+
+You can manually manage file watchers using the API endpoints:
+
+```bash
+# Check all watcher statuses
+curl "http://localhost:8001/api/watchers"
+
+# Add watcher for a new device
+curl -X POST "http://localhost:8001/api/watchers/device123/add"
+
+# Remove watcher for a device
+curl -X DELETE "http://localhost:8001/api/watchers/device123"
+
+# Sync watchers with current device list
+curl -X POST "http://localhost:8001/api/watchers/sync"
+
+# Check if specific device has active watcher
+curl "http://localhost:8001/api/watchers/device123/status"
+```
+
+### Cleanup and Maintenance
+
+The service automatically handles cleanup, but you can also trigger manual cleanup:
+
+```bash
+# Clean up orphaned watchers manually
+curl -X POST "http://localhost:8001/api/watchers/cleanup-orphaned"
+
+# Refresh all watchers (useful after configuration changes)
+curl -X POST "http://localhost:8001/api/watchers/refresh"
 ```
 
 ## Hook Event Types
