@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
   Download,
+  FileImage,
   FileText,
   Image,
   Loader2,
@@ -19,7 +20,87 @@ import {
   Play,
   Video,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+interface DocumentPreviewProps {
+  url: string;
+}
+
+const DocumentPreview = ({ url }: DocumentPreviewProps) => {
+  const [content, setContent] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch file: ${response.statusText}`);
+        }
+        const text = await response.text();
+        setContent(text);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load file");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchContent();
+  }, [url]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2">Loading document...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8">
+        <FileText className="h-16 w-16 mb-4 text-muted-foreground" />
+        <p className="text-red-500 mb-4">{error}</p>
+        <Button variant="outline" onClick={() => window.open(url, "_blank")}>
+          Open File
+        </Button>
+      </div>
+    );
+  }
+
+  // Format content based on file type
+  const formattedContent = content;
+
+  // Limit content size for performance
+  const maxContentLength = 100000; // 100KB
+  const isTruncated = content.length > maxContentLength;
+  const displayContent = isTruncated
+    ? content.substring(0, maxContentLength) + "\n\n... (content truncated)"
+    : formattedContent;
+
+  return (
+    <div className="w-full h-full flex flex-col">
+      <div className="flex-1 overflow-auto p-4">
+        <div className="bg-muted/50 p-4 rounded-lg max-h-[60vh] overflow-auto">
+          {isTruncated && (
+            <div className="mb-2 p-2 bg-yellow-100 text-yellow-800 rounded text-xs">
+              File is too large to display completely. Showing first{" "}
+              {maxContentLength.toLocaleString()} characters.
+            </div>
+          )}
+          <pre className="text-sm font-mono whitespace-pre-wrap break-words">
+            {displayContent}
+          </pre>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 interface FocusedEventProps {
   focusedEvent: GalleryResponse | null;
@@ -122,9 +203,32 @@ export const FocusedEvent = ({
   };
 
   const renderMedia = () => {
-    if (!focusedEvent?.event) return null;
+    if (!focusedEvent?.event) {
+      return (
+        <div className="flex flex-col items-center justify-center p-8">
+          <FileText className="h-16 w-16 mb-4 text-muted-foreground" />
+          <p className="text-sm text-muted-foreground mb-4">
+            This event hasn't been pulled yet
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => pullMutation.mutate(focusedEvent?.id || "")}
+            disabled={pullMutation.isPending}
+          >
+            {pullMutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <Download className="h-4 w-4 mr-2" />
+            )}
+            Pull Event
+          </Button>
+        </div>
+      );
+    }
 
     const url = pb.files.getURL(focusedEvent, focusedEvent.event);
+    const fileName = focusedEvent.name || focusedEvent.event_id;
+    const extension = fileName.split(".").pop()?.toLowerCase();
 
     switch (focusedEvent.media_type) {
       case "video":
@@ -138,6 +242,36 @@ export const FocusedEvent = ({
           />
         );
       case "image":
+        // Handle HEIC images specially since they might not display in all browsers
+        if (extension === "heic" || extension === "heif") {
+          return (
+            <div className="flex flex-col items-center justify-center p-8">
+              <FileImage className="h-16 w-16 mb-4 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground mb-4">
+                HEIC image format detected
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => window.open(url, "_blank")}
+                >
+                  Open File
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = fileName;
+                    link.click();
+                  }}
+                >
+                  Download
+                </Button>
+              </div>
+            </div>
+          );
+        }
         return (
           <img
             src={url}
@@ -156,7 +290,30 @@ export const FocusedEvent = ({
             onPause={() => setIsPlaying(false)}
           />
         );
-      default:
+      case "document":
+        return <DocumentPreview url={url} />;
+      default: {
+        // Check if it's a text-based file by extension
+        const textExtensions = [
+          "txt",
+          "md",
+          "json",
+          "xml",
+          "csv",
+          "log",
+          "js",
+          "ts",
+          "py",
+          "cpp",
+          "c",
+          "h",
+          "html",
+          "css",
+          "sql",
+        ];
+        if (extension && textExtensions.includes(extension)) {
+          return <DocumentPreview url={url} />;
+        }
         return (
           <div className="flex flex-col items-center justify-center p-8">
             <FileText className="h-16 w-16 mb-4 text-muted-foreground" />
@@ -168,6 +325,7 @@ export const FocusedEvent = ({
             </Button>
           </div>
         );
+      }
     }
   };
 
@@ -228,17 +386,34 @@ export const FocusedEvent = ({
                         {isPlaying ? "Pause" : "Play"}
                       </Button>
                     ) : (
-                      <Button
-                        variant="secondary"
-                        onClick={() =>
-                          window.open(
-                            pb.files.getURL(focusedEvent, focusedEvent.event),
-                            "_blank"
-                          )
-                        }
-                      >
-                        Open File
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="secondary"
+                          onClick={() =>
+                            window.open(
+                              pb.files.getURL(focusedEvent, focusedEvent.event),
+                              "_blank"
+                            )
+                          }
+                        >
+                          Open File
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            const link = document.createElement("a");
+                            link.href = pb.files.getURL(
+                              focusedEvent,
+                              focusedEvent.event
+                            );
+                            link.download =
+                              focusedEvent.name || focusedEvent.event_id;
+                            link.click();
+                          }}
+                        >
+                          Download
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>

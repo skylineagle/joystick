@@ -19,10 +19,15 @@ export const GalleryStats: FC<GalleryStatsProperties> = ({ deviceId }) => {
   const { data: stats, isLoading: isLoadingStats } = useQuery({
     queryKey: ["gallery", "stats", deviceId],
     queryFn: async () => {
-      const data = await joystickApi.get<GalleryStatsType>(
-        `${urls.studio}/api/gallery/${deviceId}/stats`
-      );
-      return data;
+      const data = await joystickApi.get<{
+        success: boolean;
+        stats: GalleryStatsType;
+      }>(`${urls.studio}/api/gallery/${deviceId}/stats`);
+      console.log(data);
+      if (data.success) {
+        return data.stats;
+      }
+      return null;
     },
     enabled: !!deviceId,
   });
@@ -71,10 +76,15 @@ export const GalleryStats: FC<GalleryStatsProperties> = ({ deviceId }) => {
           {Object.entries(stats.byMediaType).map(([type, count]) => (
             <div key={type} className="flex items-center space-x-1">
               <span className="text-sm">
-                {type === 'image' ? '🖼️' : 
-                 type === 'video' ? '🎥' : 
-                 type === 'audio' ? '🎵' : 
-                 type === 'document' ? '📄' : '📁'}
+                {type === "image"
+                  ? "🖼️"
+                  : type === "video"
+                  ? "🎥"
+                  : type === "audio"
+                  ? "🎵"
+                  : type === "document"
+                  ? "📄"
+                  : "📁"}
               </span>
               <span className="text-sm font-medium">{count}</span>
             </div>

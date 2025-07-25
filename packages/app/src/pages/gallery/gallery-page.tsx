@@ -16,6 +16,12 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useDevice } from "@/hooks/use-device";
 import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 import { useIsSupported } from "@/hooks/use-is-supported";
@@ -357,37 +363,6 @@ export function GalleryPage() {
     return <div>You are not allowed to access this page</div>;
   }
 
-  if (!isSupported) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full">
-        <div className="text-lg font-medium mb-2">Device not supported</div>
-        <div className="text-sm">
-          Please ensure the device has on of the following actions enabled:
-          <ul className="mt-2 space-y-1 text-muted-foreground">
-            <li className="flex items-center space-x-2">
-              <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full"></span>
-              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                list-events
-              </code>
-            </li>
-            <li className="flex items-center space-x-2">
-              <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full"></span>
-              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                list-media
-              </code>
-            </li>
-            <li className="flex items-center space-x-2">
-              <span className="w-1.5 h-1.5 bg-muted-foreground rounded-full"></span>
-              <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                list-files
-              </code>
-            </li>
-          </ul>
-        </div>
-      </div>
-    );
-  }
-
   if (isLoadingEvents || isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -414,78 +389,111 @@ export function GalleryPage() {
           <GalleryStats deviceId={deviceId!} />
         </div>
         <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            {isLoadingStatus ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <>
-                <Switch
-                  checked={device?.harvesting}
-                  onCheckedChange={handleServiceToggle}
-                  disabled={startMutation.isPending || stopMutation.isPending}
-                  className={cn(
-                    "data-[state=checked]:bg-green-600",
-                    device?.harvesting ? "bg-green-600/30" : ""
+          <TooltipProvider>
+            <div className="flex items-center space-x-2">
+              {isLoadingStatus ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <Switch
+                          checked={device?.harvesting}
+                          onCheckedChange={handleServiceToggle}
+                          disabled={
+                            !isSupported ||
+                            startMutation.isPending ||
+                            stopMutation.isPending
+                          }
+                          className={cn(
+                            "data-[state=checked]:bg-green-600",
+                            device?.harvesting ? "bg-green-600/30" : ""
+                          )}
+                        />
+                      </div>
+                    </TooltipTrigger>
+                    {!isSupported && (
+                      <TooltipContent>
+                        <p>Device doesn't support automatic harvesting.</p>
+                        <p>Events must be posted manually to the server.</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                  <span className="text-sm text-muted-foreground">
+                    {device?.harvesting ? "Harvesting" : "Stopped"}
+                  </span>
+                </>
+              )}
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        disabled={
+                          !isSupported ||
+                          galleryStatus?.status === "running" ||
+                          startMutation.isPending ||
+                          stopMutation.isPending
+                        }
+                      >
+                        <Settings2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TooltipTrigger>
+                  {!isSupported && (
+                    <TooltipContent>
+                      <p>Gallery settings unavailable.</p>
+                      <p>Device doesn't support automatic harvesting.</p>
+                    </TooltipContent>
                   )}
-                />
-                <span className="text-sm text-muted-foreground">
-                  {device?.harvesting ? "Harvesting" : "Stopped"}
-                </span>
-              </>
-            )}
-          </div>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={
-                  galleryStatus?.status === "running" ||
-                  startMutation.isPending ||
-                  stopMutation.isPending
-                }
-              >
-                <Settings2 className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <h4 className="font-medium leading-none">Gallery Settings</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Configure the gallery service behavior
-                  </p>
-                </div>
-                <Separator />
+                </Tooltip>
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="interval">Scan interval (seconds)</Label>
-                    <Input
-                      id="interval"
-                      type="number"
-                      value={device?.information?.harvestingInterval}
-                      onChange={(e) =>
-                        updateHarvestingIntervalMutation.mutate(
-                          Number(e.target.value)
-                        )
-                      }
-                      min={30}
-                      step={30}
-                      className="h-8"
-                    />
+                    <h4 className="font-medium leading-none">
+                      Gallery Settings
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                      Configure the gallery service behavior
+                    </p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <Label htmlFor="auto-pull">Auto pull events</Label>
-                    <Switch
-                      id="auto-pull"
-                      checked={autoPull}
-                      onCheckedChange={(checked) => setAutoPull(checked)}
-                    />
+                  <Separator />
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="interval">Scan interval (seconds)</Label>
+                      <Input
+                        id="interval"
+                        type="number"
+                        value={device?.information?.harvestingInterval}
+                        onChange={(e) =>
+                          updateHarvestingIntervalMutation.mutate(
+                            Number(e.target.value)
+                          )
+                        }
+                        min={30}
+                        step={30}
+                        className="h-8"
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="auto-pull">Auto pull events</Label>
+                      <Switch
+                        id="auto-pull"
+                        checked={autoPull}
+                        onCheckedChange={(checked) => setAutoPull(checked)}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+              </PopoverContent>
+            </Popover>
+          </TooltipProvider>
         </div>
       </motion.div>
 

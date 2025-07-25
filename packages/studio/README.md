@@ -18,6 +18,14 @@ The Studio service has been enhanced to support flexible media management beyond
 - **Parameter Templating**: Support for dynamic parameters in action commands
 - **Flexible Output Parsing**: Handles various output formats from devices
 
+### 📤 **Event Publishing Methods**
+
+- **File-Based Upload**: Simple directory-based file upload system
+- **Harvesting**: Automatic polling of device events at configurable intervals
+- **Direct Upload**: HTTP POST endpoint for direct event upload with files
+- **URL-Based Upload**: Get pre-signed URLs for secure file uploads
+- **Flexible Integration**: Support for SCP, CURL, or any HTTP client
+
 ### 🎣 **Hook System**
 
 - **Event-Based Hooks**: Execute device actions on specific events
@@ -25,17 +33,77 @@ The Studio service has been enhanced to support flexible media management beyond
 - **Parameter Injection**: Automatic context parameter injection
 - **Device-Specific or Global**: Hooks can be device-specific or apply to all devices
 
+## Directory Structure
+
+The service creates the following directory structure for each device:
+
+```
+data/gallery/
+  ├── device1/
+  │   ├── incoming/     # Drop new files here
+  │   ├── processed/    # Successfully processed files
+  │   └── thumbnails/   # Optional thumbnail files
+  └── device2/
+      ├── incoming/
+      ├── processed/
+      └── thumbnails/
+```
+
+## File-Based Upload
+
+The simplest way to publish events is by copying files to the device's incoming directory:
+
+1. Get device paths:
+
+```bash
+# Get device-specific paths
+curl "http://localhost:8001/api/gallery/device123/paths"
+
+# Response:
+{
+  "success": true,
+  "paths": {
+    "incoming": "/path/to/data/gallery/device123/incoming",
+    "thumbnails": "/path/to/data/gallery/device123/thumbnails"
+  }
+}
+```
+
+2. Upload files:
+
+```bash
+# Copy event file
+cp event.jpg /path/to/data/gallery/device123/incoming/
+
+# Optional: Copy thumbnail (must have same name as event file)
+cp thumb.jpg /path/to/data/gallery/device123/thumbnails/event.jpg
+```
+
+The service will:
+
+1. Detect new files in the incoming directory
+2. Create gallery records with metadata
+3. Move processed files to the processed directory
+4. Handle thumbnails if present
+5. Trigger appropriate hooks
+
 ## API Endpoints
 
 ### Media Management
 
-- `GET /api/media/:device/events` - List media events with type filtering
-- `POST /api/media/:device/start` - Start media service with flexible config
-- `POST /api/media/:device/stop` - Stop media service
-- `GET /api/media/:device/status` - Get service status
-- `POST /api/media/:device/pull/:eventId` - Pull specific event
-- `GET /api/media/:device/stats` - Get media statistics with type breakdown
-- `DELETE /api/media/:device/events/:eventId` - Delete media event
+- `GET /api/gallery/:device/paths` - Get device-specific upload paths
+- `GET /api/gallery/:device/events` - List media events with type filtering
+- `POST /api/gallery/:device/start` - Start media service with flexible config
+- `POST /api/gallery/:device/stop` - Stop media service
+- `GET /api/gallery/:device/status` - Get service status
+- `POST /api/gallery/:device/pull/:eventId` - Pull specific event
+- `GET /api/gallery/:device/stats` - Get media statistics with type breakdown
+- `DELETE /api/gallery/:device/events/:eventId` - Delete media event
+
+### Event Upload
+
+- `POST /api/gallery/:device/upload` - Direct event upload with files
+- `GET /api/gallery/:device/upload-url` - Get pre-signed upload URLs
 
 ### Hook Management
 
@@ -45,121 +113,128 @@ The Studio service has been enhanced to support flexible media management beyond
 - `DELETE /api/hooks/:id` - Delete hook
 - `GET /api/hooks/events/:eventType` - Get hooks by event type
 
+### File Watcher Management
+
+- `GET /api/watchers` - Get status of all file watchers
+- `POST /api/watchers/refresh` - Refresh all file watchers (restart all)
+- `POST /api/watchers/sync` - Sync watchers with current device list
+- `POST /api/watchers/:deviceId/add` - Add watcher for specific device
+- `DELETE /api/watchers/:deviceId` - Remove watcher for specific device
+- `GET /api/watchers/:deviceId/status` - Check if watcher is active for device
+- `POST /api/watchers/cleanup-orphaned` - Clean up orphaned watchers manually
+
+## Event Upload Examples
+
+### File-Based Upload Script
+
+```bash
+#!/bin/bash
+EVENT_FILE=$1
+THUMB_FILE=$2
+DEVICE_ID="device123"
+
+# Get device paths
+PATHS=$(curl -s "http://localhost:8001/api/gallery/$DEVICE_ID/paths")
+INCOMING_PATH=$(echo $PATHS | jq -r '.paths.incoming')
+THUMB_PATH=$(echo $PATHS | jq -r '.paths.thumbnails')
+
+# Copy event file
+cp "$EVENT_FILE" "$INCOMING_PATH/"
+
+# Copy thumbnail if provided
+if [ -n "$THUMB_FILE" ]; then
+  EVENT_NAME=$(basename "$EVENT_FILE")
+  THUMB_NAME="${EVENT_NAME%.*}.jpg"
+  cp "$THUMB_FILE" "$THUMB_PATH/$THUMB_NAME"
+fi
+```
+
+### Direct Upload using CURL
+
+```bash
+# Upload event with file
+curl -X POST "http://localhost:8001/api/gallery/device123/upload" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "name=capture.jpg" \
+  -F "event=@/path/to/capture.jpg" \
+  -F "media_type=image" \
+  -F "metadata={\"timestamp\":\"2024-03-20T10:00:00Z\"}"
+
+# Upload with thumbnail
+curl -X POST "http://localhost:8001/api/gallery/device123/upload" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -F "name=video.mp4" \
+  -F "event=@/path/to/video.mp4" \
+  -F "thumbnail=@/path/to/thumb.jpg" \
+  -F "has_thumbnail=true" \
+  -F "media_type=video"
+```
+
+### URL-Based Upload
+
+```bash
+# Get upload URLs
+curl "http://localhost:8001/api/gallery/device123/upload-url?filename=event.mp4&thumbnail=true" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+
+# Response:
+{
+  "success": true,
+  "upload_url": "https://...",
+  "thumbnail_upload_url": "https://..."
+}
+
+# Upload files to the pre-signed URLs
+curl -X PUT "UPLOAD_URL" --upload-file /path/to/event.mp4
+curl -X PUT "THUMBNAIL_UPLOAD_URL" --upload-file /path/to/thumb.jpg
+```
+
+## File Watcher Management
+
+The Studio service automatically manages file watchers for all devices to monitor incoming files. The file watcher system provides:
+
+### Automatic Management
+
+- **Auto-initialization**: File watchers are automatically created for all devices on service startup
+- **Periodic sync**: Watchers are automatically synced with the device list every 5 minutes
+- **Graceful cleanup**: Orphaned watchers are automatically cleaned up when devices are deleted
+- **Error recovery**: Watchers are automatically restarted if they encounter errors
+
+### Manual Management
+
+You can manually manage file watchers using the API endpoints:
+
+```bash
+# Check all watcher statuses
+curl "http://localhost:8001/api/watchers"
+
+# Add watcher for a new device
+curl -X POST "http://localhost:8001/api/watchers/device123/add"
+
+# Remove watcher for a device
+curl -X DELETE "http://localhost:8001/api/watchers/device123"
+
+# Sync watchers with current device list
+curl -X POST "http://localhost:8001/api/watchers/sync"
+
+# Check if specific device has active watcher
+curl "http://localhost:8001/api/watchers/device123/status"
+```
+
+### Cleanup and Maintenance
+
+The service automatically handles cleanup, but you can also trigger manual cleanup:
+
+```bash
+# Clean up orphaned watchers manually
+curl -X POST "http://localhost:8001/api/watchers/cleanup-orphaned"
+
+# Refresh all watchers (useful after configuration changes)
+curl -X POST "http://localhost:8001/api/watchers/refresh"
+```
+
 ## Hook Event Types
 
 1. **`after_event_pulled`** - After an event is successfully pulled from device
 2. **`after_all_events_pulled`** - After all events in a batch are processed
-3. **`after_event_created`** - After a new event is discovered and stored
-4. **`after_event_deleted`** - After an event is deleted from the system
-5. **`before_event_pull`** - Before pulling an event from device
-6. **`after_gallery_start`** - After media service starts for a device
-7. **`after_gallery_stop`** - After media service stops for a device
-
-## Configuration Examples
-
-### Start Media Service with Custom Types
-
-```json
-{
-  "interval": 30,
-  "autoPull": true,
-  "supportedTypes": ["image", "video", "audio"],
-  "generateThumbnails": false
-}
-```
-
-### Create a Hook
-
-```json
-{
-  "hookName": "Backup after pull",
-  "eventType": "after_event_pulled",
-  "deviceId": "device123",
-  "actionId": "backup-action-id",
-  "parameters": {
-    "destination": "/backup/{{deviceId}}/{{eventId}}"
-  },
-  "enabled": true
-}
-```
-
-## Device Action Requirements
-
-### List Actions (one of these should be configured):
-
-- `list-events` - Original action name
-- `list-files` - Alternative action name
-- `list-media` - Alternative action name
-
-### Delete Actions (optional, one of these):
-
-- `delete-event` - Original action name
-- `remove-file` - Alternative action name
-- `cleanup` - Alternative action name
-
-### Expected Output Format
-
-```
-/path/to/file1.jpg	/path/to/thumb1.jpg	1024	{"meta": "data"}
-/path/to/file2.mp4		2048
-/path/to/file3.pdf
-```
-
-Format: `path[TAB]thumbnail[TAB]size[TAB]metadata`
-
-- **path**: Required - full path to the media file
-- **thumbnail**: Optional - path to thumbnail file
-- **size**: Optional - file size in bytes
-- **metadata**: Optional - JSON metadata
-
-## Frontend Enhancements
-
-### Media Type Filtering
-
-- Visual media type filters in gallery view
-- Icons for different media types (🖼️ 🎥 🎵 📄)
-- Support for files without thumbnails
-
-### Enhanced Event Display
-
-- Fallback icons for files without thumbnails
-- Media type indicators
-- File size information
-- Download links for non-previewable files
-
-### Statistics Dashboard
-
-- Media type breakdown in stats
-- Visual indicators for different file types
-- Enhanced filtering and sorting
-
-## Backward Compatibility
-
-All existing `/api/gallery/*` endpoints remain functional and use the new media service internally. The original GalleryService is preserved for compatibility.
-
-## Migration Guide
-
-1. **Database**: Run the new migrations to add media type support
-2. **Actions**: Ensure devices have list actions configured (list-events, list-files, or list-media)
-3. **Hooks**: Optionally configure hooks for automated workflows
-4. **Frontend**: The UI automatically supports new media types
-
-## Examples
-
-### Audio File Processing
-
-```bash
-# Device action output
-/recordings/audio1.mp3		1048576	{"duration": 180}
-/recordings/audio2.wav		2097152	{"duration": 240}
-```
-
-### Document Management
-
-```bash
-# Device action output
-/documents/report.pdf	/thumbs/report.jpg	524288	{"pages": 10}
-/documents/data.xlsx		1048576	{"sheets": 3}
-```
-
-The enhanced studio service provides a flexible foundation for any media management workflow while maintaining simplicity and backward compatibility.
+3. \*\*`
