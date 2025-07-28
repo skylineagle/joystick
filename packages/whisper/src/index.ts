@@ -14,6 +14,7 @@ import type {
   WebhookEvent,
   WebHookPayload,
 } from "./types";
+import { sendMessage } from "@/rut.utils";
 
 // In-memory store to track pending SMS messages by phone number
 const pendingSmsMessages = new Map<string, PendingSmsMessage>();
@@ -46,12 +47,12 @@ const httpFetchClient: FetchClient = {
   },
 };
 
-const apiClient = new Client(
-  Bun.env.SMS_USER || "sms",
-  Bun.env.SMS_KEY || "test",
-  httpFetchClient,
-  Bun.env.SMS_SERVER_URL || "https://api.sms-gate.app"
-);
+// const apiClient = new Client(
+//   Bun.env.SMS_USER || "sms",
+//   Bun.env.SMS_KEY || "test",
+//   httpFetchClient,
+//   Bun.env.SMS_SERVER_URL || "https://api.sms-gate.app"
+// );
 
 // Create a Bun server using Elysia
 const app = new Elysia()
@@ -190,14 +191,7 @@ const app = new Elysia()
             }
 
             try {
-              const result = await apiClient.send({
-                phoneNumbers: [activePhone],
-                message,
-              });
-
-              if (result.state === "Failed") {
-                throw new Error("Failed to send SMS");
-              }
+              await sendMessage(activePhone, message);
 
               await pb.collection("message").create({
                 device: params.device,
