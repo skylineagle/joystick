@@ -174,11 +174,13 @@ export function ParamTree({
       className={cn(
         "flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 rounded-md",
         "hover:bg-accent/5 transition-colors duration-200",
-        "relative"
+        "relative min-w-0 overflow-hidden"
       )}
     >
-      <ParamValueEditor schema={schema} path={path} treeId={treeId} />
-      <div className="flex items-center gap-1">
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <ParamValueEditor schema={schema} path={path} treeId={treeId} />
+      </div>
+      <div className="flex items-center gap-1 flex-shrink-0">
         {isEdited ? (
           <ValueIndicator
             status="edited"

@@ -59,7 +59,7 @@ export function ParamValueEditor({
     const commonProps = {
       disabled: value.isLoading,
       className: cn(
-        "w-full",
+        "min-w-full",
         value.edited !== null && "border-chart-1",
         value.pending !== null && "border-chart-4",
         value.error && "border-destructive"
@@ -78,6 +78,7 @@ export function ParamValueEditor({
               value.pending !== null && "bg-chart-4/10",
               value.error && "bg-destructive/10"
             )}
+            style={{ minWidth: '200px' }}
           >
             <Switch
               checked={Boolean(currentValue)}
@@ -96,7 +97,10 @@ export function ParamValueEditor({
               onValueChange={handleChange}
               disabled={value.isLoading}
             >
-              <SelectTrigger className={cn("w-full", commonProps.className)}>
+              <SelectTrigger
+                className={cn("w-full", commonProps.className)}
+                style={{ minWidth: "200px" }}
+              >
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -114,6 +118,7 @@ export function ParamValueEditor({
             value={(value.edited ?? value.current)?.toString() ?? ""}
             onChange={(e) => handleChange(e.target.value)}
             {...commonProps}
+            style={{ minWidth: "200px" }}
           />
         );
 
@@ -128,6 +133,7 @@ export function ParamValueEditor({
             max={schema.maximum}
             step={schema.type === "integer" ? 1 : "any"}
             {...commonProps}
+            style={{ minWidth: "200px" }}
           />
         );
 
@@ -137,15 +143,15 @@ export function ParamValueEditor({
   };
 
   return (
-    <div className="grid grid-cols-[120px_1fr_auto] sm:grid-cols-[200px_1fr_auto] items-center gap-2 sm:gap-6">
+    <div className="grid grid-cols-[140px_1fr_auto] sm:grid-cols-[220px_1fr_auto] items-center gap-2 sm:gap-6 min-w-0">
       <Label
-        className="text-xs sm:text-sm font-medium truncate capitalize"
+        className="text-xs sm:text-sm font-medium truncate capitalize flex-shrink-0"
         title={schema.description || displayTitle}
       >
         {displayTitle}
       </Label>
-      <div className="min-w-0">
-        {renderInput()}
+      <div className="min-w-0 overflow-hidden">
+        <div className="overflow-x-auto">{renderInput()}</div>
         {value.error && (
           <p
             className="mt-1 sm:mt-1.5 text-xs sm:text-sm text-destructive truncate"
