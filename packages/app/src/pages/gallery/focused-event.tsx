@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { joystickApi } from "@/lib/api-client";
 import { useAuthStore } from "@/lib/auth";
 import { pb } from "@/lib/pocketbase";
 import { urls } from "@/lib/urls";
+import { GalleryEventName } from "@/pages/gallery/gallery-event-name";
 import { getEventState } from "@/pages/gallery/utils";
 import { GalleryResponse } from "@/types/db.types";
 import { toast } from "@/utils/toast";
@@ -115,7 +116,6 @@ export const FocusedEvent = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const queryClient = useQueryClient();
-
   const pullMutation = useMutation({
     mutationFn: async (eventId: string) => {
       const response = await joystickApi.post(
@@ -281,14 +281,18 @@ export const FocusedEvent = ({
         );
       case "audio":
         return (
-          <audio
-            ref={videoRef}
-            src={url}
-            className="w-full"
-            controls
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-          />
+          <div className="w-full max-w-md mx-auto">
+            <audio
+              ref={videoRef}
+              src={url}
+              className="w-full"
+              controls
+              preload="metadata"
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              onEnded={() => setIsPlaying(false)}
+            />
+          </div>
         );
       case "document":
         return <DocumentPreview url={url} />;
@@ -331,91 +335,103 @@ export const FocusedEvent = ({
 
   return (
     <Dialog open={!!focusedEvent} onOpenChange={() => handleClose()}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden">
+      <DialogTitle />
+      <DialogContent className="max-w-6xl max-h-[90vh] p-0 overflow-hidden">
         {focusedEvent && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
+            className="flex flex-col h-full"
           >
-            <div className="relative">
-              <div className="flex items-center justify-center bg-black/95 p-4">
+            <div className="flex-1 flex items-center justify-center bg-black/95 p-6 min-h-0">
+              <div className="max-w-full max-h-full flex items-center justify-center">
                 {renderMedia()}
               </div>
+            </div>
 
-              <div className="absolute bottom-4 left-4 right-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                      {getMediaIcon(focusedEvent.media_type || "unknown")}
-                      {focusedEvent.name || focusedEvent.event_id}
-                    </h3>
-                    <p className="text-sm text-white/80">
+            <div className="bg-background/95 backdrop-blur-sm border-t p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold flex items-center gap-2 truncate">
+                    {getMediaIcon(focusedEvent.media_type || "unknown")}
+                    <span className="truncate">
+                      <GalleryEventName
+                        name={focusedEvent.name || focusedEvent.event_id}
+                        eventId={focusedEvent.event_id}
+                      />
+                    </span>
+                  </h3>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                    <span>
                       {new Date(focusedEvent.created).toLocaleString()}
-                    </p>
+                    </span>
                     {focusedEvent.file_size && (
-                      <p className="text-sm text-white/60">
+                      <span>
                         Size:{" "}
                         {(focusedEvent.file_size / 1024 / 1024).toFixed(2)} MB
-                      </p>
+                      </span>
                     )}
+                    <span className="capitalize">
+                      {focusedEvent.media_type || "unknown"}
+                    </span>
                   </div>
-                  <div className="flex gap-2">
-                    {getEventState(focusedEvent, user?.id || "") === "new" ? (
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
+                  {getEventState(focusedEvent, user?.id || "") === "new" ? (
+                    <Button
+                      variant="secondary"
+                      onClick={() => pullMutation.mutate(focusedEvent.id)}
+                      disabled={pullMutation.isPending}
+                    >
+                      {pullMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      ) : (
+                        <Download className="h-4 w-4 mr-2" />
+                      )}
+                      Pull Event
+                    </Button>
+                  ) : focusedEvent.media_type === "video" ||
+                    focusedEvent.media_type === "audio" ? (
+                    <Button variant="secondary" onClick={handlePlayPause}>
+                      {isPlaying ? (
+                        <Pause className="h-4 w-4 mr-2" />
+                      ) : (
+                        <Play className="h-4 w-4 mr-2" />
+                      )}
+                      {isPlaying ? "Pause" : "Play"}
+                    </Button>
+                  ) : (
+                    <div className="flex gap-2">
                       <Button
                         variant="secondary"
-                        onClick={() => pullMutation.mutate(focusedEvent.id)}
-                        disabled={pullMutation.isPending}
+                        onClick={() =>
+                          window.open(
+                            pb.files.getURL(focusedEvent, focusedEvent.event),
+                            "_blank"
+                          )
+                        }
                       >
-                        {pullMutation.isPending ? (
-                          <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        ) : (
-                          <Download className="h-4 w-4 mr-2" />
-                        )}
-                        Pull Event
+                        Open File
                       </Button>
-                    ) : focusedEvent.media_type === "video" ||
-                      focusedEvent.media_type === "audio" ? (
-                      <Button variant="secondary" onClick={handlePlayPause}>
-                        {isPlaying ? (
-                          <Pause className="h-4 w-4 mr-2" />
-                        ) : (
-                          <Play className="h-4 w-4 mr-2" />
-                        )}
-                        {isPlaying ? "Pause" : "Play"}
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          const link = document.createElement("a");
+                          link.href = pb.files.getURL(
+                            focusedEvent,
+                            focusedEvent.event
+                          );
+                          link.download =
+                            focusedEvent.name || focusedEvent.event_id;
+                          link.click();
+                        }}
+                      >
+                        Download
                       </Button>
-                    ) : (
-                      <div className="flex gap-2">
-                        <Button
-                          variant="secondary"
-                          onClick={() =>
-                            window.open(
-                              pb.files.getURL(focusedEvent, focusedEvent.event),
-                              "_blank"
-                            )
-                          }
-                        >
-                          Open File
-                        </Button>
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            const link = document.createElement("a");
-                            link.href = pb.files.getURL(
-                              focusedEvent,
-                              focusedEvent.event
-                            );
-                            link.download =
-                              focusedEvent.name || focusedEvent.event_id;
-                            link.click();
-                          }}
-                        >
-                          Download
-                        </Button>
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

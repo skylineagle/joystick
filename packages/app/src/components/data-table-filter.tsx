@@ -106,11 +106,6 @@ export function ActiveFiltersMobileContainer({
     }
   };
 
-  // Log blur states for debugging
-  // useEffect(() => {
-  //   console.log('left:', showLeftBlur, '  right:', showRightBlur)
-  // }, [showLeftBlur, showRightBlur])
-
   // Set up ResizeObserver to monitor container size
   useEffect(() => {
     if (scrollContainerRef.current) {

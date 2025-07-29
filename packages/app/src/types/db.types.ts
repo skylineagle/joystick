@@ -273,13 +273,19 @@ export enum StudioHooksEventTypeOptions {
 	"before_event_pull" = "before_event_pull",
 	"after_gallery_start" = "after_gallery_start",
 	"after_gallery_stop" = "after_gallery_stop",
+	"after_file_downloaded" = "after_file_downloaded",
+}
+
+export enum StudioHooksExecutionTypeOptions {
+	"local" = "local",
+	"device" = "device",
 }
 export type StudioHooksRecord<Tparameters = unknown> = {
-	action: RecordIdString
 	created?: IsoDateString
 	device?: RecordIdString
 	enabled?: boolean
 	event_type: StudioHooksEventTypeOptions
+	executionType: StudioHooksExecutionTypeOptions
 	hook_name: string
 	id: string
 	parameters?: null | Tparameters

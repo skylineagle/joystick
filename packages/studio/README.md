@@ -237,4 +237,218 @@ curl -X POST "http://localhost:8001/api/watchers/refresh"
 
 1. **`after_event_pulled`** - After an event is successfully pulled from device
 2. **`after_all_events_pulled`** - After all events in a batch are processed
-3. \*\*`
+3. **`after_event_processed`** - After an event is processed and stored
+4. **`after_thumbnail_generated`** - After a thumbnail is generated for an event
+5. **`on_file_detected`** - When a new file is detected in the incoming directory
+6. **`on_error`** - When an error occurs during processing
+7. **`on_service_start`** - When the media service starts for a device
+
+## Action Command Examples
+
+The Studio service uses configurable device actions to interact with devices. Here are examples of common action commands for listing and removing events, media, and files.
+
+### Listing Commands
+
+#### List Events
+
+```bash
+# Basic list events command
+ls -la /events
+
+# List events with date filtering
+find /events -name "*.jpg" -newermt "2024-03-01" -ls
+
+# List events with JSON output
+ls -la /events | jq -R -s 'split("\n") | map(select(length > 0)) | map(split(" ")) | map({name: .[8], size: .[4], date: .[5] + " " + .[6] + " " + .[7]})'
+
+# List events by size
+find /events -type f -size +1M -ls
+
+# List recent events (last 24 hours)
+find /events -type f -mtime -1 -ls
+```
+
+#### List Media Files
+
+```bash
+# List all video media files
+find /media -type f \( -name "*.mp4" -o -name "*.avi" -o -name "*.mov" \) -ls
+
+# List all image files
+find /media -type f \( -name "*.jpg" -o -name "*.jpeg" -o -name "*.png" -o -name "*.gif" \) -ls
+
+# List media with metadata
+for file in /media/*; do echo "{\"name\": \"$(basename $file)\", \"size\": \"$(stat -c %s $file)\", \"modified\": \"$(stat -c %y $file)\", \"type\": \"$(file -b --mime-type $file)\"}"; done
+
+# List media by size
+find /media -type f -size +50M -ls
+
+# List media by date range
+find /media -type f -newermt "2024-03-01" ! -newermt "2024-03-31" -ls
+```
+
+#### List Files
+
+```bash
+# List all files recursively
+find /data -type f -ls
+
+# List files larger than 10MB
+find /data -type f -size +10M -ls
+
+# List files modified in the last 7 days
+find /data -type f -mtime -7 -ls
+
+# List files by extension
+find /data -type f -name "*.log" -ls
+
+# List files with human-readable sizes
+find /data -type f -exec ls -lh {} \;
+```
+
+### Removing Commands
+
+#### Remove Events
+
+```bash
+# Remove specific event file
+rm -f /events/{{event_name}}
+
+# Remove events older than 30 days
+find /events -type f -mtime +30 -delete
+
+# Remove events matching pattern
+rm -f /events/{{pattern}}
+
+# Remove all event files
+rm -rf /events/*
+
+# Remove events by size (larger than 100MB)
+find /events -type f -size +100M -delete
+```
+
+#### Remove Media Files
+
+```bash
+# Remove specific media file
+rm -f /media/{{media_name}}
+
+# Remove all video files
+find /media -type f \( -name "*.mp4" -o -name "*.avi" \) -delete
+
+# Remove media files larger than 100MB
+find /media -type f -size +100M -delete
+
+# Remove old media files (older than 60 days)
+find /media -type f -mtime +60 -delete
+
+# Remove media by type
+find /media -type f -name "*.tmp" -delete
+```
+
+#### Remove Files
+
+```bash
+# Remove specific file
+rm -f /data/{{file_name}}
+
+# Remove files older than 90 days
+find /data -type f -mtime +90 -delete
+
+# Remove temporary files
+find /tmp -type f -name "*.tmp" -delete
+
+# Remove empty directories
+find /data -type d -empty -delete
+
+# Remove files by extension
+find /data -type f -name "*.bak" -delete
+```
+
+### Advanced Command Examples
+
+#### Conditional Removal
+
+```bash
+# Remove files only if disk space is low
+if [ $(df /data | awk 'NR==2 {print $5}' | sed 's/%//') -gt 90 ]; then find /data -type f -mtime +30 -delete; fi
+
+# Remove files only if they exist
+[ -f /events/old_file.jpg ] && rm -f /events/old_file.jpg
+
+# Remove files with size check
+find /media -type f -size +1G -exec rm -f {} \;
+```
+
+#### Backup Before Removal
+
+```bash
+# Backup events before removing them
+tar -czf /backup/events-$(date +%Y%m%d).tar.gz /events && rm -rf /events/*
+
+# Backup with timestamp
+tar -czf /backup/media-$(date +%Y%m%d_%H%M%S).tar.gz /media && find /media -type f -delete
+
+# Incremental backup before removal
+rsync -av /events/ /backup/events/ && rm -rf /events/*
+```
+
+#### Selective Removal with Confirmation
+
+```bash
+# Remove image files with interactive confirmation
+find /events -type f -name "*.jpg" -exec rm -i {} \;
+
+# Remove files with verbose output
+find /media -type f -name "*.mp4" -exec rm -v {} \;
+
+# Remove files with progress
+find /data -type f -name "*.log" -print0 | xargs -0 -I {} rm -v {}
+```
+
+#### Safe Removal with Logging
+
+```bash
+# Remove files with logging
+find /events -type f -mtime +30 -exec sh -c 'echo "Removing: $1"; rm -f "$1"' _ {} \;
+
+# Remove files and log to file
+find /media -type f -size +100M -exec sh -c 'echo "$(date): Removing $1" >> /var/log/cleanup.log; rm -f "$1"' _ {} \;
+
+# Remove files with error handling
+find /data -type f -name "*.tmp" -exec sh -c 'if rm -f "$1"; then echo "Removed: $1"; else echo "Failed to remove: $1"; fi' _ {} \;
+```
+
+## Parameter Templating
+
+The Studio service supports dynamic parameter injection in action commands using template variables:
+
+- `{{device_id}}` - Current device ID
+- `{{event_name}}` - Event filename
+- `{{media_type}}` - Media type (image, video, audio, etc.)
+- `{{file_path}}` - Full file path
+- `{{timestamp}}` - Current timestamp
+- `{{date}}` - Current date in YYYY-MM-DD format
+
+Example with parameters:
+
+```bash
+curl -X POST "http://localhost:8090/api/collections/actions/records" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "name": "process-event",
+    "device": "device123",
+    "command": "ffmpeg -i {{file_path}} -vf scale=640:480 /processed/{{event_name}}",
+    "description": "Process event with dynamic parameters"
+  }'
+```
+
+## Usage Notes
+
+- **Safety First**: Always test removal commands on a small subset first
+- **Backup Strategy**: Consider implementing backup procedures before bulk deletions
+- **Permission Checks**: Ensure the device has proper permissions for file operations
+- **Error Handling**: Use commands that provide meaningful error messages
+- **Logging**: Consider adding logging to track what files are being removed
+- **Dry Run**: Test commands with `echo` or `ls` before actual removal

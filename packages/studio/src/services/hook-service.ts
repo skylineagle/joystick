@@ -1,12 +1,10 @@
 import { logger } from "@/logger";
 import { pb } from "@/pocketbase";
-import type {
-  DeviceResponse,
-  StudioHooksResponse,
-  ActionsResponse,
-  RunResponse,
-} from "@joystick/core";
+import type { DeviceResponse } from "@joystick/core";
 import { runCommandOnDevice } from "@joystick/core";
+import { $ } from "bun";
+import { join } from "path";
+import { GALLERY_BASE_PATH } from "../config";
 
 interface HookContext {
   deviceId: string;
@@ -15,6 +13,9 @@ interface HookContext {
   config?: any;
   events?: any[];
   totalProcessed?: number;
+  localPath?: string;
+  fileStats?: any;
+  extension?: string;
 }
 
 export class HookService {
@@ -34,12 +35,10 @@ export class HookService {
     context: HookContext
   ): Promise<void> {
     try {
-      const hooks = await pb
-        .collection("studio_hooks")
-        .getFullList({
-          filter: `event_type = "${eventType}" && enabled = true`,
-          expand: "device,action",
-        });
+      const hooks = await pb.collection("studio_hooks").getFullList({
+        filter: `event_type = "${eventType}" && enabled = true`,
+        expand: "device,action",
+      });
 
       const relevantHooks = hooks.filter(
         (hook) => !hook.device || hook.device === context.deviceId
@@ -62,16 +61,62 @@ export class HookService {
     }
   }
 
-  private async executeHook(
-    hook: any,
-    context: HookContext
-  ): Promise<void> {
+  private async executeHook(hook: any, context: HookContext): Promise<void> {
     try {
       logger.debug(`Executing hook: ${hook.hook_name}`, {
         hook: hook.hook_name,
         context,
       });
 
+      const mergedParams = this.mergeParameters(hook.parameters, context);
+
+      // Check if this is a local hook using the executionType column
+      const isLocalHook = hook.executionType === "local";
+
+      if (isLocalHook) {
+        await this.executeLocalCommand(hook, mergedParams, context);
+      } else {
+        await this.executeDeviceCommand(hook, mergedParams, context);
+      }
+    } catch (error) {
+      logger.info(error);
+      logger.error(`Hook execution failed: ${hook.hook_name}`, error);
+    }
+  }
+
+  private async executeLocalCommand(
+    hook: any,
+    params: Record<string, any>,
+    context: HookContext
+  ): Promise<void> {
+    try {
+      const command = this.buildCommand(
+        hook.parameters?.command || "echo 'No command specified'",
+        params
+      );
+
+      logger.info(`Executing local hook: ${hook.hook_name}`, {
+        command,
+        deviceId: context.deviceId,
+      });
+
+      const result = await $`sh -c ${command}`.text();
+
+      logger.info(`Local hook ${hook.hook_name} executed successfully`, {
+        result: result.substring(0, 200) + (result.length > 200 ? "..." : ""),
+      });
+    } catch (error) {
+      logger.error(`Local hook execution failed: ${hook.hook_name}`, error);
+      throw error;
+    }
+  }
+
+  private async executeDeviceCommand(
+    hook: any,
+    params: Record<string, any>,
+    context: HookContext
+  ): Promise<void> {
+    try {
       const device = await this.getDevice(context.deviceId);
       if (!device) {
         logger.error(
@@ -80,42 +125,24 @@ export class HookService {
         return;
       }
 
-      const action = await pb.collection("actions").getOne(hook.action);
-      if (!action) {
-        logger.error(
-          `Action ${hook.action} not found for hook ${hook.hook_name}`
-        );
-        return;
-      }
-
-      const runConfig = await pb.collection("run").getFullList<RunResponse>({
-        filter: `action = "${action.id}" && device = "${device.expand?.device.id}"`,
-      });
-
-      if (runConfig.length === 0) {
-        logger.error(
-          `Action ${action.name} not configured for device ${device.name} in hook ${hook.hook_name}`
-        );
-        return;
-      }
-
-      const run = runConfig[0];
-      const mergedParams = this.mergeParameters(hook.parameters, context);
-      const command = this.buildCommand(run.command, mergedParams);
+      const command = this.buildCommand(
+        hook.parameters?.command || "echo 'No command specified'",
+        params
+      );
 
       logger.info(
-        `Executing hook action: ${action.name} on device: ${device.name}`
+        `Executing device hook action: ${hook.hook_name} on device: ${device.name}`
       );
 
       const result = await runCommandOnDevice(device, command);
 
-      logger.info(`Hook ${hook.hook_name} executed successfully`, {
-        action: action.name,
+      logger.info(`Device hook ${hook.hook_name} executed successfully`, {
         device: device.name,
         result: result.substring(0, 200) + (result.length > 200 ? "..." : ""),
       });
     } catch (error) {
-      logger.error(`Hook execution failed: ${hook.hook_name}`, error);
+      logger.error(`Device hook execution failed: ${hook.hook_name}`, error);
+      throw error;
     }
   }
 
@@ -143,18 +170,49 @@ export class HookService {
       deviceId: context.deviceId,
       eventId: context.eventId,
       timestamp: new Date().toISOString(),
+      date: new Date().toISOString().split("T")[0],
     };
 
     if (hookParams && typeof hookParams === "object") {
       Object.assign(merged, hookParams);
     }
 
+    // Handle after_file_downloaded hook context
+    if (context.localPath) {
+      merged.localPath = context.localPath;
+      merged.sourcePath = context.localPath; // Alias for backward compatibility
+      merged.fileStats = context.fileStats;
+      merged.extension = context.extension;
+    }
+
     if (context.event) {
-      merged.eventPath = context.event.path;
-      merged.eventName = context.event.name;
+      merged.eventPath = context.event.name;
+      merged.eventName = context.event.name.split("/").pop();
       merged.mediaType = context.event.media_type;
       merged.hasThumb = context.event.has_thumbnail;
       merged.fileSize = context.event.file_size;
+
+      const extension = context.event.name?.split(".").pop() || "";
+      merged.extension = extension;
+
+      // Only set sourcePath if not already set by localPath
+      if (!merged.sourcePath) {
+        merged.sourcePath = join(
+          GALLERY_BASE_PATH,
+          context.deviceId,
+          "processed",
+          context.event.name || ""
+        );
+      }
+
+      merged.thumbnailPath = context.event.has_thumbnail
+        ? join(
+            GALLERY_BASE_PATH,
+            context.deviceId,
+            "thumbnails",
+            `${context.eventId}.jpg`
+          )
+        : "";
     }
 
     if (context.config) {
@@ -186,6 +244,7 @@ export class HookService {
     actionId: string;
     parameters?: Record<string, any>;
     enabled?: boolean;
+    executionType?: "local" | "device";
   }): Promise<any> {
     const hook = await pb.collection("studio_hooks").create({
       hook_name: hookData.hookName,
@@ -193,6 +252,7 @@ export class HookService {
       device: hookData.deviceId,
       action: hookData.actionId,
       parameters: hookData.parameters,
+      executionType: hookData.executionType || "device",
       enabled: hookData.enabled ?? true,
     });
 
@@ -209,6 +269,7 @@ export class HookService {
       actionId: string;
       parameters?: Record<string, any>;
       enabled: boolean;
+      executionType: "local" | "device";
     }>
   ): Promise<any> {
     const updateData: any = {};
@@ -217,9 +278,10 @@ export class HookService {
     if (updates.eventType) updateData.event_type = updates.eventType;
     if (updates.deviceId !== undefined) updateData.device = updates.deviceId;
     if (updates.actionId) updateData.action = updates.actionId;
+    if (updates.enabled !== undefined) updateData.enabled = updates.enabled;
+    if (updates.executionType) updateData.executionType = updates.executionType;
     if (updates.parameters !== undefined)
       updateData.parameters = updates.parameters;
-    if (updates.enabled !== undefined) updateData.enabled = updates.enabled;
 
     const hook = await pb.collection("studio_hooks").update(hookId, updateData);
     logger.info(`Updated hook: ${hookId}`, updates);
@@ -250,12 +312,10 @@ export class HookService {
       filter += ` && (device = "${deviceId}" || device = "")`;
     }
 
-    return await pb
-      .collection("studio_hooks")
-      .getFullList({
-        filter,
-        expand: "device,action",
-        sort: "-created",
-      });
+    return await pb.collection("studio_hooks").getFullList({
+      filter,
+      expand: "device,action",
+      sort: "-created",
+    });
   }
 }

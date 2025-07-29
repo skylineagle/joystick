@@ -186,3 +186,6 @@ pocketbase/pb_data/logs/
 pocketbase/pb_data/storage/
 
 data/
+
+packages/studio/data
+packages/studio/backup
