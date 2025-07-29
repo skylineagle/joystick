@@ -13,6 +13,8 @@ FROM oven/bun:slim as runner
 
 WORKDIR /app/packages/studio
 
+RUN apt-get update && apt-get install -y sshpass curl iputils-ping
+
 COPY --from=base /app/packages/studio /app/packages/studio
 COPY --from=base /app/packages/core /app/packages/core
 COPY --from=base /app/bun.lock /app/bun.lock
