@@ -1,58 +1,20 @@
 import { pb } from "@/pocketbase";
+import { sendMessage } from "@/rut.utils";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import type { DeviceResponse } from "@joystick/core";
 import { createAuthPlugin, getActiveDeviceConnection } from "@joystick/core";
-import Client from "android-sms-gateway";
 import { Elysia, t } from "elysia";
 import { logger } from "./logger";
 import type {
   AndroidSmsGatewayEvent,
-  FetchClient,
   PendingSmsMessage,
   SmsResponse,
   WebhookEvent,
-  WebHookPayload,
 } from "./types";
-import { sendMessage } from "@/rut.utils";
 
 // In-memory store to track pending SMS messages by phone number
 const pendingSmsMessages = new Map<string, PendingSmsMessage>();
-
-const httpFetchClient: FetchClient = {
-  get: async (url, headers = {}) => {
-    const response = await fetch(url, {
-      method: "GET",
-      headers,
-    });
-
-    return response.json();
-  },
-  post: async (url, body, headers = {}) => {
-    const response = await fetch(url, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(body),
-    });
-
-    return response.json();
-  },
-  delete: async (url, headers = {}) => {
-    const response = await fetch(url, {
-      method: "DELETE",
-      headers,
-    });
-
-    return response.json();
-  },
-};
-
-// const apiClient = new Client(
-//   Bun.env.SMS_USER || "sms",
-//   Bun.env.SMS_KEY || "test",
-//   httpFetchClient,
-//   Bun.env.SMS_SERVER_URL || "https://api.sms-gate.app"
-// );
 
 // Create a Bun server using Elysia
 const app = new Elysia()
