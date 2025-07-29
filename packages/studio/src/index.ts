@@ -79,23 +79,17 @@ const app = new Elysia()
     "/api/gallery/:device/start",
     async ({ params, body }) => {
       try {
-        const config = body as {
-          interval: number;
-          autoPull: boolean;
-          supportedTypes?: string[];
-          generateThumbnails?: boolean;
-        };
+        const device = await pb
+          .collection("devices")
+          .getFirstListItem<DeviceResponse>(`id = "${params.device}"`, {
+            expand: "device",
+          });
 
         const galleryConfig = {
-          interval: config.interval,
-          autoPull: config.autoPull,
-          supportedTypes: config.supportedTypes || [
-            "image",
-            "video",
-            "audio",
-            "document",
-          ],
-          generateThumbnails: config.generateThumbnails || false,
+          interval: device.information?.harvest?.interval ?? 60,
+          autoPull: device.information?.harvest?.autoPull ?? false,
+          supportedTypes: device.information?.harvest?.supportedTypes || [],
+          generateThumbnails: false,
         };
 
         await galleryService.startGalleryService(params.device, galleryConfig);
@@ -557,13 +551,13 @@ console.log(
 async function initializeServices() {
   try {
     logger.info("Initializing studio services...");
-    
+
     // Initialize file watcher service
     await fileWatcherService.initialize();
-    
+
     // Initialize gallery services for devices with harvesting enabled
     await initializeGalleryServices();
-    
+
     // Set up periodic sync of watchers with device list (every 5 minutes)
     setInterval(async () => {
       try {
@@ -572,7 +566,7 @@ async function initializeServices() {
         logger.error("Error during periodic watcher sync:", error);
       }
     }, 5 * 60 * 1000); // 5 minutes
-    
+
     logger.info("All studio services initialized successfully");
   } catch (error) {
     logger.error("Failed to initialize studio services:", error);
@@ -600,9 +594,9 @@ async function initializeGalleryServices() {
         );
 
         const galleryConfig = {
-          interval: device.information?.harvestingInterval ?? 60,
-          autoPull: false,
-          supportedTypes: ["image", "video", "audio", "document"],
+          interval: device.information?.harvest?.interval ?? 60,
+          autoPull: device.information?.harvest?.autoPull ?? false,
+          supportedTypes: device.information?.harvest?.supportedTypes || [],
           generateThumbnails: false,
         };
 

@@ -114,7 +114,11 @@ export type DeviceInformation = {
   autoSlotSwitch?: boolean;
   battery_capacity?: number;
   aspectRatio?: string;
-  harvestingInterval?: number;
+  harvest: {
+    interval?: number;
+    supportedTypes?: string[];
+    autoPull?: boolean;
+  };
   imuResetValues?: {
     x: number;
     y: number;

@@ -144,7 +144,6 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
   }, [currentTab, isJsonValid, isAutomationValid, isPending, editingConfig]);
 
   const handleOverlayChange = useCallback((files: FileWithPreview[]) => {
-    console.log(files);
     setEditingConfig((prev) => {
       return prev
         ? { ...prev, overlay: (files?.[0]?.file as File) ?? "" }

@@ -37,7 +37,6 @@ export const NewMessage = ({ deviceId, selectedPreset }: NewMessageProps) => {
             error?: string;
             message?: string;
           } = JSON.parse(result?.output || "{}");
-          console.log(result);
 
           if (!result.success && !output.success) {
             toast.error({

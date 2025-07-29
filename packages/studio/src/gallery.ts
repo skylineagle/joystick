@@ -4,10 +4,10 @@ import type {
   DeviceResponse,
   GalleryResponse,
   RunResponse,
-  StudioHooksResponse,
 } from "@joystick/core";
 import {
   getActiveDeviceConnection,
+  parseActionCommand,
   runCommandOnDevice,
   runScpFromDevice,
 } from "@joystick/core";
@@ -15,8 +15,8 @@ import { $ } from "bun";
 import { Baker } from "cronbake";
 import { existsSync, mkdirSync, readFileSync, statSync } from "fs";
 import { join } from "path";
-import { HookService } from "./services/hook-service";
 import { GALLERY_BASE_PATH } from "./config";
+import { HookService } from "./services/hook-service";
 
 if (!existsSync(GALLERY_BASE_PATH)) {
   mkdirSync(GALLERY_BASE_PATH, { recursive: true });
@@ -267,7 +267,7 @@ export class GalleryService {
     }
 
     const run = runConfig[0];
-    const command = this.buildCommand(run.command, params);
+    const command = this.buildCommand(device, run.command, params);
 
     logger.info(`Executing command for device ${device.name}: ${command}`);
 
@@ -277,21 +277,12 @@ export class GalleryService {
     return result;
   }
 
-  private buildCommand(command: string, params?: Record<string, any>): string {
-    if (!params) return command;
-
-    let result = command;
-    logger.debug(`Building command with params:`, { command, params });
-
-    for (const [key, value] of Object.entries(params)) {
-      const pattern = new RegExp(`{{${key}}}`, "g");
-      const replacement = String(value);
-      result = result.replace(pattern, replacement);
-      logger.debug(`Replaced {{${key}}} with ${replacement}`);
-    }
-
-    logger.debug(`Final command: ${result}`);
-    return result;
+  private buildCommand(
+    device: DeviceResponse,
+    command: string,
+    params?: Record<string, any>
+  ): string {
+    return parseActionCommand(device, command, params);
   }
 
   private async listEvents(
@@ -361,16 +352,6 @@ export class GalleryService {
           metadata: parts.length > 3 ? this.parseMetadata(parts[3]) : {},
         };
 
-        logger.debug(`Parsed event:`, {
-          id: event.id,
-          path: event.path,
-          filename,
-          extension,
-          mediaType: event.mediaType,
-          hasThumb: event.hasThumb,
-          parts: parts.length,
-        });
-
         return event;
       })
       .filter(
@@ -392,10 +373,32 @@ export class GalleryService {
   }
 
   public getMediaType(extension: string): string {
-    const imageTypes = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff", "heic", "heif"];
+    const imageTypes = [
+      "jpg",
+      "jpeg",
+      "png",
+      "gif",
+      "webp",
+      "bmp",
+      "tiff",
+      "heic",
+      "heif",
+    ];
     const videoTypes = ["mp4", "webm", "avi", "mov", "mkv", "flv"];
     const audioTypes = ["mp3", "wav", "ogg", "m4a", "aac"];
-    const documentTypes = ["pdf", "doc", "docx", "xls", "xlsx", "txt", "md", "json", "xml", "csv", "log"];
+    const documentTypes = [
+      "pdf",
+      "doc",
+      "docx",
+      "xls",
+      "xlsx",
+      "txt",
+      "md",
+      "json",
+      "xml",
+      "csv",
+      "log",
+    ];
 
     extension = extension.toLowerCase();
 
@@ -410,7 +413,16 @@ export class GalleryService {
   }
 
   private hasThumbExtension(extension: string): boolean {
-    const thumbExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "webp", "heic", "heif"];
+    const thumbExtensions = [
+      "jpg",
+      "jpeg",
+      "png",
+      "gif",
+      "bmp",
+      "webp",
+      "heic",
+      "heif",
+    ];
     const hasThumb = thumbExtensions.includes(extension);
 
     logger.debug(`Checking thumb extension:`, { extension, hasThumb });
@@ -604,8 +616,11 @@ export class GalleryService {
       deviceId,
     });
 
-    const extension = remotePath.split(".").pop() || "bin";
-    const localPath = join(deviceDir, `${event.event_id}.${extension}`);
+    const extension = remotePath.split(".").pop();
+    const localPath = join(
+      deviceDir,
+      `${event.event_id}${extension ? `.${extension}` : ""}`
+    );
     logger.info(`Downloading event from ${remotePath} to ${localPath}`);
 
     try {
@@ -623,7 +638,10 @@ export class GalleryService {
     const fileStats = statSync(localPath);
 
     await pb.collection("gallery").update(event.id, {
-      event: new File([fileContent], `${event.event_id}.${extension}`),
+      event: new File(
+        [fileContent],
+        `${event.event_id}${extension ? `.${extension}` : ""}`
+      ),
       file_size: fileStats.size,
     });
 

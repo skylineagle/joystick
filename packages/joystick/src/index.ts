@@ -10,10 +10,9 @@ import type {
 import {
   createAuthPlugin,
   getActiveDeviceConnection,
+  parseActionCommand,
   runCommandOnDevice,
   RunTargetOptions,
-  STREAM_API_URL,
-  SWITCHER_API_URL,
   type SendNotificationPayload,
 } from "@joystick/core";
 import { $ } from "bun";
@@ -136,29 +135,12 @@ const app = new Elysia()
           }
         }
 
-        const defaultParameters = {
-          device: params.device,
-          mediamtx: STREAM_API_URL,
-          switcher: SWITCHER_API_URL,
-          userId: auth.userId,
-          ...device.information,
-        };
-        enhancedLogger.info(
-          {
-            defaultParameters,
-          },
-          "Default parameters"
+        const command = parseActionCommand(
+          device,
+          run.command,
+          body as Record<string, unknown>,
+          { userId }
         );
-        const command = Object.entries({
-          ...defaultParameters,
-          ...body,
-        }).reduce((acc, [key, value]) => {
-          if (acc.includes(`$${key}`)) {
-            return acc.replaceAll(`$${key}`, String(value));
-          }
-          return acc;
-        }, run.command);
-
         enhancedLogger.warn(command);
 
         const output =

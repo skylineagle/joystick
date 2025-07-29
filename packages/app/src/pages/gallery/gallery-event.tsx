@@ -1,17 +1,13 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { joystickApi } from "@/lib/api-client";
 import { useAuthStore } from "@/lib/auth";
 import { pb } from "@/lib/pocketbase";
 import { urls } from "@/lib/urls";
 import { cn } from "@/lib/utils";
+import { GalleryEventName } from "@/pages/gallery/gallery-event-name";
 import { GalleryResponse } from "@/types/db.types";
 import { MetadataValue } from "@/types/types";
 import { toast } from "@/utils/toast";
@@ -42,13 +38,6 @@ const formatFileSize = (bytes: number) => {
   }
   const kb = bytes / 1024;
   return `${kb.toFixed(2)} KB`;
-};
-
-const getFileName = (fullPath: string) => {
-  if (!fullPath) return "";
-  // Handle both forward and backward slashes
-  const parts = fullPath.split(/[/\\]/);
-  return parts[parts.length - 1] || fullPath;
 };
 
 const formatDate = (date: string | Date) => {
@@ -139,54 +128,31 @@ const isPreviewable = (mediaType: string, fileName?: string) => {
   if (["video", "image", "audio"].includes(mediaType)) {
     return true;
   }
-  
+
   // Check file extension for additional previewable types
   if (fileName) {
     const extension = fileName.split(".").pop()?.toLowerCase();
     const previewableExtensions = [
-      "txt", "md", "json", "xml", "csv", "log", "js", "ts", "py", "cpp", "c", "h", "html", "css", "sql"
+      "txt",
+      "md",
+      "json",
+      "xml",
+      "csv",
+      "log",
+      "js",
+      "ts",
+      "py",
+      "cpp",
+      "c",
+      "h",
+      "html",
+      "css",
+      "sql",
     ];
     return previewableExtensions.includes(extension || "");
   }
-  
+
   return false;
-};
-
-interface FileNameDisplayProps {
-  name: string;
-  eventId: string;
-  className?: string;
-}
-
-const FileNameDisplay = ({
-  name,
-  eventId,
-  className,
-}: FileNameDisplayProps) => {
-  const fileName = getFileName(name);
-  const fullPath = name;
-
-  // If the filename is the same as the full path, no need for tooltip
-  if (fileName === fullPath) {
-    return (
-      <span className={cn("font-medium truncate", className)}>
-        {fileName || eventId}
-      </span>
-    );
-  }
-
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <span className={cn("font-medium truncate cursor-help", className)}>
-          {fileName || eventId}
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p className="max-w-xs break-all">{fullPath}</p>
-      </TooltipContent>
-    </Tooltip>
-  );
 };
 
 export function GalleryEvent({
@@ -282,11 +248,12 @@ export function GalleryEvent({
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
           className={cn(
-            "flex items-center gap-4 p-4 rounded-lg border transition-colors",
+            "flex items-center gap-4 p-4 rounded-lg border transition-all duration-200 cursor-pointer",
             isSelected
-              ? "bg-accent/50 border-primary"
-              : "bg-card hover:bg-accent/50"
+              ? "bg-primary/5 border-primary ring-2 ring-primary/20"
+              : "bg-card hover:bg-accent/50 hover:border-border/60"
           )}
+          onClick={() => onSelect()}
         >
           <Checkbox
             checked={isSelected}
@@ -296,11 +263,12 @@ export function GalleryEvent({
             onCheckedChange={() => {
               onSelect();
             }}
+            className="z-10"
           />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               {getFileIcon(event.media_type, event.name)}
-              <FileNameDisplay name={event.name} eventId={event.event_id} />
+              <GalleryEventName name={event.name} eventId={event.event_id} />
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <span>{formatDate(event.created)}</span>
@@ -408,32 +376,46 @@ export function GalleryEvent({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: index * 0.1 }}
         className={cn(
-          "group relative rounded-lg border overflow-hidden bg-card transition-colors h-fit",
-          isSelected && "border-primary"
+          "group relative rounded-lg border overflow-hidden bg-card transition-all duration-200 h-fit",
+          isSelected
+            ? "border-primary ring-2 ring-primary/20 shadow-lg"
+            : "hover:border-border/60 hover:shadow-md"
         )}
+        onClick={() => onSelect()}
       >
         {isPreviewable(event.media_type, event.name) ? (
           <div
             className="aspect-video relative cursor-pointer"
             onClick={() => handleFocusEvent(event)}
           >
-            {event.thumbnail && (
+            {event.thumbnail ? (
               <img
                 src={pb.files.getURL(event, event.thumbnail)}
                 alt={event.name || event.event_id}
                 className="w-full h-full object-cover"
               />
+            ) : (
+              <div className="w-full h-full bg-muted/30 flex items-center justify-center">
+                {getFileIcon(event.media_type, event.name)}
+              </div>
             )}
-            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <Play className="h-8 w-8 text-white" />
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Play className="h-8 w-8" />
             </div>
           </div>
         ) : (
-          <div className="aspect-video flex items-center justify-center bg-muted/30 p-4">
+          <div className="aspect-video flex items-center justify-center bg-muted/30 p-4 relative">
             {getFileIcon(event.media_type, event.name)}
             <span className="ml-2 text-sm font-medium truncate">
               {event.name?.split(".").pop()?.toUpperCase()}
             </span>
+            {isSelected && (
+              <div className="absolute inset-0 bg-primary/20 border-2 border-primary flex items-center justify-center">
+                <div className="bg-primary text-primary-foreground rounded-full p-1">
+                  <Checkbox checked={true} className="pointer-events-none" />
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -444,6 +426,7 @@ export function GalleryEvent({
                 checked={isSelected}
                 onCheckedChange={onSelect}
                 onClick={(e) => e.stopPropagation()}
+                className="z-10"
               />
               <Badge
                 variant={
@@ -528,7 +511,7 @@ export function GalleryEvent({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               {getFileIcon(event.media_type, event.name)}
-              <FileNameDisplay
+              <GalleryEventName
                 name={event.name}
                 eventId={event.event_id}
                 className="text-sm"
