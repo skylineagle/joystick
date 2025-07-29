@@ -74,15 +74,7 @@ export function useGalleryEvents(deviceId: string, filters?: FilterOptions) {
           setIsLoadingMore(false);
         });
     }
-  }, [
-    page,
-    isLoadingMore,
-    hasMore,
-    buildFilter,
-    filters?.searchQuery,
-    filters?.selectedMediaTypes,
-    filters?.sortOrder,
-  ]);
+  }, [isLoadingMore, hasMore, page, buildFilter, filters]);
 
   const refresh = useCallback(() => {
     setPage(1);
@@ -112,12 +104,7 @@ export function useGalleryEvents(deviceId: string, filters?: FilterOptions) {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [
-    buildFilter,
-    filters?.searchQuery,
-    filters?.selectedMediaTypes,
-    filters?.sortOrder,
-  ]);
+  }, [buildFilter, filters]);
 
   useEffect(() => {
     const loadInitialEvents = async () => {
@@ -152,14 +139,16 @@ export function useGalleryEvents(deviceId: string, filters?: FilterOptions) {
 
     loadInitialEvents();
   }, [
+    buildFilter,
     deviceId,
+    filters,
     filters?.searchQuery,
     filters?.selectedMediaTypes,
     filters?.sortOrder,
   ]);
 
   useEffect(() => {
-    const unsubscribe = pb.collection("gallery").subscribe("*", (e) => {
+    pb.collection("gallery").subscribe("*", (e) => {
       if (e.record.device !== deviceId) return;
 
       switch (e.action) {
