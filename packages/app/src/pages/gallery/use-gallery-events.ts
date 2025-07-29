@@ -138,10 +138,10 @@ export function useGalleryEvents(deviceId: string, filters?: FilterOptions) {
     };
 
     loadInitialEvents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     buildFilter,
     deviceId,
-    filters,
     filters?.searchQuery,
     filters?.selectedMediaTypes,
     filters?.sortOrder,

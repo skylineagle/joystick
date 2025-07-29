@@ -616,7 +616,9 @@ export class GalleryService {
       deviceId,
     });
 
-    const extension = remotePath.split(".").pop();
+    const extension = remotePath.includes(".")
+      ? remotePath.split(".").pop()
+      : undefined;
     const localPath = join(
       deviceDir,
       `${event.event_id}${extension ? `.${extension}` : ""}`
