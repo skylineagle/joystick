@@ -406,9 +406,6 @@ export function GalleryEvent({
         ) : (
           <div className="aspect-video flex items-center justify-center bg-muted/30 p-4 relative">
             {getFileIcon(event.media_type, event.name)}
-            <span className="ml-2 text-sm font-medium truncate">
-              {event.name?.split(".").pop()?.toUpperCase()}
-            </span>
             {isSelected && (
               <div className="absolute inset-0 bg-primary/20 border-2 border-primary flex items-center justify-center">
                 <div className="bg-primary text-primary-foreground rounded-full p-1">
