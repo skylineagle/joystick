@@ -46,20 +46,39 @@ The `studio_hooks` collection now includes:
 
 ## Available Template Variables
 
-For local hooks, you have access to these template variables:
+The following template variables are available for local hooks:
 
-- `{{deviceId}}` - The device ID
-- `{{eventId}}` - The event ID (filename without extension)
+### General Variables
+
+- `{{deviceId}}` - Current device ID
+- `{{eventId}}` - Event filename (without extension)
+- `{{event}}` - Full event object from PocketBase
 - `{{timestamp}}` - Current timestamp
 - `{{date}}` - Current date in YYYY-MM-DD format
-- `{{eventPath}}` - The original event path
-- `{{eventName}}` - The event name
-- `{{mediaType}}` - Media type (image, video, audio, etc.)
-- `{{hasThumb}}` - Whether the event has a thumbnail
-- `{{fileSize}}` - File size in bytes
-- `{{extension}}` - File extension
-- `{{sourcePath}}` - Full path to the processed file in Studio
-- `{{thumbnailPath}}` - Full path to the thumbnail (if exists)
+
+### File-Specific Variables (for after_file_downloaded hook)
+
+- `{{localPath}}` - Full local path to the downloaded file
+- `{{fileStats}}` - File statistics object (size, modified time, etc.)
+- `{{extension}}` - File extension (e.g., "jpg", "mp4")
+- `{{sourcePath}}` - Alias for localPath (for backward compatibility)
+- `{{destinationPath}}` - Can be used in your command to specify where to copy
+
+### Example Commands
+
+```bash
+# Copy file to backup directory
+cp {{localPath}} /backup/{{deviceId}}/{{eventId}}.{{extension}}
+
+# Copy with timestamp
+cp {{localPath}} /backup/{{deviceId}}/$(date +%Y%m%d_%H%M%S)_{{eventId}}.{{extension}}
+
+# Copy to organized directory structure
+mkdir -p /archive/{{deviceId}}/$(date +%Y/%m) && cp {{localPath}} /archive/{{deviceId}}/$(date +%Y/%m)/{{eventId}}.{{extension}}
+
+# Copy and compress
+cp {{localPath}} /backup/{{deviceId}}/ && gzip /backup/{{deviceId}}/{{eventId}}.{{extension}}
+```
 
 ## Example Use Cases
 

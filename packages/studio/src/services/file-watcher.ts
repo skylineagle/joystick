@@ -38,7 +38,7 @@ export class FileWatcherService {
 
       for (const device of devices) {
         await this.setupDeviceDirectories(device.id);
-        await this.startWatcher(device.id);
+        this.startWatcher(device.id);
       }
 
       this.isInitialized = true;

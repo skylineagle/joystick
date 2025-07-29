@@ -637,6 +637,16 @@ export class GalleryService {
     const fileContent = readFileSync(localPath);
     const fileStats = statSync(localPath);
 
+    // Execute hooks after file is downloaded but before uploading to PocketBase
+    await this.hookService.executeHooks("after_file_downloaded", {
+      deviceId,
+      eventId,
+      event,
+      localPath,
+      fileStats,
+      extension,
+    });
+
     await pb.collection("gallery").update(event.id, {
       event: new File(
         [fileContent],

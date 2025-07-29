@@ -1,11 +1,6 @@
 import { logger } from "@/logger";
 import { pb } from "@/pocketbase";
-import type {
-  DeviceResponse,
-  StudioHooksResponse,
-  ActionsResponse,
-  RunResponse,
-} from "@joystick/core";
+import type { DeviceResponse } from "@joystick/core";
 import { runCommandOnDevice } from "@joystick/core";
 import { $ } from "bun";
 import { join } from "path";
@@ -18,6 +13,9 @@ interface HookContext {
   config?: any;
   events?: any[];
   totalProcessed?: number;
+  localPath?: string;
+  fileStats?: any;
+  extension?: string;
 }
 
 export class HookService {
@@ -70,14 +68,6 @@ export class HookService {
         context,
       });
 
-      const action = await pb.collection("actions").getOne(hook.action);
-      if (!action) {
-        logger.error(
-          `Action ${hook.action} not found for hook ${hook.hook_name}`
-        );
-        return;
-      }
-
       const mergedParams = this.mergeParameters(hook.parameters, context);
 
       // Check if this is a local hook using the executionType column
@@ -89,6 +79,7 @@ export class HookService {
         await this.executeDeviceCommand(hook, mergedParams, context);
       }
     } catch (error) {
+      logger.info(error);
       logger.error(`Hook execution failed: ${hook.hook_name}`, error);
     }
   }
@@ -134,19 +125,10 @@ export class HookService {
         return;
       }
 
-      const runConfig = await pb.collection("run").getFullList<RunResponse>({
-        filter: `action = "${hook.action}" && device = "${device.expand?.device.id}"`,
-      });
-
-      if (runConfig.length === 0) {
-        logger.error(
-          `Action ${hook.action} not configured for device ${device.name} in hook ${hook.hook_name}`
-        );
-        return;
-      }
-
-      const run = runConfig[0];
-      const command = this.buildCommand(run.command, params);
+      const command = this.buildCommand(
+        hook.parameters?.command || "echo 'No command specified'",
+        params
+      );
 
       logger.info(
         `Executing device hook action: ${hook.hook_name} on device: ${device.name}`
@@ -155,7 +137,6 @@ export class HookService {
       const result = await runCommandOnDevice(device, command);
 
       logger.info(`Device hook ${hook.hook_name} executed successfully`, {
-        action: hook.action,
         device: device.name,
         result: result.substring(0, 200) + (result.length > 200 ? "..." : ""),
       });
@@ -196,9 +177,17 @@ export class HookService {
       Object.assign(merged, hookParams);
     }
 
+    // Handle after_file_downloaded hook context
+    if (context.localPath) {
+      merged.localPath = context.localPath;
+      merged.sourcePath = context.localPath; // Alias for backward compatibility
+      merged.fileStats = context.fileStats;
+      merged.extension = context.extension;
+    }
+
     if (context.event) {
-      merged.eventPath = context.event.path;
-      merged.eventName = context.event.name;
+      merged.eventPath = context.event.name;
+      merged.eventName = context.event.name.split("/").pop();
       merged.mediaType = context.event.media_type;
       merged.hasThumb = context.event.has_thumbnail;
       merged.fileSize = context.event.file_size;
@@ -206,12 +195,16 @@ export class HookService {
       const extension = context.event.name?.split(".").pop() || "";
       merged.extension = extension;
 
-      merged.sourcePath = join(
-        GALLERY_BASE_PATH,
-        context.deviceId,
-        "processed",
-        context.event.name || ""
-      );
+      // Only set sourcePath if not already set by localPath
+      if (!merged.sourcePath) {
+        merged.sourcePath = join(
+          GALLERY_BASE_PATH,
+          context.deviceId,
+          "processed",
+          context.event.name || ""
+        );
+      }
+
       merged.thumbnailPath = context.event.has_thumbnail
         ? join(
             GALLERY_BASE_PATH,

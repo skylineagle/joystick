@@ -200,6 +200,7 @@ export function ConfigurationEditor({ device }: ConfigurationEditorProps) {
               password: "",
               host: "",
               phone: "",
+              harvest: {},
             },
           });
         }
