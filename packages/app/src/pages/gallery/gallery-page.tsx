@@ -392,172 +392,175 @@ export function GalleryPage() {
 
   return (
     <div className="grow size-full flex flex-col">
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-6"
-      >
-        <div className="flex items-center space-x-6">
-          <GalleryStats deviceId={deviceId!} />
-        </div>
-        <div className="flex items-center space-x-4">
-          <TooltipProvider>
-            <div className="flex items-center space-x-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div>
-                    <Switch
-                      checked={device?.harvesting}
-                      onCheckedChange={handleServiceToggle}
-                      disabled={
-                        !isSupported ||
-                        startMutation.isPending ||
-                        stopMutation.isPending
-                      }
-                      className={cn(
-                        "data-[state=checked]:bg-green-600",
-                        device?.harvesting ? "bg-green-600/30" : ""
-                      )}
-                    />
-                  </div>
-                </TooltipTrigger>
-                {!isSupported && (
-                  <TooltipContent>
-                    <p>Device doesn't support automatic harvesting.</p>
-                    <p>Events must be posted manually to the server.</p>
-                  </TooltipContent>
-                )}
-              </Tooltip>
-              <span className="text-sm text-muted-foreground">
-                {device?.harvesting ? "Harvesting" : "Stopped"}
-              </span>
-            </div>
-            <Tooltip>
-              <Popover>
-                <PopoverTrigger asChild>
+      {/* Fixed Header */}
+      <div className="flex-shrink-0">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 p-6"
+        >
+          <div className="flex items-center space-x-6">
+            <GalleryStats deviceId={deviceId!} />
+          </div>
+          <div className="flex items-center space-x-4">
+            <TooltipProvider>
+              <div className="flex items-center space-x-2">
+                <Tooltip>
                   <TooltipTrigger asChild>
                     <div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
+                      <Switch
+                        checked={device?.harvesting}
+                        onCheckedChange={handleServiceToggle}
                         disabled={
                           !isSupported ||
-                          galleryStatus?.status === "running" ||
                           startMutation.isPending ||
                           stopMutation.isPending
                         }
-                      >
-                        <Settings2 className="h-4 w-4" />
-                      </Button>
+                        className={cn(
+                          "data-[state=checked]:bg-green-600",
+                          device?.harvesting ? "bg-green-600/30" : ""
+                        )}
+                      />
                     </div>
                   </TooltipTrigger>
-                </PopoverTrigger>
-                <PopoverContent className="w-80">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <h4 className="font-medium leading-none">
-                        Gallery Settings
-                      </h4>
-                      <p className="text-sm text-muted-foreground">
-                        Configure the gallery service behavior
-                      </p>
-                    </div>
-                    <Separator />
+                  {!isSupported && (
+                    <TooltipContent>
+                      <p>Device doesn't support automatic harvesting.</p>
+                      <p>Events must be posted manually to the server.</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+                <span className="text-sm text-muted-foreground">
+                  {device?.harvesting ? "Harvesting" : "Stopped"}
+                </span>
+              </div>
+              <Tooltip>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          disabled={
+                            !isSupported ||
+                            galleryStatus?.status === "running" ||
+                            startMutation.isPending ||
+                            stopMutation.isPending
+                          }
+                        >
+                          <Settings2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TooltipTrigger>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80">
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <Label htmlFor="interval">
-                          Scan interval (seconds)
-                        </Label>
-                        <Input
-                          id="interval"
-                          type="number"
-                          value={device?.information?.harvest?.interval}
-                          onChange={(e) =>
-                            updateHarvestingIntervalMutation.mutate(
-                              Number(e.target.value)
-                            )
-                          }
-                          min={30}
-                          step={30}
-                          className="h-8"
-                        />
+                        <h4 className="font-medium leading-none">
+                          Gallery Settings
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          Configure the gallery service behavior
+                        </p>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="auto-pull">Auto pull events</Label>
-                        <Switch
-                          id="auto-pull"
-                          checked={
-                            device?.information?.harvest?.autoPull ?? false
-                          }
-                          onCheckedChange={(checked) =>
-                            updateHarvestingAutoPullMutation.mutate(checked)
-                          }
-                        />
+                      <Separator />
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="interval">
+                            Scan interval (seconds)
+                          </Label>
+                          <Input
+                            id="interval"
+                            type="number"
+                            value={device?.information?.harvest?.interval}
+                            onChange={(e) =>
+                              updateHarvestingIntervalMutation.mutate(
+                                Number(e.target.value)
+                              )
+                            }
+                            min={30}
+                            step={30}
+                            className="h-8"
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <Label htmlFor="auto-pull">Auto pull events</Label>
+                          <Switch
+                            id="auto-pull"
+                            checked={
+                              device?.information?.harvest?.autoPull ?? false
+                            }
+                            onCheckedChange={(checked) =>
+                              updateHarvestingAutoPullMutation.mutate(checked)
+                            }
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </PopoverContent>
-                {!isSupported && (
-                  <TooltipContent>
-                    <p>Gallery settings unavailable.</p>
-                    <p>Device doesn't support automatic harvesting.</p>
-                  </TooltipContent>
-                )}
-              </Popover>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      </motion.div>
+                  </PopoverContent>
+                  {!isSupported && (
+                    <TooltipContent>
+                      <p>Gallery settings unavailable.</p>
+                      <p>Device doesn't support automatic harvesting.</p>
+                    </TooltipContent>
+                  )}
+                </Popover>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </motion.div>
 
-      {/* Filters and Controls */}
-      <div className="p-6 pb-4">
-        <GalleryFilters
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          selectedState={selectedState}
-          onStateChange={setSelectedState}
-          sortOrder={sortOrder}
-          onSortChange={setSortOrder}
-          selectedMediaTypes={selectedMediaTypes}
-          onMediaTypesChange={setSelectedMediaTypes}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          totalEvents={totalCount}
-          filteredCount={filteredEvents?.length || 0}
-        />
+        {/* Filters and Controls */}
+        <div className="p-6 pb-4">
+          <GalleryFilters
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            selectedState={selectedState}
+            onStateChange={setSelectedState}
+            sortOrder={sortOrder}
+            onSortChange={setSortOrder}
+            selectedMediaTypes={selectedMediaTypes}
+            onMediaTypesChange={setSelectedMediaTypes}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            totalEvents={totalCount}
+            filteredCount={filteredEvents?.length || 0}
+          />
+        </div>
+
+        {/* Bulk Actions */}
+        <AnimatePresence>
+          {selectedEvents.size > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="px-6"
+            >
+              <GalleryBatchOperations
+                selectedEvents={selectedEvents}
+                events={events || []}
+                onClearSelection={clearSelection}
+                onBulkAction={handleBulkAction}
+                isProcessing={
+                  bulkViewMutation.isPending ||
+                  bulkPullMutation.isPending ||
+                  bulkDeleteMutation.isPending ||
+                  bulkFlagMutation.isPending ||
+                  bulkUnflagMutation.isPending
+                }
+                progress={0}
+                userId={user?.id || ""}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Bulk Actions */}
-      <AnimatePresence>
-        {selectedEvents.size > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="px-6"
-          >
-            <GalleryBatchOperations
-              selectedEvents={selectedEvents}
-              events={events || []}
-              onClearSelection={clearSelection}
-              onBulkAction={handleBulkAction}
-              isProcessing={
-                bulkViewMutation.isPending ||
-                bulkPullMutation.isPending ||
-                bulkDeleteMutation.isPending ||
-                bulkFlagMutation.isPending ||
-                bulkUnflagMutation.isPending
-              }
-              progress={0}
-              userId={user?.id || ""}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Gallery Grid/List */}
-      <div className="flex-1 px-6 pb-6">
+      {/* Scrollable Gallery Content */}
+      <div className="flex-1 overflow-auto px-6 pb-6">
         <AnimatePresence>
           {isLoadingEvents ? (
             <div className="flex items-center justify-center h-full">
