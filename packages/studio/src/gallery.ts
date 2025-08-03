@@ -11,9 +11,8 @@ import {
   runCommandOnDevice,
   runScpFromDevice,
 } from "@joystick/core";
-import { $ } from "bun";
 import { Baker } from "cronbake";
-import { existsSync, mkdirSync, readFileSync, statSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, statSync, unlinkSync } from "fs";
 import { join } from "path";
 import { GALLERY_BASE_PATH } from "./config";
 import { HookService } from "./services/hook-service";
@@ -44,6 +43,7 @@ export class GalleryService {
   private baker = Baker.create();
   private hookService: HookService;
   private processingDevices = new Set<string>();
+  private activeJobs = new Set<string>();
 
   private constructor() {
     this.hookService = HookService.getInstance();
@@ -67,7 +67,6 @@ export class GalleryService {
       return;
     }
 
-    // Update device harvesting status
     await pb.collection("devices").update(deviceId, {
       harvesting: true,
     });
@@ -88,6 +87,7 @@ export class GalleryService {
           }
 
           this.processingDevices.add(deviceId);
+          this.activeJobs.add(deviceId);
           await this.processGalleryEvents(deviceId, config);
         } catch (error) {
           logger.error(
@@ -96,6 +96,7 @@ export class GalleryService {
           );
         } finally {
           this.processingDevices.delete(deviceId);
+          this.activeJobs.delete(deviceId);
         }
       },
       onTick: () => {
@@ -114,11 +115,16 @@ export class GalleryService {
   public stopGalleryService(deviceId: string) {
     logger.info(`Stopping gallery service for device ${deviceId}`);
 
-    this.baker.stop(deviceId);
-    this.baker.remove(deviceId);
-    this.processingDevices.delete(deviceId);
+    try {
+      this.baker.stop(deviceId);
+      this.baker.remove(deviceId);
+    } catch (error) {
+      logger.warn(`Error stopping baker job for device ${deviceId}:`, error);
+    }
 
-    // Update device harvesting status
+    this.processingDevices.delete(deviceId);
+    this.activeJobs.delete(deviceId);
+
     pb.collection("devices")
       .update(deviceId, {
         harvesting: false,
@@ -208,6 +214,8 @@ export class GalleryService {
         logger.debug(`Auto-pulling event ${event.id}`);
         await this.pullEvent(deviceId, event.id);
       }
+
+      thumbnailContent = null;
     }
 
     if (newEvents.length > 0) {
@@ -330,8 +338,6 @@ export class GalleryService {
   ): GalleryEvent[] {
     const lines = output.split("\n").filter(Boolean);
 
-    logger.debug(`Parsing ${lines.length} lines from ${actionName} output`);
-
     return lines
       .map((line) => {
         const parts = line.split("\t");
@@ -368,7 +374,6 @@ export class GalleryService {
         .pop()
         ?.replace(/\.[^/.]+$/, "") || "";
 
-    logger.debug(`Generated event ID:`, { path, eventId });
     return eventId;
   }
 
@@ -408,7 +413,6 @@ export class GalleryService {
     else if (audioTypes.includes(extension)) mediaType = "audio";
     else if (documentTypes.includes(extension)) mediaType = "document";
 
-    logger.debug(`Determined media type:`, { extension, mediaType });
     return mediaType;
   }
 
@@ -425,7 +429,6 @@ export class GalleryService {
     ];
     const hasThumb = thumbExtensions.includes(extension);
 
-    logger.debug(`Checking thumb extension:`, { extension, hasThumb });
     return hasThumb;
   }
 
@@ -476,9 +479,9 @@ export class GalleryService {
     const content = readFileSync(localPath);
 
     try {
-      await $`rm -f ${localPath}`;
-    } catch {
-      // Ignore cleanup errors
+      unlinkSync(localPath);
+    } catch (error) {
+      logger.warn(`Failed to cleanup thumbnail temp file ${localPath}:`, error);
     }
 
     return content;
@@ -489,7 +492,6 @@ export class GalleryService {
     event: GalleryEvent,
     thumbnailContent: Buffer | null
   ) {
-    // Log the event details for debugging
     logger.info(`Creating gallery record:`, {
       deviceId,
       eventId: event.id,
@@ -529,7 +531,6 @@ export class GalleryService {
   ): Promise<GalleryResponse | null> {
     logger.debug(`Looking for existing event:`, { deviceId, eventId });
 
-    // First try to find by PocketBase ID
     try {
       const event = await pb
         .collection("gallery")
@@ -544,11 +545,9 @@ export class GalleryService {
         return event;
       }
     } catch {
-      // If not found by ID, continue to search by event_id
       logger.debug(`Event not found by ID, searching by event_id`);
     }
 
-    // Then try to find by event_id (file name)
     const result = await pb
       .collection("gallery")
       .getFullList<GalleryResponse>(1, {
@@ -602,13 +601,11 @@ export class GalleryService {
     const deviceDir = join(GALLERY_BASE_PATH, device.id);
     mkdirSync(deviceDir, { recursive: true });
 
-    // Ensure we have the full path for the file on the device
     const remotePath = event.name;
     if (!remotePath) {
       throw new Error(`No path found for event ${eventId}`);
     }
 
-    // Log the path information for debugging
     logger.info(`Event details:`, {
       eventId: event.event_id,
       name: event.name,
@@ -639,7 +636,6 @@ export class GalleryService {
     const fileContent = readFileSync(localPath);
     const fileStats = statSync(localPath);
 
-    // Execute hooks after file is downloaded but before uploading to PocketBase
     await this.hookService.executeHooks("after_file_downloaded", {
       deviceId,
       eventId,
@@ -662,13 +658,13 @@ export class GalleryService {
       logger.info(`Successfully deleted event files from device: ${eventId}`);
     } catch (error) {
       logger.error(`Failed to delete event files from device: ${error}`);
-      throw error; // Re-throw to ensure proper error handling
+      throw error;
     }
 
     try {
-      await $`rm -f ${localPath}`;
-    } catch {
-      // Ignore cleanup errors
+      unlinkSync(localPath);
+    } catch (error) {
+      logger.warn(`Failed to cleanup local file ${localPath}:`, error);
     }
 
     await this.hookService.executeHooks("after_event_pulled", {
@@ -761,5 +757,22 @@ export class GalleryService {
     });
 
     logger.info(`Event ${eventId} deleted successfully for device ${deviceId}`);
+  }
+
+  public cleanup(): void {
+    logger.info("Cleaning up GalleryService...");
+
+    try {
+      for (const deviceId of Array.from(this.activeJobs)) {
+        this.stopGalleryService(deviceId);
+      }
+
+      this.processingDevices.clear();
+      this.activeJobs.clear();
+
+      logger.info("GalleryService cleanup completed");
+    } catch (error) {
+      logger.error("Error during GalleryService cleanup:", error);
+    }
   }
 }
