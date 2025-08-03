@@ -1,11 +1,11 @@
 import { logger } from "@/logger";
 import { pb } from "@/pocketbase";
 import type { DeviceResponse } from "@joystick/core";
-import { watch } from "fs/promises";
 import { existsSync, mkdirSync, renameSync, statSync } from "fs";
-import { basename, dirname, join } from "path";
-import { GalleryService } from "../gallery";
+import { watch } from "fs/promises";
+import { basename, join } from "path";
 import { GALLERY_BASE_PATH } from "../config";
+import { GalleryService } from "../gallery";
 
 export class FileWatcherService {
   private static instance: FileWatcherService;
@@ -13,6 +13,8 @@ export class FileWatcherService {
   private watchers: Map<string, { abort: AbortController; deviceId: string }> =
     new Map();
   private isInitialized = false;
+  private processingFiles = new Set<string>();
+  private maxConcurrentProcessing = 3;
 
   private constructor() {
     this.galleryService = GalleryService.getInstance();
@@ -90,10 +92,8 @@ export class FileWatcherService {
 
   public async refreshWatchers(): Promise<void> {
     try {
-      // Stop all existing watchers
       await this.stopAllWatchers();
 
-      // Get current devices and restart watchers
       const devices = await pb
         .collection("devices")
         .getFullList<DeviceResponse>();
@@ -113,7 +113,6 @@ export class FileWatcherService {
 
   public async syncWatchers(): Promise<void> {
     try {
-      // Get current devices from database
       const devices = await pb
         .collection("devices")
         .getFullList<DeviceResponse>();
@@ -121,7 +120,6 @@ export class FileWatcherService {
       const deviceIds = new Set(devices.map((device) => device.id));
       const currentWatcherIds = new Set(this.watchers.keys());
 
-      // Add watchers for new devices
       for (const device of devices) {
         if (!currentWatcherIds.has(device.id)) {
           await this.setupDeviceDirectories(device.id);
@@ -130,7 +128,6 @@ export class FileWatcherService {
         }
       }
 
-      // Remove watchers for deleted devices
       for (const watcherDeviceId of Array.from(currentWatcherIds)) {
         if (!deviceIds.has(watcherDeviceId)) {
           await this.stopWatcher(watcherDeviceId);
@@ -168,24 +165,40 @@ export class FileWatcherService {
   }
 
   private async processNewFile(deviceId: string, filename: string) {
-    const incomingPath = join(
-      GALLERY_BASE_PATH,
-      deviceId,
-      "incoming",
-      filename
-    );
-    const processedPath = join(
-      GALLERY_BASE_PATH,
-      deviceId,
-      "processed",
-      filename
-    );
+    const fileKey = `${deviceId}:${filename}`;
+
+    if (this.processingFiles.has(fileKey)) {
+      logger.debug(
+        `File ${filename} for device ${deviceId} is already being processed`
+      );
+      return;
+    }
+
+    if (this.processingFiles.size >= this.maxConcurrentProcessing) {
+      logger.debug(
+        `Too many files being processed, skipping ${filename} for device ${deviceId}`
+      );
+      return;
+    }
+
+    this.processingFiles.add(fileKey);
 
     try {
-      // Wait a bit to ensure file is completely written
+      const incomingPath = join(
+        GALLERY_BASE_PATH,
+        deviceId,
+        "incoming",
+        filename
+      );
+      const processedPath = join(
+        GALLERY_BASE_PATH,
+        deviceId,
+        "processed",
+        filename
+      );
+
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // Check if file still exists (wasn't deleted/moved)
       if (!existsSync(incomingPath)) {
         return;
       }
@@ -195,7 +208,6 @@ export class FileWatcherService {
       const extension = filename.split(".").pop()?.toLowerCase() || "";
       const mediaType = this.galleryService.getMediaType(extension);
 
-      // Check for thumbnail
       const thumbName = `${basename(filename, `.${extension}`)}.jpg`;
       const thumbPath = join(
         GALLERY_BASE_PATH,
@@ -205,7 +217,6 @@ export class FileWatcherService {
       );
       const hasThumb = existsSync(thumbPath);
 
-      // Create gallery record
       await this.galleryService.createGalleryRecord(
         deviceId,
         {
@@ -220,7 +231,6 @@ export class FileWatcherService {
         null
       );
 
-      // Move file to processed directory
       renameSync(incomingPath, processedPath);
 
       logger.info(`Processed new file ${filename} for device ${deviceId}`);
@@ -229,13 +239,19 @@ export class FileWatcherService {
         `Error processing file ${filename} for device ${deviceId}:`,
         error
       );
+    } finally {
+      this.processingFiles.delete(fileKey);
     }
   }
 
   public async stopWatcher(deviceId: string) {
     const watcher = this.watchers.get(deviceId);
     if (watcher) {
-      watcher.abort.abort();
+      try {
+        watcher.abort.abort();
+      } catch (error) {
+        logger.warn(`Error aborting watcher for device ${deviceId}:`, error);
+      }
       this.watchers.delete(deviceId);
       logger.info(`Stopped watcher for device ${deviceId}`);
     }
@@ -243,10 +259,15 @@ export class FileWatcherService {
 
   public async stopAllWatchers() {
     for (const [deviceId, watcher] of Array.from(this.watchers.entries())) {
-      watcher.abort.abort();
+      try {
+        watcher.abort.abort();
+      } catch (error) {
+        logger.warn(`Error aborting watcher for device ${deviceId}:`, error);
+      }
       this.watchers.delete(deviceId);
     }
     this.isInitialized = false;
+    this.processingFiles.clear();
     logger.info("Stopped all file watchers");
   }
 
@@ -273,7 +294,6 @@ export class FileWatcherService {
 
   public async cleanupOrphanedWatchers(): Promise<void> {
     try {
-      // Get current devices from database
       const devices = await pb
         .collection("devices")
         .getFullList<DeviceResponse>();
@@ -281,14 +301,12 @@ export class FileWatcherService {
       const deviceIds = new Set(devices.map((device) => device.id));
       const orphanedWatchers: string[] = [];
 
-      // Check for watchers that don't have corresponding devices
       for (const [watcherDeviceId] of Array.from(this.watchers.entries())) {
         if (!deviceIds.has(watcherDeviceId)) {
           orphanedWatchers.push(watcherDeviceId);
         }
       }
 
-      // Remove orphaned watchers
       for (const deviceId of orphanedWatchers) {
         await this.stopWatcher(deviceId);
         logger.info(`Cleaned up orphaned watcher for device ${deviceId}`);

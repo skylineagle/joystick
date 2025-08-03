@@ -48,7 +48,6 @@ const app = new Elysia()
   .use(cors())
   .use(createAuthPlugin(pb, Bun.env.JWT_SECRET))
   .get("/", () => "Studio API")
-  // Gallery endpoints
   .get("/api/gallery/:device/events", async ({ params, query }) => {
     try {
       const config = {
@@ -190,7 +189,6 @@ const app = new Elysia()
       };
     }
   })
-  // Direct event upload endpoint
   .post("/api/gallery/:device/upload", async ({ params, body }) => {
     try {
       const uploadRequest = body as EventUploadRequest;
@@ -216,7 +214,6 @@ const app = new Elysia()
         null
       );
 
-      // Get the created record to use its PocketBase ID for updates
       const createdRecord = await pb
         .collection("gallery")
         .getFirstListItem(
@@ -278,7 +275,6 @@ const app = new Elysia()
         query.event_id || galleryService.generateEventId(filename);
       const hasThumbnail = query.thumbnail === "true";
 
-      // Create initial record
       await galleryService.createGalleryRecord(
         params.device,
         {
@@ -295,7 +291,6 @@ const app = new Elysia()
         null
       );
 
-      // Get the created record to use its PocketBase ID for getting upload URLs
       const record = await pb
         .collection("gallery")
         .getFirstListItem(
@@ -326,7 +321,6 @@ const app = new Elysia()
       } as EventUploadUrlResponse;
     }
   })
-  // Hook management endpoints
   .get("/api/hooks", async ({ query }) => {
     try {
       const hooks = await hookService.getHooks(
@@ -436,7 +430,6 @@ const app = new Elysia()
       };
     }
   })
-  // File watcher management endpoints
   .get("/api/watchers", async () => {
     try {
       const status = fileWatcherService.getWatcherStatus();
@@ -552,20 +545,16 @@ async function initializeServices() {
   try {
     logger.info("Initializing studio services...");
 
-    // Initialize file watcher service
     await fileWatcherService.initialize();
-
-    // Initialize gallery services for devices with harvesting enabled
     await initializeGalleryServices();
 
-    // Set up periodic sync of watchers with device list (every 5 minutes)
     setInterval(async () => {
       try {
         await fileWatcherService.syncWatchers();
       } catch (error) {
         logger.error("Error during periodic watcher sync:", error);
       }
-    }, 5 * 60 * 1000); // 5 minutes
+    }, 5 * 60 * 1000);
 
     logger.info("All studio services initialized successfully");
   } catch (error) {
@@ -616,15 +605,12 @@ async function initializeGalleryServices() {
   }
 }
 
-// Graceful shutdown handling
 async function gracefulShutdown(signal: string) {
   logger.info(`Received ${signal}, starting graceful shutdown...`);
 
   try {
-    // Cleanup file watcher service
     await fileWatcherService.cleanup();
-
-    // Stop the server
+    galleryService.cleanup();
     await app.stop();
 
     logger.info("Graceful shutdown completed");
@@ -635,9 +621,7 @@ async function gracefulShutdown(signal: string) {
   }
 }
 
-// Register shutdown handlers
 process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
 process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
-// Initialize services
 initializeServices();
