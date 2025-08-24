@@ -90,7 +90,7 @@ export const NotificationTable = ({
               </Badge>
             </TableCell>
             <TableCell className="font-medium">{notification.title}</TableCell>
-            <TableCell className="max-w-md truncate">
+            <TableCell className="max-w-md overflow-auto">
               {notification.message}
             </TableCell>
             <TableCell>{notification.expand?.device?.name || "-"}</TableCell>
