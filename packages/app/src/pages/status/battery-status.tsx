@@ -56,7 +56,11 @@ export function BatteryStatus({ deviceId }: BatteryStatusProps) {
   // Calculate percentage based on consumption and battery capacity
   const calculatePercentage = () => {
     if (!data || !batteryCapacity) return 0;
-    const percentage = 100 - (data.consumption / batteryCapacity) * 100;
+    const percentage =
+      100 -
+      ((data.consumption * (deviceData.information?.battery_factor ?? 1)) /
+        batteryCapacity) *
+        100;
     return Math.min(100, Math.max(0, percentage));
   };
 
@@ -157,7 +161,7 @@ export function BatteryStatus({ deviceId }: BatteryStatusProps) {
               <span className="text-xs text-muted-foreground">Consumption</span>
               <div className="flex items-center gap-1">
                 <span className="font-medium text-sm">{data.consumption}</span>
-                <span className="text-xs text-muted-foreground">mWh</span>
+                <span className="text-xs text-muted-foreground">mVh</span>
               </div>
             </div>
           </div>

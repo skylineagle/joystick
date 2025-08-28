@@ -109,6 +109,7 @@ export type DeviceInformation = {
   activeSlot?: "primary" | "secondary";
   autoSlotSwitch?: boolean;
   battery_capacity?: number;
+  battery_factor?: number;
   aspectRatio?: string;
   harvest: {
     interval?: number;
