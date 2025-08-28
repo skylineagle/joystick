@@ -161,7 +161,7 @@ export function BatteryStatus({ deviceId }: BatteryStatusProps) {
               <span className="text-xs text-muted-foreground">Consumption</span>
               <div className="flex items-center gap-1">
                 <span className="font-medium text-sm">{data.consumption}</span>
-                <span className="text-xs text-muted-foreground">mVh</span>
+                <span className="text-xs text-muted-foreground">mAh</span>
               </div>
             </div>
           </div>
