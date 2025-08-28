@@ -1,19 +1,26 @@
+import { MessagePreset } from "@/hooks/use-message-presets";
 import { joystickApi } from "@/lib/api-client";
 import { urls } from "@/lib/urls";
+import { toast } from "@/utils/toast";
 import { useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Send } from "lucide-react";
-import { useState, useEffect } from "react";
-import { toast } from "@/utils/toast";
-import { MessagePreset } from "@/hooks/use-message-presets";
+import { useEffect, useState } from "react";
+
+type SlotSelection = "primary" | "secondary" | "both";
 
 interface NewMessageProps {
   deviceId: string;
+  selectedSlot: SlotSelection;
   onPresetSelect?: (preset: MessagePreset) => void;
   selectedPreset?: MessagePreset | null;
 }
 
-export const NewMessage = ({ deviceId, selectedPreset }: NewMessageProps) => {
+export const NewMessage = ({
+  deviceId,
+  selectedSlot,
+  selectedPreset,
+}: NewMessageProps) => {
   const [input, setInput] = useState("");
 
   useEffect(() => {
@@ -26,8 +33,9 @@ export const NewMessage = ({ deviceId, selectedPreset }: NewMessageProps) => {
       const result = await joystickApi.post<{
         success: boolean;
         output: string;
-      }>(`${urls.joystick}/api/run/${deviceId}/send-sms`, {
-        sms: input,
+      }>(`${urls.whisper}/api/${deviceId}/send-sms`, {
+        message: input,
+        slot: selectedSlot,
       });
 
       try {
@@ -38,23 +46,19 @@ export const NewMessage = ({ deviceId, selectedPreset }: NewMessageProps) => {
             message?: string;
           } = JSON.parse(result?.output || "{}");
 
-          if (!result.success && !output.success) {
-            toast.error({
-              message:
-                output.error || output.message || "Failed to send message",
-            });
-            return;
-          }
+          toast.error({
+            message: `Failed to send message: ${`${selectedSlot}: ${
+              output.error || output.message || "Failed to send message"
+            }`}`,
+          });
         }
       } catch {
         toast.error({
           message: "Failed to send message",
         });
       }
-
-      return result;
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       setInput("");
     },
   });
@@ -73,7 +77,7 @@ export const NewMessage = ({ deviceId, selectedPreset }: NewMessageProps) => {
   return (
     <>
       <form
-        className="flex items-end gap-3"
+        className="flex items-center gap-3"
         onSubmit={(e) => {
           e.preventDefault();
           handleSendMessage();
@@ -100,7 +104,7 @@ export const NewMessage = ({ deviceId, selectedPreset }: NewMessageProps) => {
         </div>
         <motion.button
           type="submit"
-          className="p-3 rounded-full bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:bg-primary/90 hover:scale-105 active:scale-95 shadow-lg"
+          className="h-[44px] w-[44px] rounded-full bg-primary text-primary-foreground disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:bg-primary/90 hover:scale-105 active:scale-95 shadow-lg flex items-center justify-center"
           disabled={isPending || !input.trim()}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
