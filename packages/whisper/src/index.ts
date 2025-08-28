@@ -182,17 +182,17 @@ const app = new Elysia()
             logger.info(JSON.stringify(body));
 
             try {
-              // if (body?.slot === "both") {
-              //   await sendMessage(device.information.phone, message);
-              //   await sendMessage(device.information.secondSlotPhone, message);
-              // } else {
-              //   await sendMessage(
-              //     body?.slot === "secondary"
-              //       ? device.information.secondSlotPhone
-              //       : device.information.phone,
-              //     message
-              //   );
-              // }
+              if (body?.slot === "both") {
+                await sendMessage(device.information.phone, message);
+                await sendMessage(device.information.secondSlotPhone, message);
+              } else {
+                await sendMessage(
+                  body?.slot === "secondary"
+                    ? device.information.secondSlotPhone
+                    : device.information.phone,
+                  message
+                );
+              }
 
               await pb.collection("message").create({
                 device: params.device,
