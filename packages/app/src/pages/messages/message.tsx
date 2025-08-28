@@ -99,20 +99,6 @@ export const Message: FC<MessageProps> = memo(
                                   Number(deviceInfo.secondSlotPhone)
                                 ? "Slot 2"
                                 : "Unknown Slot"
-                              : typeof message.phone === "string" &&
-                                message.phone.startsWith("BOTH:")
-                              ? "Both Slots"
-                              : Array.isArray(message.phone)
-                              ? message.phone.length === 1 &&
-                                message.phone[0] === deviceInfo.phone
-                                ? "Slot 1"
-                                : message.phone.length === 1 &&
-                                  message.phone[0] ===
-                                    deviceInfo.secondSlotPhone
-                                ? "Slot 2"
-                                : message.phone.length > 1
-                                ? "Both Slots"
-                                : "Multiple Slots"
                               : "Unknown Slot"}
                           </span>
                         </div>
@@ -123,13 +109,6 @@ export const Message: FC<MessageProps> = memo(
                             ? message.phone === -1
                               ? `${deviceInfo.phone}, ${deviceInfo.secondSlotPhone}`
                               : message.phone.toString()
-                            : typeof message.phone === "string" &&
-                              message.phone.startsWith("BOTH:")
-                            ? `${message.phone.replace("BOTH:", "")}, ${
-                                deviceInfo.secondSlotPhone
-                              }`
-                            : Array.isArray(message.phone)
-                            ? message.phone.join(", ")
                             : "Unknown"}
                         </p>
                       </TooltipContent>
@@ -160,20 +139,6 @@ export const Message: FC<MessageProps> = memo(
                                     Number(deviceInfo.secondSlotPhone)
                                   ? "Slot 2"
                                   : "Unknown Slot"
-                                : typeof message.phone === "string" &&
-                                  message.phone.startsWith("BOTH:")
-                                ? "Both Slots"
-                                : Array.isArray(message.phone)
-                                ? message.phone.length === 1 &&
-                                  message.phone[0] === deviceInfo.phone
-                                  ? "Slot 1"
-                                  : message.phone.length === 1 &&
-                                    message.phone[0] ===
-                                      deviceInfo.secondSlotPhone
-                                  ? "Slot 2"
-                                  : message.phone.length > 1
-                                  ? "Both Slots"
-                                  : "Multiple Slots"
                                 : "Unknown Slot"}
                             </span>
                           </div>
@@ -184,13 +149,6 @@ export const Message: FC<MessageProps> = memo(
                               ? message.phone === -1
                                 ? `${deviceInfo.phone}, ${deviceInfo.secondSlotPhone}`
                                 : message.phone.toString()
-                              : typeof message.phone === "string" &&
-                                message.phone.startsWith("BOTH:")
-                              ? `${message.phone.replace("BOTH:", "")}, ${
-                                  deviceInfo.secondSlotPhone
-                                }`
-                              : Array.isArray(message.phone)
-                              ? message.phone.join(", ")
                               : "Unknown"}
                           </p>
                         </TooltipContent>
