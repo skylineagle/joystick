@@ -2,8 +2,11 @@ import { pb } from "@/pocketbase";
 import { sendMessage } from "@/rut.utils";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
-import type { DeviceResponse } from "@joystick/core";
-import { createAuthPlugin, getActiveDeviceConnection } from "@joystick/core";
+import {
+  createAuthPlugin,
+  type DeviceResponse,
+  getActiveDeviceConnection,
+} from "@joystick/core";
 import { Elysia, t } from "elysia";
 import { logger } from "./logger";
 import type {
@@ -105,6 +108,42 @@ const app = new Elysia()
           message,
           phone: phoneNumber,
         });
+
+        if (Bun.env.ENABLE_SLOT_SYNC === "true" && deviceId) {
+          try {
+            const device = await pb
+              .collection("devices")
+              .getOne<DeviceResponse>(deviceId);
+            const deviceInfo = device.information;
+
+            if (deviceInfo) {
+              let newActiveSlot = deviceInfo.activeSlot || "primary";
+
+              if (
+                phoneNumber === deviceInfo.phone &&
+                deviceInfo.activeSlot !== "primary"
+              ) {
+                newActiveSlot = "primary";
+              } else if (
+                phoneNumber === deviceInfo.secondSlotPhone &&
+                deviceInfo.activeSlot !== "secondary"
+              ) {
+                newActiveSlot = "secondary";
+              }
+
+              if (newActiveSlot !== deviceInfo.activeSlot) {
+                await pb.collection("devices").update(deviceId, {
+                  information: {
+                    ...deviceInfo,
+                    activeSlot: newActiveSlot,
+                  },
+                });
+              }
+            }
+          } catch (error) {
+            logger.error("Failed to sync device slot:", error);
+          }
+        }
       } catch {}
 
       return { success: true };
@@ -135,31 +174,36 @@ const app = new Elysia()
               };
             }
 
-            const { phone: activePhone } = getActiveDeviceConnection(
-              device.information
-            );
-
-            if (!activePhone) {
-              set.status = 400;
-              return {
-                success: false,
-                error: "Device does not have an active phone number",
-              };
-            }
-
             if (!message) {
               set.status = 400;
               return { error: "Message is required" };
             }
 
+            logger.info(JSON.stringify(body));
+
             try {
-              await sendMessage(activePhone, message);
+              if (body?.slot === "both") {
+                await sendMessage(device.information.phone, message);
+                await sendMessage(device.information.secondSlotPhone, message);
+              } else {
+                await sendMessage(
+                  body?.slot === "secondary"
+                    ? device.information.secondSlotPhone
+                    : device.information.phone,
+                  message
+                );
+              }
 
               await pb.collection("message").create({
                 device: params.device,
                 direction: "to",
                 message,
-                phone: activePhone,
+                phone:
+                  body?.slot === "both"
+                    ? -1
+                    : body?.slot === "secondary"
+                    ? device.information.secondSlotPhone
+                    : device.information.phone,
                 user: auth.userId,
               });
 
@@ -167,7 +211,12 @@ const app = new Elysia()
                 return;
               }
 
-              const phoneKey = activePhone;
+              const phoneKey =
+                body?.slot === "both"
+                  ? -1
+                  : body?.slot === "secondary"
+                  ? device.information.secondSlotPhone
+                  : device.information.phone;
 
               const responsePromise = new Promise<SmsResponse[]>(
                 (resolve, reject) => {
@@ -234,6 +283,13 @@ const app = new Elysia()
         {
           body: t.Object({
             message: t.String(),
+            slot: t.Optional(
+              t.Union([
+                t.Literal("primary"),
+                t.Literal("secondary"),
+                t.Literal("both"),
+              ])
+            ),
           }),
         }
       )

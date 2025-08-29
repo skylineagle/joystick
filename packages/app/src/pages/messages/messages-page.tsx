@@ -1,18 +1,18 @@
+import {
+  HeaderSlotSelector,
+  SlotSelection,
+} from "@/components/messages/header-slot-selector";
+import { MessagePresetsManager } from "@/components/messages/message-presets-manager";
 import { useTheme } from "@/components/theme-provider";
+import { useDevice } from "@/hooks/use-device";
 import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 import { useIsSupported } from "@/hooks/use-is-supported";
+import { MessagePreset, useMessagePresets } from "@/hooks/use-message-presets";
 import { useMessages } from "@/hooks/use-messages";
-import { useMessagePresets, MessagePreset } from "@/hooks/use-message-presets";
 import { useAuthStore } from "@/lib/auth";
-import { pb } from "@/lib/pocketbase";
 import { Message } from "@/pages/messages/message";
 import { NewMessage } from "@/pages/messages/new-message";
-import { MessagePresetsManager } from "@/components/messages/message-presets-manager";
-import {
-  DevicesResponse,
-  MessageResponse,
-  UsersRecord,
-} from "@/types/db.types";
+import { MessageResponse, UsersRecord } from "@/types/db.types";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertCircle, Check, CheckCheck, Smartphone } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -25,17 +25,17 @@ type MessageWithSeen = MessageResponse<{ user: UsersRecord }> & {
 export function MessagesPage() {
   const { user } = useAuthStore();
   const { device: deviceId } = useParams<{ device: string }>();
-  const [deviceInfo, setDeviceInfo] = useState<DevicesResponse | null>(null);
+  const { data: device } = useDevice(deviceId);
   const { isSupported } = useIsSupported(deviceId!, "send-sms");
   const isRoutePermitted = useIsRouteAllowed("message");
   const { designTheme, getActualColorMode } = useTheme();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
   const { messages, isLoading } = useMessages(deviceId);
   const { data: presets = [] } = useMessagePresets(deviceId!);
   const [selectedPreset, setSelectedPreset] = useState<MessagePreset | null>(
     null
   );
+  const [selectedSlot, setSelectedSlot] = useState<SlotSelection>("both");
 
   const isMessageSeen = useCallback(
     (message: MessageWithSeen) => {
@@ -43,21 +43,6 @@ export function MessagesPage() {
     },
     [user?.id]
   );
-
-  useEffect(() => {
-    const loadDeviceInfo = async () => {
-      try {
-        const deviceData = await pb.collection("devices").getOne(deviceId!);
-        setDeviceInfo(deviceData);
-      } catch (err) {
-        console.error("Failed to load device info:", err);
-      }
-    };
-
-    if (deviceId) {
-      loadDeviceInfo();
-    }
-  }, [deviceId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -129,7 +114,7 @@ export function MessagesPage() {
           </div>
           <div>
             <h2 className="font-semibold text-foreground">
-              {deviceInfo?.name || `Device ${deviceId}`}
+              {device?.name || `Device ${deviceId}`}
             </h2>
             <div className="flex items-center space-x-2 text-xs text-muted-foreground">
               <div
@@ -141,6 +126,13 @@ export function MessagesPage() {
             </div>
           </div>
         </div>
+        {device?.information && (
+          <HeaderSlotSelector
+            deviceInfo={device.information}
+            selectedSlot={selectedSlot}
+            onSlotChange={setSelectedSlot}
+          />
+        )}
       </div>
 
       <div className="flex-1 overflow-y-auto bg-gradient-to-b from-background to-muted/20">
@@ -186,7 +178,8 @@ export function MessagesPage() {
 
                     <Message
                       message={msg}
-                      deviceName={deviceInfo?.name}
+                      deviceName={device?.name}
+                      deviceInfo={device?.information ?? undefined}
                       formatMessageTime={formatMessageTime}
                       getMessageStatus={getMessageStatus}
                     />
@@ -210,6 +203,7 @@ export function MessagesPage() {
           <div className="relative">
             <NewMessage
               deviceId={deviceId!}
+              selectedSlot={selectedSlot}
               onPresetSelect={setSelectedPreset}
               selectedPreset={selectedPreset}
             />

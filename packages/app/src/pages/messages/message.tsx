@@ -1,10 +1,17 @@
 import { useAuthStore } from "@/lib/auth";
 import { MessageResponse, UsersRecord } from "@/types/db.types";
 import { motion } from "framer-motion";
-import { Clock, User } from "lucide-react";
+import { Clock, User, Smartphone } from "lucide-react";
 import { FC, memo, useEffect, useMemo, useRef } from "react";
 import { pb } from "@/lib/pocketbase";
 import { useMutation } from "@tanstack/react-query";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { DeviceInformation } from "@/types/types";
 
 type MessageWithSeen = MessageResponse<{ user: UsersRecord }> & {
   seenAt?: string;
@@ -13,12 +20,19 @@ type MessageWithSeen = MessageResponse<{ user: UsersRecord }> & {
 interface MessageProps {
   message: MessageWithSeen;
   deviceName?: string;
+  deviceInfo?: DeviceInformation;
   formatMessageTime: (dateString: string) => string;
   getMessageStatus: (message: MessageWithSeen) => React.ReactNode;
 }
 
 export const Message: FC<MessageProps> = memo(
-  ({ message, deviceName, formatMessageTime, getMessageStatus }) => {
+  ({
+    message,
+    deviceName,
+    deviceInfo,
+    formatMessageTime,
+    getMessageStatus,
+  }) => {
     const { user } = useAuthStore();
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const isMessageSeen = useMemo(
@@ -68,12 +82,80 @@ export const Message: FC<MessageProps> = memo(
               <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                 <User className="w-3 h-3" />
                 <span>{deviceName || "Device"}</span>
+                {message.phone && deviceInfo && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center space-x-1 cursor-help">
+                          <span>•</span>
+                          <Smartphone className="w-3 h-3" />
+                          <span>
+                            {typeof message.phone === "number"
+                              ? message.phone === -1
+                                ? "Both Slots"
+                                : message.phone === Number(deviceInfo.phone)
+                                ? "Slot 1"
+                                : message.phone ===
+                                  Number(deviceInfo.secondSlotPhone)
+                                ? "Slot 2"
+                                : "Unknown Slot"
+                              : "Unknown Slot"}
+                          </span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>
+                          {typeof message.phone === "number"
+                            ? message.phone === -1
+                              ? `${deviceInfo.phone}, ${deviceInfo.secondSlotPhone}`
+                              : message.phone.toString()
+                            : "Unknown"}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
               </div>
             )}
             {message.direction === "to" && (
               <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                 <User className="w-3 h-3" />
                 <span>{message.expand?.user?.name}</span>
+                {message.phone && deviceInfo && (
+                  <>
+                    <span>•</span>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center space-x-1 cursor-help">
+                            <Smartphone className="w-3 h-3" />
+                            <span>
+                              {typeof message.phone === "number"
+                                ? message.phone === -1
+                                  ? "Both Slots"
+                                  : message.phone === Number(deviceInfo.phone)
+                                  ? "Slot 1"
+                                  : message.phone ===
+                                    Number(deviceInfo.secondSlotPhone)
+                                  ? "Slot 2"
+                                  : "Unknown Slot"
+                                : "Unknown Slot"}
+                            </span>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>
+                            {typeof message.phone === "number"
+                              ? message.phone === -1
+                                ? `${deviceInfo.phone}, ${deviceInfo.secondSlotPhone}`
+                                : message.phone.toString()
+                              : "Unknown"}
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </>
+                )}
               </div>
             )}
           </div>

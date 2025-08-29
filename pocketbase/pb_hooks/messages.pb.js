@@ -26,7 +26,8 @@ onRecordAfterCreateSuccess((e) => {
     }
 
     // Format phone number for display
-    const phoneDisplay = phone ? `from ${phone}` : "";
+    const phoneDisplay =
+      phone && phone.length > 0 ? `from ${phone.join(", ")}` : "";
 
     // Truncate message if too long
     const messagePreview =
