@@ -176,8 +176,8 @@ dist
 # Finder (MacOS) folder config
 .DS_Store
 
-# PocketBase local data (hook typings stay versioned)
 pocketbase/pb_data/**
+!pocketbase/pb_data/
 !pocketbase/pb_data/types.d.ts
 
 data/
