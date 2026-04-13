@@ -1,0 +1,15 @@
+{
+  "name": "@joystick/dev-tools",
+  "type": "module",
+  "scripts": {
+    "seed": "bun run src/seed/index.ts",
+    "mock-device": "bun run src/device-mock/index.ts"
+  },
+  "dependencies": {
+    "pocketbase": "^0.25.2",
+    "ssh2": "^1.16.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.17"
+  }
+}
