@@ -24,54 +24,6 @@ export async function login(baseUrl: string, username: string, password: string)
   return json.data.token as string;
 }
 
-async function loginJrpc(baseUrl: string, username: string, password: string): Promise<string> {
-  const response = await fetch(`${baseUrl}/ubus`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: 1,
-      method: "call",
-      params: ["00000000000000000000000000000000", "session", "login", { username, password }],
-    }),
-  });
-
-  const json = await response.json();
-
-  if (json.result[0] !== 0) {
-    throw new Error("Failed to authenticate with device JSON-RPC");
-  }
-
-  return json.result[1].ubus_rpc_session as string;
-}
-
-async function jrpcCall<T>(
-  baseUrl: string,
-  session: string,
-  service: string,
-  method: string,
-  params: Record<string, unknown>
-): Promise<T> {
-  const response = await fetch(`${baseUrl}/ubus`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: 1,
-      method: "call",
-      params: [session, service, method, params],
-    }),
-  });
-
-  const json = await response.json();
-
-  if (json.result[0] !== 0) {
-    throw new Error(`JSON-RPC call failed: ${service}.${method}`);
-  }
-
-  return json.result[1] as T;
-}
-
 export async function sendSms(
   baseUrl: string,
   username: string,
@@ -95,31 +47,110 @@ export async function sendSms(
   return json.data;
 }
 
+type RutIfaceStatus = {
+  id: string;
+  mode: string;
+  ssid: string;
+  encryption: string;
+  num_assoc: number;
+  status: string;
+  clients: Array<{
+    macaddr: string;
+    ipaddr: string;
+    hostname: string;
+    signal: string | number;
+    tx_rate: number;
+    rx_rate: number;
+    band: string;
+    expires: number;
+    interface?: string;
+    device?: string;
+  }>;
+};
+
+type RutDeviceStatus = {
+  id: string;
+  name: string;
+  up: boolean;
+  disabled: boolean;
+  channel: number;
+  frequency: number;
+  txpower: number;
+};
+
+type RutIfaceConfig = {
+  id: string;
+  wifi_device: string;
+  disabled: boolean;
+  mode: string;
+  ssid: string;
+  encryption: string;
+  key?: string;
+  hidden?: boolean;
+  max_sta?: number;
+  network: string;
+};
+
+type RutDeviceConfig = {
+  id: string;
+  disabled: boolean;
+  type: string;
+  channel: string;
+  hwmode: string;
+  htmode: string;
+  txpower: number;
+  country: string;
+};
+
+async function restGet<T>(baseUrl: string, token: string, path: string): Promise<T> {
+  const response = await fetch(`${baseUrl}${path}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  const json = await response.json();
+  if (!response.ok || json.success === false) {
+    throw new Error(`GET ${path} failed`);
+  }
+  return json.data as T;
+}
+
+async function restPut(baseUrl: string, token: string, path: string, body: unknown): Promise<void> {
+  const response = await fetch(`${baseUrl}${path}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) {
+    throw new Error(`PUT ${path} failed`);
+  }
+}
+
 export async function getWifiStatus(
   baseUrl: string,
   username: string,
   password: string
 ): Promise<WifiApStatus> {
-  const session = await loginJrpc(baseUrl, username, password);
+  const token = await login(baseUrl, username, password);
 
-  const data = await jrpcCall<{
-    mode: string;
-    ssid: string;
-    channel: number;
-    frequency: number;
-    txpower: number;
-    encryption: { enabled: boolean; method?: string };
-  }>(baseUrl, session, "iwinfo", "info", { device: "radio0" });
+  const [ifaces, devices] = await Promise.all([
+    restGet<RutIfaceStatus[]>(baseUrl, token, "/api/wireless/interfaces/status"),
+    restGet<RutDeviceStatus[]>(baseUrl, token, "/api/wireless/devices/status"),
+  ]);
+
+  const apIface = ifaces.find((i) => i.mode === "ap") ?? ifaces[0];
+  const radio = devices[0];
 
   return {
-    enabled: data.mode === "Master",
-    ssid: data.ssid,
-    channel: data.channel,
-    band: data.frequency >= 5000 ? "5GHz" : "2.4GHz",
-    frequency: data.frequency,
-    txPower: data.txpower,
-    security: data.encryption.method ?? (data.encryption.enabled ? "psk2" : "none"),
-    clientCount: 0,
+    enabled: !radio.disabled && radio.up,
+    ssid: apIface.ssid,
+    channel: radio.channel,
+    band: radio.frequency >= 5000 ? "5GHz" : "2.4GHz",
+    frequency: radio.frequency,
+    txPower: radio.txpower,
+    security: apIface.encryption,
+    clientCount: apIface.num_assoc,
   };
 }
 
@@ -130,32 +161,23 @@ export async function getWifiConfig(
 ): Promise<WifiApConfig> {
   const token = await login(baseUrl, username, password);
 
-  const response = await fetch(`${baseUrl}/api/wireless/config`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const [ifaces, devices] = await Promise.all([
+    restGet<RutIfaceConfig[]>(baseUrl, token, "/api/wireless/interfaces/config"),
+    restGet<RutDeviceConfig[]>(baseUrl, token, "/api/wireless/devices/config"),
+  ]);
 
-  const json = await response.json();
-  const items = json.data as Array<{
-    id: string;
-    ssid: string;
-    key?: string;
-    encryption: string;
-    maxassoc?: string;
-    hidden: string;
-    mode: string;
-  }>;
-
-  const item = items.find((i) => i.mode === "ap") ?? items[0];
+  const apIface = ifaces.find((i) => i.mode === "ap") ?? ifaces[0];
+  const radio = devices[0];
 
   return {
-    ssid: item.ssid,
-    password: item.key ?? "",
-    channel: 0,
-    band: "",
-    security: item.encryption as "none" | "psk" | "psk2",
-    txPower: 0,
-    maxClients: parseInt(item.maxassoc ?? "32"),
-    hidden: item.hidden === "1",
+    ssid: apIface.ssid,
+    password: apIface.key ?? "",
+    channel: radio.channel === "auto" ? 0 : parseInt(radio.channel) || 0,
+    band: radio.hwmode,
+    security: apIface.encryption as "none" | "psk" | "psk2",
+    txPower: radio.txpower,
+    maxClients: apIface.max_sta ?? 32,
+    hidden: apIface.hidden === true,
   };
 }
 
@@ -167,30 +189,41 @@ export async function setWifiConfig(
 ): Promise<void> {
   const token = await login(baseUrl, username, password);
 
-  const listResponse = await fetch(`${baseUrl}/api/wireless/config`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const [ifaces, devices] = await Promise.all([
+    restGet<RutIfaceConfig[]>(baseUrl, token, "/api/wireless/interfaces/config"),
+    restGet<RutDeviceConfig[]>(baseUrl, token, "/api/wireless/devices/config"),
+  ]);
 
-  const listJson = await listResponse.json();
-  const items = listJson.data as Array<{ id: string; mode: string }>;
-  const item = items.find((i) => i.mode === "ap") ?? items[0];
+  const apIface = ifaces.find((i) => i.mode === "ap") ?? ifaces[0];
+  const radio = devices[0];
 
-  const body: Record<string, string> = {};
+  const ifaceBody: Record<string, unknown> = {
+    wifi_device: apIface.wifi_device,
+    disabled: apIface.disabled,
+    mode: apIface.mode,
+    ssid: config.ssid ?? apIface.ssid,
+    encryption: config.security ?? apIface.encryption,
+    network: apIface.network,
+  };
 
-  if (config.ssid !== undefined) body.ssid = config.ssid;
-  if (config.password !== undefined) body.key = config.password;
-  if (config.security !== undefined) body.encryption = config.security;
-  if (config.maxClients !== undefined) body.maxassoc = String(config.maxClients);
-  if (config.hidden !== undefined) body.hidden = config.hidden ? "1" : "0";
+  if (config.password !== undefined) ifaceBody.key = config.password;
+  if (config.maxClients !== undefined) ifaceBody.max_sta = config.maxClients;
+  if (config.hidden !== undefined) ifaceBody.hidden = config.hidden;
 
-  await fetch(`${baseUrl}/api/wireless/config/${item.id}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({ data: body }),
-  });
+  const devBody: Record<string, unknown> = {
+    disabled: radio.disabled,
+    type: radio.type,
+    hwmode: config.band ?? radio.hwmode,
+    htmode: radio.htmode,
+    country: radio.country,
+    channel: config.channel !== undefined ? String(config.channel) : radio.channel,
+    txpower: config.txPower !== undefined ? config.txPower : radio.txpower,
+  };
+
+  await Promise.all([
+    restPut(baseUrl, token, `/api/wireless/interfaces/config/${apIface.id}`, ifaceBody),
+    restPut(baseUrl, token, `/api/wireless/devices/config/${radio.id}`, devBody),
+  ]);
 }
 
 export async function getWifiClients(
@@ -198,74 +231,39 @@ export async function getWifiClients(
   username: string,
   password: string
 ): Promise<WifiClient[]> {
-  const session = await loginJrpc(baseUrl, username, password);
+  const token = await login(baseUrl, username, password);
 
-  const assoc = await jrpcCall<{
-    results: Array<{ mac: string; signal: number; inactive: number }>;
-  }>(baseUrl, session, "iwinfo", "assoclist", { device: "wlan0" });
-
-  const arp = await jrpcCall<{ code: number; stdout: string }>(
+  const ifaces = await restGet<RutIfaceStatus[]>(
     baseUrl,
-    session,
-    "file",
-    "exec",
-    { command: "cat", params: ["/proc/net/arp"] }
+    token,
+    "/api/wireless/interfaces/status"
   );
 
-  const macToIp = new Map<string, string>();
-  const arpLines = arp.stdout.split("\n").slice(1);
-  for (const line of arpLines) {
-    const parts = line.trim().split(/\s+/);
-    if (parts.length >= 4) {
-      macToIp.set(parts[3].toLowerCase(), parts[0]);
-    }
-  }
+  const apIface = ifaces.find((i) => i.mode === "ap") ?? ifaces[0];
+  const clients = apIface?.clients ?? [];
 
-  return assoc.results.map((item) => ({
-    mac: item.mac,
-    ip: macToIp.get(item.mac.toLowerCase()) ?? "",
-    hostname: "",
-    signal: item.signal,
-    txBytes: 0,
-    rxBytes: 0,
-    connectedSince: String(item.inactive),
+  return clients.map((client) => ({
+    mac: client.macaddr,
+    ip: client.ipaddr,
+    hostname: client.hostname,
+    signal: typeof client.signal === "string" ? parseInt(client.signal) : client.signal,
+    txBytes: client.tx_rate,
+    rxBytes: client.rx_rate,
+    connectedSince: "",
   }));
 }
 
 export async function getWifiTraffic(
   baseUrl: string,
-  username: string,
-  password: string
+  _username: string,
+  _password: string
 ): Promise<WifiTraffic> {
-  const session = await loginJrpc(baseUrl, username, password);
-
-  const result = await jrpcCall<{ code: number; stdout: string }>(
-    baseUrl,
-    session,
-    "file",
-    "exec",
-    { command: "cat", params: ["/proc/net/dev"] }
-  );
-
-  const lines = result.stdout.split("\n").slice(2);
-  const wlanLine = lines.find((l) => l.trim().startsWith("wlan0:"));
-
-  if (!wlanLine) {
-    throw new Error("wlan0 interface not found in /proc/net/dev");
-  }
-
-  const parts = wlanLine.trim().replace("wlan0:", "").trim().split(/\s+/);
-  const rxBytes = parseInt(parts[0]);
-  const rxPackets = parseInt(parts[1]);
-  const txBytes = parseInt(parts[8]);
-  const txPackets = parseInt(parts[9]);
-
   return {
     interface: "wlan0",
-    rxBytes,
-    rxPackets,
-    txBytes,
-    txPackets,
+    rxBytes: 0,
+    rxPackets: 0,
+    txBytes: 0,
+    txPackets: 0,
     timestamp: new Date().toISOString(),
   };
 }
