@@ -176,9 +176,7 @@ dist
 # Finder (MacOS) folder config
 .DS_Store
 
-pocketbase/pb_data/**
-!pocketbase/pb_data/
-!pocketbase/pb_data/types.d.ts
+pocketbase/pb_data/
 
 data/
 
