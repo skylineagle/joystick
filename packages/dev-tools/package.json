@@ -3,7 +3,9 @@
   "type": "module",
   "scripts": {
     "seed": "bun run src/seed/index.ts",
-    "mock-device": "bun run src/device-mock/index.ts"
+    "seed:rut": "bun run src/seed/seed-rut.ts",
+    "mock-device": "bun run src/device-mock/index.ts",
+    "mock-rut": "bun run src/device-mock/rut-mock.ts"
   },
   "dependencies": {
     "pocketbase": "^0.25.2",

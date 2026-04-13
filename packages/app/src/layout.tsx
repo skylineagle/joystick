@@ -17,6 +17,7 @@ import { useIsAudioSupported } from "@/hooks/use-support-audio";
 import { useIsMediaSupported } from "@/hooks/use-support-media";
 import { useIsParamsSupported } from "@/hooks/use-support-params";
 import { useIsTerminalSupported } from "@/hooks/use-support-terminal";
+import { useIsWifiApSupported } from "@/hooks/use-support-wifi-ap";
 import { pb } from "@/lib/pocketbase";
 import { cn } from "@/lib/utils";
 import { CellSearchControls } from "@/pages/cell-search/cell-search-controls";
@@ -85,6 +86,7 @@ export function Layout({ children }: LayoutProps) {
   const isMediaSupported = useIsMediaSupported(deviceId!);
   const isAudioSupported = useIsAudioSupported(deviceId!);
   const isCellSearchSupported = useIsCellSearchSupported(deviceId!);
+  const isWifiApSupported = useIsWifiApSupported(deviceId!);
   const isMediaRouteAllowed = useIsRouteAllowed("media");
   const isAudioRouteAllowed = useIsRouteAllowed("audio");
   const isActionRouteAllowed = useIsRouteAllowed("action");
@@ -108,7 +110,8 @@ export function Layout({ children }: LayoutProps) {
     !!isGalleryRouteAllowed,
     !!isTerminalRouteAllowed,
     !!isCellSearchRouteAllowed,
-    !!isMessageRouteAllowed
+    !!isMessageRouteAllowed,
+    !!isWifiApSupported
   );
   const showSidebar = availableNavItems.length > 1;
 

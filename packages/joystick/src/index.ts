@@ -25,6 +25,7 @@ import {
   sendNotification,
 } from "./notifications";
 import { generateRandomCPSIResult, updateStatus } from "./utils";
+import { wifiApPlugin } from "./wifi-ap";
 
 const app = new Elysia()
   .use(cors())
@@ -55,6 +56,7 @@ const app = new Elysia()
   )
   .use(createAuthPlugin(pb))
   .use(setupLoggingMiddleware())
+  .use(wifiApPlugin)
   .ws("/notifications", {
     open(ws: any) {
       addNotificationClient(ws);
@@ -143,10 +145,33 @@ const app = new Elysia()
         );
         enhancedLogger.warn(command);
 
-        const output =
-          run.target === RunTargetOptions.device
-            ? await runCommandOnDevice(device, command)
-            : await $`${{ raw: command }}`.text();
+        let output: string;
+        if (run.target === RunTargetOptions.device) {
+          output = await runCommandOnDevice(device, command);
+        } else if (run.target === RunTargetOptions.joystick) {
+          const spaceIdx = command.indexOf(" ");
+          const method = command.slice(0, spaceIdx);
+          const path = command.slice(spaceIdx + 1);
+          const joystickPort = Bun.env.PORT ?? "8000";
+          const internalSecret =
+            Bun.env.JOYSTICK_INTERNAL_SECRET ?? "internal-secret";
+          const internalResponse = await fetch(
+            `http://localhost:${joystickPort}${path}`,
+            {
+              method,
+              headers: {
+                "Content-Type": "application/json",
+                "x-internal-secret": internalSecret,
+              },
+              ...(body && method !== "GET"
+                ? { body: JSON.stringify(body) }
+                : {}),
+            }
+          );
+          output = await internalResponse.text();
+        } else {
+          output = await $`${{ raw: command }}`.text();
+        }
 
         const response = {
           success: true,
