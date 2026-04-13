@@ -6,27 +6,19 @@ import {
   getWifiTraffic,
   getRutApiCredentials,
   getRutApiUrl,
-  login,
   setWifiConfig,
   type DeviceResponse,
   type WifiApConfig,
 } from "@joystick/core";
 import { Elysia, t } from "elysia";
 
-const isInternalRequest = (request: Request): boolean =>
-  request.headers.get("x-internal-secret") ===
-  (Bun.env.JOYSTICK_INTERNAL_SECRET ?? "internal-secret");
-
 export const wifiApPlugin = new Elysia()
-  .get("/api/wifi-ap/:device/status", async ({ params, request, set }) => {
+  .get("/api/wifi-ap/:device/status", async ({ params, set }) => {
     try {
-      const device = await pb
-        .collection("devices")
-        .getOne<DeviceResponse>(params.device);
+      const device = await pb.collection("devices").getOne<DeviceResponse>(params.device);
       const baseUrl = getRutApiUrl(device.information);
       const { user, password } = getRutApiCredentials(device.information);
-      const token = await login(baseUrl, user, password);
-      return await getWifiStatus(baseUrl, token);
+      return await getWifiStatus(baseUrl, user, password);
     } catch (error) {
       set.status = 500;
       return {
@@ -35,15 +27,12 @@ export const wifiApPlugin = new Elysia()
       };
     }
   })
-  .get("/api/wifi-ap/:device/clients", async ({ params, request, set }) => {
+  .get("/api/wifi-ap/:device/clients", async ({ params, set }) => {
     try {
-      const device = await pb
-        .collection("devices")
-        .getOne<DeviceResponse>(params.device);
+      const device = await pb.collection("devices").getOne<DeviceResponse>(params.device);
       const baseUrl = getRutApiUrl(device.information);
       const { user, password } = getRutApiCredentials(device.information);
-      const token = await login(baseUrl, user, password);
-      return await getWifiClients(baseUrl, token);
+      return await getWifiClients(baseUrl, user, password);
     } catch (error) {
       set.status = 500;
       return {
@@ -52,15 +41,12 @@ export const wifiApPlugin = new Elysia()
       };
     }
   })
-  .get("/api/wifi-ap/:device/traffic", async ({ params, request, set }) => {
+  .get("/api/wifi-ap/:device/traffic", async ({ params, set }) => {
     try {
-      const device = await pb
-        .collection("devices")
-        .getOne<DeviceResponse>(params.device);
+      const device = await pb.collection("devices").getOne<DeviceResponse>(params.device);
       const baseUrl = getRutApiUrl(device.information);
       const { user, password } = getRutApiCredentials(device.information);
-      const token = await login(baseUrl, user, password);
-      return await getWifiTraffic(baseUrl, token);
+      return await getWifiTraffic(baseUrl, user, password);
     } catch (error) {
       set.status = 500;
       return {
@@ -69,15 +55,12 @@ export const wifiApPlugin = new Elysia()
       };
     }
   })
-  .get("/api/wifi-ap/:device/config", async ({ params, request, set }) => {
+  .get("/api/wifi-ap/:device/config", async ({ params, set }) => {
     try {
-      const device = await pb
-        .collection("devices")
-        .getOne<DeviceResponse>(params.device);
+      const device = await pb.collection("devices").getOne<DeviceResponse>(params.device);
       const baseUrl = getRutApiUrl(device.information);
       const { user, password } = getRutApiCredentials(device.information);
-      const token = await login(baseUrl, user, password);
-      return await getWifiConfig(baseUrl, token);
+      return await getWifiConfig(baseUrl, user, password);
     } catch (error) {
       set.status = 500;
       return {
@@ -88,15 +71,12 @@ export const wifiApPlugin = new Elysia()
   })
   .put(
     "/api/wifi-ap/:device/config",
-    async ({ params, body, request, set }) => {
+    async ({ params, body, set }) => {
       try {
-        const device = await pb
-          .collection("devices")
-          .getOne<DeviceResponse>(params.device);
+        const device = await pb.collection("devices").getOne<DeviceResponse>(params.device);
         const baseUrl = getRutApiUrl(device.information);
         const { user, password } = getRutApiCredentials(device.information);
-        const token = await login(baseUrl, user, password);
-        await setWifiConfig(baseUrl, token, body as Partial<WifiApConfig>);
+        await setWifiConfig(baseUrl, user, password, body as Partial<WifiApConfig>);
         return { success: true };
       } catch (error) {
         set.status = 500;
