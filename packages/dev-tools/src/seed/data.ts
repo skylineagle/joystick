@@ -107,7 +107,10 @@ const paramsSchema = {
   required: ["video", "connection"],
 };
 
-const baseConfiguration = (name: string, source: string): DeviceConfiguration => ({
+const baseConfiguration = (
+  name: string,
+  source: string,
+): DeviceConfiguration => ({
   name,
   source,
   fallback: "",
@@ -148,20 +151,24 @@ const baseAutomation: DeviceAutomation = {
 
 const mockInformation = (
   port: number,
-  extra?: Partial<DeviceInformation>
+  extra?: Partial<DeviceInformation>,
 ): DeviceInformation => ({
   user: MOCK_SSH_USER,
   password: MOCK_SSH_PASSWORD,
   key: "",
   host: "127.0.0.1",
   port,
-  phone: 15550001001,
+  phone: "15550001001",
   activeSlot: "primary",
   secondSlotHost: "127.0.0.1",
-  secondSlotPhone: 15550001002,
+  secondSlotPhone: "15550001002",
   battery_capacity: 10000,
   battery_factor: 1,
-  harvest: { supportedTypes: ["image", "video"], interval: 120, autoPull: false },
+  harvest: {
+    supportedTypes: ["image", "video"],
+    interval: 120,
+    autoPull: false,
+  },
   imuResetValues: { x: 0, y: 0, z: 0 },
   bitrate_presets: { low: 2000000, med: 5000000, high: 8000000 },
   fps_presets: { film: 24, ntsc: 30, high: 60 },
@@ -189,7 +196,8 @@ export const devModelSeeds: DevModelSeed[] = [
     key: "mock-pi",
     modelName: "Mock Raspberry Pi / mediamtx",
     deviceName: "dev-mock-pi-01",
-    description: "Bench device with day/night presets and mediamtx streaming defaults.",
+    description:
+      "Bench device with day/night presets and mediamtx streaming defaults.",
     stream: ModelsStreamOptions.mediamtx,
     isAudio: true,
     modes: ["off", "live", "live-day", "live-night", "auto"],
@@ -246,7 +254,10 @@ export const buildDeviceRecord = (seed: DevModelSeed, modelId: string) => ({
   configuration: baseConfiguration(seed.deviceName, seed.source),
   description: seed.description,
   hide: false,
-  information: mockInformation(DEV_MODEL_PORTS[seed.key], seed.informationExtra),
+  information: mockInformation(
+    DEV_MODEL_PORTS[seed.key],
+    seed.informationExtra,
+  ),
 });
 
 export type RunSeed = {
