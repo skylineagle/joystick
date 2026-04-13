@@ -176,14 +176,9 @@ dist
 # Finder (MacOS) folder config
 .DS_Store
 
-# PocketBase data files
-pocketbase/pb_data/*.db
-pocketbase/pb_data/*.db-shm
-pocketbase/pb_data/*.db-wal
-pocketbase/pb_data/backups/*.zip
-pocketbase/pb_data/backups/*.zip.attrs
-pocketbase/pb_data/logs/
-pocketbase/pb_data/storage/
+# PocketBase local data (hook typings stay versioned)
+pocketbase/pb_data/**
+!pocketbase/pb_data/types.d.ts
 
 data/
 

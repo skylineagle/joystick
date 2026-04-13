@@ -14,7 +14,9 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "dev": "turbo run dev",
-    "db:generate": "turbo run db:generate"
+    "db:generate": "turbo run db:generate",
+    "db:seed:dev": "bun run ./packages/dev-tools/src/seed/index.ts",
+    "mock-device": "bun run ./packages/dev-tools/src/device-mock/index.ts"
   },
   "type": "module",
   "workspaces": [
