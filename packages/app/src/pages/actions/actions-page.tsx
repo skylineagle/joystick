@@ -122,7 +122,7 @@ export function ActionsPage() {
                     <ScrollArea
                       className={cn(
                         "w-full overflow-y-auto px-3 py-2.5 font-mono text-sm",
-                        expandedResult ? "max-h-96" : "max-h-40",
+                        !expandedResult && "max-h-56",
                       )}
                     >
                       <ActionResultDisplay content={actionResult} />
