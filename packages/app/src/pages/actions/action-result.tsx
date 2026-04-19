@@ -1,7 +1,7 @@
-import { useTheme } from "@/components/theme-provider";
-import JsonView from "@uiw/react-json-view";
-import { darkTheme } from "@uiw/react-json-view/dark";
-import { lightTheme } from "@uiw/react-json-view/light";
+// import { useTheme } from "@/components/theme-provider";
+// import JsonView from "@uiw/react-json-view";
+// import { darkTheme } from "@uiw/react-json-view/dark";
+// import { lightTheme } from "@uiw/react-json-view/light";
 import { FC, useMemo } from "react";
 
 type ParsedActionResult =
@@ -26,24 +26,24 @@ const parseActionResultText = (raw: string): ParsedActionResult => {
 };
 
 export const ActionResultDisplay: FC<{ content: string }> = ({ content }) => {
-  const { getActualColorMode } = useTheme();
+  // const { getActualColorMode } = useTheme();
   const parsed = useMemo(() => parseActionResultText(content), [content]);
-  const themeStyle = getActualColorMode() === "dark" ? darkTheme : lightTheme;
+  // const themeStyle = getActualColorMode() === "dark" ? darkTheme : lightTheme;
 
-  if (parsed.kind === "jsonStructured") {
-    return (
-      <JsonView
-        value={parsed.value}
-        style={themeStyle}
-        collapsed={1}
-        shortenTextAfterLength={0}
-        displayDataTypes={false}
-        className="rounded-md bg-transparent text-left"
-      />
-    );
-  }
+  // if (parsed.kind === "jsonStructured") {
+  //   return (
+  //     <JsonView
+  //       value={parsed.value}
+  //       style={themeStyle}
+  //       collapsed={1}
+  //       shortenTextAfterLength={0}
+  //       displayDataTypes={false}
+  //       className="rounded-md bg-transparent text-left"
+  //     />
+  //   );
+  // }
 
-  if (parsed.kind === "jsonOther") {
+  if (parsed.kind === "jsonOther" || parsed.kind === "jsonStructured") {
     return (
       <pre className="m-0 whitespace-pre-wrap break-words text-sm leading-relaxed">
         {JSON.stringify(parsed.value, null, 2)}
