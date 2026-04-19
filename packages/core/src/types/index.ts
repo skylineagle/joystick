@@ -54,6 +54,47 @@ export type ModelResponse = ModelsResponse<
   TempLevelPresets
 >;
 
+export type WifiApStatus = {
+  enabled: boolean;
+  ssid: string;
+  channel: number;
+  band: string;
+  frequency: number;
+  txPower: number;
+  security: string;
+  clientCount: number;
+};
+
+export type WifiApConfig = {
+  ssid: string;
+  password: string;
+  channel: number;
+  band: string;
+  security: "none" | "psk" | "psk2";
+  txPower: number;
+  maxClients: number;
+  hidden: boolean;
+};
+
+export type WifiClient = {
+  mac: string;
+  ip: string;
+  hostname: string;
+  signal: number;
+  txBytes: number;
+  rxBytes: number;
+  connectedSince: string;
+};
+
+export type WifiTraffic = {
+  interface: string;
+  txBytes: number;
+  rxBytes: number;
+  txPackets: number;
+  rxPackets: number;
+  timestamp: string;
+};
+
 export type CPSIResult = {
   technology: string;
   status: string;
@@ -155,6 +196,9 @@ export type DeviceInformation = {
     data: CPSIResult;
     timestamp: string;
   };
+  rutApiPort?: number;
+  rutApiUser?: string;
+  rutApiPassword?: string;
 };
 
 export type DeviceResponse = DevicesResponse<

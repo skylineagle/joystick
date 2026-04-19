@@ -25,6 +25,8 @@ import {
   sendNotification,
 } from "./notifications";
 import { generateRandomCPSIResult, updateStatus } from "./utils";
+import { wifiApPlugin } from "./wifi-ap";
+import { DEFAULT_API_KEY } from "@joystick/core";
 
 const app = new Elysia()
   .use(cors())
@@ -51,10 +53,11 @@ const app = new Elysia()
         },
         security: [{ bearerAuth: [] }, { apiKey: [] }],
       },
-    })
+    }),
   )
   .use(createAuthPlugin(pb))
   .use(setupLoggingMiddleware())
+  .use(wifiApPlugin)
   .ws("/notifications", {
     open(ws: any) {
       addNotificationClient(ws);
@@ -65,7 +68,7 @@ const app = new Elysia()
     message(ws: any, message: any) {
       enhancedLogger.debug(
         { message },
-        "Received message from notification client"
+        "Received message from notification client",
       );
     },
   })
@@ -81,7 +84,7 @@ const app = new Elysia()
             action: params.action,
             parameters: body || {},
           },
-          "Running command"
+          "Running command",
         );
 
         const userId = auth.userId || "system";
@@ -122,7 +125,7 @@ const app = new Elysia()
 
         if (runResult.length === 0) {
           throw new Error(
-            `Action ${params.action} not found for device ${device.expand?.device.name}`
+            `Action ${params.action} not found for device ${device.expand?.device.name}`,
           );
         }
 
@@ -139,14 +142,36 @@ const app = new Elysia()
           device,
           run.command,
           body as Record<string, unknown>,
-          { userId }
+          { userId },
         );
         enhancedLogger.warn(command);
 
-        const output =
-          run.target === RunTargetOptions.device
-            ? await runCommandOnDevice(device, command)
-            : await $`${{ raw: command }}`.text();
+        let output: string;
+        if (run.target === RunTargetOptions.device) {
+          output = await runCommandOnDevice(device, command);
+        } else if (run.target === RunTargetOptions.joystick) {
+          const spaceIdx = command.indexOf(" ");
+          const method = command.slice(0, spaceIdx);
+          const path = command.slice(spaceIdx + 1);
+          const joystickPort = Bun.env.PORT ?? "8000";
+
+          const internalResponse = await fetch(
+            `http://localhost:${joystickPort}${path}`,
+            {
+              method,
+              headers: {
+                "Content-Type": "application/json",
+                "x-api-key": DEFAULT_API_KEY,
+              },
+              ...(body && method !== "GET"
+                ? { body: JSON.stringify(body) }
+                : {}),
+            },
+          );
+          output = await internalResponse.text();
+        } else {
+          output = await $`${{ raw: command }}`.text();
+        }
 
         const response = {
           success: true,
@@ -167,7 +192,7 @@ const app = new Elysia()
             action: params.action,
             response,
           },
-          "Command executed successfully"
+          "Command executed successfully",
         );
 
         return response;
@@ -178,7 +203,7 @@ const app = new Elysia()
             device: params.device,
             action: params.action,
           },
-          "Command execution failed"
+          "Command execution failed",
         );
 
         set.status = 500;
@@ -190,7 +215,7 @@ const app = new Elysia()
     },
     {
       body: t.Optional(t.Record(t.String(), t.Any())),
-    }
+    },
   )
   .get("/api/cpsi", () => generateRandomCPSIResult())
   .get("/api/battery", () => {
@@ -262,7 +287,7 @@ const app = new Elysia()
       }
 
       const { host: activeHost } = getActiveDeviceConnection(
-        device.information
+        device.information,
       );
 
       if (!activeHost) {
@@ -320,7 +345,7 @@ const app = new Elysia()
             t.Literal("warning"),
             t.Literal("error"),
             t.Literal("emergency"),
-          ])
+          ]),
         ),
         title: t.String(),
         message: t.String(),
@@ -329,12 +354,12 @@ const app = new Elysia()
         dismissible: t.Optional(t.Boolean()),
         metadata: t.Optional(t.Record(t.String(), t.Any())),
       }),
-    }
+    },
   )
   .listen(Bun.env.PORT || 8000);
 
 console.log(
   `🦊 Server is running at ${Bun.env.HOST ?? "localhost"}:${
     Bun.env.PORT ?? 8000
-  }`
+  }`,
 );

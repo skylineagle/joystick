@@ -17,6 +17,7 @@ import { useIsAudioSupported } from "@/hooks/use-support-audio";
 import { useIsMediaSupported } from "@/hooks/use-support-media";
 import { useIsParamsSupported } from "@/hooks/use-support-params";
 import { useIsTerminalSupported } from "@/hooks/use-support-terminal";
+import { useIsWifiApSupported } from "@/hooks/use-support-wifi-ap";
 import {
   ArrowLeft,
   Image,
@@ -27,6 +28,7 @@ import {
   Settings,
   Terminal,
   Video,
+  Wifi,
 } from "lucide-react";
 import * as React from "react";
 import { Link, useLocation, useParams } from "react-router";
@@ -80,6 +82,12 @@ const navItems = [
     path: "cell-search",
     description: "Cellular network analysis and cell tower search",
   },
+  {
+    label: "WiFi AP",
+    icon: Wifi,
+    path: "wifi-ap",
+    description: "WiFi access point management",
+  },
 ];
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -96,7 +104,8 @@ export const getAvailableNavItems = (
   isGalleryRouteAllowed: boolean,
   isTerminalRouteAllowed: boolean,
   isCellSearchRouteAllowed: boolean,
-  isMessageRouteAllowed: boolean
+  isMessageRouteAllowed: boolean,
+  isWifiApSupported: boolean
 ) => {
   return navItems.filter((item) => {
     if (
@@ -138,6 +147,9 @@ export const getAvailableNavItems = (
     if (item.path === "messages" && !isMessageRouteAllowed) {
       return false;
     }
+    if (item.path === "wifi-ap" && !isWifiApSupported) {
+      return false;
+    }
     return true;
   });
 };
@@ -150,6 +162,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const isMediaSupported = useIsMediaSupported(deviceId!);
   const isAudioSupported = useIsAudioSupported(deviceId!);
   const isCellSearchSupported = useIsCellSearchSupported(deviceId!);
+  const isWifiApSupported = useIsWifiApSupported(deviceId!);
   const isRecentEventPermitted = useIsPermitted("recent-events");
   const isMediaRouteAllowed = useIsRouteAllowed("media");
   const isAudioRouteAllowed = useIsRouteAllowed("audio");
@@ -180,7 +193,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             !!isGalleryRouteAllowed,
             !!isTerminalRouteAllowed,
             !!isCellSearchRouteAllowed,
-            !!isMessageRouteAllowed
+            !!isMessageRouteAllowed,
+            !!isWifiApSupported
           ).map((item) => {
             const isActive = location.pathname.endsWith(item.path);
 

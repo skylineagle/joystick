@@ -12,12 +12,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useActions } from "@/hooks/use-actions";
+import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 import { cn } from "@/lib/utils";
+import { ActionResultDisplay } from "@/pages/actions/action-result";
 import { LoaderCircle } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router";
 import { ActionForm } from "./action-form";
-import { useIsRouteAllowed } from "@/hooks/use-is-route-allowed";
 
 export function ActionsPage() {
   const { device: deviceId } = useParams();
@@ -62,7 +63,7 @@ export function ActionsPage() {
   }
 
   const filteredActions = actions.filter(
-    (action) => typeof action === "string"
+    (action) => typeof action === "string",
   );
 
   return (
@@ -100,39 +101,41 @@ export function ActionsPage() {
             />
 
             {currentAction === action && actionResult && (
-              <Card className="border-none shadow-xl">
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex justify-between items-center">
+              <Card className="overflow-hidden border shadow-lg">
+                <CardHeader className="pb-2 space-y-1">
+                  <CardTitle className="flex justify-between items-center gap-3 text-lg">
                     <span>Action Result</span>
-                    <Badge variant="outline" className="gap-1.5">
+                    <Badge variant="outline" className="gap-1.5 shrink-0">
                       <span
                         className="size-1.5 rounded-full bg-emerald-500"
                         aria-hidden="true"
                       />
-                      Sucess
+                      Success
                     </Badge>
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-sm">
                     Output from the {action.replace(/-/g, " ")} action
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <div className="p-3 rounded-md border">
+                <CardContent className="pt-0">
+                  <div className="rounded-lg border bg-muted/30">
                     <ScrollArea
                       className={cn(
-                        "w-full font-mono text-sm overflow-y-auto",
-                        expandedResult ? "max-h-96" : "max-h-32"
+                        "w-full overflow-y-auto px-3 py-2.5 font-mono text-sm",
+                        !expandedResult && "max-h-56",
                       )}
                     >
-                      <pre>{actionResult}</pre>
+                      <ActionResultDisplay content={actionResult} />
                     </ScrollArea>
                   </div>
                 </CardContent>
-                {actionResult && actionResult.length > 100 && (
-                  <CardFooter>
+                {actionResult && actionResult.length > 120 && (
+                  <CardFooter className="pt-0">
                     <button
+                      type="button"
                       onClick={() => setExpandedResult(!expandedResult)}
-                      className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                      aria-expanded={expandedResult}
+                      className="text-xs font-medium text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
                     >
                       {expandedResult ? "Show less" : "Show more"}
                     </button>

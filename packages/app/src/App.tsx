@@ -87,6 +87,12 @@ const AudioView = lazy(() =>
   }))
 );
 
+const WifiApPage = lazy(() =>
+  import("@/pages/wifi-ap/wifi-ap-page").then((module) => ({
+    default: module.WifiApPage,
+  }))
+);
+
 // Loading fallback component
 const LoadingFallback = () => (
   <motion.div
@@ -388,6 +394,20 @@ function AnimatedRoutes() {
                 <ErrorBoundary>
                   <PageTransition>
                     <CellSearchPage />
+                  </PageTransition>
+                </ErrorBoundary>
+              </Suspense>
+            </Layout>
+          }
+        />
+        <Route
+          path="wifi-ap"
+          element={
+            <Layout>
+              <Suspense fallback={<LoadingFallback />}>
+                <ErrorBoundary>
+                  <PageTransition>
+                    <WifiApPage />
                   </PageTransition>
                 </ErrorBoundary>
               </Suspense>
