@@ -27,11 +27,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Settings2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
+import { toast } from "@/utils/toast";
 import { z } from "zod";
 
 const configSchema = z.object({
-  ssid: z.string().min(1, "SSID is required").max(32, "SSID must be 32 characters or less"),
+  ssid: z
+    .string()
+    .min(1, "SSID is required")
+    .max(32, "SSID must be 32 characters or less"),
   password: z.string().min(0),
   channel: z.coerce.number().int().min(1).max(13),
   band: z.string(),
@@ -94,12 +97,12 @@ export const WifiApConfigForm = ({
     try {
       await joystickApi.put(
         createUrl(urls.joystick, `/api/wifi-ap/${deviceId}/config`),
-        values
+        values,
       );
-      toast.success("WiFi AP configuration updated");
+      toast.success({ message: "WiFi AP configuration updated" });
       onSuccess();
     } catch {
-      toast.error("Failed to update WiFi AP configuration");
+      toast.error({ message: "Failed to update WiFi AP configuration" } );
     } finally {
       setIsSubmitting(false);
     }
@@ -134,7 +137,10 @@ export const WifiApConfigForm = ({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-5"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <FormField
                 control={form.control}
@@ -168,7 +174,9 @@ export const WifiApConfigForm = ({
                           type="button"
                           onClick={handleTogglePassword}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                          aria-label={showPassword ? "Hide password" : "Show password"}
+                          aria-label={
+                            showPassword ? "Hide password" : "Show password"
+                          }
                         >
                           {showPassword ? (
                             <EyeOff className="h-4 w-4" />

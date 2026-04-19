@@ -124,16 +124,23 @@ const handleRequest = async (req: Request): Promise<Response> => {
   const path = url.pathname;
 
   if (path === "/api/login" && req.method === "POST") {
-    return Response.json({ success: true, data: { token: "mock-rest-token-rut950" } });
+    return Response.json({
+      success: true,
+      data: { token: "mock-rest-token-rut950" },
+    });
   }
 
   if (path === "/api/wireless/interfaces/status" && req.method === "GET") {
     return Response.json({ success: true, data: [buildIfaceStatus()] });
   }
 
-  if (path.startsWith("/api/wireless/interfaces/status/") && req.method === "GET") {
+  if (
+    path.startsWith("/api/wireless/interfaces/status/") &&
+    req.method === "GET"
+  ) {
     const id = path.split("/").at(-1);
-    if (id !== ifaceConfig.id) return new Response("Not found", { status: 404 });
+    if (id !== ifaceConfig.id)
+      return new Response("Not found", { status: 404 });
     return Response.json({ success: true, data: buildIfaceStatus() });
   }
 
@@ -141,15 +148,23 @@ const handleRequest = async (req: Request): Promise<Response> => {
     return Response.json({ success: true, data: [{ ...ifaceConfig }] });
   }
 
-  if (path.startsWith("/api/wireless/interfaces/config/") && req.method === "GET") {
+  if (
+    path.startsWith("/api/wireless/interfaces/config/") &&
+    req.method === "GET"
+  ) {
     const id = path.split("/").at(-1);
-    if (id !== ifaceConfig.id) return new Response("Not found", { status: 404 });
+    if (id !== ifaceConfig.id)
+      return new Response("Not found", { status: 404 });
     return Response.json({ success: true, data: { ...ifaceConfig } });
   }
 
-  if (path.startsWith("/api/wireless/interfaces/config/") && req.method === "PUT") {
+  if (
+    path.startsWith("/api/wireless/interfaces/config/") &&
+    req.method === "PUT"
+  ) {
     const id = path.split("/").at(-1);
-    if (id !== ifaceConfig.id) return new Response("Not found", { status: 404 });
+    if (id !== ifaceConfig.id)
+      return new Response("Not found", { status: 404 });
     const updates = (await req.json()) as Partial<IfaceConfig>;
     ifaceConfig = { ...ifaceConfig, ...updates, id: ifaceConfig.id };
     return Response.json({ success: true, data: { id: ifaceConfig.id } });
@@ -159,9 +174,13 @@ const handleRequest = async (req: Request): Promise<Response> => {
     return Response.json({ success: true, data: [buildDeviceStatus()] });
   }
 
-  if (path.startsWith("/api/wireless/devices/status/") && req.method === "GET") {
+  if (
+    path.startsWith("/api/wireless/devices/status/") &&
+    req.method === "GET"
+  ) {
     const id = path.split("/").at(-1);
-    if (id !== deviceConfig.id) return new Response("Not found", { status: 404 });
+    if (id !== deviceConfig.id)
+      return new Response("Not found", { status: 404 });
     return Response.json({ success: true, data: buildDeviceStatus() });
   }
 
@@ -169,15 +188,23 @@ const handleRequest = async (req: Request): Promise<Response> => {
     return Response.json({ success: true, data: [{ ...deviceConfig }] });
   }
 
-  if (path.startsWith("/api/wireless/devices/config/") && req.method === "GET") {
+  if (
+    path.startsWith("/api/wireless/devices/config/") &&
+    req.method === "GET"
+  ) {
     const id = path.split("/").at(-1);
-    if (id !== deviceConfig.id) return new Response("Not found", { status: 404 });
+    if (id !== deviceConfig.id)
+      return new Response("Not found", { status: 404 });
     return Response.json({ success: true, data: { ...deviceConfig } });
   }
 
-  if (path.startsWith("/api/wireless/devices/config/") && req.method === "PUT") {
+  if (
+    path.startsWith("/api/wireless/devices/config/") &&
+    req.method === "PUT"
+  ) {
     const id = path.split("/").at(-1);
-    if (id !== deviceConfig.id) return new Response("Not found", { status: 404 });
+    if (id !== deviceConfig.id)
+      return new Response("Not found", { status: 404 });
     const updates = (await req.json()) as Partial<DeviceConfig>;
     deviceConfig = { ...deviceConfig, ...updates, id: deviceConfig.id };
     return Response.json({ success: true, data: { id: deviceConfig.id } });

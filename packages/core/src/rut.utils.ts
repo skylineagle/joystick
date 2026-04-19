@@ -1,14 +1,26 @@
-import type { DeviceInformation, WifiApStatus, WifiApConfig, WifiClient, WifiTraffic } from "./types/index";
+import type {
+  DeviceInformation,
+  WifiApStatus,
+  WifiApConfig,
+  WifiClient,
+  WifiTraffic,
+} from "./types/index";
 
 export const getRutApiUrl = (info: DeviceInformation): string =>
   `http://${info.host}:${info.rutApiPort ?? 80}`;
 
-export const getRutApiCredentials = (info: DeviceInformation): { user: string; password: string } => ({
+export const getRutApiCredentials = (
+  info: DeviceInformation,
+): { user: string; password: string } => ({
   user: info.rutApiUser ?? info.user,
   password: info.rutApiPassword ?? info.password,
 });
 
-export async function login(baseUrl: string, username: string, password: string): Promise<string> {
+export async function login(
+  baseUrl: string,
+  username: string,
+  password: string,
+): Promise<string> {
   const response = await fetch(`${baseUrl}/api/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -30,7 +42,7 @@ export async function sendSms(
   password: string,
   phoneNumber: string,
   message: string,
-  modem: string
+  modem: string,
 ): Promise<unknown> {
   const token = await login(baseUrl, username, password);
 
@@ -102,7 +114,11 @@ type RutDeviceConfig = {
   country: string;
 };
 
-async function restGet<T>(baseUrl: string, token: string, path: string): Promise<T> {
+async function restGet<T>(
+  baseUrl: string,
+  token: string,
+  path: string,
+): Promise<T> {
   const response = await fetch(`${baseUrl}${path}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
@@ -113,7 +129,12 @@ async function restGet<T>(baseUrl: string, token: string, path: string): Promise
   return json.data as T;
 }
 
-async function restPut(baseUrl: string, token: string, path: string, body: unknown): Promise<void> {
+async function restPut(
+  baseUrl: string,
+  token: string,
+  path: string,
+  body: unknown,
+): Promise<void> {
   const response = await fetch(`${baseUrl}${path}`, {
     method: "PUT",
     headers: {
@@ -130,12 +151,16 @@ async function restPut(baseUrl: string, token: string, path: string, body: unkno
 export async function getWifiStatus(
   baseUrl: string,
   username: string,
-  password: string
+  password: string,
 ): Promise<WifiApStatus> {
   const token = await login(baseUrl, username, password);
 
   const [ifaces, devices] = await Promise.all([
-    restGet<RutIfaceStatus[]>(baseUrl, token, "/api/wireless/interfaces/status"),
+    restGet<RutIfaceStatus[]>(
+      baseUrl,
+      token,
+      "/api/wireless/interfaces/status",
+    ),
     restGet<RutDeviceStatus[]>(baseUrl, token, "/api/wireless/devices/status"),
   ]);
 
@@ -157,12 +182,16 @@ export async function getWifiStatus(
 export async function getWifiConfig(
   baseUrl: string,
   username: string,
-  password: string
+  password: string,
 ): Promise<WifiApConfig> {
   const token = await login(baseUrl, username, password);
 
   const [ifaces, devices] = await Promise.all([
-    restGet<RutIfaceConfig[]>(baseUrl, token, "/api/wireless/interfaces/config"),
+    restGet<RutIfaceConfig[]>(
+      baseUrl,
+      token,
+      "/api/wireless/interfaces/config",
+    ),
     restGet<RutDeviceConfig[]>(baseUrl, token, "/api/wireless/devices/config"),
   ]);
 
@@ -185,12 +214,16 @@ export async function setWifiConfig(
   baseUrl: string,
   username: string,
   password: string,
-  config: Partial<WifiApConfig>
+  config: Partial<WifiApConfig>,
 ): Promise<void> {
   const token = await login(baseUrl, username, password);
 
   const [ifaces, devices] = await Promise.all([
-    restGet<RutIfaceConfig[]>(baseUrl, token, "/api/wireless/interfaces/config"),
+    restGet<RutIfaceConfig[]>(
+      baseUrl,
+      token,
+      "/api/wireless/interfaces/config",
+    ),
     restGet<RutDeviceConfig[]>(baseUrl, token, "/api/wireless/devices/config"),
   ]);
 
@@ -216,27 +249,38 @@ export async function setWifiConfig(
     hwmode: config.band ?? radio.hwmode,
     htmode: radio.htmode,
     country: radio.country,
-    channel: config.channel !== undefined ? String(config.channel) : radio.channel,
+    channel:
+      config.channel !== undefined ? String(config.channel) : radio.channel,
     txpower: config.txPower !== undefined ? config.txPower : radio.txpower,
   };
 
   await Promise.all([
-    restPut(baseUrl, token, `/api/wireless/interfaces/config/${apIface.id}`, ifaceBody),
-    restPut(baseUrl, token, `/api/wireless/devices/config/${radio.id}`, devBody),
+    restPut(
+      baseUrl,
+      token,
+      `/api/wireless/interfaces/config/${apIface.id}`,
+      ifaceBody,
+    ),
+    restPut(
+      baseUrl,
+      token,
+      `/api/wireless/devices/config/${radio.id}`,
+      devBody,
+    ),
   ]);
 }
 
 export async function getWifiClients(
   baseUrl: string,
   username: string,
-  password: string
+  password: string,
 ): Promise<WifiClient[]> {
   const token = await login(baseUrl, username, password);
 
   const ifaces = await restGet<RutIfaceStatus[]>(
     baseUrl,
     token,
-    "/api/wireless/interfaces/status"
+    "/api/wireless/interfaces/status",
   );
 
   const apIface = ifaces.find((i) => i.mode === "ap") ?? ifaces[0];
@@ -246,7 +290,10 @@ export async function getWifiClients(
     mac: client.macaddr,
     ip: client.ipaddr,
     hostname: client.hostname,
-    signal: typeof client.signal === "string" ? parseInt(client.signal) : client.signal,
+    signal:
+      typeof client.signal === "string"
+        ? parseInt(client.signal)
+        : client.signal,
     txBytes: client.tx_rate,
     rxBytes: client.rx_rate,
     connectedSince: "",
@@ -256,7 +303,7 @@ export async function getWifiClients(
 export async function getWifiTraffic(
   baseUrl: string,
   _username: string,
-  _password: string
+  _password: string,
 ): Promise<WifiTraffic> {
   return {
     interface: "wlan0",
