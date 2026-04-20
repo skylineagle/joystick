@@ -1,6 +1,10 @@
 import PocketBase from "pocketbase";
 import type { DeviceInformation } from "../../../core/src/types/index.ts";
-import { RunTargetOptions, ModelsStreamOptions, DevicesStatusOptions } from "../../../core/src/types/db.types.ts";
+import {
+  RunTargetOptions,
+  ModelsStreamOptions,
+  DevicesStatusOptions,
+} from "../../../core/src/types/db.types.ts";
 import {
   DEFAULT_POCKETBASE_URL,
   MOCK_SSH_USER,
@@ -22,9 +26,14 @@ const ensureActionByName = async (name: string) => {
   }
 };
 
-const ensureModelByName = async (name: string, body: Record<string, unknown>) => {
+const ensureModelByName = async (
+  name: string,
+  body: Record<string, unknown>,
+) => {
   try {
-    const existing = await pb.collection("models").getFirstListItem(`name="${name}"`);
+    const existing = await pb
+      .collection("models")
+      .getFirstListItem(`name="${name}"`);
     await pb.collection("models").update(existing.id, body);
     return existing;
   } catch {
@@ -32,9 +41,14 @@ const ensureModelByName = async (name: string, body: Record<string, unknown>) =>
   }
 };
 
-const ensureDeviceByName = async (name: string, body: Record<string, unknown>) => {
+const ensureDeviceByName = async (
+  name: string,
+  body: Record<string, unknown>,
+) => {
   try {
-    const existing = await pb.collection("devices").getFirstListItem(`name="${name}"`);
+    const existing = await pb
+      .collection("devices")
+      .getFirstListItem(`name="${name}"`);
     await pb.collection("devices").update(existing.id, body);
     return existing;
   } catch {
@@ -45,12 +59,12 @@ const ensureDeviceByName = async (name: string, body: Record<string, unknown>) =
 const ensureRun = async (
   modelId: string,
   actionId: string,
-  body: Record<string, unknown>
+  body: Record<string, unknown>,
 ) => {
   try {
-    const existing = await pb.collection("run").getFirstListItem(
-      `device="${modelId}" && action="${actionId}"`
-    );
+    const existing = await pb
+      .collection("run")
+      .getFirstListItem(`device="${modelId}" && action="${actionId}"`);
     await pb.collection("run").update(existing.id, body);
     return existing;
   } catch {
@@ -164,7 +178,11 @@ const rutInformation: DeviceInformation = {
 const rutModelRecord = {
   name: "Mock RUT950",
   params: paramsSchema,
-  mode_configs: { off: modeLabels.off, live: modeLabels.live, auto: modeLabels.auto },
+  mode_configs: {
+    off: modeLabels.off,
+    live: modeLabels.live,
+    auto: modeLabels.auto,
+  },
   stream_quality: streamQuality,
   temp_levels: tempLevels,
   stream: ModelsStreamOptions.mediamtx,
@@ -227,19 +245,57 @@ type RutRunSeed = {
 };
 
 const rutRunSeeds: RutRunSeed[] = [
-  { actionName: "get-wifi-ap-status", command: "GET /api/wifi-ap/$device/status", target: RunTargetOptions.joystick },
-  { actionName: "get-wifi-clients", command: "GET /api/wifi-ap/$device/clients", target: RunTargetOptions.joystick },
-  { actionName: "get-wifi-traffic", command: "GET /api/wifi-ap/$device/traffic", target: RunTargetOptions.joystick },
-  { actionName: "set-wifi-ap-config", command: "PUT /api/wifi-ap/$device/config", target: RunTargetOptions.joystick },
-  { actionName: "healthcheck", command: "echo true", target: RunTargetOptions.device },
-  { actionName: "set-mode", command: `echo '{"ok":true,"mode":"$mode"}'`, target: RunTargetOptions.device },
-  { actionName: "get-battery", command: `echo '{"voltage":3.95,"current":140,"power":553,"consumption":420}'`, target: RunTargetOptions.device },
-  { actionName: "get-cpsi", command: `echo '{"technology":"LTE","status":"online","cellId":"00AB01","operator":"MockNet","mccMnc":"310260","band":"B2","rssi":-71,"rsrp":-95,"rsrq":-12,"sinr":8}'`, target: RunTargetOptions.device },
-  { actionName: "get-temp", command: `echo '{"temperature":42.1,"unit":"°C"}'`, target: RunTargetOptions.device },
+  {
+    actionName: "get-wifi-ap-status",
+    command: "GET /api/wifi-ap/$device/status",
+    target: RunTargetOptions.api,
+  },
+  {
+    actionName: "get-wifi-clients",
+    command: "GET /api/wifi-ap/$device/clients",
+    target: RunTargetOptions.api,
+  },
+  {
+    actionName: "get-wifi-traffic",
+    command: "GET /api/wifi-ap/$device/traffic",
+    target: RunTargetOptions.api,
+  },
+  {
+    actionName: "set-wifi-ap-config",
+    command: "PUT /api/wifi-ap/$device/config",
+    target: RunTargetOptions.api,
+  },
+  {
+    actionName: "healthcheck",
+    command: "echo true",
+    target: RunTargetOptions.device,
+  },
+  {
+    actionName: "set-mode",
+    command: `echo '{"ok":true,"mode":"$mode"}'`,
+    target: RunTargetOptions.device,
+  },
+  {
+    actionName: "get-battery",
+    command: `echo '{"voltage":3.95,"current":140,"power":553,"consumption":420}'`,
+    target: RunTargetOptions.device,
+  },
+  {
+    actionName: "get-cpsi",
+    command: `echo '{"technology":"LTE","status":"online","cellId":"00AB01","operator":"MockNet","mccMnc":"310260","band":"B2","rssi":-71,"rsrp":-95,"rsrq":-12,"sinr":8}'`,
+    target: RunTargetOptions.device,
+  },
+  {
+    actionName: "get-temp",
+    command: `echo '{"temperature":42.1,"unit":"°C"}'`,
+    target: RunTargetOptions.device,
+  },
 ];
 
 const main = async () => {
-  await pb.collection("_superusers").authWithPassword(adminEmail, adminPassword);
+  await pb
+    .collection("_superusers")
+    .authWithPassword(adminEmail, adminPassword);
 
   const actionIds = new Map<string, string>();
   const actionNames = [...new Set(rutRunSeeds.map((r) => r.actionName))];
@@ -262,7 +318,9 @@ const main = async () => {
     });
   }
 
-  console.log("RUT seed finished. Model: Mock RUT950, Device: dev-mock-rut950-01");
+  console.log(
+    "RUT seed finished. Model: Mock RUT950, Device: dev-mock-rut950-01",
+  );
   pb.authStore.clear();
 };
 

@@ -1,5 +1,5 @@
 import { pb } from "@/pocketbase";
-import { tryImpersonate } from "@/utils";
+import { executeApiAction, tryImpersonate } from "@/utils";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import type {
@@ -146,32 +146,16 @@ const app = new Elysia()
         );
         enhancedLogger.warn(command);
 
-        let output: string;
-        if (run.target === RunTargetOptions.device) {
-          output = await runCommandOnDevice(device, command);
-        } else if (run.target === RunTargetOptions.joystick) {
-          const spaceIdx = command.indexOf(" ");
-          const method = command.slice(0, spaceIdx);
-          const path = command.slice(spaceIdx + 1);
-          const joystickPort = Bun.env.PORT ?? "8000";
-
-          const internalResponse = await fetch(
-            `http://localhost:${joystickPort}${path}`,
-            {
-              method,
-              headers: {
-                "Content-Type": "application/json",
-                "x-api-key": DEFAULT_API_KEY,
-              },
-              ...(body && method !== "GET"
-                ? { body: JSON.stringify(body) }
-                : {}),
-            },
-          );
-          output = await internalResponse.text();
-        } else {
-          output = await $`${{ raw: command }}`.text();
-        }
+        const output =
+          run.target === RunTargetOptions.device
+            ? await runCommandOnDevice(device, command)
+            : run.target === RunTargetOptions.api
+            ? await executeApiAction(
+                device,
+                command,
+                body as Record<string, unknown>,
+              )
+            : await $`${{ raw: command }}`.text();
 
         const response = {
           success: true,

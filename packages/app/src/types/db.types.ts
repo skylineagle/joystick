@@ -253,6 +253,7 @@ export type RulesRecord = {
 export enum RunTargetOptions {
 	"local" = "local",
 	"device" = "device",
+	"api" = "api",
 }
 export type RunRecord<Tparameters = unknown> = {
 	action: RecordIdString

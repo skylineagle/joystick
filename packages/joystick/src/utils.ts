@@ -2,7 +2,11 @@ import { enhancedLogger } from "@/enhanced-logger";
 import { logger } from "@/logger";
 import { pb } from "@/pocketbase";
 import type { DeviceResponse } from "@joystick/core";
-import { STREAM_API_URL } from "@joystick/core";
+import {
+  DEFAULT_API_KEY,
+  JOYSTICK_API_URL,
+  STREAM_API_URL,
+} from "@joystick/core";
 
 export function generateRandomCPSIResult(): string {
   // Randomly choose a technology type
@@ -91,20 +95,20 @@ export async function updateStatus(deviceId: string) {
 
     const status = paths.find(
       (path: { name: string; ready: boolean }) =>
-        path.name === device.configuration?.name
+        path.name === device.configuration?.name,
     );
 
     const updatedStatus = status
       ? paths.find(
           (path: { name: string; ready: boolean }) =>
-            path.name === device.configuration?.name
+            path.name === device.configuration?.name,
         ).ready
         ? "on"
         : "waiting"
       : "off";
 
     logger.info(
-      `Updating status for device ${device.configuration?.name} to ${updatedStatus}`
+      `Updating status for device ${device.configuration?.name} to ${updatedStatus}`,
     );
     await pb.collection("devices").update(device.id, {
       status: updatedStatus,
@@ -120,7 +124,7 @@ export function tryImpersonate(userId: string) {
   } catch (error) {
     enhancedLogger.error(
       { error, userId },
-      "Failed to impersonate user, continuing with superuser"
+      "Failed to impersonate user, continuing with superuser",
     );
     return pb;
   }
@@ -136,4 +140,35 @@ export async function tryGetDevice(deviceId: string) {
     enhancedLogger.error({ error, deviceId }, "Failed to get device");
     return null;
   }
+}
+
+export async function executeApiAction(
+  device: DeviceResponse,
+  command: string,
+  requestBody?: Record<string, unknown>,
+) {
+  const spaceIdx = command.indexOf(" ");
+  const method = command.slice(0, spaceIdx);
+  const path = command.slice(spaceIdx + 1);
+
+  const requestUrl = path.startsWith("http")
+    ? path
+    : `${JOYSTICK_API_URL}${path}`;
+
+  const internalResponse = await fetch(requestUrl, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": DEFAULT_API_KEY,
+    },
+    ...(requestBody && { body: JSON.stringify(requestBody) }),
+  });
+
+  if (!internalResponse.ok) {
+    throw new Error(
+      `Failed to execute API action: ${internalResponse.statusText}`,
+    );
+  }
+
+  return await internalResponse.text();
 }
